@@ -1,0 +1,149 @@
+
+package com.photostudio.service.impl;
+
+import com.photostudio.dto.EquipmentRequest;
+import com.photostudio.dto.EquipmentResponse;
+import com.photostudio.mapper.EquipmentMapper;
+import com.photostudio.model.Equipment;
+import com.photostudio.model.EquipmentType;
+import com.photostudio.repository.EquipmentRepository;
+import com.photostudio.service.EquipmentService;
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class EquipmentServiceImpl implements EquipmentService {
+
+    private final EquipmentRepository repository;
+
+    public EquipmentServiceImpl(EquipmentRepository repository) {
+        this.repository = repository;
+    }
+
+    private Equipment findEntity(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy thiết bị có id: " + id));
+    }
+
+    private EquipmentResponse toResponse(Equipment e) {
+        return new EquipmentResponse(
+                e.getId(),
+                e.getType().name(),
+                e.getName(),
+                e.getBrand(),
+                e.getModel(),
+                e.getSerialNumber(),
+                e.getPurchaseDate(),
+                e.getDescription(),
+                e.getStatus().name());
+    }
+
+    private void copyRequest(
+            EquipmentRequest request, Equipment equipment) {
+
+        equipment.setType(
+                com.photostudio.model.EquipmentType.valueOf(request.getType()));
+
+        equipment.setName(request.getName());
+        equipment.setBrand(request.getBrand());
+        equipment.setModel(request.getModel());
+        equipment.setSerialNumber(request.getSerialNumber());
+        equipment.setPurchaseDate(request.getPurchaseDate());
+        equipment.setDescription(request.getDescription());
+
+        if (request.getStatus() != null) {
+            equipment.setStatus(
+                    com.photostudio.model.EquipmentStatus.valueOf(
+                            request.getStatus()));
+        }
+    }
+
+    private void checkSerial(String serial, Long id) {
+        if (serial == null || serial.isBlank()) {
+            return;
+        }
+
+        boolean exists = id == null
+                ? repository.existsBySerialNumber(serial)
+                : repository.existsBySerialNumberAndIdNot(serial, id);
+
+        if (exists) {
+            throw new IllegalArgumentException(
+                    "Số serial đã tồn tại");
+        }
+    }
+
+    @Override
+    public List<EquipmentResponse> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public EquipmentResponse findById(Long id) {
+        return toResponse(findEntity(id));
+    }
+
+    @Override
+    public EquipmentResponse create(EquipmentRequest request) {
+        request.validate();
+        checkSerial(request.getSerialNumber(), null);
+
+        Equipment equipment = new Equipment();
+        copyRequest(request, equipment);
+
+        Equipment saved = repository.save(equipment);
+        return toResponse(saved);
+    }
+
+    @Override
+    public EquipmentResponse update(
+            Long id, EquipmentRequest request) {
+
+        request.validate();
+
+        Equipment equipment = findEntity(id);
+        checkSerial(request.getSerialNumber(), id);
+
+        copyRequest(request, equipment);
+
+        Equipment saved = repository.save(equipment);
+        return toResponse(saved);
+    }
+
+    @Override
+    public void delete(Long id) {
+        Equipment equipment = findEntity(id);
+        repository.delete(equipment);
+    }
+
+    @Override
+    public List<EquipmentResponse> findByName(String name) {
+        return repository.findByNameContaining(name)
+                .stream()
+                .map(EquipmentMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<EquipmentResponse> findByType(String type) {
+        EquipmentType equipmentType;
+
+        try {
+            equipmentType = EquipmentType.valueOf(type.toLowerCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new IllegalArgumentException(
+                    "Loại thiết bị không hợp lệ. Các loại hợp lệ: camera, lens, lighting, tripod, other");
+        }
+
+        return repository.findByType(equipmentType)
+                .stream()
+                .map(EquipmentMapper::toResponse)
+                .toList();
+    }
+}
