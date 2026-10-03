@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
 
         String message = ex.getMessage();
         HttpStatus status = message != null
-                && message.startsWith("Không tìm thấy thiết bị")
+                && message.startsWith("Không tìm thấy")
             ? HttpStatus.NOT_FOUND
             : HttpStatus.BAD_REQUEST;
 
