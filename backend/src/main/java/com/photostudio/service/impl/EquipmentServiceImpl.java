@@ -1,11 +1,11 @@
 
 package com.photostudio.service.impl;
 
-import com.photostudio.dto.EquipmentRequest;
-import com.photostudio.dto.EquipmentResponse;
+import com.photostudio.dto.equipment.EquipmentRequest;
+import com.photostudio.dto.equipment.EquipmentResponse;
 import com.photostudio.mapper.EquipmentMapper;
-import com.photostudio.model.Equipment;
-import com.photostudio.model.EquipmentType;
+import com.photostudio.model.equipment.Equipment;
+import com.photostudio.model.equipment.EquipmentType;
 import com.photostudio.repository.EquipmentRepository;
 import com.photostudio.service.EquipmentService;
 
@@ -45,7 +45,7 @@ public class EquipmentServiceImpl implements EquipmentService {
             EquipmentRequest request, Equipment equipment) {
 
         equipment.setType(
-                com.photostudio.model.EquipmentType.valueOf(request.getType()));
+                com.photostudio.model.equipment.EquipmentType.valueOf(request.getType()));
 
         equipment.setName(request.getName());
         equipment.setBrand(request.getBrand());
@@ -56,7 +56,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
         if (request.getStatus() != null) {
             equipment.setStatus(
-                    com.photostudio.model.EquipmentStatus.valueOf(
+                    com.photostudio.model.equipment.EquipmentStatus.valueOf(
                             request.getStatus()));
         }
     }

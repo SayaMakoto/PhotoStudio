@@ -1,11 +1,11 @@
 
 package com.photostudio.mapper;
 
-import com.photostudio.dto.EquipmentRequest;
-import com.photostudio.dto.EquipmentResponse;
-import com.photostudio.model.Equipment;
-import com.photostudio.model.EquipmentType;
-import com.photostudio.model.EquipmentStatus;
+import com.photostudio.dto.equipment.EquipmentRequest;
+import com.photostudio.dto.equipment.EquipmentResponse;
+import com.photostudio.model.equipment.Equipment;
+import com.photostudio.model.equipment.EquipmentType;
+import com.photostudio.model.equipment.EquipmentStatus;
 
 public class EquipmentMapper {
 

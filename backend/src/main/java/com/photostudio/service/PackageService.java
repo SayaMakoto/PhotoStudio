@@ -1,7 +1,7 @@
 package com.photostudio.service;
 
-import com.photostudio.dto.PackageRequest;
-import com.photostudio.dto.PackageResponse;
+import com.photostudio.dto.packages.PackageRequest;
+import com.photostudio.dto.packages.PackageResponse;
 
 import java.util.List;
 

@@ -1,5 +1,4 @@
-
-package com.photostudio.model;
+package com.photostudio.model.equipment;
 
 import jakarta.persistence.*;
 import lombok.Getter;

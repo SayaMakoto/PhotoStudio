@@ -1,7 +1,7 @@
 package com.photostudio.repository;
 
-import com.photostudio.model.Package;
-import com.photostudio.model.PackageStatus;
+import com.photostudio.model.packages.Package;
+import com.photostudio.model.packages.PackageStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

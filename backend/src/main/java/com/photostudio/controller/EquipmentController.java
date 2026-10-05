@@ -1,8 +1,8 @@
 
 package com.photostudio.controller;
 
-import com.photostudio.dto.EquipmentRequest;
-import com.photostudio.dto.EquipmentResponse;
+import com.photostudio.dto.equipment.EquipmentRequest;
+import com.photostudio.dto.equipment.EquipmentResponse;
 import com.photostudio.service.EquipmentService;
 
 import org.springframework.http.HttpStatus;
