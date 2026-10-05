@@ -1,5 +1,4 @@
-
-package com.photostudio.dto;
+package com.photostudio.dto.equipment;
 
 import java.time.LocalDateTime;
 

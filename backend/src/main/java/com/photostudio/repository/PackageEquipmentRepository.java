@@ -1,6 +1,6 @@
 package com.photostudio.repository;
 
-import com.photostudio.model.PackageEquipment;
+import com.photostudio.model.packages.PackageEquipment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

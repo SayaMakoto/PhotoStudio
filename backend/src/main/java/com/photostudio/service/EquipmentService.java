@@ -1,8 +1,8 @@
 
 package com.photostudio.service;
 
-import com.photostudio.dto.EquipmentRequest;
-import com.photostudio.dto.EquipmentResponse;
+import com.photostudio.dto.equipment.EquipmentRequest;
+import com.photostudio.dto.equipment.EquipmentResponse;
 
 import java.util.List;
 

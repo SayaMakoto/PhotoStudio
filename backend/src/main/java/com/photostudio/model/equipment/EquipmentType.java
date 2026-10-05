@@ -1,4 +1,4 @@
-package com.photostudio.model;
+package com.photostudio.model.equipment;
 
 public enum EquipmentType {
     camera,

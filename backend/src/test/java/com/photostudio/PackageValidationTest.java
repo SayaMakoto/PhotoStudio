@@ -1,9 +1,9 @@
 package com.photostudio;
 
-import com.photostudio.dto.PackageEquipmentItemRequest;
-import com.photostudio.dto.PackageRequest;
-import com.photostudio.dto.PackageResponse;
-import com.photostudio.model.Package;
+import com.photostudio.dto.packages.PackageEquipmentItemRequest;
+import com.photostudio.dto.packages.PackageRequest;
+import com.photostudio.dto.packages.PackageResponse;
+import com.photostudio.model.packages.Package;
 import com.photostudio.repository.PackageRepository;
 import com.photostudio.service.impl.PackageServiceImpl;
 import org.junit.jupiter.api.BeforeEach;

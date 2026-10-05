@@ -1,4 +1,4 @@
-package com.photostudio.model;
+package com.photostudio.model.packages;
 
 public enum PackageStatus {
     active,

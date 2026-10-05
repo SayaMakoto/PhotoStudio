@@ -1,13 +1,13 @@
 package com.photostudio.mapper;
 
-import com.photostudio.dto.PackageEquipmentItemRequest;
-import com.photostudio.dto.PackageEquipmentItemResponse;
-import com.photostudio.dto.PackageRequest;
-import com.photostudio.dto.PackageResponse;
-import com.photostudio.model.EquipmentType;
-import com.photostudio.model.Package;
-import com.photostudio.model.PackageEquipment;
-import com.photostudio.model.PackageStatus;
+import com.photostudio.dto.packages.PackageEquipmentItemRequest;
+import com.photostudio.dto.packages.PackageEquipmentItemResponse;
+import com.photostudio.dto.packages.PackageRequest;
+import com.photostudio.dto.packages.PackageResponse;
+import com.photostudio.model.equipment.EquipmentType;
+import com.photostudio.model.packages.Package;
+import com.photostudio.model.packages.PackageEquipment;
+import com.photostudio.model.packages.PackageStatus;
 
 import java.util.ArrayList;
 import java.util.List;

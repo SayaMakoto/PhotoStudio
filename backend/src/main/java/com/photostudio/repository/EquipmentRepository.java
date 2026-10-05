@@ -1,9 +1,9 @@
 
 package com.photostudio.repository;
 
-import com.photostudio.model.Equipment;
-import com.photostudio.model.EquipmentStatus;
-import com.photostudio.model.EquipmentType;
+import com.photostudio.model.equipment.Equipment;
+import com.photostudio.model.equipment.EquipmentStatus;
+import com.photostudio.model.equipment.EquipmentType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,9 +1,9 @@
 package com.photostudio.service.impl;
 
-import com.photostudio.dto.PackageRequest;
-import com.photostudio.dto.PackageResponse;
+import com.photostudio.dto.packages.PackageRequest;
+import com.photostudio.dto.packages.PackageResponse;
 import com.photostudio.mapper.PackageMapper;
-import com.photostudio.model.Package;
+import com.photostudio.model.packages.Package;
 import com.photostudio.repository.PackageRepository;
 import com.photostudio.service.PackageService;
 import org.springframework.stereotype.Service;

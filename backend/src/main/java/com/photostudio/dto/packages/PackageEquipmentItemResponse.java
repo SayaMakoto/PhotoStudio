@@ -1,4 +1,4 @@
-package com.photostudio.dto;
+package com.photostudio.dto.packages;
 
 import lombok.Getter;
 import lombok.Setter;

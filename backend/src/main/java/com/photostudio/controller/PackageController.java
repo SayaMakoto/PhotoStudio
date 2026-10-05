@@ -1,7 +1,7 @@
 package com.photostudio.controller;
 
-import com.photostudio.dto.PackageRequest;
-import com.photostudio.dto.PackageResponse;
+import com.photostudio.dto.packages.PackageRequest;
+import com.photostudio.dto.packages.PackageResponse;
 import com.photostudio.service.PackageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
