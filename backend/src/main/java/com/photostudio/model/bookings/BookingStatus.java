@@ -3,7 +3,7 @@ package com.photostudio.model.bookings;
 public enum BookingStatus {
     pending,
     confirmed,
-    in_process,
+    in_progress,
     completed,
     cancelled
 }

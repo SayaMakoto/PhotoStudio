@@ -17,9 +17,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Booking {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "customer_id", nullable = false)
     private Long customerId;
@@ -46,7 +47,7 @@ public class Booking {
     @Column(name = "status", nullable = false)
     private BookingStatus status = BookingStatus.pending;
 
-    @Column(name = "customer_note", length = 255, nullable = true)
+    @Column(name = "customer_note", length = 255)
     private String customerNote;
 
     @Column(name = "created_at", nullable = false, updatable = false)
