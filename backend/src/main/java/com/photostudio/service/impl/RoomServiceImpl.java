@@ -45,7 +45,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public Room updateRoom(Long id, Room roomDetails) {
         Room room = roomRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng với ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng với ID: " + id));
 
         room.setName(roomDetails.getName());
         room.setDescription(roomDetails.getDescription());
@@ -61,7 +61,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public void deleteRoom(Long id) {
         if (!roomRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy phòng với ID: " + id);
+            throw new IllegalArgumentException("Không tìm thấy phòng với ID: " + id);
         }
         roomRepository.deleteById(id);
     }

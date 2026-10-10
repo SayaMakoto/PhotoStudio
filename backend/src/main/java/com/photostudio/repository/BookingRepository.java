@@ -17,7 +17,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByCustomerId(@Param("customerId") Long customerId);
 
     // Tìm kiếm các lịch đặt theo phòng chụp
-    List<Booking> findByRoomId(Long roomId);
+    @Query("SELECT b FROM Booking b WHERE b.room.id = :roomId")
+    List<Booking> findByRoomId(@Param("roomId") Long roomId);
 
     // Tìm kiếm theo chính xác thời điểm bookingDate
     List<Booking> findByBookingDate(LocalDateTime bookingDate);
@@ -29,7 +30,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByStatus(BookingStatus status);
 
     // Kiểm tra trùng lịch đặt phòng trong cùng khung giờ ngày đó (trừ đơn đã hủy)
-    @Query("SELECT COUNT(b) > 0 FROM Booking b WHERE b.roomId = :roomId " +
+    @Query("SELECT COUNT(b) > 0 FROM Booking b WHERE b.room.id = :roomId " +
            "AND FUNCTION('DATE', b.bookingDate) = FUNCTION('DATE', :bookingDate) " +
            "AND b.status != :cancelledStatus " +
            "AND (:id IS NULL OR b.id != :id) " +

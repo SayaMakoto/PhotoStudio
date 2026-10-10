@@ -48,7 +48,7 @@ public class RoomController {
     @PutMapping("/{id}")
     public ResponseEntity<RoomResponse> updateRoom(@PathVariable Long id, @RequestBody RoomRequest request) {
         Room existingRoom = roomService.getRoomById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng với ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng với ID: " + id));
 
         roomMapper.updateEntityFromRequest(request, existingRoom);
         Room updatedRoom = roomService.updateRoom(id, existingRoom);

@@ -5,8 +5,10 @@ import com.photostudio.dto.bookings.BookingResponse;
 import com.photostudio.mapper.BookingMapper;
 import com.photostudio.model.bookings.Booking;
 import com.photostudio.model.bookings.BookingStatus;
+import com.photostudio.model.rooms.Room;
 import com.photostudio.model.users.User;
 import com.photostudio.repository.BookingRepository;
+import com.photostudio.repository.RoomRepository;
 import com.photostudio.repository.UserRepository;
 import com.photostudio.service.BookingService;
 import org.springframework.stereotype.Service;
@@ -24,17 +26,15 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository repository;
     private final UserRepository userRepository;
 
-    // Khi có RoomRepository, inject thêm vào đây:
-    // private final RoomRepository roomRepository;
+    private final RoomRepository roomRepository;
 
     public BookingServiceImpl(
             BookingRepository repository,
-            UserRepository userRepository
-            // RoomRepository roomRepository
-    ) {
+            UserRepository userRepository,
+            RoomRepository roomRepository) {
         this.repository = repository;
         this.userRepository = userRepository;
-        // this.roomRepository = roomRepository;
+        this.roomRepository = roomRepository;
     }
 
     private Booking findEntity(Long id) {
@@ -78,22 +78,18 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse create(BookingRequest request) {
         request.validate();
 
-        // Kiểm tra khách hàng tồn tại trong bảng users
         User customer = userRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy khách hàng có id: " + request.getCustomerId()));
 
-        // Ràng buộc khi có entity Room (bảng rooms):
-        // if (!roomRepository.existsById(request.getRoomId())) {
-        // throw new IllegalArgumentException("Không tìm thấy phòng chụp có id: " +
-        // request.getRoomId());
-        // }
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy phòng chụp có id: " + request.getRoomId()));
 
-        // Kiểm tra trùng lịch đặt phòng trong cùng khung giờ
         checkRoomConflict(request.getRoomId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
                 null);
 
-        Booking booking = BookingMapper.toEntity(request, customer);
+        Booking booking = BookingMapper.toEntity(request, customer, room);
         Booking saved = repository.save(booking);
         return BookingMapper.toResponse(saved);
     }
@@ -108,17 +104,14 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy khách hàng có id: " + request.getCustomerId()));
 
-        // Ràng buộc khi có entity Room (bảng rooms):
-        // if (!roomRepository.existsById(request.getRoomId())) {
-        // throw new IllegalArgumentException("Không tìm thấy phòng chụp có id: " +
-        // request.getRoomId());
-        // }
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy phòng chụp có id: " + request.getRoomId()));
 
-        // Kiểm tra trùng lịch đặt phòng (trừ đơn hiện tại đang cập nhật)
         checkRoomConflict(request.getRoomId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
                 id);
 
-        BookingMapper.updateEntity(request, booking, customer);
+        BookingMapper.updateEntity(request, booking, customer, room);
         Booking saved = repository.save(booking);
         return BookingMapper.toResponse(saved);
     }
@@ -139,10 +132,9 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = findEntity(id);
 
-        // Nếu chuyển từ cancelled sang trạng thái khác thì phải kiểm tra lại xung đột
-        // phòng
         if (booking.getStatus() == BookingStatus.cancelled && bookingStatus != BookingStatus.cancelled) {
-            checkRoomConflict(booking.getRoomId(), booking.getBookingDate(), booking.getStartTime(),
+            checkRoomConflict(booking.getRoom() != null ? booking.getRoom().getId() : null, booking.getBookingDate(),
+                    booking.getStartTime(),
                     booking.getEndTime(), booking.getId());
         }
 
