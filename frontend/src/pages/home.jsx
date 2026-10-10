@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
+import QuickContact from '../components/layout/QuickContact';
+
 import Hero from '../components/sections/Hero';
 import Stats from '../components/sections/Stats';
-import Services from '../components/sections/Services';
+import Pricing from '../components/sections/Pricing';
 import Gallery from '../components/sections/Gallery';
-import BeforeAfterComparison from '../components/sections/BeforeAfterComparison';
-import StudioExperience from '../components/sections/StudioExperience';
-import Testimonials from '../components/sections/Testimonials';
-import CTA from '../components/sections/CTA';
-import Footer from '../components/layout/Footer';
-import FloatingActions from '../components/layout/FloatingActions';
+import BeforeAfter from '../components/sections/BeforeAfter';
+import AboutStudio from '../components/sections/AboutStudio';
+import Reviews from '../components/sections/Reviews';
+import Booking from '../components/sections/Booking';
 
 export default function HomePage() {
   const [selectedPackage, setSelectedPackage] = useState(null);
@@ -38,16 +39,16 @@ export default function HomePage() {
       <main>
         <Hero onOpenBooking={handleOpenBooking} />
         <Stats />
-        <Services onSelectPackage={handleSelectPackage} />
+        <Pricing onSelectPackage={handleSelectPackage} />
         <Gallery />
-        <BeforeAfterComparison />
-        <StudioExperience />
-        <Testimonials />
-        <CTA selectedPackage={selectedPackage} />
+        <BeforeAfter />
+        <AboutStudio />
+        <Reviews />
+        <Booking selectedPackage={selectedPackage} />
       </main>
 
-      {/* Floating Action Buttons */}
-      <FloatingActions onOpenBooking={handleOpenBooking} />
+      {/* Quick floating contact buttons */}
+      <QuickContact onOpenBooking={handleOpenBooking} />
 
       {/* Footer */}
       <Footer />
