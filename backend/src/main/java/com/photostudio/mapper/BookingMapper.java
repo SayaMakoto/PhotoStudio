@@ -4,15 +4,16 @@ import com.photostudio.dto.bookings.BookingRequest;
 import com.photostudio.dto.bookings.BookingResponse;
 import com.photostudio.model.bookings.Booking;
 import com.photostudio.model.bookings.BookingStatus;
+import com.photostudio.model.rooms.Room;
 import com.photostudio.model.users.User;
 
 public class BookingMapper {
 
     public static Booking toEntity(BookingRequest request) {
-        return toEntity(request, null);
+        return toEntity(request, null, null);
     }
 
-    public static Booking toEntity(BookingRequest request, User customer) {
+    public static Booking toEntity(BookingRequest request, User customer, Room room) {
         Booking booking = new Booking();
         if (customer != null) {
             booking.setCustomer(customer);
@@ -20,7 +21,12 @@ public class BookingMapper {
             booking.setCustomerId(request.getCustomerId());
         }
 
-        booking.setRoomId(request.getRoomId());
+        if (room != null) {
+            booking.setRoom(room);
+        } else if (request.getRoomId() != null) {
+            booking.setRoomId(request.getRoomId());
+        }
+
         booking.setBookingDate(request.getBookingDate());
         booking.setStartTime(request.getStartTime());
         booking.setEndTime(request.getEndTime());
@@ -36,17 +42,22 @@ public class BookingMapper {
     }
 
     public static void updateEntity(BookingRequest request, Booking booking) {
-        updateEntity(request, booking, null);
+        updateEntity(request, booking, null, null);
     }
 
-    public static void updateEntity(BookingRequest request, Booking booking, User customer) {
+    public static void updateEntity(BookingRequest request, Booking booking, User customer, Room room) {
         if (customer != null) {
             booking.setCustomer(customer);
         } else if (request.getCustomerId() != null) {
             booking.setCustomerId(request.getCustomerId());
         }
 
-        booking.setRoomId(request.getRoomId());
+        if (room != null) {
+            booking.setRoom(room);
+        } else if (request.getRoomId() != null) {
+            booking.setRoomId(request.getRoomId());
+        }
+
         booking.setBookingDate(request.getBookingDate());
         booking.setStartTime(request.getStartTime());
         booking.setEndTime(request.getEndTime());
@@ -64,7 +75,7 @@ public class BookingMapper {
                 booking.getCustomer() != null ? booking.getCustomer().getFullname() : null,
                 booking.getCustomer() != null ? booking.getCustomer().getPhone() : null,
                 booking.getRoomId(),
-                // Khi có bảng rooms, map tên phòng: booking.getRoom() != null ? booking.getRoom().getName() : null,
+                booking.getRoom() != null ? booking.getRoom().getName() : null,
                 booking.getBookingDate(),
                 booking.getStartTime(),
                 booking.getEndTime(),

@@ -3,6 +3,7 @@ package com.photostudio.model.bookings;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.photostudio.model.rooms.Room;
 import com.photostudio.model.users.User;
 
 import jakarta.persistence.*;
@@ -27,12 +28,9 @@ public class Booking {
     @JoinColumn(name = "customer_id", nullable = false)
     private User customer;
 
-    @Column(name = "room_id", nullable = false)
-    private Long roomId;
-    // Quan hệ khi có entity Room (bảng rooms):
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "room_id", nullable = false)
-    // private Room room;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
 
     @Column(name = "booking_date", nullable = false)
     private LocalDateTime bookingDate;
@@ -68,6 +66,21 @@ public class Booking {
             this.customer.setId(customerId);
         } else {
             this.customer = null;
+        }
+    }
+
+    public Long getRoomId() {
+        return room != null ? room.getId() : null;
+    }
+
+    public void setRoomId(Long roomId) {
+        if (roomId != null) {
+            if (this.room == null) {
+                this.room = new Room();
+            }
+            this.room.setId(roomId);
+        } else {
+            this.room = null;
         }
     }
 
