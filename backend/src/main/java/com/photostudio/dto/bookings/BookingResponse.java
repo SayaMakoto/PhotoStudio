@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -18,15 +17,14 @@ public class BookingResponse {
     private Long id;
 
     private Long customerId;
-    // Khi có bảng users, có thể bổ sung thông tin hiển thị:
-    // private String customerName;
-    // private String customerPhone;
+    private String customerName;
+    private String customerPhone;
 
     private Long roomId;
     // Khi có bảng rooms, có thể bổ sung thông tin phòng:
     // private String roomName;
 
-    private LocalDate bookingDate;
+    private LocalDateTime bookingDate;
 
     private LocalTime startTime;
 

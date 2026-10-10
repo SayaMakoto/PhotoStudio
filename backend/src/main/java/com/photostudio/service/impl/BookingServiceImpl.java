@@ -5,12 +5,15 @@ import com.photostudio.dto.bookings.BookingResponse;
 import com.photostudio.mapper.BookingMapper;
 import com.photostudio.model.bookings.Booking;
 import com.photostudio.model.bookings.BookingStatus;
+import com.photostudio.model.users.User;
 import com.photostudio.repository.BookingRepository;
+import com.photostudio.repository.UserRepository;
 import com.photostudio.service.BookingService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -19,18 +22,18 @@ import java.util.List;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository repository;
+    private final UserRepository userRepository;
 
-    // Khi có UserRepository và RoomRepository, inject thêm vào đây:
-    // private final UserRepository userRepository;
+    // Khi có RoomRepository, inject thêm vào đây:
     // private final RoomRepository roomRepository;
 
     public BookingServiceImpl(
-            BookingRepository repository
-    // UserRepository userRepository,
-    // RoomRepository roomRepository
+            BookingRepository repository,
+            UserRepository userRepository
+            // RoomRepository roomRepository
     ) {
         this.repository = repository;
-        // this.userRepository = userRepository;
+        this.userRepository = userRepository;
         // this.roomRepository = roomRepository;
     }
 
@@ -39,7 +42,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt lịch có id: " + id));
     }
 
-    private void checkRoomConflict(Long roomId, LocalDate bookingDate, LocalTime startTime, LocalTime endTime,
+    private void checkRoomConflict(Long roomId, LocalDateTime bookingDate, LocalTime startTime, LocalTime endTime,
             Long excludeId) {
         boolean hasConflict = repository.existsRoomBookingConflict(
                 roomId,
@@ -75,11 +78,10 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse create(BookingRequest request) {
         request.validate();
 
-        // Ràng buộc khi có entity User (bảng users):
-        // if (!userRepository.existsById(request.getCustomerId())) {
-        // throw new IllegalArgumentException("Không tìm thấy khách hàng có id: " +
-        // request.getCustomerId());
-        // }
+        // Kiểm tra khách hàng tồn tại trong bảng users
+        User customer = userRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy khách hàng có id: " + request.getCustomerId()));
 
         // Ràng buộc khi có entity Room (bảng rooms):
         // if (!roomRepository.existsById(request.getRoomId())) {
@@ -91,7 +93,7 @@ public class BookingServiceImpl implements BookingService {
         checkRoomConflict(request.getRoomId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
                 null);
 
-        Booking booking = BookingMapper.toEntity(request);
+        Booking booking = BookingMapper.toEntity(request, customer);
         Booking saved = repository.save(booking);
         return BookingMapper.toResponse(saved);
     }
@@ -102,11 +104,9 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = findEntity(id);
 
-        // Ràng buộc khi có entity User (bảng users):
-        // if (!userRepository.existsById(request.getCustomerId())) {
-        // throw new IllegalArgumentException("Không tìm thấy khách hàng có id: " +
-        // request.getCustomerId());
-        // }
+        User customer = userRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy khách hàng có id: " + request.getCustomerId()));
 
         // Ràng buộc khi có entity Room (bảng rooms):
         // if (!roomRepository.existsById(request.getRoomId())) {
@@ -118,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
         checkRoomConflict(request.getRoomId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
                 id);
 
-        BookingMapper.updateEntity(request, booking);
+        BookingMapper.updateEntity(request, booking, customer);
         Booking saved = repository.save(booking);
         return BookingMapper.toResponse(saved);
     }
@@ -187,7 +187,9 @@ public class BookingServiceImpl implements BookingService {
         if (date == null) {
             throw new IllegalArgumentException("Ngày tìm kiếm không được để trống");
         }
-        return repository.findByBookingDate(date)
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        return repository.findByBookingDateBetween(startOfDay, endOfDay)
                 .stream()
                 .map(BookingMapper::toResponse)
                 .toList();
