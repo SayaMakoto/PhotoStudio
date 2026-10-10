@@ -1,6 +1,6 @@
 import { UserGroupIcon, TrophyIcon, CameraIcon, HeartIcon } from '@heroicons/react/24/solid';
-import CountUp from './reactbits/CountUp';
-import ScrollReveal from './reactbits/ScrollReveal';
+import CountUp from '../animations/CountUp';
+import ScrollReveal from '../animations/ScrollReveal';
 
 export default function Stats() {
   const stats = [

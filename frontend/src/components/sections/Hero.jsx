@@ -1,9 +1,9 @@
 import { ArrowRightIcon, SparklesIcon, StarIcon, TrophyIcon, CameraIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
-import BlurText from './reactbits/BlurText';
-import ShinyText from './reactbits/ShinyText';
-import TiltedCard from './reactbits/TiltedCard';
-import Magnet from './reactbits/Magnet';
-import ScrollReveal from './reactbits/ScrollReveal';
+import BlurText from '../animations/BlurText';
+import ShinyText from '../animations/ShinyText';
+import TiltedCard from '../cards/TiltedCard';
+import Magnet from '../animations/Magnet';
+import ScrollReveal from '../animations/ScrollReveal';
 
 export default function Hero({ onOpenBooking }) {
   return (

@@ -11,7 +11,7 @@ import {
   CalendarDaysIcon,
   FilmIcon
 } from '@heroicons/react/24/solid';
-import ScrollReveal from './reactbits/ScrollReveal';
+import ScrollReveal from '../animations/ScrollReveal';
 
 export default function Gallery() {
   const [activeFilter, setActiveFilter] = useState('all');

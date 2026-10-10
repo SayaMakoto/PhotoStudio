@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CameraIcon, SparklesIcon, Bars3Icon, XMarkIcon, PhoneIcon, CalendarDaysIcon } from '@heroicons/react/24/solid';
-import Magnet from './reactbits/Magnet';
+import Magnet from '../animations/Magnet';
 
 export default function Navbar({ onOpenBooking }) {
   const [scrolled, setScrolled] = useState(false);

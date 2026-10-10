@@ -5,8 +5,8 @@ import {
   ShieldCheckIcon,
   HeartIcon
 } from '@heroicons/react/24/solid';
-import SpotlightCard from './reactbits/SpotlightCard';
-import ScrollReveal from './reactbits/ScrollReveal';
+import SpotlightCard from '../cards/SpotlightCard';
+import ScrollReveal from '../animations/ScrollReveal';
 
 export default function Testimonials() {
   const reviews = [

@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import Navbar from '../components/Navbar';
-import Hero from '../components/Hero';
-import Stats from '../components/Stats';
-import Services from '../components/Services';
-import Gallery from '../components/Gallery';
-import BeforeAfterComparison from '../components/BeforeAfterComparison';
-import StudioExperience from '../components/StudioExperience';
-import Testimonials from '../components/Testimonials';
-import CTA from '../components/CTA';
-import Footer from '../components/Footer';
-import FloatingActions from '../components/FloatingActions';
+import Navbar from '../components/layout/Navbar';
+import Hero from '../components/sections/Hero';
+import Stats from '../components/sections/Stats';
+import Services from '../components/sections/Services';
+import Gallery from '../components/sections/Gallery';
+import BeforeAfterComparison from '../components/sections/BeforeAfterComparison';
+import StudioExperience from '../components/sections/StudioExperience';
+import Testimonials from '../components/sections/Testimonials';
+import CTA from '../components/sections/CTA';
+import Footer from '../components/layout/Footer';
+import FloatingActions from '../components/layout/FloatingActions';
 
 export default function HomePage() {
   const [selectedPackage, setSelectedPackage] = useState(null);
