@@ -1,20 +1,15 @@
 package com.photostudio.controller;
 
-import com.photostudio.dto.user.UserRequestDTO;
-import com.photostudio.dto.user.UserResponseDTO;
-import com.photostudio.mapper.UserMapper;
-import com.photostudio.model.users.Role;
-import com.photostudio.model.users.User;
-import com.photostudio.model.users.UserStatus;
+import com.photostudio.dto.users.UserRequest;
+import com.photostudio.dto.users.UserResponse;
 import com.photostudio.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -22,66 +17,80 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
-    private final UserMapper userMapper;
 
     // Lấy tất cả người dùng
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
-        List<UserResponseDTO> users = userService.getAllUsers().stream()
-                .map(userMapper::toResponseDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAll());
     }
 
     // Lấy người dùng theo ID
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok(userMapper.toResponseDTO(user)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.findById(id));
+    }
+
+    // Lấy người dùng theo username
+    @GetMapping("/username/{username}")
+    public ResponseEntity<UserResponse> getUserByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(userService.findByUsername(username));
+    }
+
+    // Lấy người dùng theo email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(userService.findByEmail(email));
     }
 
     // Tạo mới người dùng (Đăng ký)
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO requestDTO) {
-        User user = userMapper.toEntity(requestDTO);
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponseDTO(createdUser));
+    public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
     }
 
     // Cập nhật thông tin người dùng
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDTO requestDTO) {
-        User existingUser = userService.getUserById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + id));
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable Long id,
+            @RequestBody UserRequest request) {
+        return ResponseEntity.ok(userService.update(id, request));
+    }
 
-        userMapper.updateEntityFromDTO(requestDTO, existingUser);
-        User updatedUser = userService.updateUser(id, existingUser);
-        return ResponseEntity.ok(userMapper.toResponseDTO(updatedUser));
+    // Cập nhật trạng thái người dùng (active, inactive, banned)
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<UserResponse> updateStatus(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body,
+            @RequestParam(required = false) String status) {
+        String targetStatus = status;
+        if ((targetStatus == null || targetStatus.isBlank()) && body != null) {
+            targetStatus = body.get("status");
+        }
+        return ResponseEntity.ok(userService.updateStatus(id, targetStatus));
     }
 
     // Xóa người dùng
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     // Lọc theo Role (Customer, Employee, Admin)
     @GetMapping("/role/{role}")
-    public ResponseEntity<List<UserResponseDTO>> getUsersByRole(@PathVariable Role role) {
-        List<UserResponseDTO> users = userService.getUsersByRole(role).stream()
-                .map(userMapper::toResponseDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserResponse>> getUsersByRole(@PathVariable String role) {
+        return ResponseEntity.ok(userService.findByRole(role));
     }
 
     // Lọc theo Status (active, inactive, banned)
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<UserResponseDTO>> getUsersByStatus(@PathVariable UserStatus status) {
-        List<UserResponseDTO> users = userService.getUsersByStatus(status).stream()
-                .map(userMapper::toResponseDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserResponse>> getUsersByStatus(@PathVariable String status) {
+        return ResponseEntity.ok(userService.findByStatus(status));
+    }
+
+    // Tìm kiếm theo tên (fullname)
+    @GetMapping("/search")
+    public ResponseEntity<List<UserResponse>> searchByName(@RequestParam(required = false, defaultValue = "") String keyword) {
+        return ResponseEntity.ok(userService.searchByName(keyword));
     }
 }

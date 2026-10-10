@@ -1,71 +1,103 @@
 package com.photostudio.mapper;
 
-import com.photostudio.dto.user.UserRequestDTO;
-import com.photostudio.dto.user.UserResponseDTO;
+import com.photostudio.dto.users.UserRequest;
+import com.photostudio.dto.users.UserResponse;
 import com.photostudio.model.users.User;
+import com.photostudio.model.users.UserRole;
+import com.photostudio.model.users.UserStatus;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
 
-    // Chuyển từ Entity sang Response DTO
-    public UserResponseDTO toResponseDTO(User user) {
+    public static UserResponse toResponse(User user) {
         if (user == null) {
             return null;
         }
-        UserResponseDTO dto = new UserResponseDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setFullname(user.getFullname());
-        dto.setDateOfBirth(user.getDateOfBirth());
-        dto.setGender(user.getGender());
-        dto.setAddress(user.getAddress());
-        dto.setPhone(user.getPhone());
-        dto.setAvatar(user.getAvatar());
-        dto.setRole(user.getRole());
-        dto.setStatus(user.getStatus());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setUpdatedAt(user.getUpdatedAt());
-        return dto;
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFullname(),
+                user.getDateOfBirth(),
+                user.getGender(),
+                user.getAddress(),
+                user.getPhone(),
+                user.getAvatar(),
+                user.getRole(),
+                user.getStatus(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
     }
 
-    // Chuyển từ Request DTO sang Entity (dùng khi tạo mới)
-    public User toEntity(UserRequestDTO dto) {
-        if (dto == null) {
+    public static User toEntity(UserRequest request) {
+        if (request == null) {
             return null;
         }
         User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword()); // Lưu ý: Nên mã hóa mật khẩu (BCrypt) ở tầng Service trước khi lưu
-        user.setFullname(dto.getFullname());
-        user.setDateOfBirth(dto.getDateOfBirth());
-        user.setGender(dto.getGender());
-        user.setAddress(dto.getAddress());
-        user.setPhone(dto.getPhone());
-        user.setAvatar(dto.getAvatar());
-        user.setRole(dto.getRole());
-        user.setStatus(dto.getStatus());
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        user.setFullname(request.getFullname());
+        user.setDateOfBirth(request.getDateOfBirth());
+        user.setGender(request.getGender());
+        user.setAddress(request.getAddress());
+        user.setPhone(request.getPhone());
+        user.setAvatar(request.getAvatar());
+        user.setRole(request.getRole() != null ? request.getRole() : UserRole.Customer);
+        user.setStatus(request.getStatus() != null ? request.getStatus() : UserStatus.active);
         return user;
     }
 
-    // Cập nhật dữ liệu từ DTO vào Entity có sẵn (dùng khi update)
-    public void updateEntityFromDTO(UserRequestDTO dto, User user) {
-        if (dto == null || user == null) {
+    public static void updateEntity(UserRequest request, User user) {
+        if (request == null || user == null) {
             return;
         }
-        user.setFullname(dto.getFullname());
-        user.setDateOfBirth(dto.getDateOfBirth());
-        user.setGender(dto.getGender());
-        user.setAddress(dto.getAddress());
-        user.setPhone(dto.getPhone());
-        user.setAvatar(dto.getAvatar());
-        if (dto.getRole() != null) {
-            user.setRole(dto.getRole());
+        if (request.getUsername() != null && !request.getUsername().isBlank()) {
+            user.setUsername(request.getUsername());
         }
-        if (dto.getStatus() != null) {
-            user.setStatus(dto.getStatus());
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            user.setEmail(request.getEmail());
         }
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(request.getPassword());
+        }
+        if (request.getFullname() != null) {
+            user.setFullname(request.getFullname());
+        }
+        if (request.getDateOfBirth() != null) {
+            user.setDateOfBirth(request.getDateOfBirth());
+        }
+        if (request.getGender() != null) {
+            user.setGender(request.getGender());
+        }
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getAvatar() != null) {
+            user.setAvatar(request.getAvatar());
+        }
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
+        if (request.getStatus() != null) {
+            user.setStatus(request.getStatus());
+        }
+    }
+
+    public UserResponse toResponseDTO(User user) {
+        return toResponse(user);
+    }
+
+    public User toEntityFromDTO(UserRequest request) {
+        return toEntity(request);
+    }
+
+    public void updateEntityFromDTO(UserRequest request, User user) {
+        updateEntity(request, user);
     }
 }

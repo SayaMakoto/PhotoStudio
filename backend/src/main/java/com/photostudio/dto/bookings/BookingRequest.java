@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
 
@@ -24,7 +24,7 @@ public class BookingRequest {
     // Ghi chú: Khi có bảng rooms, có thể mở rộng kiểm tra sự tồn tại của Room
     // private String roomName;
 
-    private LocalDate bookingDate;
+    private LocalDateTime bookingDate;
 
     private LocalTime startTime;
 

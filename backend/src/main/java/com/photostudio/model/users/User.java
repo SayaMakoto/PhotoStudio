@@ -51,7 +51,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private UserRole role = Role.Customer;
+    private UserRole role = UserRole.Customer;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -68,7 +68,7 @@ public class User {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         if (this.role == null) {
-            this.role = Role.Customer;
+            this.role = UserRole.Customer;
         }
         if (this.status == null) {
             this.status = UserStatus.active;

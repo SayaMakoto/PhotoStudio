@@ -4,7 +4,9 @@ import com.photostudio.dto.bookings.BookingRequest;
 import com.photostudio.dto.bookings.BookingResponse;
 import com.photostudio.model.bookings.Booking;
 import com.photostudio.model.bookings.BookingStatus;
+import com.photostudio.model.users.User;
 import com.photostudio.repository.BookingRepository;
+import com.photostudio.repository.UserRepository;
 import com.photostudio.service.impl.BookingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
@@ -28,29 +30,40 @@ class BookingValidationTest {
     @Mock
     private BookingRepository bookingRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private BookingServiceImpl bookingService;
 
     private BookingRequest validRequest;
+    private User testCustomer;
 
     @BeforeEach
     void setUp() {
         validRequest = new BookingRequest();
         validRequest.setCustomerId(1L);
         validRequest.setRoomId(2L);
-        validRequest.setBookingDate(LocalDate.of(2026, 10, 15));
+        validRequest.setBookingDate(LocalDateTime.of(2026, 10, 15, 9, 0, 0));
         validRequest.setStartTime(LocalTime.of(9, 0));
         validRequest.setEndTime(LocalTime.of(11, 0));
         validRequest.setStatus("pending");
         validRequest.setCustomerNote("Chụp ảnh cá nhân phong cách vintage");
+
+        testCustomer = new User();
+        testCustomer.setId(1L);
+        testCustomer.setFullname("Đỗ Thành Thương");
+        testCustomer.setPhone("0987654321");
     }
 
     @Test
     @DisplayName("Tạo đơn đặt lịch thành công khi dữ liệu hợp lệ và không trùng lịch phòng")
     void testCreateBooking_Success() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testCustomer));
+
         when(bookingRepository.existsRoomBookingConflict(
                 eq(2L),
-                eq(LocalDate.of(2026, 10, 15)),
+                eq(LocalDateTime.of(2026, 10, 15, 9, 0, 0)),
                 eq(LocalTime.of(9, 0)),
                 eq(LocalTime.of(11, 0)),
                 eq(BookingStatus.cancelled),
@@ -68,12 +81,28 @@ class BookingValidationTest {
         assertNotNull(response);
         assertEquals(100L, response.getId());
         assertEquals(1L, response.getCustomerId());
+        assertEquals("Đỗ Thành Thương", response.getCustomerName());
+        assertEquals("0987654321", response.getCustomerPhone());
         assertEquals(2L, response.getRoomId());
-        assertEquals(LocalDate.of(2026, 10, 15), response.getBookingDate());
+        assertEquals(LocalDateTime.of(2026, 10, 15, 9, 0, 0), response.getBookingDate());
         assertEquals(LocalTime.of(9, 0), response.getStartTime());
         assertEquals(LocalTime.of(11, 0), response.getEndTime());
         assertEquals("pending", response.getStatus());
         verify(bookingRepository, times(1)).save(any(Booking.class));
+    }
+
+    @Test
+    @DisplayName("Ném ngoại lệ khi không tìm thấy khách hàng")
+    void testCreateBooking_CustomerNotFound_ThrowsException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> bookingService.create(validRequest)
+        );
+
+        assertTrue(ex.getMessage().contains("Không tìm thấy khách hàng có id: 1"));
+        verify(bookingRepository, never()).save(any());
     }
 
     @Test
@@ -108,9 +137,11 @@ class BookingValidationTest {
     @Test
     @DisplayName("Ném ngoại lệ khi trùng lịch phòng chụp trong cùng khung giờ")
     void testCreateBooking_RoomConflict_ThrowsException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testCustomer));
+
         when(bookingRepository.existsRoomBookingConflict(
                 eq(2L),
-                eq(LocalDate.of(2026, 10, 15)),
+                eq(LocalDateTime.of(2026, 10, 15, 9, 0, 0)),
                 eq(LocalTime.of(9, 0)),
                 eq(LocalTime.of(11, 0)),
                 eq(BookingStatus.cancelled),
@@ -131,8 +162,9 @@ class BookingValidationTest {
     void testUpdateStatus_FromCancelled_ChecksConflict() {
         Booking existing = new Booking();
         existing.setId(50L);
+        existing.setCustomer(testCustomer);
         existing.setRoomId(2L);
-        existing.setBookingDate(LocalDate.of(2026, 10, 15));
+        existing.setBookingDate(LocalDateTime.of(2026, 10, 15, 9, 0, 0));
         existing.setStartTime(LocalTime.of(9, 0));
         existing.setEndTime(LocalTime.of(11, 0));
         existing.setStatus(BookingStatus.cancelled);
@@ -140,7 +172,7 @@ class BookingValidationTest {
         when(bookingRepository.findById(50L)).thenReturn(Optional.of(existing));
         when(bookingRepository.existsRoomBookingConflict(
                 eq(2L),
-                eq(LocalDate.of(2026, 10, 15)),
+                eq(LocalDateTime.of(2026, 10, 15, 9, 0, 0)),
                 eq(LocalTime.of(9, 0)),
                 eq(LocalTime.of(11, 0)),
                 eq(BookingStatus.cancelled),

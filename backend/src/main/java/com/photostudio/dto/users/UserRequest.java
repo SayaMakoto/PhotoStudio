@@ -1,43 +1,108 @@
 package com.photostudio.dto.users;
 
-import com.photostudio.model.users.Gender;
-import com.photostudio.model.users.Role;
+import com.photostudio.model.users.UserGender;
+import com.photostudio.model.users.UserRole;
 import com.photostudio.model.users.UserStatus;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.regex.Pattern;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserRequest {
 
-    @NotBlank(message = "Tên đăng nhập không được để trống")
     private String username;
 
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không hợp lệ")
     private String email;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String password;
 
     private String fullname;
 
     private LocalDate dateOfBirth;
 
-    private Gender gender;
+    private UserGender gender;
 
     private String address;
 
-    @Size(max = 11, message = "Số điện thoại tối đa 11 chữ số")
     private String phone;
 
     private String avatar;
 
-    private Role role;
+    private UserRole role;
 
     private UserStatus status;
+
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+    public void validate() {
+        validate(true);
+    }
+
+    public void validate(boolean isCreate) {
+        if (isCreate || username != null) {
+            if (username == null || username.trim().isBlank()) {
+                throw new IllegalArgumentException("Tên đăng nhập không được để trống");
+            }
+            if (username.length() > 255) {
+                throw new IllegalArgumentException("Tên đăng nhập tối đa 255 ký tự");
+            }
+        }
+
+        if (isCreate || email != null) {
+            if (email == null || email.trim().isBlank()) {
+                throw new IllegalArgumentException("Email không được để trống");
+            }
+            if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
+                throw new IllegalArgumentException("Email không hợp lệ");
+            }
+            if (email.length() > 255) {
+                throw new IllegalArgumentException("Email tối đa 255 ký tự");
+            }
+        }
+
+        if (isCreate) {
+            if (password == null || password.trim().isBlank()) {
+                throw new IllegalArgumentException("Mật khẩu không được để trống");
+            }
+            if (password.length() < 6) {
+                throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
+            }
+            if (password.length() > 255) {
+                throw new IllegalArgumentException("Mật khẩu tối đa 255 ký tự");
+            }
+        } else if (password != null && !password.isBlank()) {
+            if (password.length() < 6) {
+                throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
+            }
+            if (password.length() > 255) {
+                throw new IllegalArgumentException("Mật khẩu tối đa 255 ký tự");
+            }
+        }
+
+        if (fullname != null && fullname.length() > 255) {
+            throw new IllegalArgumentException("Họ và tên tối đa 255 ký tự");
+        }
+
+        if (phone != null && !phone.isBlank()) {
+            if (phone.length() > 11) {
+                throw new IllegalArgumentException("Số điện thoại tối đa 11 chữ số");
+            }
+        }
+
+        if (address != null && address.length() > 255) {
+            throw new IllegalArgumentException("Địa chỉ tối đa 255 ký tự");
+        }
+
+        if (avatar != null && avatar.length() > 255) {
+            throw new IllegalArgumentException("Đường dẫn ảnh đại diện tối đa 255 ký tự");
+        }
+    }
 }

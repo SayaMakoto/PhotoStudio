@@ -1,8 +1,9 @@
 package com.photostudio.model.bookings;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+
+import com.photostudio.model.users.User;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,20 +23,19 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "customer_id", nullable = false)
-    private Long customerId;
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "customer_id", nullable = false)
-    // private User customer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private User customer;
 
     @Column(name = "room_id", nullable = false)
     private Long roomId;
+    // Quan hệ khi có entity Room (bảng rooms):
     // @ManyToOne(fetch = FetchType.LAZY)
     // @JoinColumn(name = "room_id", nullable = false)
     // private Room room;
 
     @Column(name = "booking_date", nullable = false)
-    private LocalDate bookingDate;
+    private LocalDateTime bookingDate;
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
@@ -55,6 +55,21 @@ public class Booking {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public Long getCustomerId() {
+        return customer != null ? customer.getId() : null;
+    }
+
+    public void setCustomerId(Long customerId) {
+        if (customerId != null) {
+            if (this.customer == null) {
+                this.customer = new User();
+            }
+            this.customer.setId(customerId);
+        } else {
+            this.customer = null;
+        }
+    }
 
     @PrePersist
     protected void onCreate() {
