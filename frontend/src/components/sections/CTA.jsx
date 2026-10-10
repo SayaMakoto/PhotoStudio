@@ -17,8 +17,8 @@ import {
   UserGroupIcon,
   CameraIcon,
 } from '@heroicons/react/24/solid';
-import ShinyText from './reactbits/ShinyText';
-import ScrollReveal from './reactbits/ScrollReveal';
+import ShinyText from '../animations/ShinyText';
+import ScrollReveal from '../animations/ScrollReveal';
 
 const PACKAGE_OPTIONS = [
   {

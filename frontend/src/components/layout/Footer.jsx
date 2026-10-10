@@ -7,8 +7,8 @@ import {
   SparklesIcon,
   HeartIcon
 } from '@heroicons/react/24/solid';
-import Magnet from './reactbits/Magnet';
-import ScrollReveal from './reactbits/ScrollReveal';
+import Magnet from '../animations/Magnet';
+import ScrollReveal from '../animations/ScrollReveal';
 
 export default function Footer() {
   const scrollToTop = () => {
