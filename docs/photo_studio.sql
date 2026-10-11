@@ -17,6 +17,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ---------------------------------------------------------------------
 -- DROP TABLES (in reverse dependency order)
 -- ---------------------------------------------------------------------
+DROP TABLE IF EXISTS `contacts`;
 DROP TABLE IF EXISTS `contents`;
 DROP TABLE IF EXISTS `banners`;
 DROP TABLE IF EXISTS `notifications`;
@@ -391,6 +392,22 @@ CREATE TABLE `contents` (
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày tạo bài viết',
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ngày cập nhật bài viết'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý bài viết và các trang nội dung tĩnh của website';
+
+-- Bảng 28: contacts (Quản lý liên hệ, phản hồi và yêu cầu tư vấn từ khách hàng)
+CREATE TABLE `contacts` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
+    `user_id` BIGINT NULL COMMENT 'FK - users (Tài khoản người dùng nếu đã đăng nhập, NULL nếu là khách vãng lai)',
+    `fullname` VARCHAR(255) NOT NULL COMMENT 'Họ và tên người gửi liên hệ',
+    `email` VARCHAR(255) NOT NULL COMMENT 'Email người gửi để nhận phản hồi',
+    `phone` VARCHAR(20) NULL COMMENT 'Số điện thoại liên hệ',
+    `subject` VARCHAR(255) NULL COMMENT 'Tiêu đề / Chủ đề liên hệ (tư vấn gói chụp, báo giá, thắc mắc...)',
+    `message` TEXT NOT NULL COMMENT 'Nội dung tin nhắn / yêu cầu liên hệ',
+    `status` ENUM('pending', 'completed', 'cancelled') NOT NULL DEFAULT 'pending' COMMENT 'Trạng thái xử lý liên hệ',
+    `reply_message` TEXT NULL COMMENT 'Nội dung phản hồi từ quản trị viên / nhân viên studio',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời điểm gửi liên hệ',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Thời điểm cập nhật trạng thái hoặc gửi phản hồi',
+    CONSTRAINT `fk_contacts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý tin nhắn liên hệ và phản hồi của khách hàng';
 
 -- =====================================================================
 -- KẾT THÚC CẤU TRÚC CƠ SỞ DỮ LIỆU
