@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import {
   SparklesIcon,
   CalendarDaysIcon,
@@ -17,8 +17,8 @@ import {
   UserGroupIcon,
   CameraIcon,
 } from '@heroicons/react/24/solid';
-import ShinyText from '../animations/ShinyText';
-import ScrollReveal from '../animations/ScrollReveal';
+import ShinyText from '../../animations/ShinyText';
+import ScrollReveal from '../../animations/ScrollReveal';
 
 const PACKAGE_OPTIONS = [
   {

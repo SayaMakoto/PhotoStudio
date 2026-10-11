@@ -1,6 +1,6 @@
-import { useState, useRef, useCallback } from 'react';
+﻿import { useState, useRef, useCallback } from 'react';
 import { SparklesIcon, AdjustmentsHorizontalIcon, PhotoIcon } from '@heroicons/react/24/solid';
-import ScrollReveal from '../animations/ScrollReveal';
+import ScrollReveal from '../../animations/ScrollReveal';
 
 export default function BeforeAfterComparison() {
   const [sliderPosition, setSliderPosition] = useState(50);

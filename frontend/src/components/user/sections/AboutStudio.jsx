@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import {
   CubeIcon,
   CheckIcon,
@@ -9,8 +9,8 @@ import {
   BoltIcon,
   EyeIcon
 } from '@heroicons/react/24/solid';
-import SpotlightCard from '../cards/SpotlightCard';
-import ScrollReveal from '../animations/ScrollReveal';
+import SpotlightCard from '../../cards/SpotlightCard';
+import ScrollReveal from '../../animations/ScrollReveal';
 
 export default function StudioExperience() {
   const [activeRoomIndex, setActiveRoomIndex] = useState(0);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { PhoneIcon, CalendarDaysIcon } from '@heroicons/react/24/solid';
 
 export default function FloatingActions({ onOpenBooking }) {

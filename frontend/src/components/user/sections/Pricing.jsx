@@ -1,4 +1,4 @@
-import {
+﻿import {
   CheckIcon,
   SparklesIcon,
   ClockIcon,
@@ -11,8 +11,8 @@ import {
   PaintBrushIcon,
   ShoppingBagIcon,
 } from '@heroicons/react/24/solid';
-import SpotlightCard from '../cards/SpotlightCard';
-import ScrollReveal from '../animations/ScrollReveal';
+import SpotlightCard from '../../cards/SpotlightCard';
+import ScrollReveal from '../../animations/ScrollReveal';
 
 export default function Services({ onSelectPackage }) {
   const packages = [
