@@ -1,12 +1,12 @@
-import {
+﻿import {
   StarIcon,
   ChatBubbleBottomCenterTextIcon,
   HandThumbUpIcon,
   ShieldCheckIcon,
   HeartIcon
 } from '@heroicons/react/24/solid';
-import SpotlightCard from '../cards/SpotlightCard';
-import ScrollReveal from '../animations/ScrollReveal';
+import SpotlightCard from '../../cards/SpotlightCard';
+import ScrollReveal from '../../animations/ScrollReveal';
 
 export default function Testimonials() {
   const reviews = [

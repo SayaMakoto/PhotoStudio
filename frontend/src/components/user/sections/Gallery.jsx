@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   SparklesIcon,
@@ -11,7 +11,7 @@ import {
   CalendarDaysIcon,
   FilmIcon
 } from '@heroicons/react/24/solid';
-import ScrollReveal from '../animations/ScrollReveal';
+import ScrollReveal from '../../animations/ScrollReveal';
 
 export default function Gallery() {
   const [activeFilter, setActiveFilter] = useState('all');

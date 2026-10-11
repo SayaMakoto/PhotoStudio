@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
-import QuickContact from '../components/layout/QuickContact';
+﻿import { useState } from 'react';
+import Navbar from '../../components/user/layout/Navbar';
+import Footer from '../../components/user/layout/Footer';
+import QuickContact from '../../components/user/layout/QuickContact';
 
-import Hero from '../components/sections/Hero';
-import Stats from '../components/sections/Stats';
-import Pricing from '../components/sections/Pricing';
-import Gallery from '../components/sections/Gallery';
-import BeforeAfter from '../components/sections/BeforeAfter';
-import AboutStudio from '../components/sections/AboutStudio';
-import Reviews from '../components/sections/Reviews';
-import Booking from '../components/sections/Booking';
+import Hero from '../../components/user/sections/Hero';
+import Stats from '../../components/user/sections/Stats';
+import Pricing from '../../components/user/sections/Pricing';
+import Gallery from '../../components/user/sections/Gallery';
+import BeforeAfter from '../../components/user/sections/BeforeAfter';
+import AboutStudio from '../../components/user/sections/AboutStudio';
+import Reviews from '../../components/user/sections/Reviews';
+import Booking from '../../components/user/sections/Booking';
 
 export default function HomePage() {
   const [selectedPackage, setSelectedPackage] = useState(null);
