@@ -98,6 +98,11 @@ INSERT INTO `contents` (`id`, `type`, `title`, `slug`, `content`, `image_url`, `
 (1, 'page', 'Về Chúng Tôi - PhotoStudio', 'gioi-thieu', 'PhotoStudio tự hào là đơn vị cung cấp dịch vụ chụp ảnh chuyên nghiệp hàng đầu với trang thiết bị hiện đại...', '/contents/about.jpg', 'published'),
 (2, 'post', 'Bí quyết chọn trang phục chụp ảnh cưới studio đẹp nhất', 'bi-quyet-chon-trang-phuc-cuoi', 'Chụp ảnh cưới studio đang là xu hướng được nhiều cặp đôi lựa chọn bởi sự tiện lợi và phong cách tinh tế...', '/contents/tips.jpg', 'published');
 
+-- 15. Thêm dữ liệu mẫu liên hệ (contacts)
+INSERT INTO `contacts` (`id`, `user_id`, `fullname`, `email`, `phone`, `subject`, `message`, `status`, `reply_message`) VALUES
+(1, 4, 'Lê Minh Tuấn', 'minhtuan@gmail.com', '0934567890', 'Tư vấn gói chụp cưới ngoại cảnh', 'Chào studio, mình muốn hỏi gói chụp cưới phong cách vintage có hỗ trợ trang điểm và xe di chuyển không ạ?', 'completed', 'Dạ chào bạn Tuấn, gói chụp cưới bên mình đã bao gồm trọn gói trang điểm và ekip hỗ trợ bạn nhé! Nhân viên sẽ liên hệ tư vấn chi tiết ạ.'),
+(2, NULL, 'Nguyễn Mai Phương', 'maiphuong@outlook.com', '0988776655', 'Hỏi báo giá chụp kỷ yếu nhóm', 'Cho em xin báo giá chi tiết gói chụp ảnh kỷ yếu cho nhóm 15 người tại studio vào cuối tuần này với ạ.', 'pending', NULL);
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- =====================================================================
