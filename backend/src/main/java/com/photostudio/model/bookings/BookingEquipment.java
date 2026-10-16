@@ -2,7 +2,6 @@ package com.photostudio.model.bookings;
 
 import com.photostudio.model.equipment.Equipment;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +13,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class BookingEquipment {
 
     @Id

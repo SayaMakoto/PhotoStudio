@@ -1,5 +1,5 @@
 package com.photostudio.model.accessories;
 
 public enum AccessoryType {
-    fashion, concept, vintage, wedding
+    fashion, concept, vintage, wedding, other
 }

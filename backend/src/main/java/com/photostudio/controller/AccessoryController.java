@@ -72,7 +72,7 @@ public class AccessoryController {
     @PutMapping("/{id}")
     public ResponseEntity<AccessoryResponse> updateAccessory(@PathVariable Long id, @RequestBody AccessoryRequest request) {
         Accessory existingAccessory = accessoryService.getAccessoryById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phụ kiện với ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phụ kiện với ID: " + id));
 
         accessoryMapper.updateEntityFromRequest(request, existingAccessory);
         Accessory updatedAccessory = accessoryService.updateAccessory(id, existingAccessory);
