@@ -16,6 +16,22 @@ export const ROUTES = {
     REVIEWS: '/#reviews',
   },
 
+  // Tuyến đường Xác thực (Authentication)
+  AUTH: {
+    // Khách hàng (User / Customer)
+    LOGIN: '/login',
+    REGISTER: '/register',
+    FORGOT_PASSWORD: '/forgot-password',
+
+    // Nhân viên (Employee)
+    EMPLOYEE_LOGIN: '/employee/login',
+    EMPLOYEE_REGISTER: '/employee/register',
+
+    // Quản trị viên (Admin)
+    ADMIN_LOGIN: '/admin/login',
+    ADMIN_REGISTER: '/admin/register',
+  },
+
   // 2. Giao diện Nhân viên (Employee)
   EMPLOYEE: {
     DASHBOARD: '/employee',

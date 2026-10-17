@@ -1,6 +1,17 @@
-﻿import { useState, useEffect } from 'react';
-import { CameraIcon, SparklesIcon, Bars3Icon, XMarkIcon, PhoneIcon, CalendarDaysIcon } from '@heroicons/react/24/solid';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  CameraIcon, 
+  SparklesIcon, 
+  Bars3Icon, 
+  XMarkIcon, 
+  PhoneIcon, 
+  CalendarDaysIcon,
+  UserCircleIcon,
+  // ArrowRightOnRectangleIcon
+} from '@heroicons/react/24/solid';
 import Magnet from '../../animations/Magnet';
+import { ROUTES } from '../../../routes/web';
 
 export default function Navbar({ onOpenBooking }) {
   const [scrolled, setScrolled] = useState(false);
@@ -61,14 +72,15 @@ export default function Navbar({ onOpenBooking }) {
           </nav>
 
           {/* Actions */}
-          <div className="hidden lg:flex items-center gap-4">
-            <a
-              href="tel:0901234567"
-              className="flex items-center gap-2 text-xs text-neutral-200 hover:text-white transition-colors py-2 px-3.5 rounded-full bg-neutral-900 border border-amber-500/30 hover:border-amber-400/60 shadow-sm"
+          <div className="hidden lg:flex items-center gap-3">
+
+            <Link
+              to={ROUTES.AUTH.LOGIN}
+              className="flex items-center gap-2 text-xs font-semibold text-neutral-200 hover:text-white transition-all py-2 px-4 rounded-full bg-neutral-900/90 border border-white/15 hover:border-amber-400/60 hover:bg-neutral-800 shadow-sm group"
             >
-              <PhoneIcon className="w-4 h-4 text-amber-400" />
-              <span>Hotline: <strong className="text-amber-300">0901 234 567</strong></span>
-            </a>
+              <UserCircleIcon className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span>Đăng Nhập</span>
+            </Link>
 
             <Magnet padding={40} magnetStrength={3}>
               <button
@@ -105,6 +117,24 @@ export default function Navbar({ onOpenBooking }) {
               </a>
             ))}
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  to={ROUTES.AUTH.LOGIN}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 text-sm font-medium text-neutral-200 py-2.5 rounded-xl bg-neutral-900 border border-white/15 hover:border-amber-400/50 transition-colors"
+                >
+                  <UserCircleIcon className="w-4 h-4 text-amber-400" />
+                  <span>Đăng Nhập</span>
+                </Link>
+                <Link
+                  to={ROUTES.AUTH.REGISTER}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 text-sm font-bold text-neutral-950 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 shadow-md transition-colors"
+                >
+                  <span>Đăng Ký</span>
+                </Link>
+              </div>
+
               <a
                 href="tel:0901234567"
                 className="flex items-center justify-center gap-2 text-sm text-neutral-200 py-2.5 rounded-xl bg-neutral-900 border border-amber-500/30"
