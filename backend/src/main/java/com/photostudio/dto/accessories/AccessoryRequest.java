@@ -20,15 +20,15 @@ public class AccessoryRequest {
     private Double price;
     private String status;
 
-    private static final Set<String> VALID_TYPES = Set.of("fashion", "concept", "vintage", "wedding");
-    private static final Set<String> VALID_STATUSES = Set.of("available", "rented", "maintenance", "damaged");
+    private static final Set<String> VALID_TYPES = Set.of("fashion", "concept", "vintage", "wedding", "other");
+    private static final Set<String> VALID_STATUSES = Set.of("available", "rented", "maintenance", "damaged", "retired");
 
     public void validate() {
         if (type == null || type.isBlank()) {
             throw new IllegalArgumentException("Loại phụ kiện không được để trống");
         }
         if (!VALID_TYPES.contains(type.trim().toLowerCase())) {
-            throw new IllegalArgumentException("Loại phụ kiện không hợp lệ. Các loại hợp lệ: fashion, concept, vintage, wedding");
+            throw new IllegalArgumentException("Loại phụ kiện không hợp lệ. Các loại hợp lệ: fashion, concept, vintage, wedding, other");
         }
 
         if (name == null || name.isBlank()) {
@@ -51,7 +51,7 @@ public class AccessoryRequest {
         }
 
         if (status != null && !VALID_STATUSES.contains(status.trim().toLowerCase())) {
-            throw new IllegalArgumentException("Trạng thái phụ kiện không hợp lệ. Các trạng thái hợp lệ: available, rented, maintenance, damaged");
+            throw new IllegalArgumentException("Trạng thái phụ kiện không hợp lệ. Các trạng thái hợp lệ: available, rented, maintenance, damaged, retired");
         }
     }
 }

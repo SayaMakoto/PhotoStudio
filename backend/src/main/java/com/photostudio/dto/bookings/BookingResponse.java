@@ -21,8 +21,7 @@ public class BookingResponse {
     private String customerPhone;
 
     private Long roomId;
-    // Khi có bảng rooms, có thể bổ sung thông tin phòng:
-    // private String roomName;
+    private String roomName;
 
     private LocalDateTime bookingDate;
 
