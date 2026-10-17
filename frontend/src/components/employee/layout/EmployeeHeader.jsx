@@ -1,7 +1,9 @@
 import React from 'react';
-import { Menu, Search, Bell, Filter, Calendar, Camera } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, Search, Bell, Filter, Calendar, Camera, LogIn } from 'lucide-react';
 import ShinyText from '../../animations/ShinyText';
 import { EMPLOYEE_PROFILE, EMPLOYEE_KPIS } from '../employeeData';
+import { ROUTES } from '../../../routes/web';
 
 export default function EmployeeHeader({
   onOpenMobile,
@@ -68,7 +70,7 @@ export default function EmployeeHeader({
         {/* Notifications button */}
         <button
           onClick={onNotificationClick}
-          className="relative rounded-xl border border-neutral-800 bg-neutral-900 p-2 text-neutral-300 hover:border-neutral-700 hover:text-white transition-colors"
+          className="relative rounded-xl border border-neutral-800 bg-neutral-900 p-2 text-neutral-300 hover:border-neutral-700 hover:text-white transition-colors cursor-pointer"
           title="Thông báo & Chỉ đạo Admin"
         >
           <Bell className="h-4.5 w-4.5" />
@@ -78,6 +80,16 @@ export default function EmployeeHeader({
             </span>
           )}
         </button>
+
+        {/* Nút Đăng Nhập Nhân Viên */}
+        <Link
+          to={ROUTES.AUTH.EMPLOYEE_LOGIN}
+          className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 text-xs font-semibold text-amber-300 transition-colors shadow-sm"
+          title="Đăng nhập tài khoản nhân sự"
+        >
+          <LogIn className="h-4 w-4 text-amber-400" />
+          <span>Đăng Nhập</span>
+        </Link>
       </div>
     </header>
   );

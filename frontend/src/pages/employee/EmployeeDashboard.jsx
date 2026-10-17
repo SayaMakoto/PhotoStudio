@@ -107,11 +107,11 @@ export default function EmployeeDashboard() {
                 onStatusChange={handleStatusChange}
               />
 
-              {/* Split row: Equipment quick check & Customer reviews */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <EquipmentAndCostumesSection onReportIncident={handleOpenIncident} />
-                <CustomerReviewsSection />
-              </div>
+              {/* Quản lý thiết bị & phụ kiện đang giữ */}
+              <EquipmentAndCostumesSection onReportIncident={handleOpenIncident} />
+
+              {/* Đánh giá từ khách hàng */}
+              <CustomerReviewsSection />
             </div>
           )}
 

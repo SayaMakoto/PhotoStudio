@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Camera,
   CalendarDays,
@@ -15,6 +16,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { EMPLOYEE_PROFILE, EMPLOYEE_KPIS } from '../employeeData';
+import { ROUTES } from '../../../routes/web';
 
 export const EMPLOYEE_TABS = [
   { id: 'dashboard', label: 'Dashboard & KPI', icon: Camera, section: 'Cơ bản' },
@@ -170,8 +172,15 @@ export default function EmployeeSidebar({ activeTab, onSelectTab, isMobileOpen, 
         </div>
 
         {/* Sidebar Footer */}
-        <div className="border-t border-neutral-800/80 p-3 bg-neutral-950/60">
-          <div className="flex items-center justify-between text-xs text-neutral-400 px-2 py-1">
+        <div className="border-t border-neutral-800/80 p-3 bg-neutral-950/60 space-y-2">
+          <Link
+            to={ROUTES.AUTH.EMPLOYEE_LOGIN}
+            className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-amber-400/40 text-xs font-semibold text-neutral-200 hover:text-white transition-all shadow-sm"
+          >
+            <LogOut className="w-3.5 h-3.5 text-amber-400" />
+            <span>Đăng Nhập Tài Khoản</span>
+          </Link>
+          <div className="flex items-center justify-between text-xs text-neutral-400 px-2 py-0.5">
             <span className="text-[11px]">Mã NV: <strong>{EMPLOYEE_PROFILE.id}</strong></span>
             <span className="text-[11px] text-amber-400 font-medium">Phiên 2026.1</span>
           </div>

@@ -1,0 +1,295 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Camera,
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Briefcase,
+  CheckCircle2,
+  Sparkles,
+  UserCheck
+} from 'lucide-react';
+import { ROUTES } from '../../routes/web';
+
+export default function EmployeeLoginPage() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    usernameOrEmail: '',
+    password: '',
+    rememberMe: true,
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+    if (errorMessage) setErrorMessage('');
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    if (!formData.usernameOrEmail.trim()) {
+      setErrorMessage('Vui lòng nhập mã nhân viên hoặc email công vụ.');
+      return;
+    }
+    if (!formData.password) {
+      setErrorMessage('Vui lòng nhập mật khẩu tài khoản.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setIsLoading(false);
+      setSuccessMessage('Đăng nhập thành công! Đang chuyển hướng vào trang tác nghiệp...');
+      setTimeout(() => {
+        navigate(ROUTES.EMPLOYEE.DASHBOARD);
+      }, 800);
+    }, 600);
+  };
+
+  const handleQuickDemo = (role) => {
+    if (role === 'photo') {
+      setFormData({
+        usernameOrEmail: 'photographer@photostudio.vn',
+        password: 'crewPassword123',
+        rememberMe: true,
+      });
+    } else if (role === 'makeup') {
+      setFormData({
+        usernameOrEmail: 'makeup@photostudio.vn',
+        password: 'crewPassword123',
+        rememberMe: true,
+      });
+    } else {
+      setFormData({
+        usernameOrEmail: 'logistics@photostudio.vn',
+        password: 'crewPassword123',
+        rememberMe: true,
+      });
+    }
+    setErrorMessage('');
+  };
+
+  return (
+    <div className="min-h-screen bg-[#090b10] text-white selection:bg-amber-400 selection:text-neutral-950 font-sans p-4 sm:p-6 flex flex-col justify-between relative overflow-hidden">
+      {/* Background Lighting & Studio glow */}
+      <div className="absolute top-1/4 left-1/3 -translate-x-1/2 w-[600px] h-[450px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[400px] bg-amber-600/5 rounded-full blur-[120px] pointer-events-none" />
+      
+      {/* Subtle Studio Aperture pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      {/* Top Header Navigation */}
+      <header className="relative z-10 w-full max-w-4xl mx-auto flex items-center justify-between py-2">
+        <Link to={ROUTES.USER.HOME} className="flex items-center gap-2 group text-xs text-neutral-400 hover:text-amber-400 transition-colors">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span>Về Trang Chủ Studio</span>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          <Link
+            to={ROUTES.AUTH.LOGIN}
+            className="text-xs text-neutral-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/5 bg-neutral-900/60 hover:bg-neutral-800 transition-colors"
+          >
+            Cổng Khách Hàng
+          </Link>
+          <Link
+            to={ROUTES.AUTH.ADMIN_LOGIN}
+            className="text-xs text-neutral-400 hover:text-amber-400 px-3 py-1.5 rounded-lg border border-white/5 bg-neutral-900/60 hover:bg-neutral-800 transition-colors"
+          >
+            Cổng Quản Trị →
+          </Link>
+        </div>
+      </header>
+
+      {/* Main Employee Login Box */}
+      <main className="relative z-10 w-full max-w-md mx-auto my-auto py-6">
+        <div className="rounded-3xl bg-neutral-950/90 border border-neutral-800/80 p-7 sm:p-9 shadow-2xl shadow-black/90 backdrop-blur-2xl">
+          
+          {/* Brand Header */}
+          <div className="text-center mb-7">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 text-neutral-950 shadow-lg shadow-amber-500/20 mb-3.5">
+              <Camera className="w-7 h-7 stroke-[2.2]" />
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/25 text-amber-300 text-[11px] font-semibold tracking-wider uppercase mb-2">
+              <Briefcase className="w-3.5 h-3.5 text-amber-400" />
+              <span>PHOTOSTUDIO STAFF PORTAL</span>
+            </div>
+
+            <h1 className="text-2xl font-bold tracking-tight text-white">
+              Đăng Nhập Nhân Viên
+            </h1>
+            <p className="text-xs text-neutral-400 mt-1">
+              Dành riêng cho Đội ngũ Nhiếp ảnh gia, Makeup Artist và Hậu cần
+            </p>
+          </div>
+
+          {/* Alert Messages */}
+          {errorMessage && (
+            <div className="mb-5 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2.5">
+              <div className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+          {successMessage && (
+            <div className="mb-5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>{successMessage}</span>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Employee ID or Email */}
+            <div>
+              <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+                Mã nhân viên hoặc Email công vụ
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                  <Mail className="w-4 h-4 text-amber-400/80" />
+                </div>
+                <input
+                  type="text"
+                  name="usernameOrEmail"
+                  value={formData.usernameOrEmail}
+                  onChange={handleChange}
+                  placeholder="photographer@photostudio.vn hoặc NV01"
+                  className="w-full pl-10 pr-4 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-neutral-300">
+                  Mật khẩu
+                </label>
+                <span className="text-[11px] text-neutral-400">
+                  Quên mật khẩu? Liên hệ Admin
+                </span>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                  <Lock className="w-4 h-4 text-amber-400/80" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-11 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me */}
+            <div className="flex items-center justify-between pt-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-neutral-300">
+                <input
+                  type="checkbox"
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleChange}
+                  className="w-4 h-4 rounded border-neutral-700 bg-neutral-900 text-amber-400 focus:ring-amber-400 accent-amber-400 cursor-pointer"
+                />
+                <span>Ghi nhớ phiên làm việc trên máy studio</span>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 font-bold text-sm shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-neutral-950 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <UserCheck className="w-4 h-4 stroke-[2.4]" />
+                  <span>ĐĂNG NHẬP NHÂN VIÊN</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Quick Demo Autofill per role */}
+          <div className="mt-5 p-3 rounded-2xl bg-neutral-900/60 border border-white/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-semibold text-amber-400/90 uppercase flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                Điền nhanh tài khoản demo:
+              </span>
+              <span className="text-[10px] text-neutral-400">Chọn vai trò</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleQuickDemo('photo')}
+                className="py-1.5 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-white/10 hover:border-amber-400/40 text-[11px] font-medium text-neutral-200 hover:text-white transition-all text-center cursor-pointer"
+              >
+                📸 Nhiếp Ảnh
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickDemo('makeup')}
+                className="py-1.5 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-white/10 hover:border-amber-400/40 text-[11px] font-medium text-neutral-200 hover:text-white transition-all text-center cursor-pointer"
+              >
+                💄 Makeup
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickDemo('logistics')}
+                className="py-1.5 px-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-white/10 hover:border-amber-400/40 text-[11px] font-medium text-neutral-200 hover:text-white transition-all text-center cursor-pointer"
+              >
+                🎬 Hậu Cần
+              </button>
+            </div>
+          </div>
+
+          {/* Footer note: Account is granted by Admin */}
+          <div className="pt-4 mt-5 border-t border-neutral-800/80 text-center text-[11px] text-neutral-400 leading-relaxed">
+            Tài khoản nhân viên được cấp và phân quyền bởi <strong className="text-neutral-300">Ban Quản Trị Studio</strong>.
+          </div>
+        </div>
+      </main>
+
+      {/* Footer System Meta */}
+      <footer className="relative z-10 w-full max-w-4xl mx-auto flex items-center justify-between py-2 text-[11px] text-neutral-400 border-t border-white/5">
+        <span>PhotoStudio Staff Portal v2.4</span>
+        <span className="text-amber-400">Nội bộ Studio</span>
+      </footer>
+    </div>
+  );
+}

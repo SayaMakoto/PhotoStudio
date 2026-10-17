@@ -17,7 +17,7 @@ export default function CustomerReviewsSection() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-neutral-950 px-3.5 py-1.5 rounded-xl border border-neutral-800">
+        <div className="flex items-center gap-2 bg-neutral-950 px-3.5 py-1.5 rounded-xl border border-neutral-800 shrink-0 whitespace-nowrap">
           <span className="text-amber-400 font-extrabold text-sm">★ {EMPLOYEE_PROFILE.avgRating} / 5.0</span>
           <span className="text-neutral-500 text-xs">({EMPLOYEE_PROFILE.totalShoots} buổi chụp)</span>
         </div>

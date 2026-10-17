@@ -3,6 +3,12 @@ import { ROUTES } from './web';
 
 // Pages
 import HomePage from '../pages/user/HomePage';
+import LoginPage from '../pages/auth/LoginPage';
+import RegisterPage from '../pages/auth/RegisterPage';
+import AdminLoginPage from '../pages/auth/AdminLoginPage';
+import AdminRegisterPage from '../pages/auth/AdminRegisterPage';
+import EmployeeLoginPage from '../pages/auth/EmployeeLoginPage';
+import EmployeeRegisterPage from '../pages/auth/EmployeeRegisterPage';
 import AdminLayout from '../components/admin/layout/AdminLayout';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
@@ -13,6 +19,18 @@ export default function AppRoutes() {
     <Routes>
       {/* 1. Tuyến đường Khách hàng (User) */}
       <Route path={ROUTES.USER.HOME} element={<HomePage />} />
+
+      {/* Tuyến đường Xác thực (Auth) - Khách hàng */}
+      <Route path={ROUTES.AUTH.LOGIN} element={<LoginPage />} />
+      <Route path={ROUTES.AUTH.REGISTER} element={<RegisterPage />} />
+
+      {/* Tuyến đường Xác thực (Auth) - Nhân viên */}
+      <Route path={ROUTES.AUTH.EMPLOYEE_LOGIN} element={<EmployeeLoginPage />} />
+      <Route path={ROUTES.AUTH.EMPLOYEE_REGISTER} element={<Navigate to={ROUTES.AUTH.EMPLOYEE_LOGIN} replace />} />
+
+      {/* Tuyến đường Xác thực (Auth) - Quản trị viên */}
+      <Route path={ROUTES.AUTH.ADMIN_LOGIN} element={<AdminLoginPage />} />
+      <Route path={ROUTES.AUTH.ADMIN_REGISTER} element={<AdminRegisterPage />} />
 
       {/* 2. Tuyến đường Nhân viên (Employee) */}
       <Route path={ROUTES.EMPLOYEE.DASHBOARD} element={<EmployeeDashboard />} />

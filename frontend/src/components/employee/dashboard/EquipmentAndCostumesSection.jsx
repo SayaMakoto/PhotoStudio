@@ -46,12 +46,12 @@ export default function EquipmentAndCostumesSection({ onReportIncident }) {
           </p>
         </div>
 
-        {/* Filter */}
-        <div className="flex items-center gap-2">
+        {/* Filter & Actions */}
+        <div className="flex items-center gap-2 shrink-0">
           <select
             value={filterCat}
             onChange={(e) => setFilterCat(e.target.value)}
-            className="rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-xs text-neutral-300 font-medium focus:border-amber-400 focus:outline-none"
+            className="rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-xs text-neutral-300 font-medium focus:border-amber-400 focus:outline-none whitespace-nowrap shrink-0"
           >
             <option value="all">Tất cả phân loại</option>
             <option value="máy ảnh">Body Máy Ảnh</option>
@@ -61,37 +61,37 @@ export default function EquipmentAndCostumesSection({ onReportIncident }) {
 
           <button
             onClick={() => onReportIncident && onReportIncident(null)}
-            className="flex items-center gap-1.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 hover:bg-rose-500/25 px-3 py-1.5 text-xs font-semibold transition-colors"
+            className="flex items-center gap-1.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 hover:bg-rose-500/25 px-3.5 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer shadow-sm"
           >
-            <AlertTriangle className="h-3.5 w-3.5" />
-            <span>Báo sự cố thiết bị</span>
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+            <span className="whitespace-nowrap">Báo sự cố thiết bị</span>
           </button>
         </div>
       </div>
 
       {/* Equipment Table */}
-      <div className="overflow-x-auto rounded-xl border border-neutral-800">
-        <table className="w-full text-left text-xs text-neutral-300">
+      <div className="overflow-x-auto rounded-xl border border-neutral-800 scrollbar-thin scrollbar-thumb-neutral-800">
+        <table className="w-full min-w-[700px] text-left text-xs text-neutral-300">
           <thead className="bg-neutral-950 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider border-b border-neutral-800">
             <tr>
-              <th className="px-4 py-3">Mã & Tên thiết bị</th>
-              <th className="px-4 py-3">Phân loại</th>
-              <th className="px-4 py-3">Tình trạng vật lý</th>
-              <th className="px-4 py-3 text-center">Trạng thái giữ đồ</th>
-              <th className="px-4 py-3 text-right">Thao tác</th>
+              <th className="px-4 py-3 whitespace-nowrap">Mã & Tên thiết bị</th>
+              <th className="px-4 py-3 whitespace-nowrap">Phân loại</th>
+              <th className="px-4 py-3 whitespace-nowrap">Tình trạng vật lý</th>
+              <th className="px-4 py-3 text-center whitespace-nowrap">Trạng thái giữ đồ</th>
+              <th className="px-4 py-3 text-right whitespace-nowrap">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-800/60 font-sans">
             {filteredItems.map((item) => (
               <tr key={item.id} className="hover:bg-neutral-850/40 transition-colors">
-                <td className="px-4 py-3.5">
+                <td className="px-4 py-3.5 whitespace-nowrap">
                   <div className="font-bold text-white">{item.name}</div>
                   <div className="font-mono text-[11px] text-amber-400/80">{item.code}</div>
                 </td>
-                <td className="px-4 py-3.5 text-neutral-400">
+                <td className="px-4 py-3.5 whitespace-nowrap text-neutral-400">
                   {item.category}
                 </td>
-                <td className="px-4 py-3.5">
+                <td className="px-4 py-3.5 whitespace-nowrap">
                   <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium ${
                     item.status === 'reported'
                       ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
@@ -100,7 +100,7 @@ export default function EquipmentAndCostumesSection({ onReportIncident }) {
                     {item.condition}
                   </span>
                 </td>
-                <td className="px-4 py-3.5 text-center">
+                <td className="px-4 py-3.5 text-center whitespace-nowrap">
                   <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                     item.status === 'holding'
                       ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
@@ -113,10 +113,10 @@ export default function EquipmentAndCostumesSection({ onReportIncident }) {
                     {item.status === 'reported' && '⚠ Báo hỏng'}
                   </span>
                 </td>
-                <td className="px-4 py-3.5 text-right">
+                <td className="px-4 py-3.5 text-right whitespace-nowrap">
                   <button
                     onClick={() => handleToggleStatus(item.id)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-3 py-1.5 text-[11px] font-semibold transition-colors"
+                    className="inline-flex items-center gap-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-3 py-1.5 text-[11px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
                   >
                     <RotateCcw className="h-3 w-3 text-amber-400" />
                     <span>{item.status === 'holding' ? 'Bấm Trả Kho' : 'Bấm Nhận Lại'}</span>
