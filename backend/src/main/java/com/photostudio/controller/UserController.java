@@ -6,6 +6,9 @@ import com.photostudio.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,10 +45,27 @@ public class UserController {
         return ResponseEntity.ok(userService.findByEmail(email));
     }
 
-    // Tạo mới người dùng (Đăng ký)
+    // Tạo mới người dùng
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
+    }
+
+    // Đăng ký tài khoản (No Auth theo yêu cầu đề bài Lab 6)
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(request));
+    }
+
+    // Đăng xuất (xóa SecurityContext và vô hiệu hóa session nếu có theo ca B09)
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
+        SecurityContextHolder.clearContext();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công"));
     }
 
     // Cập nhật thông tin người dùng

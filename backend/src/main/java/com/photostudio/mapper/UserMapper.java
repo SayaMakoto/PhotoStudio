@@ -45,7 +45,17 @@ public class UserMapper {
         user.setAddress(request.getAddress());
         user.setPhone(request.getPhone());
         user.setAvatar(request.getAvatar());
-        user.setRole(request.getRole() != null ? request.getRole() : UserRole.Customer);
+        UserRole targetRole = UserRole.Customer;
+        if (request.getRole() != null) {
+            if (request.getRole() == UserRole.Admin || request.getRole() == UserRole.ADMIN) {
+                targetRole = UserRole.Admin;
+            } else if (request.getRole() == UserRole.Employee) {
+                targetRole = UserRole.Employee;
+            } else {
+                targetRole = UserRole.Customer;
+            }
+        }
+        user.setRole(targetRole);
         user.setStatus(request.getStatus() != null ? request.getStatus() : UserStatus.active);
         return user;
     }
@@ -82,7 +92,13 @@ public class UserMapper {
             user.setAvatar(request.getAvatar());
         }
         if (request.getRole() != null) {
-            user.setRole(request.getRole());
+            UserRole targetRole = UserRole.Customer;
+            if (request.getRole() == UserRole.Admin || request.getRole() == UserRole.ADMIN) {
+                targetRole = UserRole.Admin;
+            } else if (request.getRole() == UserRole.Employee) {
+                targetRole = UserRole.Employee;
+            }
+            user.setRole(targetRole);
         }
         if (request.getStatus() != null) {
             user.setStatus(request.getStatus());

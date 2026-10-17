@@ -21,6 +21,8 @@ public interface UserService {
 
     UserResponse create(UserRequest request);
 
+    UserResponse register(UserRequest request);
+
     UserResponse update(Long id, UserRequest request);
 
     UserResponse updateStatus(Long id, String status);

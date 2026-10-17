@@ -9,6 +9,7 @@ import com.photostudio.model.users.UserStatus;
 import com.photostudio.repository.UserRepository;
 import com.photostudio.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private User findEntity(Long id) {
         return userRepository.findById(id)
@@ -92,8 +94,16 @@ public class UserServiceImpl implements UserService {
         checkUniqueUsernameAndEmail(request.getUsername(), request.getEmail(), null);
 
         User user = UserMapper.toEntity(request);
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword().trim()));
+        }
         User saved = userRepository.save(user);
         return UserMapper.toResponse(saved);
+    }
+
+    @Override
+    public UserResponse register(UserRequest request) {
+        return create(request);
     }
 
     @Override
@@ -104,6 +114,9 @@ public class UserServiceImpl implements UserService {
         checkUniqueUsernameAndEmail(request.getUsername(), request.getEmail(), id);
 
         UserMapper.updateEntity(request, user);
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword().trim()));
+        }
         User saved = userRepository.save(user);
         return UserMapper.toResponse(saved);
     }
