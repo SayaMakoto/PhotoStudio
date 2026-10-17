@@ -19,16 +19,16 @@ import java.util.List;
 @Transactional
 public class EmployeeServiceImpl implements EmployeeService {
 
-    private final EmployeeRepository employeeRepository;
+    private final EmployeeRepository repository;
     private final UserRepository userRepository;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, UserRepository userRepository) {
-        this.employeeRepository = employeeRepository;
+    public EmployeeServiceImpl(EmployeeRepository repository, UserRepository userRepository) {
+        this.repository = repository;
         this.userRepository = userRepository;
     }
 
     private Employee findEntity(Long id) {
-        return employeeRepository.findById(id)
+        return repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhân viên có id: " + id));
     }
 
@@ -37,19 +37,10 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng có id: " + userId));
     }
 
-    private void ensureUserAvailable(Long userId, Long employeeId) {
-        boolean alreadyAssigned = employeeId == null
-                ? employeeRepository.existsByUserId(userId)
-                : employeeRepository.existsByUserIdAndIdNot(userId, employeeId);
-        if (alreadyAssigned) {
-            throw new IllegalArgumentException("Người dùng đã có hồ sơ nhân viên!");
-        }
-    }
-
     @Override
     @Transactional(readOnly = true)
     public List<EmployeeResponse> findAll() {
-        return employeeRepository.findAll().stream().map(EmployeeMapper::toResponse).toList();
+        return repository.findAll().stream().map(EmployeeMapper::toResponse).toList();
     }
 
     @Override
@@ -61,60 +52,83 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional(readOnly = true)
     public EmployeeResponse findByUserId(Long userId) {
-        Employee employee = employeeRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhân viên với userId: " + userId));
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("Mã người dùng không hợp lệ");
+        }
+        Employee employee = repository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy nhân viên có userId: " + userId));
         return EmployeeMapper.toResponse(employee);
     }
 
     @Override
     public EmployeeResponse create(EmployeeRequest request) {
         request.validate();
-        ensureUserAvailable(request.getUserId(), null);
-        Employee employee = EmployeeMapper.toEntity(request, findUser(request.getUserId()));
-        return EmployeeMapper.toResponse(employeeRepository.save(employee));
+
+        User user = findUser(request.getUserId());
+
+        // Quan hệ 1-1: một user chỉ có tối đa một hồ sơ nhân viên
+        if (repository.existsByUserId(request.getUserId())) {
+            throw new IllegalArgumentException(
+                    "Người dùng có id " + request.getUserId() + " đã có hồ sơ nhân viên");
+        }
+
+        Employee saved = repository.save(EmployeeMapper.toEntity(request, user));
+        return EmployeeMapper.toResponse(saved);
     }
 
     @Override
     public EmployeeResponse update(Long id, EmployeeRequest request) {
         request.validate();
+
         Employee employee = findEntity(id);
-        ensureUserAvailable(request.getUserId(), id);
-        EmployeeMapper.updateEntity(request, employee, findUser(request.getUserId()));
-        return EmployeeMapper.toResponse(employeeRepository.save(employee));
+        User user = findUser(request.getUserId());
+
+        if (repository.existsByUserIdAndIdNot(request.getUserId(), id)) {
+            throw new IllegalArgumentException(
+                    "Người dùng có id " + request.getUserId() + " đã có hồ sơ nhân viên khác");
+        }
+
+        EmployeeMapper.updateEntity(request, employee, user);
+        return EmployeeMapper.toResponse(repository.save(employee));
     }
 
     @Override
     public void delete(Long id) {
-        employeeRepository.delete(findEntity(id));
+        repository.delete(findEntity(id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<EmployeeResponse> findByPosition(String position) {
-        EmployeePosition value = parsePosition(position);
-        return employeeRepository.findByPosition(value).stream().map(EmployeeMapper::toResponse).toList();
+        if (position == null || position.isBlank()) {
+            throw new IllegalArgumentException("Vị trí nhân viên không được để trống");
+        }
+        EmployeePosition employeePosition;
+        try {
+            employeePosition = EmployeePosition.valueOf(position.trim().toLowerCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Vị trí nhân viên không hợp lệ. Các vị trí hợp lệ: photographer, makeup, logistics");
+        }
+        return repository.findByPosition(employeePosition).stream()
+                .map(EmployeeMapper::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<EmployeeResponse> findByStatus(String status) {
-        EmployeeStatus value = parseStatus(status);
-        return employeeRepository.findByStatus(value).stream().map(EmployeeMapper::toResponse).toList();
-    }
-
-    private EmployeePosition parsePosition(String position) {
-        try {
-            return EmployeePosition.valueOf(position.trim().toLowerCase());
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException("Vị trí nhân viên không hợp lệ");
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("Trạng thái không được để trống");
         }
-    }
-
-    private EmployeeStatus parseStatus(String status) {
+        EmployeeStatus employeeStatus;
         try {
-            return EmployeeStatus.valueOf(status.trim().toLowerCase());
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException("Trạng thái nhân viên không hợp lệ");
+            employeeStatus = EmployeeStatus.valueOf(status.trim().toLowerCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Trạng thái nhân viên không hợp lệ. Các trạng thái hợp lệ: active, inactive, on_leave");
         }
+        return repository.findByStatus(employeeStatus).stream()
+                .map(EmployeeMapper::toResponse).toList();
     }
 }
