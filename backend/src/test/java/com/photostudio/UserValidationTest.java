@@ -29,6 +29,9 @@ class UserValidationTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -46,6 +49,8 @@ class UserValidationTest {
         validRequest.setPhone("0987654321");
         validRequest.setRole(UserRole.Customer);
         validRequest.setStatus(UserStatus.active);
+
+        lenient().when(passwordEncoder.encode(any())).thenAnswer(inv -> "encoded_" + inv.getArgument(0));
     }
 
     @Test
