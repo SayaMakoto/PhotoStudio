@@ -16,12 +16,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/accessories")
-@RequiredArgsConstructor
+@RequestMapping({"/api/accessories", "/api/categories"})
 public class AccessoryController {
 
     private final AccessoryService accessoryService;
     private final AccessoryMapper accessoryMapper;
+
+    public AccessoryController(AccessoryService accessoryService, AccessoryMapper accessoryMapper) {
+        super();
+        this.accessoryService = accessoryService;
+        this.accessoryMapper = accessoryMapper;
+    }
 
     @GetMapping
     public ResponseEntity<List<AccessoryResponse>> getAllAccessories() {

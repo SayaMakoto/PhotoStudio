@@ -21,13 +21,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final DatabaseUserDetailsService userDetailsService;
     private final JwtService jwtService;
     private final UserService userService;
+
+    public AuthController(
+            AuthenticationManager authenticationManager,
+            DatabaseUserDetailsService userDetailsService,
+            JwtService jwtService,
+            UserService userService
+    ) {
+        super();
+        this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
+        this.jwtService = jwtService;
+        this.userService = userService;
+    }
 
     // API Đăng nhập sinh token JWT (hỗ trợ cả /api/auth/login và /api/users/login)
     @PostMapping({"/api/auth/login", "/api/users/login"})

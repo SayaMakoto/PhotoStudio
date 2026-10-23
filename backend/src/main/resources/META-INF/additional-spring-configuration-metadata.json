@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Khoá bí mật (Secret Key) dùng để ký và xác thực JWT token."
+    },
+    {
+      "name": "jwt.expiration",
+      "type": "java.lang.Long",
+      "description": "Thời gian hết hạn của JWT token (mili-giây)."
+    },
+    {
+      "name": "jwt.expiration-ms",
+      "type": "java.lang.Long",
+      "description": "Thời gian hết hạn của JWT token tính bằng mili-giây (dùng cho kịch bản kiểm thử E01 - E04)."
+    }
+  ]
+}
