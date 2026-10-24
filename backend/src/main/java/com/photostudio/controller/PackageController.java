@@ -52,4 +52,9 @@ public class PackageController {
     public ResponseEntity<List<PackageResponse>> findByName(@RequestParam String name) {
         return ResponseEntity.ok(service.findByName(name));
     }
+
+    @GetMapping("/status")
+    public ResponseEntity<List<PackageResponse>> findByStatus(@RequestParam String status) {
+        return ResponseEntity.ok(service.findByStatus(status));
+    }
 }

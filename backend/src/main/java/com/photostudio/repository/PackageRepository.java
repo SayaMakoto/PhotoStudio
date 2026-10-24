@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface PackageRepository extends JpaRepository<Package, Long> {
 
-    List<Package> findByNameContaining(String name);
+    List<Package> findByNameContainingIgnoreCase(String name);
 
     List<Package> findByStatus(PackageStatus status);
 }

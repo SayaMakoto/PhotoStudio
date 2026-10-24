@@ -16,10 +16,12 @@ public class BookingResponse {
 
     private Long id;
 
+    /** Thông tin user Customer được liên kết với booking. */
     private Long customerId;
     private String customerName;
     private String customerPhone;
 
+    /** Thông tin phòng được liên kết với booking. */
     private Long roomId;
     private String roomName;
 

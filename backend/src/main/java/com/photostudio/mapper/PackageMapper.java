@@ -16,7 +16,7 @@ public class PackageMapper {
 
     public static Package toEntity(PackageRequest request) {
         Package pkg = new Package();
-        pkg.setName(request.getName());
+        pkg.setName(request.getName().trim());
         pkg.setDescription(request.getDescription());
         pkg.setDuration(request.getDuration() != null ? request.getDuration() : 0);
         pkg.setPrice(request.getPrice() != null ? request.getPrice() : 0.0);
@@ -38,18 +38,21 @@ public class PackageMapper {
     }
 
     public static void updateEntity(PackageRequest request, Package pkg) {
-        pkg.setName(request.getName());
+        pkg.setName(request.getName().trim());
         pkg.setDescription(request.getDescription());
-        pkg.setDuration(request.getDuration() != null ? request.getDuration() : 0);
-        pkg.setPrice(request.getPrice() != null ? request.getPrice() : 0.0);
+        if (request.getDuration() != null) {
+            pkg.setDuration(request.getDuration());
+        }
+        if (request.getPrice() != null) {
+            pkg.setPrice(request.getPrice());
+        }
 
         if (request.getStatus() != null) {
             pkg.setStatus(PackageStatus.valueOf(request.getStatus().trim().toLowerCase()));
         }
 
-        pkg.getPackageEquipments().clear();
-
         if (request.getEquipments() != null) {
+            pkg.getPackageEquipments().clear();
             for (PackageEquipmentItemRequest item : request.getEquipments()) {
                 PackageEquipment pe = new PackageEquipment();
                 pe.setEquipmentType(EquipmentType.valueOf(item.getEquipmentType().trim().toLowerCase()));

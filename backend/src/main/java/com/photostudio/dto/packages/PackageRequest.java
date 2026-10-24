@@ -52,6 +52,9 @@ public class PackageRequest {
 
         if (equipments != null) {
             for (PackageEquipmentItemRequest item : equipments) {
+                if (item == null) {
+                    throw new IllegalArgumentException("Thông tin thiết bị trong gói không được để trống");
+                }
                 if (item.getEquipmentType() == null || item.getEquipmentType().isBlank()) {
                     throw new IllegalArgumentException("Loại thiết bị không được để trống");
                 }
