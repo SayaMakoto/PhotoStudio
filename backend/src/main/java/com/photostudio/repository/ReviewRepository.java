@@ -28,10 +28,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByEmployeeId(@Param("employeeId") Long employeeId);
 
     // Điểm trung bình của một nhân viên (null nếu chưa có đánh giá)
-    @Query("SELECT AVG(er.rating) FROM EmployeeReview er WHERE er.employeeId = :employeeId")
+    @Query("SELECT AVG(er.rating) FROM ReviewEmployeeReview er WHERE er.employeeId = :employeeId")
     Double findAverageRatingByEmployeeId(@Param("employeeId") Long employeeId);
 
     // Tổng số lượt đánh giá của một nhân viên
-    @Query("SELECT COUNT(er) FROM EmployeeReview er WHERE er.employeeId = :employeeId")
+    @Query("SELECT COUNT(er) FROM ReviewEmployeeReview er WHERE er.employeeId = :employeeId")
     long countByEmployeeId(@Param("employeeId") Long employeeId);
 }

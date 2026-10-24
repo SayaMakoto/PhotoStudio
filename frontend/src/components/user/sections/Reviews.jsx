@@ -1,4 +1,5 @@
-﻿import {
+import { useState, useEffect } from 'react';
+import {
   StarIcon,
   ChatBubbleBottomCenterTextIcon,
   HandThumbUpIcon,
@@ -7,9 +8,10 @@
 } from '@heroicons/react/24/solid';
 import SpotlightCard from '../../cards/SpotlightCard';
 import ScrollReveal from '../../animations/ScrollReveal';
+import customerReviewService from '../../../services/user/reviewService';
 
 export default function Testimonials() {
-  const reviews = [
+  const DEFAULT_REVIEWS = [
     {
       name: 'Lê Minh Tuấn & Mai Lan',
       role: 'Khách hàng Gói Cưới Studio B',
@@ -38,6 +40,32 @@ export default function Testimonials() {
       highlight: '“Cả gia đình đều rất ưng ý”',
     },
   ];
+
+  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+
+  useEffect(() => {
+    customerReviewService
+      .getAllReviews()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.slice(0, 6).map((rev, idx) => {
+            const fallback = DEFAULT_REVIEWS[idx % DEFAULT_REVIEWS.length];
+            return {
+              name: rev.customerName || rev.customer?.fullname || fallback.name,
+              role: rev.bookingPackageName || fallback.role,
+              rating: rev.rating || 5,
+              avatar: rev.customerAvatar || fallback.avatar,
+              comment: rev.comment || fallback.comment,
+              highlight: rev.highlight || (rev.comment ? `“${rev.comment.slice(0, 30)}...”` : fallback.highlight),
+            };
+          });
+          setReviews(mapped);
+        }
+      })
+      .catch((err) => {
+        console.warn('[Reviews] Không thể kết nối API đánh giá, hiển thị dữ liệu mẫu:', err.message);
+      });
+  }, []);
 
   return (
     <section id="testimonials" className="py-24 bg-neutral-950 border-t border-white/10 relative overflow-hidden">
