@@ -16,13 +16,8 @@ import java.util.Set;
 public class BookingRequest {
 
     private Long customerId;
-    // Ghi chú: Khi có bảng users, có thể mở rộng kiểm tra sự tồn tại của User
-    // private String customerName;
-    // private String customerPhone;
 
     private Long roomId;
-    // Ghi chú: Khi có bảng rooms, có thể mở rộng kiểm tra sự tồn tại của Room
-    // private String roomName;
 
     private LocalDateTime bookingDate;
 

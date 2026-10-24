@@ -45,6 +45,9 @@ public class Package {
     @OneToMany(mappedBy = "packageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PackageEquipment> packageEquipments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "packageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PackageService> packageServices = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -64,5 +67,15 @@ public class Package {
     public void removeEquipment(PackageEquipment equipment) {
         packageEquipments.remove(equipment);
         equipment.setPackageEntity(null);
+    }
+
+    public void addService(PackageService packageService) {
+        packageServices.add(packageService);
+        packageService.setPackageEntity(this);
+    }
+
+    public void removeService(PackageService packageService) {
+        packageServices.remove(packageService);
+        packageService.setPackageEntity(null);
     }
 }

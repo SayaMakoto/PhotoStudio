@@ -6,7 +6,10 @@ import com.photostudio.mapper.BookingMapper;
 import com.photostudio.model.bookings.Booking;
 import com.photostudio.model.bookings.BookingStatus;
 import com.photostudio.model.rooms.Room;
+import com.photostudio.model.rooms.RoomStatus;
 import com.photostudio.model.users.User;
+import com.photostudio.model.users.UserRole;
+import com.photostudio.model.users.UserStatus;
 import com.photostudio.repository.BookingRepository;
 import com.photostudio.repository.RoomRepository;
 import com.photostudio.repository.UserRepository;
@@ -38,8 +41,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Booking findEntity(Long id) {
+        validateId(id, "Mã đơn đặt lịch");
         return repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt lịch có id: " + id));
+    }
+
+    private void validateId(Long id, String fieldName) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(fieldName + " không hợp lệ");
+        }
     }
 
     private void checkRoomConflict(Long roomId, LocalDateTime bookingDate, LocalTime startTime, LocalTime endTime,
@@ -56,6 +66,21 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException(
                     "Phòng chụp (roomId: " + roomId + ") đã có người đặt trong khoảng thời gian từ "
                             + startTime + " đến " + endTime + " ngày " + bookingDate);
+        }
+    }
+
+    private void validateCustomer(User customer) {
+        if (customer.getRole() != UserRole.Customer) {
+            throw new IllegalArgumentException("Người dùng có id: " + customer.getId() + " không phải khách hàng");
+        }
+        if (customer.getStatus() != UserStatus.active) {
+            throw new IllegalArgumentException("Tài khoản khách hàng có id: " + customer.getId() + " không hoạt động");
+        }
+    }
+
+    private void validateRoom(Room room) {
+        if (room.getStatus() != RoomStatus.active) {
+            throw new IllegalArgumentException("Phòng chụp có id: " + room.getId() + " hiện không hoạt động");
         }
     }
 
@@ -76,26 +101,35 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponse create(BookingRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Dữ liệu đơn đặt lịch không được để trống");
+        }
         request.validate();
 
         User customer = userRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy khách hàng có id: " + request.getCustomerId()));
+        validateCustomer(customer);
 
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy phòng chụp có id: " + request.getRoomId()));
-
-        checkRoomConflict(request.getRoomId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
-                null);
+        validateRoom(room);
 
         Booking booking = BookingMapper.toEntity(request, customer, room);
+        if (booking.getStatus() != BookingStatus.cancelled) {
+            checkRoomConflict(request.getRoomId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
+                    null);
+        }
         Booking saved = repository.save(booking);
         return BookingMapper.toResponse(saved);
     }
 
     @Override
     public BookingResponse update(Long id, BookingRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Dữ liệu đơn đặt lịch không được để trống");
+        }
         request.validate();
 
         Booking booking = findEntity(id);
@@ -103,15 +137,18 @@ public class BookingServiceImpl implements BookingService {
         User customer = userRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy khách hàng có id: " + request.getCustomerId()));
+        validateCustomer(customer);
 
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy phòng chụp có id: " + request.getRoomId()));
-
-        checkRoomConflict(request.getRoomId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
-                id);
+        validateRoom(room);
 
         BookingMapper.updateEntity(request, booking, customer, room);
+        if (booking.getStatus() != BookingStatus.cancelled) {
+            checkRoomConflict(request.getRoomId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
+                    id);
+        }
         Booking saved = repository.save(booking);
         return BookingMapper.toResponse(saved);
     }
@@ -133,8 +170,22 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = findEntity(id);
 
         if (booking.getStatus() == BookingStatus.cancelled && bookingStatus != BookingStatus.cancelled) {
-            checkRoomConflict(booking.getRoom() != null ? booking.getRoom().getId() : null, booking.getBookingDate(),
-                    booking.getStartTime(),
+            if (booking.getCustomer() == null) {
+                throw new IllegalArgumentException("Đơn đặt lịch chưa được liên kết với khách hàng hợp lệ");
+            }
+            validateCustomer(booking.getCustomer());
+            if (booking.getRoom() == null) {
+                throw new IllegalArgumentException("Đơn đặt lịch chưa được liên kết với phòng chụp hợp lệ");
+            }
+            validateRoom(booking.getRoom());
+            checkRoomConflict(booking.getRoom().getId(), booking.getBookingDate(), booking.getStartTime(),
+                    booking.getEndTime(), booking.getId());
+        }
+        if (bookingStatus != BookingStatus.cancelled && booking.getStatus() != BookingStatus.cancelled) {
+            if (booking.getRoom() == null) {
+                throw new IllegalArgumentException("Đơn đặt lịch chưa được liên kết với phòng chụp hợp lệ");
+            }
+            checkRoomConflict(booking.getRoom().getId(), booking.getBookingDate(), booking.getStartTime(),
                     booking.getEndTime(), booking.getId());
         }
 

@@ -2,7 +2,6 @@ package com.photostudio.service;
 
 import com.photostudio.dto.packages.PackageRequest;
 import com.photostudio.dto.packages.PackageResponse;
-
 import java.util.List;
 
 public interface PackageService {
@@ -18,4 +17,6 @@ public interface PackageService {
     void delete(Long id);
 
     List<PackageResponse> findByName(String name);
+
+    List<PackageResponse> findByStatus(String status);
 }
