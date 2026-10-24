@@ -4,6 +4,7 @@ export default function SpotlightCard({
   children,
   className = '',
   spotlightColor = 'rgba(217, 119, 6, 0.15)', // warm amber glow for photo studio
+  ...props
 }) {
   const divRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -42,6 +43,7 @@ export default function SpotlightCard({
       onBlur={handleBlur}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      {...props}
       className={`relative overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/60 p-6 backdrop-blur-md transition-all duration-300 hover:border-amber-500/30 ${className}`}
     >
       <div

@@ -29,6 +29,34 @@ export const customerAuth = {
   isAuthenticated: () => Boolean(localStorage.getItem(TOKEN_KEY)),
 };
 
+/**
+ * Tự động sửa lỗi giải mã UTF-8 (mojibake) từ CSDL
+ */
+function fixMojibakeString(str) {
+  if (typeof str !== 'string' || !str) return str;
+  try {
+    const bytes = Uint8Array.from([...str].map((c) => c.charCodeAt(0) & 0xff));
+    const decoded = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    return decoded;
+  } catch {
+    return str;
+  }
+}
+
+function cleanPayload(data) {
+  if (!data) return data;
+  if (typeof data === 'string') return fixMojibakeString(data);
+  if (Array.isArray(data)) return data.map(cleanPayload);
+  if (typeof data === 'object') {
+    const res = {};
+    for (const key of Object.keys(data)) {
+      res[key] = cleanPayload(data[key]);
+    }
+    return res;
+  }
+  return data;
+}
+
 const axiosCustomer = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
@@ -47,7 +75,7 @@ axiosCustomer.interceptors.request.use(
 );
 
 axiosCustomer.interceptors.response.use(
-  (response) => response.data,
+  (response) => cleanPayload(response.data),
   (error) => {
     if (error.response?.status === 401) {
       customerAuth.clearAuth();

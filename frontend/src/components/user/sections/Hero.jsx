@@ -1,11 +1,65 @@
-﻿import { ArrowRightIcon, SparklesIcon, StarIcon, TrophyIcon, CameraIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRightIcon, SparklesIcon, StarIcon, TrophyIcon, CameraIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
 import BlurText from '../../animations/BlurText';
 import ShinyText from '../../animations/ShinyText';
 import TiltedCard from '../../cards/TiltedCard';
 import Magnet from '../../animations/Magnet';
 import ScrollReveal from '../../animations/ScrollReveal';
+import userBannerService from '../../../services/user/bannerService';
+import customerReviewService from '../../../services/user/reviewService';
+import { ROUTES } from '../../../routes/web';
 
 export default function Hero({ onOpenBooking }) {
+  const [heroData, setHeroData] = useState({
+    badge: 'STUDIO NHIẾP ẢNH NGHỆ THUẬT & CƯỚI CHUYÊN NGHIỆP',
+    awardBadge: '🏆 Không Gian Chụp Ảnh Nghệ Thuật Độc Bản',
+    headline: 'Khoảnh Khắc Cảm Xúc',
+    description: 'Không gian phòng chụp chuẩn điện ảnh, máy ảnh Full-Frame sắc nét cùng đội ngũ Makeup & Stylist chuyên nghiệp. Hãy để chúng tôi kể lại câu chuyện của bạn bằng ngôn ngữ ánh sáng.',
+    imageSrc: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85',
+    imageTitle: 'Khoảnh Khắc Hạnh Phúc',
+    imageSubtitle: 'Trang thiết bị chuyên nghiệp & Không gian sáng tạo',
+    ratingText: '5.0 / 5.0',
+    totalReviewsText: 'Chất lượng hàng đầu',
+  });
+
+  useEffect(() => {
+    // 1. Tải Banner nổi bật từ CSDL
+    void userBannerService
+      .getAllBanners()
+      .then((banners) => {
+        if (Array.isArray(banners) && banners.length > 0) {
+          const activeBanner = banners.find((b) => b.status === 'active') || banners[0];
+          setHeroData((prev) => ({
+            ...prev,
+            badge: activeBanner.title || prev.badge,
+            imageSrc: activeBanner.imageUrl || prev.imageSrc,
+            imageTitle: activeBanner.title || prev.imageTitle,
+          }));
+        }
+      })
+      .catch((err) => {
+        console.warn('[Hero] Lỗi tải banners:', err.message);
+      });
+
+    // 2. Tính toán điểm rating thực tế từ CSDL Reviews
+    void customerReviewService
+      .getAllReviews()
+      .then((reviews) => {
+        if (Array.isArray(reviews) && reviews.length > 0) {
+          const avg = (reviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviews.length).toFixed(1);
+          setHeroData((prev) => ({
+            ...prev,
+            ratingText: `${avg} / 5.0`,
+            totalReviewsText: `${reviews.length} Lượt đánh giá`,
+          }));
+        }
+      })
+      .catch((err) => {
+        console.warn('[Hero] Lỗi tải reviews:', err);
+      });
+  }, []);
+
   return (
     <section id="hero" className="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden bg-neutral-950">
       {/* Background Studio Glow & Lights */}
@@ -32,7 +86,7 @@ export default function Hero({ onOpenBooking }) {
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-900/90 border border-amber-500/40 backdrop-blur-md mb-6 shadow-inner shadow-amber-500/10">
                 <SparklesIcon className="w-4 h-4 text-amber-400 animate-pulse" />
                 <ShinyText
-                  text="STUDIO NHIẾP ẢNH NGHỆ THUẬT & CƯỚI HÀNG ĐẦU"
+                  text={heroData.badge}
                   className="text-xs font-semibold tracking-wider text-amber-300"
                 />
               </div>
@@ -44,7 +98,7 @@ export default function Hero({ onOpenBooking }) {
                 Lưu Giữ Trọn Vẹn{' '}
                 <span className="block mt-2">
                   <BlurText
-                    text="Khoảnh Khắc Cảm Xúc"
+                    text={heroData.headline}
                     delay={120}
                     animateBy="words"
                     direction="top"
@@ -58,7 +112,7 @@ export default function Hero({ onOpenBooking }) {
             {/* Subtitle */}
             <ScrollReveal direction="up" delay={0.2}>
               <p className="text-base sm:text-lg text-neutral-300 max-w-2xl mx-auto lg:mx-0 font-light leading-relaxed mb-8">
-                Không gian phòng chụp chuẩn điện ảnh, máy ảnh Full-Frame 45MP sắc nét cùng đội ngũ Makeup & Stylist chuyên nghiệp. Hãy để chúng tôi kể lại câu chuyện tình yêu và dấu ấn thanh xuân của bạn.
+                {heroData.description}
               </p>
             </ScrollReveal>
 
@@ -71,16 +125,16 @@ export default function Hero({ onOpenBooking }) {
                     className="cursor-pointer w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 font-bold text-base shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
                   >
                     <span>Đặt Lịch Tư Vấn Ngay</span>
-                    <ArrowRightIcon className="w-5 h-5 text-white" />
+                    <ArrowRightIcon className="w-5 h-5 text-neutral-950" />
                   </button>
                 </Magnet>
 
-                <a
-                  href="#services"
+                <Link
+                  to={ROUTES.USER.PACKAGES}
                   className="w-full sm:w-auto px-7 py-4 rounded-full bg-neutral-900/90 hover:bg-neutral-800 text-neutral-200 border border-white/15 hover:border-amber-500/50 text-base font-medium transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <span>Xem Bảng Giá & Gói Chụp</span>
-                </a>
+                </Link>
               </div>
             </ScrollReveal>
 
@@ -92,8 +146,8 @@ export default function Hero({ onOpenBooking }) {
                     <StarIcon className="w-5 h-5 text-amber-400" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">4.9 / 5.0</h4>
-                    <p className="text-xs text-neutral-400">1,500+ Khách hàng</p>
+                    <h4 className="text-sm font-bold text-white">{heroData.ratingText}</h4>
+                    <p className="text-xs text-neutral-400">{heroData.totalReviewsText}</p>
                   </div>
                 </div>
 
@@ -121,51 +175,59 @@ export default function Hero({ onOpenBooking }) {
 
           </div>
 
-          {/* Right Column: Tilted Hero Cards with TOP 1 AWARD BADGE SEPARATED ON TOP */}
+          {/* Right Column: Tilted Hero Cards */}
           <div className="lg:col-span-5 relative flex flex-col items-center justify-center">
             <ScrollReveal direction="left" duration={0.9} className="w-full flex flex-col items-center">
               
-              {/* Standalone Top 1 Award Badge - separated cleanly above the photo */}
+              {/* Standalone Award Badge */}
               <div className="w-full max-w-[500px] lg:max-w-[520px] mb-4">
                 <div className="flex items-center justify-center gap-2.5 px-4 sm:px-6 py-3 rounded-2xl bg-neutral-900/95 border-2 border-amber-400/70 shadow-xl shadow-amber-500/20 backdrop-blur-md">
                   <TrophyIcon className="w-5 h-5 text-amber-400 shrink-0 animate-bounce" />
-                  <span className="text-xs sm:text-sm font-extrabold text-amber-300 tracking-wide text-center">
-                    🏆 Top 1 Bình Chọn Studio Nghệ Thuật Xuất Sắc
+                  <span className="text-amber-300 font-extrabold text-xs sm:text-sm tracking-wide text-center">
+                    {heroData.awardBadge}
                   </span>
-                  <SparklesIcon className="w-4 h-4 text-amber-400 shrink-0 hidden sm:inline-block" />
                 </div>
               </div>
 
-              {/* Photo Container - Enlarged */}
-              <div className="w-full max-w-[500px] lg:max-w-[520px] relative">
-                {/* Background decorative glowing ring */}
-                <div className="absolute -inset-4 rounded-3xl border border-amber-500/30 -rotate-2 scale-95 pointer-events-none bg-amber-500/5 blur-sm" />
+              {/* Interactive 3D Tilted Card */}
+              <div className="relative w-full flex justify-center">
+                <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/20 via-transparent to-purple-500/20 rounded-[40px] blur-2xl opacity-70 pointer-events-none" />
 
                 <TiltedCard
-                  imageSrc="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85"
-                  altText="Khoảnh Khắc Hạnh Phúc Viên Mãn"
-                  captionText="✨ Tác phẩm chụp ảnh cưới tại Studio VIP"
-                  containerHeight="560px"
+                  imageSrc={heroData.imageSrc}
+                  altText="Photo Studio Hero Showcase"
+                  captionText="PHOTOSTUDIO • ÁNH SÁNG & CẢM XÚC"
+                  containerHeight="520px"
                   containerWidth="100%"
-                  imageHeight="100%"
+                  imageHeight="520px"
                   imageWidth="100%"
+                  rotateAmplitude={12}
                   scaleOnHover={1.03}
-                  rotateAmplitude={10}
+                  showMobileWarning={false}
+                  showTooltip={true}
+                  displayOverlayContent={true}
                   overlayContent={
-                    <div className="space-y-2">
-                      <span className="inline-block px-3 py-1 rounded-full bg-amber-400 text-neutral-950 font-extrabold text-xs uppercase tracking-wider shadow-md">
-                        Concept Cưới Hàn Quốc 2026
-                      </span>
-                      <h3 className="text-2xl sm:text-3xl font-extrabold text-white drop-shadow-lg">
-                        Khoảnh Khắc Hạnh Phúc Viên Mãn
+                    <div className="p-6 rounded-3xl bg-neutral-950/85 backdrop-blur-xl border border-amber-500/30 shadow-2xl flex flex-col gap-2 max-w-[90%]">
+                      <div className="flex items-center justify-between">
+                        <span className="text-amber-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                          <SparklesIcon className="w-3.5 h-3.5" />
+                          <span>Studio Cao Cấp</span>
+                        </span>
+                        <span className="text-[11px] text-white bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-500/40 font-bold">
+                          2026
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-white leading-snug">
+                        {heroData.imageTitle}
                       </h3>
-                      <p className="text-xs sm:text-sm text-neutral-200 drop-shadow">
-                        Bối cảnh Studio B - Đèn Godox AD600 Pro & Trang phục nhập khẩu
+                      <p className="text-xs text-neutral-300 font-light leading-relaxed">
+                        {heroData.imageSubtitle}
                       </p>
                     </div>
                   }
                 />
               </div>
+
             </ScrollReveal>
           </div>
 

@@ -24,49 +24,6 @@ import customerRoomService from '../../../services/user/roomService';
 import customerBookingService from '../../../services/user/bookingService';
 import { customerAuth } from '../../../lib/axiosCustomer';
 
-const DEFAULT_PACKAGE_OPTIONS = [
-  {
-    id: 1,
-    name: 'Gói Chụp Nàng Thơ / Cá Nhân',
-    price: '990.000đ',
-    badge: '990k',
-    tag: 'Nàng Thơ',
-    icon: HeartIcon,
-    iconColor: 'text-rose-400',
-    iconBg: 'bg-rose-500/15 border-rose-500/30',
-  },
-  {
-    id: 2,
-    name: 'Gói Chụp Ảnh Cưới Studio',
-    price: '2.990.000đ',
-    badge: '2.990k',
-    tag: 'Best Seller',
-    icon: TrophyIcon,
-    iconColor: 'text-amber-400',
-    iconBg: 'bg-amber-500/15 border-amber-500/30',
-  },
-  {
-    id: 3,
-    name: 'Gói Chụp Gia Đình & Nhóm Bạn',
-    price: '1.890.000đ',
-    badge: '1.890k',
-    tag: 'Ấm Cúng',
-    icon: UserGroupIcon,
-    iconColor: 'text-sky-400',
-    iconBg: 'bg-sky-500/15 border-sky-500/30',
-  },
-  {
-    id: 4,
-    name: 'Thuê Phòng Studio & Thiết Bị Riêng',
-    price: '500.000đ / h',
-    badge: 'Theo Giờ',
-    tag: 'Custom',
-    icon: CameraIcon,
-    iconColor: 'text-emerald-400',
-    iconBg: 'bg-emerald-500/15 border-emerald-500/30',
-  },
-];
-
 const MONTH_NAMES = [
   'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
   'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
@@ -87,14 +44,14 @@ const formatDateDisplay = (dateStr) => {
 };
 
 export default function CTA({ selectedPackage }) {
-  const [packageOptions, setPackageOptions] = useState(DEFAULT_PACKAGE_OPTIONS);
+  const [packageOptions, setPackageOptions] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    packageId: selectedPackage ? selectedPackage.name : 'Gói Chụp Ảnh Cưới Studio',
+    packageId: selectedPackage ? selectedPackage.name : '',
     date: '',
     note: '',
   });
@@ -113,7 +70,7 @@ export default function CTA({ selectedPackage }) {
 
   // Tải danh sách Gói chụp và Phòng từ database
   useEffect(() => {
-    customerPackageService
+    void customerPackageService
       .getAllPackages()
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -125,7 +82,8 @@ export default function CTA({ selectedPackage }) {
             'bg-sky-500/15 border-sky-500/30',
             'bg-emerald-500/15 border-emerald-500/30',
           ];
-          const mapped = data.map((pkg, idx) => ({
+          const active = data.filter((p) => !p.status || p.status === 'active');
+          const mapped = active.map((pkg, idx) => ({
             id: pkg.id,
             name: pkg.name,
             price: pkg.price ? `${Number(pkg.price).toLocaleString('vi-VN')}đ` : 'Liên hệ',
@@ -136,18 +94,26 @@ export default function CTA({ selectedPackage }) {
             iconBg: bgs[idx % bgs.length],
           }));
           setPackageOptions(mapped);
+          if (mapped.length > 0) {
+            setFormData((prev) => ({
+              ...prev,
+              packageId: prev.packageId || mapped[0].name,
+            }));
+          }
         }
       })
       .catch((err) => {
-        console.warn('[Booking] Không thể tải gói chụp từ backend:', err.message);
+        console.warn('[Booking] Lỗi tải gói chụp từ database:', err.message);
       });
 
-    customerRoomService
+    void customerRoomService
       .getAllRooms()
       .then((data) => {
         if (Array.isArray(data)) setRooms(data);
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.warn('[Booking] Lỗi tải phòng:', err);
+      });
   }, []);
 
   const [prevSelectedPkg, setPrevSelectedPkg] = useState(selectedPackage);
@@ -249,7 +215,6 @@ export default function CTA({ selectedPackage }) {
     setIsSubmitting(true);
 
     const bookingDateStr = formData.date || `${today.getFullYear()}-${padZero(today.getMonth() + 1)}-${padZero(today.getDate())}`;
-    const selectedPkgObj = packageOptions.find((p) => p.name === formData.packageId);
     const roomIdToUse = rooms.length > 0 ? rooms[0].id : 1;
     const currentCustomer = customerAuth.getUser();
 
@@ -281,7 +246,7 @@ export default function CTA({ selectedPackage }) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Promotional Banner with Copy Promo Code Button & ScrollReveal */}
+        {/* Promotional Banner */}
         <ScrollReveal direction="down">
           <div className="mb-16 relative overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-r from-neutral-900 via-amber-950/40 to-neutral-900 p-8 sm:p-12 shadow-2xl shadow-amber-500/15">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -295,7 +260,7 @@ export default function CTA({ selectedPackage }) {
                   Giảm Ngay 20% Khi Đặt Lịch Chụp Trong Tháng Này
                 </h3>
                 <p className="text-neutral-300 text-sm sm:text-base font-light max-w-2xl leading-relaxed">
-                  Tặng kèm 01 Album Mini cao cấp khổ 15x21cm, miễn phí toàn bộ phụ kiện hoa cưới và trang phục khi đăng ký gói Chụp Studio B hoặc VIP.
+                  Tặng kèm 01 Album Mini cao cấp khổ 15x21cm, miễn phí toàn bộ phụ kiện hoa cưới và trang phục khi đăng ký gói chụp studio.
                 </p>
               </div>
 
@@ -355,7 +320,7 @@ export default function CTA({ selectedPackage }) {
               </p>
             </ScrollReveal>
 
-            {/* 3 Bright Interactive Info Cards */}
+            {/* 3 Interactive Info Cards */}
             <div className="space-y-4 pt-4">
               
               {/* Card 1: Giờ làm việc */}
@@ -430,7 +395,7 @@ export default function CTA({ selectedPackage }) {
             </div>
           </div>
 
-          {/* Right Column: Form with ScrollReveal */}
+          {/* Right Column: Form */}
           <div className="lg:col-span-7">
             <ScrollReveal direction="left" delay={0.2}>
               <div className="relative rounded-3xl border border-white/20 bg-neutral-900/85 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl">
@@ -446,7 +411,7 @@ export default function CTA({ selectedPackage }) {
                     <button
                       onClick={() => {
                         setSubmitted(false);
-                        setFormData({ name: '', phone: '', packageId: packageOptions[0]?.name || 'Gói Chụp Ảnh Cưới Studio', date: '', note: '' });
+                        setFormData({ name: '', phone: '', packageId: packageOptions[0]?.name || '', date: '', note: '' });
                       }}
                       className="cursor-pointer mt-4 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all"
                     >
@@ -486,7 +451,7 @@ export default function CTA({ selectedPackage }) {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      {/* Custom Package Dropdown */}
+                      {/* Package Dropdown */}
                       <div className="relative" ref={packageRef}>
                         <label className="block text-xs font-bold text-neutral-200 mb-2">
                           Gói Chụp Quan Tâm *
@@ -506,6 +471,14 @@ export default function CTA({ selectedPackage }) {
                           <div className="flex items-center gap-2.5 truncate">
                             {(() => {
                               const curr = packageOptions.find((pkg) => pkg.name === formData.packageId) || packageOptions[0];
+                              if (!curr) {
+                                return (
+                                  <div className="flex items-center gap-2 text-neutral-400 text-xs">
+                                    <SparklesIcon className="w-4 h-4 text-amber-400 animate-pulse" />
+                                    <span>Đang tải gói chụp từ CSDL...</span>
+                                  </div>
+                                );
+                              }
                               const CurrIcon = curr.icon || SparklesIcon;
                               return (
                                 <>
@@ -570,7 +543,7 @@ export default function CTA({ selectedPackage }) {
                         )}
                       </div>
 
-                      {/* Custom Calendar Dropdown */}
+                      {/* Calendar Dropdown */}
                       <div className="relative" ref={datePickerRef}>
                         <label className="block text-xs font-bold text-neutral-200 mb-2">
                           Ngày Chụp Dự Kiến

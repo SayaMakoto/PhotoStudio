@@ -1,4 +1,5 @@
-﻿import {
+import { Link } from 'react-router-dom';
+import {
   CameraIcon,
   EnvelopeIcon,
   PhoneIcon,
@@ -9,6 +10,7 @@
 } from '@heroicons/react/24/solid';
 import Magnet from '../../animations/Magnet';
 import ScrollReveal from '../../animations/ScrollReveal';
+import { ROUTES } from '../../../routes/web';
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -43,13 +45,14 @@ export default function Footer() {
                 <PhoneIcon className="w-4 h-4 text-amber-400" />
                 <span>Gọi 0901 234 567</span>
               </a>
-              <a
-                href="#booking"
+              <Link
+                to={ROUTES.USER.PACKAGES}
+                onClick={scrollToTop}
                 className="px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-neutral-950 text-xs font-extrabold shadow-lg shadow-amber-500/30 hover:scale-105 transition-all flex items-center gap-1.5"
               >
-                <SparklesIcon className="w-4 h-4 text-white" />
-                <span>Giữ Lịch Trực Tuyến</span>
-              </a>
+                <SparklesIcon className="w-4 h-4 text-neutral-950" />
+                <span>Xem Báo Giá Trực Tuyến</span>
+              </Link>
             </div>
           </div>
         </ScrollReveal>
@@ -59,22 +62,21 @@ export default function Footer() {
           
           {/* Col 1 & 2: Brand Info & Vibrant Social Icons */}
           <div className="lg:col-span-2 space-y-4">
-            <a href="#hero" className="flex items-center gap-3 group w-fit">
+            <Link to={ROUTES.USER.HOME} onClick={scrollToTop} className="flex items-center gap-3 group w-fit">
               <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300">
                 <CameraIcon className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold tracking-wider text-white font-sans">
                 PHOTO<span className="text-amber-400 font-extrabold">STUDIO</span>
               </span>
-            </a>
+            </Link>
 
             <p className="text-xs text-neutral-300 leading-relaxed max-w-sm font-light">
               Hệ thống phòng chụp ảnh nghệ thuật, ảnh cưới và thương mại chuyên nghiệp. Nơi lưu giữ những khoảnh khắc quý giá nhất của cuộc đời bạn bằng ánh sáng và cảm xúc.
             </p>
 
-            {/* Vibrant, High-Contrast Social Icons (NEVER BLACK) */}
+            {/* Social Icons */}
             <div className="flex items-center gap-3.5 pt-3">
-              {/* Facebook */}
               <Magnet padding={30} magnetStrength={3}>
                 <a
                   href="https://facebook.com"
@@ -89,7 +91,6 @@ export default function Footer() {
                 </a>
               </Magnet>
 
-              {/* Instagram */}
               <Magnet padding={30} magnetStrength={3}>
                 <a
                   href="https://instagram.com"
@@ -104,7 +105,6 @@ export default function Footer() {
                 </a>
               </Magnet>
 
-              {/* YouTube */}
               <Magnet padding={30} magnetStrength={3}>
                 <a
                   href="https://youtube.com"
@@ -128,29 +128,29 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-xs">
               <li>
-                <a href="#services" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
-                  Chụp Ảnh Cưới Studio B
-                </a>
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                  Tất Cả Gói Chụp & Báo Giá
+                </Link>
               </li>
               <li>
-                <a href="#services" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
                   Concept Nàng Thơ / Cá Nhân
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#services" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                  Chụp Ảnh Cưới Studio & Ngoại Cảnh
+                </Link>
+              </li>
+              <li>
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
                   Chụp Ảnh Gia Đình VIP
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#services" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
-                  Trang Điểm & Làm Tóc
-                </a>
-              </li>
-              <li>
-                <a href="#services" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
-                  Thuê Váy Cưới & Tuxedo
-                </a>
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                  Dịch Vụ Phụ Trợ & Cho Thuê
+                </Link>
               </li>
             </ul>
           </div>
@@ -162,29 +162,29 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-xs">
               <li>
-                <a href="#gallery" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.HOME}#gallery`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
                   Bộ Sưu Tập Nghệ Thuật
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#studios" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
-                  Hệ Thống 3 Phòng Studio
-                </a>
+                <Link to={`${ROUTES.USER.HOME}#studios`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                  Hệ Thống Phòng Studio
+                </Link>
               </li>
               <li>
-                <a href="#studios" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.HOME}#studios`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
                   Dàn Thiết Bị Full-Frame
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#booking" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
-                  Ưu Đãi Mùa Cưới 2026
-                </a>
+                <Link to={`${ROUTES.USER.HOME}#booking`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                  Đặt Lịch Trực Tuyến
+                </Link>
               </li>
               <li>
-                <a href="#testimonials" className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.HOME}#testimonials`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
                   Đánh Giá Khách Hàng (5.0★)
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

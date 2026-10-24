@@ -1,11 +1,33 @@
-﻿import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { SparklesIcon, AdjustmentsHorizontalIcon, PhotoIcon } from '@heroicons/react/24/solid';
 import ScrollReveal from '../../animations/ScrollReveal';
+import userImageService from '../../../services/user/imageService';
 
 export default function BeforeAfterComparison() {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef(null);
+
+  const [images, setImages] = useState({
+    after: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1600&q=85',
+    before: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1600&q=70',
+  });
+
+  useEffect(() => {
+    void userImageService
+      .getAllImages()
+      .then((data) => {
+        if (Array.isArray(data) && data.length >= 2) {
+          setImages({
+            after: data[0].imageUrl,
+            before: data[1].imageUrl,
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('[BeforeAfter] Lỗi tải ảnh:', err);
+      });
+  }, []);
 
   const handleMove = useCallback((clientX) => {
     if (!containerRef.current) return;
@@ -59,15 +81,15 @@ export default function BeforeAfterComparison() {
               onTouchMove={handleTouchMove}
               className="relative h-[380px] sm:h-[520px] rounded-3xl overflow-hidden border border-white/20 select-none shadow-2xl shadow-amber-500/10 cursor-ew-resize bg-neutral-900"
             >
-              {/* After Image (Retouched - Full Width Background) */}
+              {/* After Image */}
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1600&q=85"
+                src={images.after}
                 alt="Retouched Masterpiece"
                 className="absolute inset-0 w-full h-full object-cover filter contrast-[1.08] saturate-[1.15]"
                 draggable={false}
               />
 
-              {/* After Label (Right side) */}
+              {/* After Label */}
               <div className="absolute top-5 right-5 z-20 pointer-events-none">
                 <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-400 text-neutral-950 font-extrabold text-xs tracking-wider uppercase shadow-xl">
                   <SparklesIcon className="w-3.5 h-3.5 text-white" />
@@ -75,9 +97,9 @@ export default function BeforeAfterComparison() {
                 </span>
               </div>
 
-              {/* Before Image (Raw - Cleanly clipped using clipPath polygon) */}
+              {/* Before Image */}
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1600&q=70"
+                src={images.before}
                 alt="Raw Camera Shot"
                 className="absolute inset-0 w-full h-full object-cover filter grayscale-[25%] brightness-[0.92] contrast-[0.95]"
                 style={{
@@ -86,7 +108,7 @@ export default function BeforeAfterComparison() {
                 draggable={false}
               />
 
-              {/* Before Label (Left side) */}
+              {/* Before Label */}
               <div className="absolute top-5 left-5 z-20 pointer-events-none">
                 <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-neutral-950/85 backdrop-blur-md border border-white/20 text-neutral-300 font-bold text-xs tracking-wider uppercase shadow-xl">
                   <PhotoIcon className="w-3.5 h-3.5 text-neutral-400" />
@@ -99,16 +121,12 @@ export default function BeforeAfterComparison() {
                 className="absolute top-0 bottom-0 z-30 pointer-events-none flex items-center justify-center"
                 style={{ left: `${sliderPosition}%` }}
               >
-                {/* Vertical Line */}
                 <div className="w-0.5 h-full bg-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.8)]" />
-
-                {/* Center Circular Knob */}
                 <div className="absolute w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 border-2 border-white shadow-2xl flex items-center justify-center transform -translate-x-1/2 pointer-events-auto cursor-grab active:cursor-grabbing hover:scale-110 transition-transform">
                   <AdjustmentsHorizontalIcon className="w-6 h-6 text-white" />
                 </div>
               </div>
 
-              {/* Bottom Instruction Pill */}
               <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none bg-neutral-950/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 text-[11px] text-neutral-300 font-medium">
                 👈 Kéo sang hai bên để so sánh chi tiết 👉
               </div>
