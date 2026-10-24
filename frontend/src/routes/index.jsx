@@ -1,14 +1,19 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from './web';
 
-// Pages
+// User Layout & Pages
+import UserLayout from '../components/user/layout/UserLayout';
 import HomePage from '../pages/user/HomePage';
+import PackagesPage from '../pages/user/PackagesPage';
+
+// Auth Pages
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import AdminLoginPage from '../pages/auth/AdminLoginPage';
 import AdminRegisterPage from '../pages/auth/AdminRegisterPage';
 import EmployeeLoginPage from '../pages/auth/EmployeeLoginPage';
-import EmployeeRegisterPage from '../pages/auth/EmployeeRegisterPage';
+
+// Admin & Employee Pages
 import AdminLayout from '../components/admin/layout/AdminLayout';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
@@ -17,8 +22,11 @@ import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* 1. Tuyến đường Khách hàng (User) */}
-      <Route path={ROUTES.USER.HOME} element={<HomePage />} />
+      {/* 1. Tuyến đường Khách hàng (User) - Bọc bởi UserLayout (Header & Footer chung) */}
+      <Route element={<UserLayout />}>
+        <Route path={ROUTES.USER.HOME} element={<HomePage />} />
+        <Route path={ROUTES.USER.PACKAGES} element={<PackagesPage />} />
+      </Route>
 
       {/* Tuyến đường Xác thực (Auth) - Khách hàng */}
       <Route path={ROUTES.AUTH.LOGIN} element={<LoginPage />} />

@@ -2,168 +2,208 @@ import { useState, useEffect } from 'react';
 import {
   StarIcon,
   ChatBubbleBottomCenterTextIcon,
-  HandThumbUpIcon,
   ShieldCheckIcon,
-  HeartIcon
+  HeartIcon,
+  UserCircleIcon,
 } from '@heroicons/react/24/solid';
 import SpotlightCard from '../../cards/SpotlightCard';
 import ScrollReveal from '../../animations/ScrollReveal';
 import customerReviewService from '../../../services/user/reviewService';
 
 export default function Testimonials() {
-  const DEFAULT_REVIEWS = [
-    {
-      name: 'Lê Minh Tuấn & Mai Lan',
-      role: 'Khách hàng Gói Cưới Studio B',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      comment:
-        'Hai vợ chồng mình cực kỳ hài lòng với bộ ảnh cưới! Ekip rất nhiệt tình, bạn Makeup làm tóc tỉ mỉ từng chi tiết, nhiếp ảnh gia chụp có tâm và bắt trọn từng khoảnh khắc tự nhiên.',
-      highlight: '“Ảnh cưới đẹp ngoài mong đợi!”',
-    },
-    {
-      name: 'Phạm Phương Linh',
-      role: 'Khách hàng Gói Nàng Thơ',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
-      comment:
-        'Lần đầu chụp cá nhân mà không hề bị gượng gạo nhờ anh photographer hướng dẫn tạo dáng siêu chi tiết. Tone màu Hàn Quốc ngọt ngào, ảnh retouch da mướt mịn tự nhiên lắm!',
-      highlight: '“Tone màu Hàn Quốc cực sang”',
-    },
-    {
-      name: 'Gia Đình Anh Hoàng Nam',
-      role: 'Khách hàng Gói Gia Đình VIP',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-      comment:
-        'Phòng VIP của studio rất rộng rãi, thoáng mát, gia đình 6 người chụp rất thoải mái. Bức ảnh in phóng to treo phòng khách ai đến chơi cũng khen hết lời.',
-      highlight: '“Cả gia đình đều rất ưng ý”',
-    },
-  ];
-
-  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+  const [reviews, setReviews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    customerReviewService
+    void customerReviewService
       .getAllReviews()
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const mapped = data.slice(0, 6).map((rev, idx) => {
-            const fallback = DEFAULT_REVIEWS[idx % DEFAULT_REVIEWS.length];
-            return {
-              name: rev.customerName || rev.customer?.fullname || fallback.name,
-              role: rev.bookingPackageName || fallback.role,
-              rating: rev.rating || 5,
-              avatar: rev.customerAvatar || fallback.avatar,
-              comment: rev.comment || fallback.comment,
-              highlight: rev.highlight || (rev.comment ? `“${rev.comment.slice(0, 30)}...”` : fallback.highlight),
-            };
-          });
-          setReviews(mapped);
+        if (Array.isArray(data)) {
+          setReviews(data);
+        } else {
+          setReviews([]);
         }
       })
       .catch((err) => {
-        console.warn('[Reviews] Không thể kết nối API đánh giá, hiển thị dữ liệu mẫu:', err.message);
+        console.warn('[Reviews] Lỗi tải đánh giá:', err.message);
+        setReviews([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error('[Reviews] Lỗi không xử lý:', err);
       });
   }, []);
 
   return (
     <section id="testimonials" className="py-24 bg-neutral-950 border-t border-white/10 relative overflow-hidden">
-      {/* Background radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-amber-500/10 rounded-full blur-[160px] pointer-events-none" />
+      {/* Background ambient lighting */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Header with ScrollReveal */}
+        {/* Section Header */}
         <ScrollReveal direction="down">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
-              <StarIcon className="w-4 h-4 text-amber-400" />
-              <span>Cảm Nhận Của Khách Hàng</span>
+              <StarIcon className="w-4 h-4 text-amber-400 animate-spin" />
+              <span>ĐÁNH GIÁ TỪ KHÁCH HÀNG THẬT</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
-              Hơn 2,500+ Nụ Cười & Kỷ Niệm
-            </h2>
-            <p className="text-neutral-400 text-base sm:text-lg font-light leading-relaxed">
-              Sự hài lòng và hạnh phúc của khách hàng chính là thước đo giá trị lớn nhất cho mỗi tác phẩm nghệ thuật của chúng tôi.
-            </p>
 
-            {/* Social Proof Badges with bright colors */}
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-900 border border-white/15 text-xs text-neutral-200 shadow-sm">
-                <HandThumbUpIcon className="w-4 h-4 text-amber-400" />
-                <span>99.8% Khách hàng giới thiệu bạn bè</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
+              Cảm Nhận Của Khách Hàng
+            </h2>
+
+            <p className="text-neutral-400 text-base font-light leading-relaxed">
+              Những phản hồi và đánh giá được ghi nhận trực tiếp từ hệ thống khách hàng đã trải nghiệm dịch vụ tại PhotoStudio.
+            </p>
+          </div>
+        </ScrollReveal>
+
+        {/* Loading state */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className="rounded-3xl border border-white/10 bg-neutral-900/60 p-7 animate-pulse space-y-4"
+              >
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <div key={s} className="w-4 h-4 bg-white/10 rounded-full" />
+                  ))}
+                </div>
+                <div className="h-4 w-3/4 bg-white/10 rounded" />
+                <div className="h-4 w-full bg-white/10 rounded" />
+                <div className="h-4 w-2/3 bg-white/10 rounded" />
+                <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+                  <div className="w-10 h-10 rounded-full bg-white/10" />
+                  <div className="space-y-1">
+                    <div className="h-4 w-24 bg-white/10 rounded" />
+                    <div className="h-3 w-16 bg-white/10 rounded" />
+                  </div>
+                </div>
               </div>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-900 border border-white/15 text-xs text-neutral-200 shadow-sm">
-                <ShieldCheckIcon className="w-4 h-4 text-amber-400" />
-                <span>100% Cam kết trả file đúng hẹn</span>
+            ))}
+          </div>
+        )}
+
+        {/* Empty state when 0 reviews in Database */}
+        {!isLoading && reviews.length === 0 && (
+          <ScrollReveal direction="up">
+            <div className="max-w-2xl mx-auto rounded-3xl border border-white/10 bg-neutral-900/40 p-10 text-center mb-16">
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto mb-4 border border-amber-500/30">
+                <ChatBubbleBottomCenterTextIcon className="w-8 h-8 text-amber-400" />
               </div>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-900 border border-white/15 text-xs text-neutral-200 shadow-sm">
-                <HeartIcon className="w-4 h-4 text-rose-500" />
-                <span>5.0 / 5.0 Rating</span>
+              <h3 className="text-xl font-bold text-white mb-2">Chưa có bài đánh giá nào trên hệ thống</h3>
+              <p className="text-xs text-neutral-400 leading-relaxed mb-6">
+                Hệ thống chưa ghi nhận đánh giá từ khách hàng trong cơ sở dữ liệu. Sau khi hoàn thành buổi chụp, bạn có thể để lại phản hồi để chia sẻ trải nghiệm cùng cộng đồng!
+              </p>
+              <a
+                href="#booking"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 font-bold text-xs shadow-lg hover:from-amber-400 hover:to-amber-300 transition-all hover:scale-105"
+              >
+                <HeartIcon className="w-4 h-4 text-neutral-950" />
+                <span>Trải Nghiệm & Đặt Lịch Ngay</span>
+              </a>
+            </div>
+          </ScrollReveal>
+        )}
+
+        {/* Real Reviews List from Database */}
+        {!isLoading && reviews.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            {reviews.map((rev, idx) => {
+              const ratingCount = Math.round(rev.rating || 5);
+              return (
+                <ScrollReveal
+                  key={rev.id || idx}
+                  direction="up"
+                  delay={idx * 0.1}
+                  className="flex"
+                >
+                  <SpotlightCard
+                    className="p-7 rounded-3xl bg-neutral-900/60 border border-white/10 flex flex-col justify-between hover:border-amber-500/50 transition-all duration-300 w-full"
+                    spotlightColor="rgba(245, 158, 11, 0.15)"
+                  >
+                    <div>
+                      {/* Rating Stars */}
+                      <div className="flex items-center gap-1 mb-4">
+                        {[...Array(5)].map((_, i) => (
+                          <StarIcon
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < ratingCount ? 'text-amber-400 fill-amber-400' : 'text-neutral-700'
+                            }`}
+                          />
+                        ))}
+                        <span className="text-xs font-bold text-amber-400 ml-1.5">
+                          {rev.rating ? rev.rating.toFixed(1) : '5.0'}
+                        </span>
+                      </div>
+
+                      {/* Comment from Database */}
+                      <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-light mb-6">
+                        "{rev.comment || 'Dịch vụ chụp ảnh rất chuyên nghiệp và chu đáo.'}"
+                      </p>
+                    </div>
+
+                    {/* Customer Info */}
+                    <div className="pt-4 border-t border-white/10 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/40">
+                        <UserCircleIcon className="w-6 h-6 text-amber-400" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white">
+                          {rev.customerName || `Khách hàng #${rev.customerId || rev.id}`}
+                        </h4>
+                        <span className="text-[11px] text-neutral-400 block">
+                          {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('vi-VN') : 'Khách hàng PhotoStudio'}
+                        </span>
+                      </div>
+                    </div>
+                  </SpotlightCard>
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Quality Commitment Badges */}
+        <ScrollReveal direction="up" delay={0.2}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-white/10">
+            <div className="flex items-center gap-4 p-5 rounded-2xl bg-neutral-900/40 border border-white/5">
+              <div className="p-3 rounded-xl bg-amber-500/15 text-amber-400 shrink-0">
+                <ShieldCheckIcon className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">100% Ảnh Đạt Chuẩn</h4>
+                <p className="text-xs text-neutral-400">Chỉnh sửa cho đến khi khách hàng hoàn toàn hài lòng</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-5 rounded-2xl bg-neutral-900/40 border border-white/5">
+              <div className="p-3 rounded-xl bg-rose-500/15 text-rose-400 shrink-0">
+                <HeartIcon className="w-6 h-6 text-rose-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Đội Ngũ Tận Tâm</h4>
+                <p className="text-xs text-neutral-400">Nhiếp ảnh gia và stylist luôn lắng nghe ý kiến khách hàng</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-5 rounded-2xl bg-neutral-900/40 border border-white/5">
+              <div className="p-3 rounded-xl bg-sky-500/15 text-sky-400 shrink-0">
+                <ChatBubbleBottomCenterTextIcon className="w-6 h-6 text-sky-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Tư Vấn Concept Miễn Phí</h4>
+                <p className="text-xs text-neutral-400">Hỗ trợ lựa chọn trang phục và phong cách chụp phù hợp</p>
               </div>
             </div>
           </div>
         </ScrollReveal>
-
-        {/* Testimonial Cards with dynamic hover & spotlight */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reviews.map((rev, idx) => (
-            <ScrollReveal
-              key={idx}
-              direction="up"
-              delay={idx * 0.15}
-              duration={0.7}
-              className="flex"
-            >
-              <SpotlightCard
-                className="group flex flex-col justify-between bg-neutral-900/60 border-white/10 p-8 rounded-3xl transition-all duration-500 hover:-translate-y-3 hover:border-amber-400/50 hover:shadow-2xl hover:shadow-amber-500/15 w-full"
-                spotlightColor="rgba(245, 158, 11, 0.2)"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-1.5 text-amber-400">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <StarIcon
-                          key={i}
-                          className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform duration-300"
-                        />
-                      ))}
-                    </div>
-                    <ChatBubbleBottomCenterTextIcon className="w-7 h-7 text-amber-500/40 group-hover:text-amber-400 transition-colors duration-300" />
-                  </div>
-
-                  <p className="text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
-                    {rev.highlight}
-                  </p>
-
-                  <p className="text-neutral-300 text-sm font-light leading-relaxed mb-6 italic group-hover:text-white transition-colors">
-                    "{rev.comment}"
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3.5 pt-5 border-t border-white/10">
-                  <div className="relative">
-                    <img
-                      src={rev.avatar}
-                      alt={rev.name}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-amber-400/50 group-hover:border-amber-400 group-hover:scale-105 transition-all duration-300"
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-amber-400 flex items-center justify-center text-neutral-950 text-[9px] font-bold">
-                      ✓
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
-                      {rev.name}
-                    </h4>
-                    <p className="text-xs text-amber-400 font-medium">{rev.role}</p>
-                  </div>
-                </div>
-              </SpotlightCard>
-            </ScrollReveal>
-          ))}
-        </div>
 
       </div>
     </section>

@@ -1,8 +1,4 @@
-﻿import { useState } from 'react';
-import Navbar from '../../components/user/layout/Navbar';
-import Footer from '../../components/user/layout/Footer';
-import QuickContact from '../../components/user/layout/QuickContact';
-
+import { useState } from 'react';
 import Hero from '../../components/user/sections/Hero';
 import Stats from '../../components/user/sections/Stats';
 import Pricing from '../../components/user/sections/Pricing';
@@ -31,27 +27,15 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white selection:bg-amber-400 selection:text-neutral-950 font-sans">
-      {/* Navigation */}
-      <Navbar onOpenBooking={handleOpenBooking} />
-
-      {/* Main Content */}
-      <main>
-        <Hero onOpenBooking={handleOpenBooking} />
-        <Stats />
-        <Pricing onSelectPackage={handleSelectPackage} />
-        <Gallery />
-        <BeforeAfter />
-        <AboutStudio />
-        <Reviews />
-        <Booking selectedPackage={selectedPackage} />
-      </main>
-
-      {/* Quick floating contact buttons */}
-      <QuickContact onOpenBooking={handleOpenBooking} />
-
-      {/* Footer */}
-      <Footer />
-    </div>
+    <>
+      <Hero onOpenBooking={handleOpenBooking} />
+      <Stats />
+      <Pricing onSelectPackage={handleSelectPackage} />
+      <Gallery />
+      <BeforeAfter />
+      <AboutStudio />
+      <Reviews />
+      <Booking selectedPackage={selectedPackage} />
+    </>
   );
 }

@@ -9,11 +9,12 @@ export const ROUTES = {
   // 1. Giao diện Người dùng / Khách hàng (User)
   USER: {
     HOME: '/',
+    PACKAGES: '/packages',
     BOOKING: '/#booking',
-    PRICING: '/#pricing',
+    PRICING: '/packages',
     GALLERY: '/#gallery',
-    ABOUT: '/#about',
-    REVIEWS: '/#reviews',
+    ABOUT: '/#studios',
+    REVIEWS: '/#testimonials',
   },
 
   // Tuyến đường Xác thực (Authentication)
