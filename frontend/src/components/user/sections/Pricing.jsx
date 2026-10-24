@@ -1,4 +1,5 @@
-﻿import {
+import { useState, useEffect } from 'react';
+import {
   CheckIcon,
   SparklesIcon,
   ClockIcon,
@@ -13,9 +14,11 @@
 } from '@heroicons/react/24/solid';
 import SpotlightCard from '../../cards/SpotlightCard';
 import ScrollReveal from '../../animations/ScrollReveal';
+import customerPackageService from '../../../services/user/packageService';
+import customerServiceService from '../../../services/user/serviceService';
 
 export default function Services({ onSelectPackage }) {
-  const packages = [
+  const DEFAULT_PACKAGES = [
     {
       id: 1,
       name: 'Gói Chụp Nàng Thơ / Cá Nhân',
@@ -78,7 +81,7 @@ export default function Services({ onSelectPackage }) {
     },
   ];
 
-  const additionalServices = [
+  const DEFAULT_ADDITIONAL_SERVICES = [
     {
       title: 'Makeup & Hair Chuyên Nghiệp',
       price: '300.000đ',
@@ -112,6 +115,70 @@ export default function Services({ onSelectPackage }) {
       bg: 'bg-emerald-500/15 border-emerald-500/30',
     },
   ];
+
+  const [packages, setPackages] = useState(DEFAULT_PACKAGES);
+  const [additionalServices, setAdditionalServices] = useState(DEFAULT_ADDITIONAL_SERVICES);
+
+  useEffect(() => {
+    // 1. Tải danh sách Gói chụp từ backend database
+    customerPackageService
+      .getAllPackages()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((pkg, idx) => {
+            const fallbackPkg = DEFAULT_PACKAGES[idx % DEFAULT_PACKAGES.length];
+            return {
+              id: pkg.id,
+              name: pkg.name || fallbackPkg.name,
+              category: pkg.category || fallbackPkg.category || 'Studio Package',
+              popular: idx === 1 || pkg.popular || false,
+              price: pkg.price ? Number(pkg.price).toLocaleString('vi-VN') : fallbackPkg.price,
+              duration: pkg.duration ? `${pkg.duration} phút` : fallbackPkg.duration,
+              image: pkg.imageUrl || fallbackPkg.image,
+              awardBadge: fallbackPkg.awardBadge,
+              badgeIcon: fallbackPkg.badgeIcon,
+              description: pkg.description || fallbackPkg.description,
+              features: Array.isArray(pkg.features) && pkg.features.length > 0 
+                ? pkg.features 
+                : fallbackPkg.features,
+              tag: fallbackPkg.tag,
+            };
+          });
+          setPackages(mapped);
+        }
+      })
+      .catch((err) => {
+        console.warn('[Pricing] Không thể kết nối API gói chụp, dùng dữ liệu mặc định:', err.message);
+      });
+
+    // 2. Tải danh sách dịch vụ bổ sung từ backend database
+    customerServiceService
+      .getAllServices()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const icons = [PaintBrushIcon, SparklesIcon, ShoppingBagIcon, ClockIcon];
+          const colors = ['text-rose-400', 'text-amber-400', 'text-sky-400', 'text-emerald-400'];
+          const bgs = [
+            'bg-rose-500/15 border-rose-500/30',
+            'bg-amber-500/15 border-amber-500/30',
+            'bg-sky-500/15 border-sky-500/30',
+            'bg-emerald-500/15 border-emerald-500/30',
+          ];
+          const mappedServices = data.map((srv, idx) => ({
+            title: srv.name || srv.title,
+            price: srv.price ? `${Number(srv.price).toLocaleString('vi-VN')}đ` : 'Liên hệ',
+            desc: srv.description || srv.desc || 'Dịch vụ chất lượng cao tại studio',
+            icon: icons[idx % icons.length],
+            color: colors[idx % colors.length],
+            bg: bgs[idx % bgs.length],
+          }));
+          setAdditionalServices(mappedServices);
+        }
+      })
+      .catch((err) => {
+        console.warn('[Pricing] Không thể kết nối API dịch vụ kèm theo:', err.message);
+      });
+  }, []);
 
   return (
     <section id="services" className="py-24 bg-neutral-950 relative overflow-hidden">

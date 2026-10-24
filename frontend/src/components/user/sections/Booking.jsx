@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   SparklesIcon,
   CalendarDaysIcon,
@@ -19,10 +19,14 @@ import {
 } from '@heroicons/react/24/solid';
 import ShinyText from '../../animations/ShinyText';
 import ScrollReveal from '../../animations/ScrollReveal';
+import customerPackageService from '../../../services/user/packageService';
+import customerRoomService from '../../../services/user/roomService';
+import customerBookingService from '../../../services/user/bookingService';
+import { customerAuth } from '../../../lib/axiosCustomer';
 
-const PACKAGE_OPTIONS = [
+const DEFAULT_PACKAGE_OPTIONS = [
   {
-    id: 'nang-tho',
+    id: 1,
     name: 'Gói Chụp Nàng Thơ / Cá Nhân',
     price: '990.000đ',
     badge: '990k',
@@ -32,7 +36,7 @@ const PACKAGE_OPTIONS = [
     iconBg: 'bg-rose-500/15 border-rose-500/30',
   },
   {
-    id: 'cuoi-studio',
+    id: 2,
     name: 'Gói Chụp Ảnh Cưới Studio',
     price: '2.990.000đ',
     badge: '2.990k',
@@ -42,7 +46,7 @@ const PACKAGE_OPTIONS = [
     iconBg: 'bg-amber-500/15 border-amber-500/30',
   },
   {
-    id: 'gia-dinh',
+    id: 3,
     name: 'Gói Chụp Gia Đình & Nhóm Bạn',
     price: '1.890.000đ',
     badge: '1.890k',
@@ -52,7 +56,7 @@ const PACKAGE_OPTIONS = [
     iconBg: 'bg-sky-500/15 border-sky-500/30',
   },
   {
-    id: 'thue-studio',
+    id: 4,
     name: 'Thuê Phòng Studio & Thiết Bị Riêng',
     price: '500.000đ / h',
     badge: 'Theo Giờ',
@@ -83,6 +87,10 @@ const formatDateDisplay = (dateStr) => {
 };
 
 export default function CTA({ selectedPackage }) {
+  const [packageOptions, setPackageOptions] = useState(DEFAULT_PACKAGE_OPTIONS);
+  const [rooms, setRooms] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -102,6 +110,45 @@ export default function CTA({ selectedPackage }) {
 
   const packageRef = useRef(null);
   const datePickerRef = useRef(null);
+
+  // Tải danh sách Gói chụp và Phòng từ database
+  useEffect(() => {
+    customerPackageService
+      .getAllPackages()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const icons = [HeartIcon, TrophyIcon, UserGroupIcon, CameraIcon];
+          const colors = ['text-rose-400', 'text-amber-400', 'text-sky-400', 'text-emerald-400'];
+          const bgs = [
+            'bg-rose-500/15 border-rose-500/30',
+            'bg-amber-500/15 border-amber-500/30',
+            'bg-sky-500/15 border-sky-500/30',
+            'bg-emerald-500/15 border-emerald-500/30',
+          ];
+          const mapped = data.map((pkg, idx) => ({
+            id: pkg.id,
+            name: pkg.name,
+            price: pkg.price ? `${Number(pkg.price).toLocaleString('vi-VN')}đ` : 'Liên hệ',
+            badge: pkg.duration ? `${pkg.duration}p` : 'Gói Chụp',
+            tag: idx === 1 ? 'Best Seller' : 'Phổ Biến',
+            icon: icons[idx % icons.length],
+            iconColor: colors[idx % colors.length],
+            iconBg: bgs[idx % bgs.length],
+          }));
+          setPackageOptions(mapped);
+        }
+      })
+      .catch((err) => {
+        console.warn('[Booking] Không thể tải gói chụp từ backend:', err.message);
+      });
+
+    customerRoomService
+      .getAllRooms()
+      .then((data) => {
+        if (Array.isArray(data)) setRooms(data);
+      })
+      .catch(() => {});
+  }, []);
 
   const [prevSelectedPkg, setPrevSelectedPkg] = useState(selectedPackage);
   if (selectedPackage !== prevSelectedPkg) {
@@ -183,7 +230,7 @@ export default function CTA({ selectedPackage }) {
     setIsDatePickerOpen(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) {
       alert('Vui lòng điền họ tên và số điện thoại liên hệ!');
@@ -198,7 +245,32 @@ export default function CTA({ selectedPackage }) {
         return;
       }
     }
-    setSubmitted(true);
+
+    setIsSubmitting(true);
+
+    const bookingDateStr = formData.date || `${today.getFullYear()}-${padZero(today.getMonth() + 1)}-${padZero(today.getDate())}`;
+    const selectedPkgObj = packageOptions.find((p) => p.name === formData.packageId);
+    const roomIdToUse = rooms.length > 0 ? rooms[0].id : 1;
+    const currentCustomer = customerAuth.getUser();
+
+    const payload = {
+      customerId: currentCustomer?.id || 1,
+      roomId: roomIdToUse,
+      bookingDate: `${bookingDateStr}T09:00:00`,
+      startTime: '09:00:00',
+      endTime: '11:00:00',
+      status: 'pending',
+      customerNote: `Khách: ${formData.name} - SĐT: ${formData.phone} - Gói: ${formData.packageId}${formData.note ? ` - ${formData.note}` : ''}`,
+    };
+
+    try {
+      await customerBookingService.createBooking(payload);
+    } catch (err) {
+      console.warn('[Booking] Lỗi gửi đơn đặt lịch tới database:', err.message);
+    } finally {
+      setIsSubmitting(false);
+      setSubmitted(true);
+    }
   };
 
   return (
@@ -266,7 +338,7 @@ export default function CTA({ selectedPackage }) {
         {/* Booking Consultation Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
-          {/* Left Column: Studio Information with 3 High-Visibility Interactive Cards */}
+          {/* Left Column: Studio Information */}
           <div className="lg:col-span-5 space-y-6">
             <ScrollReveal direction="right" delay={0.1}>
               <div>
@@ -283,7 +355,7 @@ export default function CTA({ selectedPackage }) {
               </p>
             </ScrollReveal>
 
-            {/* 3 Bright, Highly-Visible Interactive Info Cards */}
+            {/* 3 Bright Interactive Info Cards */}
             <div className="space-y-4 pt-4">
               
               {/* Card 1: Giờ làm việc */}
@@ -358,7 +430,7 @@ export default function CTA({ selectedPackage }) {
             </div>
           </div>
 
-          {/* Right Column: High-Contrast Glass Form with ScrollReveal */}
+          {/* Right Column: Form with ScrollReveal */}
           <div className="lg:col-span-7">
             <ScrollReveal direction="left" delay={0.2}>
               <div className="relative rounded-3xl border border-white/20 bg-neutral-900/85 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl">
@@ -374,7 +446,7 @@ export default function CTA({ selectedPackage }) {
                     <button
                       onClick={() => {
                         setSubmitted(false);
-                        setFormData({ name: '', phone: '', packageId: 'Gói Chụp Ảnh Cưới Studio', date: '', note: '' });
+                        setFormData({ name: '', phone: '', packageId: packageOptions[0]?.name || 'Gói Chụp Ảnh Cưới Studio', date: '', note: '' });
                       }}
                       className="cursor-pointer mt-4 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all"
                     >
@@ -433,12 +505,12 @@ export default function CTA({ selectedPackage }) {
                         >
                           <div className="flex items-center gap-2.5 truncate">
                             {(() => {
-                              const curr = PACKAGE_OPTIONS.find((pkg) => pkg.name === formData.packageId) || PACKAGE_OPTIONS[1];
-                              const CurrIcon = curr.icon;
+                              const curr = packageOptions.find((pkg) => pkg.name === formData.packageId) || packageOptions[0];
+                              const CurrIcon = curr.icon || SparklesIcon;
                               return (
                                 <>
-                                  <div className={`w-8 h-8 rounded-lg ${curr.iconBg} border flex items-center justify-center shrink-0`}>
-                                    <CurrIcon className={`w-4 h-4 ${curr.iconColor}`} />
+                                  <div className={`w-8 h-8 rounded-lg ${curr.iconBg || 'bg-amber-500/20'} border flex items-center justify-center shrink-0`}>
+                                    <CurrIcon className={`w-4 h-4 ${curr.iconColor || 'text-amber-400'}`} />
                                   </div>
                                   <div className="truncate">
                                     <span className="block text-white font-semibold text-xs sm:text-sm truncate">
@@ -452,24 +524,14 @@ export default function CTA({ selectedPackage }) {
                               );
                             })()}
                           </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                            <ChevronDownIcon
-                              className={`w-4 h-4 text-amber-400 transition-transform duration-300 ${
-                                isPackageOpen ? 'transform rotate-180' : ''
-                              }`}
-                            />
-                          </div>
+                          <ChevronDownIcon className={`w-4 h-4 text-neutral-400 transition-transform duration-300 shrink-0 ml-2 ${isPackageOpen ? 'rotate-180 text-amber-400' : ''}`} />
                         </button>
 
-                        {/* Dropdown Menu Popover */}
+                        {/* Dropdown Menu */}
                         {isPackageOpen && (
-                          <div className="absolute top-full left-0 right-0 mt-2 z-40 rounded-2xl border border-amber-500/40 bg-neutral-900/98 backdrop-blur-2xl shadow-2xl shadow-black/80 overflow-hidden p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                            <div className="px-3 py-1 text-[10px] uppercase font-bold text-neutral-400 tracking-wider">
-                              Chọn gói chụp tại Studio
-                            </div>
-                            {PACKAGE_OPTIONS.map((pkg) => {
-                              const IconComponent = pkg.icon;
+                          <div className="absolute top-full left-0 right-0 mt-2 z-30 rounded-2xl border border-amber-500/40 bg-neutral-900/98 backdrop-blur-2xl shadow-2xl shadow-black/80 overflow-hidden p-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                            {packageOptions.map((pkg) => {
+                              const PkgIcon = pkg.icon || SparklesIcon;
                               const isSelected = formData.packageId === pkg.name;
                               return (
                                 <button
@@ -481,33 +543,25 @@ export default function CTA({ selectedPackage }) {
                                   }}
                                   className={`cursor-pointer w-full p-2.5 rounded-xl flex items-center justify-between text-left transition-all duration-200 ${
                                     isSelected
-                                      ? 'bg-amber-500/20 border border-amber-500/40 text-white shadow-md'
-                                      : 'hover:bg-neutral-800/90 hover:border-white/10 border border-transparent text-neutral-300'
+                                      ? 'bg-amber-500/20 border border-amber-500/40'
+                                      : 'hover:bg-neutral-800/80'
                                   }`}
                                 >
-                                  <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg ${pkg.iconBg} border flex items-center justify-center shrink-0`}>
-                                      <IconComponent className={`w-4 h-4 ${pkg.iconColor}`} />
+                                  <div className="flex items-center gap-3 truncate">
+                                    <div className={`w-8 h-8 rounded-lg ${pkg.iconBg || 'bg-amber-500/20'} border flex items-center justify-center shrink-0`}>
+                                      <PkgIcon className={`w-4 h-4 ${pkg.iconColor || 'text-amber-400'}`} />
                                     </div>
-                                    <div>
-                                      <div className="flex items-center gap-1.5">
-                                        <span className={`text-xs sm:text-sm font-bold ${isSelected ? 'text-amber-300' : 'text-white'}`}>
-                                          {pkg.name}
-                                        </span>
-                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-neutral-300">
-                                          {pkg.badge}
-                                        </span>
-                                      </div>
-                                      <span className="text-xs font-extrabold text-amber-400">
+                                    <div className="truncate">
+                                      <span className="text-white font-semibold text-xs sm:text-sm block truncate">
+                                        {pkg.name}
+                                      </span>
+                                      <span className="text-[11px] text-neutral-400">
                                         {pkg.price}
                                       </span>
                                     </div>
                                   </div>
-
                                   {isSelected && (
-                                    <div className="w-5 h-5 rounded-full bg-amber-400 text-neutral-950 flex items-center justify-center shrink-0 shadow-sm ml-2">
-                                      <CheckIcon className="w-3.5 h-3.5 text-neutral-950 stroke-[3]" />
-                                    </div>
+                                    <CheckIcon className="w-4 h-4 text-amber-400 shrink-0 stroke-[3]" />
                                   )}
                                 </button>
                               );
@@ -516,10 +570,10 @@ export default function CTA({ selectedPackage }) {
                         )}
                       </div>
 
-                      {/* Custom Datepicker Popover */}
+                      {/* Custom Calendar Dropdown */}
                       <div className="relative" ref={datePickerRef}>
                         <label className="block text-xs font-bold text-neutral-200 mb-2">
-                          Ngày Dự Kiến Chụp *
+                          Ngày Chụp Dự Kiến
                         </label>
                         <button
                           type="button"
@@ -534,21 +588,17 @@ export default function CTA({ selectedPackage }) {
                           }`}
                         >
                           <div className="flex items-center gap-2.5 truncate">
-                            <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
                               <CalendarDaysIcon className="w-4 h-4 text-amber-400" />
                             </div>
-                            <span className={`truncate text-xs sm:text-sm ${formData.date ? 'text-white font-semibold' : 'text-neutral-400 font-light'}`}>
-                              {formData.date ? formatDateDisplay(formData.date) : 'Chọn ngày chụp (từ hôm nay)...'}
+                            <span className={formData.date ? 'text-white font-semibold text-xs sm:text-sm' : 'text-neutral-500 text-xs sm:text-sm'}>
+                              {formData.date ? formatDateDisplay(formData.date) : 'Chọn ngày chụp mong muốn'}
                             </span>
                           </div>
-                          <ChevronDownIcon
-                            className={`w-4 h-4 text-amber-400 transition-transform duration-300 shrink-0 ml-2 ${
-                              isDatePickerOpen ? 'transform rotate-180' : ''
-                            }`}
-                          />
+                          <ChevronDownIcon className={`w-4 h-4 text-neutral-400 transition-transform duration-300 shrink-0 ml-2 ${isDatePickerOpen ? 'rotate-180 text-amber-400' : ''}`} />
                         </button>
 
-                        {/* Custom Studio Calendar Popover */}
+                        {/* Calendar Popover */}
                         {isDatePickerOpen && (
                           <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-2 z-40 w-full sm:w-[320px] rounded-2xl border border-amber-500/40 bg-neutral-900/98 backdrop-blur-2xl shadow-2xl shadow-black/90 p-4 animate-in fade-in slide-in-from-top-2 duration-200">
                             
@@ -559,7 +609,7 @@ export default function CTA({ selectedPackage }) {
                                   {MONTH_NAMES[currentMonth]} {currentYear}
                                 </span>
                                 <span className="text-[10px] text-amber-400 font-medium">
-                                  🔒 Rào chặn: Chỉ chọn từ hôm nay
+                                  🔒 Chọn từ hôm nay trở đi
                                 </span>
                               </div>
 
@@ -605,7 +655,6 @@ export default function CTA({ selectedPackage }) {
 
                             {/* Days Grid */}
                             <div className="grid grid-cols-7 gap-1 text-center mb-3">
-                              {/* Leading empty spaces */}
                               {(() => {
                                 const daysInCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
                                 const firstDayRaw = new Date(currentYear, currentMonth, 1).getDay();
@@ -648,13 +697,10 @@ export default function CTA({ selectedPackage }) {
                                             ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 font-extrabold shadow-lg shadow-amber-500/40 scale-105'
                                             : isToday
                                             ? 'border border-amber-400 text-amber-300 hover:bg-amber-400/20'
-                                            : 'text-neutral-200 hover:bg-amber-500/20 hover:text-amber-300 hover:scale-105'
+                                            : 'text-neutral-200 hover:bg-neutral-800 hover:text-white'
                                         }`}
                                       >
                                         {dayNum}
-                                        {isToday && !isSelected && (
-                                          <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-amber-400" />
-                                        )}
                                       </button>
                                     );
                                   }
@@ -664,7 +710,7 @@ export default function CTA({ selectedPackage }) {
                             </div>
 
                             {/* Quick Select Buttons */}
-                            <div className="pt-2.5 border-t border-white/10 flex items-center justify-between gap-1.5 text-[11px]">
+                            <div className="pt-2 border-t border-white/10 flex items-center gap-1.5 text-xs">
                               <button
                                 type="button"
                                 onClick={handleSelectToday}
@@ -708,10 +754,11 @@ export default function CTA({ selectedPackage }) {
 
                     <button
                       type="submit"
-                      className="cursor-pointer w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 font-extrabold text-base shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5"
+                      disabled={isSubmitting}
+                      className="cursor-pointer w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 font-extrabold text-base shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2.5 disabled:opacity-50"
                     >
                       <PaperAirplaneIcon className="w-4 h-4 text-white" />
-                      <span>Xác Nhận Đặt Lịch & Nhận Ưu Đãi 20%</span>
+                      <span>{isSubmitting ? 'Đang Gửi Đơn Đặt...' : 'Xác Nhận Đặt Lịch & Nhận Ưu Đãi 20%'}</span>
                     </button>
 
                     <p className="text-[11px] text-center text-neutral-400 font-light">

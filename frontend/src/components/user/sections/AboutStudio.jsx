@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   CubeIcon,
   CheckIcon,
@@ -11,13 +11,12 @@ import {
 } from '@heroicons/react/24/solid';
 import SpotlightCard from '../../cards/SpotlightCard';
 import ScrollReveal from '../../animations/ScrollReveal';
+import customerRoomService from '../../../services/user/roomService';
 
 export default function StudioExperience() {
-  const [activeRoomIndex, setActiveRoomIndex] = useState(0);
-
-  const rooms = [
+  const DEFAULT_ROOMS = [
     {
-      id: 'studio-a',
+      id: 1,
       name: 'Phòng Studio A - Tone Pastel Hàn Quốc',
       tag: 'Beauty & Profile Nàng Thơ',
       image: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80',
@@ -33,7 +32,7 @@ export default function StudioExperience() {
       gear: 'Sony A7 IV + 85mm F1.4 GM',
     },
     {
-      id: 'studio-b',
+      id: 2,
       name: 'Phòng Studio B - Concept Cổ Điển & Cưới',
       tag: 'Vintage & Luxury Wedding',
       image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80',
@@ -49,7 +48,7 @@ export default function StudioExperience() {
       gear: 'Canon EOS R5 + 24-70mm F2.8L II',
     },
     {
-      id: 'studio-vip',
+      id: 3,
       name: 'Phòng Studio VIP - Cinema & Đa Năng',
       tag: 'High-End Commercial & Family',
       image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80',
@@ -66,7 +65,37 @@ export default function StudioExperience() {
     },
   ];
 
-  const currentRoom = rooms[activeRoomIndex];
+  const [rooms, setRooms] = useState(DEFAULT_ROOMS);
+  const [activeRoomIndex, setActiveRoomIndex] = useState(0);
+
+  useEffect(() => {
+    customerRoomService
+      .getAllRooms()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((room, idx) => {
+            const fallback = DEFAULT_ROOMS[idx % DEFAULT_ROOMS.length];
+            return {
+              id: room.id,
+              name: room.name || fallback.name,
+              tag: room.status === 'available' ? 'Sẵn sàng phục vụ' : (fallback.tag || 'Studio Room'),
+              image: room.imageUrl || fallback.image,
+              description: room.description || fallback.description,
+              capacity: room.capacity ? `Sức chứa tối đa: ${room.capacity} người` : fallback.capacity,
+              area: fallback.area,
+              highlights: fallback.highlights,
+              gear: fallback.gear,
+            };
+          });
+          setRooms(mapped);
+        }
+      })
+      .catch((err) => {
+        console.warn('[AboutStudio] Không thể kết nối API phòng studio, hiển thị dữ liệu mẫu:', err.message);
+      });
+  }, []);
+
+  const currentRoom = rooms[activeRoomIndex] || rooms[0] || DEFAULT_ROOMS[0];
 
   return (
     <section id="studios" className="py-24 bg-neutral-950 border-t border-white/10 relative overflow-hidden">
@@ -87,7 +116,7 @@ export default function StudioExperience() {
               Không Gian Sáng Tạo Không Giới Hạn
             </h2>
             <p className="text-neutral-400 text-base sm:text-lg font-light leading-relaxed">
-              Hệ thống 3 phòng studio chuyên biệt được thiết kế bài bản về ánh sáng, âm học và điều hòa nhiệt độ mát mẻ tối đa cho buổi chụp trọn vẹn cảm xúc.
+              Hệ thống các phòng studio chuyên biệt được thiết kế bài bản về ánh sáng, âm học và điều hòa nhiệt độ mát mẻ tối đa cho buổi chụp trọn vẹn cảm xúc.
             </p>
           </div>
         </ScrollReveal>
