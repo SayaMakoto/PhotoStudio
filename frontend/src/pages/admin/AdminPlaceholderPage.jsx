@@ -1,7 +1,6 @@
-import React from 'react';
-import { Sparkles, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { ROUTES } from '../../routes/web';
+import { Sparkles, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ROUTES } from "../../routes/web";
 
 export default function AdminPlaceholderPage({ title, description, category }) {
   return (
@@ -9,7 +8,10 @@ export default function AdminPlaceholderPage({ title, description, category }) {
       {/* Breadcrumb / Title */}
       <div>
         <div className="flex items-center gap-2 text-xs text-neutral-400">
-          <Link to={ROUTES.ADMIN.DASHBOARD} className="hover:text-amber-400 transition-colors">
+          <Link
+            to={ROUTES.ADMIN.DASHBOARD}
+            className="hover:text-amber-400 transition-colors"
+          >
             Trang chủ Admin
           </Link>
           <span>/</span>
@@ -23,7 +25,8 @@ export default function AdminPlaceholderPage({ title, description, category }) {
         </div>
         <h1 className="mt-2 text-2xl font-bold text-white">{title}</h1>
         <p className="mt-1 text-xs text-neutral-400">
-          {description || 'Khu vực quản lý và cấu hình dữ liệu dành cho quản trị viên.'}
+          {description ||
+            "Khu vực quản lý và cấu hình dữ liệu dành cho quản trị viên."}
         </p>
       </div>
 
@@ -34,7 +37,9 @@ export default function AdminPlaceholderPage({ title, description, category }) {
         </div>
         <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
         <p className="text-sm text-neutral-400 max-w-lg mx-auto mb-6">
-          Chức năng <strong>{title}</strong> đã được thiết lập tuyến đường dẫn (Route) sẵn sàng. Bạn có thể kết nối thêm các bảng dữ liệu hoặc API tương ứng tại đây.
+          Chức năng <strong>{title}</strong> đã được thiết lập tuyến đường dẫn
+          (Route) sẵn sàng. Bạn có thể kết nối thêm các bảng dữ liệu hoặc API
+          tương ứng tại đây.
         </p>
         <Link
           to={ROUTES.ADMIN.DASHBOARD}

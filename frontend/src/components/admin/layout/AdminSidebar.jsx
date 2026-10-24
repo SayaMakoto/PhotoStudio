@@ -1,109 +1,7 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { ROUTES } from '../../../routes/web';
-import {
-  LayoutDashboard,
-  Users,
-  UserCheck,
-  Camera,
-  Layers,
-  DoorOpen,
-  Shirt,
-  Sparkles,
-  Scissors,
-  Package,
-  CalendarCheck2,
-  CreditCard,
-  Star,
-  UserRoundCheck,
-  Image,
-  Bell,
-  FileText,
-  SlidersHorizontal,
-  Mail,
-  ChevronDown,
-  Building2,
-  X
-} from 'lucide-react';
-
-export const ADMIN_MENU_CONFIG = [
-  {
-    id: 'dashboard',
-    title: 'Trang chủ admin',
-    icon: LayoutDashboard,
-    path: ROUTES.ADMIN.DASHBOARD,
-  },
-  {
-    id: 'accounts',
-    title: 'Quản lý tài khoản',
-    icon: Users,
-    children: [
-      { id: 'users', title: 'Quản lý người dùng', subkey: 'users', icon: Users, path: ROUTES.ADMIN.ACCOUNTS.USERS },
-      { id: 'employees', title: 'Quản lý nhân viên', subkey: 'employees', icon: UserCheck, path: ROUTES.ADMIN.ACCOUNTS.EMPLOYEES },
-    ],
-  },
-  {
-    id: 'resources',
-    title: 'Quản lý tài nguyên',
-    icon: Layers,
-    children: [
-      { id: 'equipments', title: 'Quản lý thiết bị', subkey: 'equipments', icon: Camera, path: ROUTES.ADMIN.RESOURCES.EQUIPMENTS },
-      { id: 'backgrounds', title: 'Quản lý bối cảnh', subkey: 'backgrounds', icon: Image, path: ROUTES.ADMIN.RESOURCES.BACKGROUNDS },
-      { id: 'rooms', title: 'Quản lý phòng chụp', subkey: 'rooms', icon: DoorOpen, path: ROUTES.ADMIN.RESOURCES.ROOMS },
-      { id: 'clothes', title: 'Quản lý trang phục', subkey: 'clothes', icon: Shirt, path: ROUTES.ADMIN.RESOURCES.CLOTHES },
-      { id: 'accessories', title: 'Quản lý phụ kiện', subkey: 'accessories', icon: Sparkles, path: ROUTES.ADMIN.RESOURCES.ACCESSORIES },
-    ],
-  },
-  {
-    id: 'services_packages',
-    title: 'Quản lý dịch vụ & gói chụp',
-    icon: Package,
-    children: [
-      { id: 'services', title: 'Quản lý dịch vụ', subkey: 'services', icon: Scissors, path: ROUTES.ADMIN.SERVICES_PACKAGES.SERVICES },
-      { id: 'packages', title: 'Quản lý gói chụp', subkey: 'packages', icon: Package, path: ROUTES.ADMIN.SERVICES_PACKAGES.PACKAGES },
-    ],
-  },
-  {
-    id: 'bookings',
-    title: 'Quản lý đơn đặt lịch',
-    icon: CalendarCheck2,
-    path: ROUTES.ADMIN.BOOKINGS,
-    badge: '12 Mới',
-  },
-  {
-    id: 'payments',
-    title: 'Quản lý thanh toán',
-    icon: CreditCard,
-    path: ROUTES.ADMIN.PAYMENTS,
-  },
-  {
-    id: 'reviews_group',
-    title: 'Quản lý đánh giá',
-    icon: Star,
-    children: [
-      { id: 'reviews', title: 'Đánh giá buổi chụp', subkey: 'reviews', icon: Star, path: ROUTES.ADMIN.REVIEWS.REVIEWS },
-      { id: 'employee_reviews', title: 'Đánh giá nhân viên', subkey: 'employee_reviews', icon: UserRoundCheck, path: ROUTES.ADMIN.REVIEWS.EMPLOYEE_REVIEWS },
-    ],
-  },
-  {
-    id: 'system',
-    title: 'Quản lý hệ thống',
-    icon: SlidersHorizontal,
-    children: [
-      { id: 'banners', title: 'Quản lý banner', subkey: 'banners', icon: Image, path: ROUTES.ADMIN.SYSTEM.BANNERS },
-      { id: 'notifications', title: 'Quản lý thông báo', subkey: 'notifications', icon: Bell, path: ROUTES.ADMIN.SYSTEM.NOTIFICATIONS },
-      { id: 'images', title: 'Quản lý hình ảnh', subkey: 'images', icon: Image, path: ROUTES.ADMIN.SYSTEM.IMAGES },
-      { id: 'contents', title: 'Quản lý nội dung', subkey: 'contents', icon: FileText, path: ROUTES.ADMIN.SYSTEM.CONTENTS },
-    ],
-  },
-  {
-    id: 'contacts',
-    title: 'Quản lý liên hệ',
-    icon: Mail,
-    path: ROUTES.ADMIN.CONTACTS,
-    badge: '3',
-  },
-];
+import { NavLink, useLocation } from "react-router-dom";
+import { ROUTES } from "../../../routes/web";
+import { ChevronDown, Building2, X } from "lucide-react";
+import { ADMIN_MENU_CONFIG } from "./adminMenuConfig";
 
 export default function AdminSidebar({
   openGroup,
@@ -131,7 +29,7 @@ export default function AdminSidebar({
       {/* Sidebar container */}
       <aside
         className={`fixed top-0 bottom-0 left-0 z-50 flex w-76 flex-col border-r border-neutral-800 bg-neutral-950/95 text-neutral-300 backdrop-blur-xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+          isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand / Logo */}
@@ -146,9 +44,14 @@ export default function AdminSidebar({
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
-                PhotoStudio <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 border border-amber-500/30">ADMIN</span>
+                PhotoStudio{" "}
+                <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 border border-amber-500/30">
+                  ADMIN
+                </span>
               </h1>
-              <p className="text-xs text-neutral-400">Hệ thống quản trị studio</p>
+              <p className="text-xs text-neutral-400">
+                Hệ thống quản trị studio
+              </p>
             </div>
           </NavLink>
           <button
@@ -166,7 +69,9 @@ export default function AdminSidebar({
           </div>
 
           {ADMIN_MENU_CONFIG.map((item) => {
-            const hasChildren = Boolean(item.children && item.children.length > 0);
+            const hasChildren = Boolean(
+              item.children && item.children.length > 0,
+            );
             const isGroupOpen = openGroup === item.id;
             const Icon = item.icon;
 
@@ -180,8 +85,8 @@ export default function AdminSidebar({
                   onClick={onCloseMobile}
                   className={`group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200 ${
                     isDirectActive
-                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-500/5 text-amber-300 font-semibold shadow-inner border border-amber-500/30'
-                      : 'text-neutral-300 hover:bg-neutral-900 hover:text-white'
+                      ? "bg-gradient-to-r from-amber-500/20 to-amber-500/5 text-amber-300 shadow-inner border border-amber-500/30"
+                      : "text-neutral-300 hover:bg-neutral-900 hover:text-white"
                   }`}
                 >
                   {isDirectActive && (
@@ -190,10 +95,14 @@ export default function AdminSidebar({
                   <div className="flex items-center gap-2.5 min-w-0 pr-2">
                     <Icon
                       className={`h-4 w-4 shrink-0 transition-colors ${
-                        isDirectActive ? 'text-amber-400' : 'text-neutral-400 group-hover:text-amber-400'
+                        isDirectActive
+                          ? "text-amber-400"
+                          : "text-neutral-400 group-hover:text-amber-400"
                       }`}
                     />
-                    <span className="whitespace-nowrap font-medium">{item.title}</span>
+                    <span className="whitespace-nowrap text-xs font-medium">
+                      {item.title}
+                    </span>
                   </div>
                   {item.badge && (
                     <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-medium text-amber-300 border border-amber-500/30">
@@ -204,7 +113,9 @@ export default function AdminSidebar({
               );
             }
 
-            const isChildActive = hasChildren && item.children.some((child) => child.path === currentPath);
+            const isChildActive =
+              hasChildren &&
+              item.children.some((child) => child.path === currentPath);
 
             return (
               <div key={item.id} className="rounded-xl transition-all">
@@ -214,21 +125,25 @@ export default function AdminSidebar({
                   onClick={() => handleGroupClick(item.id)}
                   className={`group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200 ${
                     isChildActive
-                      ? 'bg-neutral-900 text-white font-semibold'
-                      : 'text-neutral-300 hover:bg-neutral-900/80 hover:text-white'
+                      ? "bg-neutral-900 text-white"
+                      : "text-neutral-300 hover:bg-neutral-900/80 hover:text-white"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 pr-2">
                     <Icon
                       className={`h-4 w-4 shrink-0 transition-colors ${
-                        isChildActive ? 'text-amber-400' : 'text-neutral-400 group-hover:text-amber-400'
+                        isChildActive
+                          ? "text-amber-400"
+                          : "text-neutral-400 group-hover:text-amber-400"
                       }`}
                     />
-                    <span className="whitespace-nowrap">{item.title}</span>
+                    <span className="whitespace-nowrap text-xs font-medium">
+                      {item.title}
+                    </span>
                   </div>
                   <ChevronDown
                     className={`h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform duration-200 ${
-                      isGroupOpen ? 'rotate-180 text-amber-400' : ''
+                      isGroupOpen ? "rotate-180 text-amber-400" : ""
                     }`}
                   />
                 </button>
@@ -245,10 +160,10 @@ export default function AdminSidebar({
                           key={subItem.id}
                           to={subItem.path}
                           onClick={onCloseMobile}
-                          className={`group relative flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[11.5px] font-medium transition-all duration-200 ${
+                          className={`group relative flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium transition-all duration-200 ${
                             isSubActive
-                              ? 'bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/30 shadow-sm'
-                              : 'text-neutral-400 hover:bg-neutral-900 hover:text-white'
+                              ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
+                              : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
                           }`}
                         >
                           {isSubActive && (
@@ -256,10 +171,14 @@ export default function AdminSidebar({
                           )}
                           <SubIcon
                             className={`h-3.5 w-3.5 shrink-0 transition-colors ${
-                              isSubActive ? 'text-amber-400' : 'text-neutral-400 group-hover:text-amber-300'
+                              isSubActive
+                                ? "text-amber-400"
+                                : "text-neutral-400 group-hover:text-amber-300"
                             }`}
                           />
-                          <span className="whitespace-nowrap">{subItem.title}</span>
+                          <span className="whitespace-nowrap text-xs font-medium">
+                            {subItem.title}
+                          </span>
                         </NavLink>
                       );
                     })}
@@ -280,8 +199,12 @@ export default function AdminSidebar({
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-900 bg-emerald-500" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="truncate text-xs font-semibold text-white">Quản Trị Viên</p>
-              <p className="truncate text-[11px] text-neutral-400">admin@photostudio.vn</p>
+              <p className="truncate text-xs font-semibold text-white">
+                Quản Trị Viên
+              </p>
+              <p className="truncate text-[11px] text-neutral-400">
+                admin@photostudio.vn
+              </p>
             </div>
           </div>
         </div>
