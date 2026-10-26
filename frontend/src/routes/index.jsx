@@ -15,8 +15,10 @@ import EmployeeLoginPage from '../pages/auth/EmployeeLoginPage';
 
 // Admin & Employee Pages
 import AdminLayout from '../components/admin/layout/AdminLayout';
+import AdminRoute from '../components/admin/layout/AdminRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
+import AdminUsersPage from '../pages/admin/users';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -44,6 +46,7 @@ export default function AppRoutes() {
       <Route path={ROUTES.EMPLOYEE.DASHBOARD} element={<EmployeeDashboard />} />
 
       {/* 3. Tuyến đường Quản trị (Admin) */}
+      <Route element={<AdminRoute />}>
       <Route path={ROUTES.ADMIN.DASHBOARD} element={<AdminLayout />}>
         {/* Trang chủ thống kê Admin */}
         <Route index element={<AdminDashboard />} />
@@ -51,13 +54,7 @@ export default function AppRoutes() {
         {/* Quản lý tài khoản */}
         <Route
           path={ROUTES.ADMIN.ACCOUNTS.USERS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Người Dùng (Users)"
-              category="Quản lý tài khoản"
-              description="Danh sách tài khoản khách hàng, lịch sử đặt lịch và quyền hạn."
-            />
-          }
+          element={<AdminUsersPage />}
         />
         <Route
           path={ROUTES.ADMIN.ACCOUNTS.EMPLOYEES.replace('/admin/', '')}
@@ -241,6 +238,7 @@ export default function AppRoutes() {
             />
           }
         />
+      </Route>
       </Route>
 
       {/* Điều hướng mặc định */}

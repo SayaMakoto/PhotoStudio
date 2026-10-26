@@ -135,15 +135,18 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = findEntity(id);
+        boolean isLockingActiveAccount =
+                user.getStatus() == UserStatus.active && userStatus == UserStatus.banned;
+        boolean isUnlockingBannedAccount =
+                user.getStatus() == UserStatus.banned && userStatus == UserStatus.active;
+        if (!isLockingActiveAccount && !isUnlockingBannedAccount) {
+            throw new IllegalArgumentException(
+                    "Chỉ được chuyển tài khoản giữa đang hoạt động và đã khóa"
+            );
+        }
         user.setStatus(userStatus);
         User saved = userRepository.save(user);
         return UserMapper.toResponse(saved);
-    }
-
-    @Override
-    public void delete(Long id) {
-        User user = findEntity(id);
-        userRepository.delete(user);
     }
 
     @Override
@@ -253,12 +256,6 @@ public class UserServiceImpl implements UserService {
         }
 
         return userRepository.save(user);
-    }
-
-    @Override
-    public void deleteUser(Long id) {
-        User user = findEntity(id);
-        userRepository.delete(user);
     }
 
     @Override

@@ -13,14 +13,8 @@ export const adminUserService = {
   // Tạo tài khoản mới (Customer, Employee, Admin)
   create: (data) => axiosAdmin.post('/api/users', data),
 
-  // Cập nhật thông tin người dùng
-  update: (id, data) => axiosAdmin.put(`/api/users/${id}`, data),
-
   // Cập nhật trạng thái người dùng (active, inactive, banned)
   updateStatus: (id, status) => axiosAdmin.patch(`/api/users/${id}/status`, { status }),
-
-  // Xóa người dùng theo ID
-  delete: (id) => axiosAdmin.delete(`/api/users/${id}`),
 
   // Tìm kiếm theo tên
   searchByName: (keyword) =>

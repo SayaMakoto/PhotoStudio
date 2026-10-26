@@ -1,3 +1,7 @@
+-- FILE HỢP NHẤT: schema + seed data + dữ liệu gói chụp mẫu.
+-- CẢNH BÁO: Script sẽ DROP và tạo lại các bảng trong database photo_studio, làm mất dữ liệu hiện có.
+-- Tài khoản mẫu: admin / 123456 (hoặc admin@photostudio.com / 123456).
+
 -- =====================================================================
 -- DATABASE SCHEMA: PhotoStudio Management System
 -- Source: docs/csdl.xlsx
@@ -412,3 +416,316 @@ CREATE TABLE `contacts` (
 -- =====================================================================
 -- KẾT THÚC CẤU TRÚC CƠ SỞ DỮ LIỆU
 -- =====================================================================
+
+
+-- =====================================================================
+-- DỮ LIỆU MẪU CƠ BẢN
+-- =====================================================================
+-- =====================================================================
+-- SEED DATA: Dữ liệu mẫu khởi tạo cho hệ thống PhotoStudio
+-- File: docs/seed_data.sql
+-- Database: photo_studio
+-- =====================================================================
+
+USE `photo_studio`;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 1. Thêm tài khoản người dùng (users)
+-- Tài khoản mẫu dùng mật khẩu mặc định: '123456'
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `fullname`, `date_of_birth`, `gender`, `address`, `phone`, `avatar`, `role`, `status`) VALUES
+(1, 'admin', 'admin@photostudio.com', '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.', 'Quản Trị Viên', '1990-01-01', 'Male', 'Hà Nội', '0901234567', '/avatars/admin.jpg', 'Admin', 'active'),
+(2, 'photographer1', 'hoanganh@photostudio.com', '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.', 'Nguyễn Hoàng Anh', '1995-05-15', 'Male', 'Hà Nội', '0912345678', '/avatars/emp1.jpg', 'Employee', 'active'),
+(3, 'makeup1', 'thuytien@photostudio.com', '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.', 'Trần Thủy Tiên', '1998-08-20', 'Female', 'Hà Nội', '0923456789', '/avatars/emp2.jpg', 'Employee', 'active'),
+(4, 'customer1', 'minhtuan@gmail.com', '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.', 'Lê Minh Tuấn', '2000-03-10', 'Male', 'Cầu Giấy, Hà Nội', '0934567890', '/avatars/cust1.jpg', 'Customer', 'active'),
+(5, 'customer2', 'phuonglinh@gmail.com', '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.', 'Phạm Phương Linh', '2001-11-25', 'Female', 'Đống Đa, Hà Nội', '0945678901', '/avatars/cust2.jpg', 'Customer', 'active');
+
+-- 2. Thêm hồ sơ nhân viên (employees)
+INSERT INTO `employees` (`id`, `user_id`, `position`, `hire_date`, `status`) VALUES
+(1, 2, 'photographer', '2023-01-15', 'active'),
+(2, 3, 'makeup', '2023-03-01', 'active');
+
+-- 3. Thêm phòng chụp (rooms)
+INSERT INTO `rooms` (`id`, `name`, `description`, `capacity`, `status`) VALUES
+(1, 'Phòng Studio A - Phong cách Hàn Quốc', 'Phòng chụp tone sáng, phù hợp ảnh chân dung, beauty, thời trang trẻ trung', 5, 'active'),
+(2, 'Phòng Studio B - Concept Cổ Điển & Cưới', 'Phòng chụp diện tích lớn, trần cao, phù hợp chụp ảnh cưới, gia đình', 10, 'active'),
+(3, 'Phòng Studio VIP - Không gian đa năng', 'Phòng trang bị hệ thống ánh sáng cinema và phông màu tự động', 8, 'active');
+
+-- 4. Thêm bối cảnh chụp (backgrounds)
+INSERT INTO `backgrounds` (`id`, `name`, `description`, `status`) VALUES
+(1, 'Phông Trơn Màu Pastel', 'Bối cảnh phông trơn tối giản phong cách Hàn Quốc', 'active'),
+(2, 'Góc Phố Cổ Vintage', 'Bối cảnh hoài niệm với đèn vàng, bàn gỗ cổ và sách cũ', 'active'),
+(3, 'Cung Điện Hoàng Gia', 'Bối cảnh trang trọng với hoa tươi, cột cổ điển và rèm lụa', 'active');
+
+-- 5. Thêm thiết bị (equipments)
+INSERT INTO `equipments` (`id`, `type`, `name`, `brand`, `model`, `serial_number`, `purchase_date`, `description`, `status`) VALUES
+(1, 'camera', 'Sony A7 IV', 'Sony', 'ILCE-7M4', 'SN-SONY-001', '2023-05-10', 'Máy ảnh Full-frame chuyên chụp studio', 'available'),
+(2, 'camera', 'Canon EOS R5', 'Canon', 'EOS R5', 'SN-CANON-002', '2023-06-12', 'Máy ảnh độ phân giải 45MP cho chi tiết cực cao', 'available'),
+(3, 'lens', 'Sony FE 24-70mm F2.8 GM II', 'Sony', 'SEL2470GM2', 'SN-LENS-003', '2023-05-15', 'Ống kính zoom tiêu chuẩn cao cấp', 'available'),
+(4, 'lighting', 'Đèn Godox AD600 Pro', 'Godox', 'AD600Pro', 'SN-LIGHT-004', '2023-04-01', 'Đèn công suất 600W cho ánh sáng studio chuẩn', 'available'),
+(5, 'tripod', 'Chân máy Manfrotto 055', 'Manfrotto', 'MK055XPRO3', 'SN-TRIPOD-005', '2023-02-18', 'Chân máy ảnh chịu tải lớn, đầm chắc', 'available');
+
+-- 6. Thêm trang phục (clothes)
+INSERT INTO `clothes` (`id`, `type`, `name`, `size`, `gender`, `color`, `description`, `price`, `status`) VALUES
+(1, 'wedding', 'Váy Cưới Xòe Công Chúa Ren Pháp', 'M', 'Female', 'Trắng tinh khôi', 'Váy cưới lộng lẫy đính pha lê cao cấp', 500000, 'available'),
+(2, 'suit', 'Bộ Vest Nam Tuxedo Cổ Điển', 'L', 'Male', 'Đen huyền bí', 'Vest cưới nam thanh lịch, tôn dáng', 300000, 'available'),
+(3, 'traditional', 'Áo Dài Truyền Thống Thêu Hoa Sen', 'S', 'Female', 'Hồng phấn', 'Áo dài lụa tơ tằm mềm mại thêu tay thủ công', 250000, 'available'),
+(4, 'casual', 'Set Váy Nàng Thơ Vintage', 'Free size', 'Female', 'Be nhạt', 'Váy dạo phố chụp ngoại cảnh hoặc studio phong cách nhẹ nhàng', 150000, 'available');
+
+-- 7. Thêm phụ kiện (accessories)
+INSERT INTO `accessories` (`id`, `type`, `name`, `description`, `quantity`, `price`, `status`) VALUES
+(1, 'wedding', 'Vương Miện Cô Dâu Hoàng Gia', 'Vương miện đính đá lấp lánh cho cô dâu', 5, 100000, 'available'),
+(2, 'wedding', 'Bó Hoa Cưới Cầm Tay Lụa Cao Cấp', 'Hoa cưới cầm tay tone pastel nhẹ nhàng', 10, 80000, 'available'),
+(3, 'vintage', 'Mũ Beret Phong Cách Cổ Điển', 'Mũ len beret phong cách Pháp', 8, 50000, 'available');
+
+-- 8. Thêm dịch vụ (services)
+INSERT INTO `services` (`id`, `name`, `type`, `description`, `duration`, `price`, `status`) VALUES
+(1, 'Trang Điểm & Làm Tóc Chuyên Nghiệp', 'makeup', 'Layout makeup cá nhân phù hợp từng concept', 60, 300000, 'active'),
+(2, 'Chụp Thêm Thời Gian (Mỗi 30 phút)', 'photography', 'Gia hạn thời gian chụp thêm với nhiếp ảnh gia', 30, 200000, 'active'),
+(3, 'Chỉnh Sửa Ảnh Chuyên Sâu (Retouch)', 'photography', 'Retouch da, dáng và màu sắc nghệ thuật theo yêu cầu (10 ảnh)', 60, 250000, 'active'),
+(4, 'Thuê Phụ Kiện Cao Cấp Đi Kèm', 'accessory', 'Không giới hạn phụ kiện chụp ảnh trong buổi chụp', 0, 150000, 'active');
+
+-- 9. Thêm gói chụp ảnh (packages)
+INSERT INTO `packages` (`id`, `name`, `description`, `duration`, `price`, `status`) VALUES
+(1, 'Gói Chụp Ảnh Cá Nhân / Nàng Thơ', 'Bao gồm chụp studio 60 phút, hỗ trợ 1 trang phục, makeup cơ bản và 15 ảnh chỉnh sửa', 60, 990000, 'active'),
+(2, 'Gói Chụp Ảnh Cưới Studio Cơ Bản', 'Chụp 120 phút với 2 bối cảnh, váy cưới và vest nam, makeup chuyên nghiệp, tặng album mini', 120, 2990000, 'active'),
+(3, 'Gói Chụp Ảnh Gia Đình / Nhóm Bạn', 'Chụp không gian phòng lớn VIP, phù hợp nhóm 4-8 người, chụp thoải mái trong 90 phút', 90, 1890000, 'active');
+
+-- 10. Gán dịch vụ cho gói chụp (package_services)
+INSERT INTO `package_services` (`id`, `package_id`, `service_id`, `quantity`) VALUES
+(1, 1, 1, 1), -- Gói Nàng Thơ có Makeup
+(2, 2, 1, 1), -- Gói Cưới có Makeup
+(3, 2, 3, 1); -- Gói Cưới có Retouch
+
+-- 11. Gán bối cảnh cho gói chụp (package_backgrounds)
+INSERT INTO `package_backgrounds` (`id`, `package_id`, `background_id`) VALUES
+(1, 1, 1), -- Gói Nàng Thơ dùng phông pastel
+(2, 2, 2), -- Gói Cưới dùng góc phố cổ
+(3, 2, 3); -- Gói Cưới dùng cung điện
+
+-- 12. Gán yêu cầu thiết bị cho gói chụp (package_equipments)
+INSERT INTO `package_equipments` (`id`, `package_id`, `equipment_type`, `quantity`) VALUES
+(1, 1, 'camera', 1),
+(2, 1, 'lighting', 2),
+(3, 2, 'camera', 1),
+(4, 2, 'lighting', 3),
+(5, 2, 'tripod', 1);
+
+-- 13. Thêm banner quảng cáo (banners)
+INSERT INTO `banners` (`id`, `title`, `image_url`, `link`, `status`) VALUES
+(1, 'Khuyến Mãi Mùa Cưới 2026 - Giảm Ngay 20%', '/banners/wedding_sale.jpg', '/packages/wedding', 'active'),
+(2, 'BST Trang Phục Dạ Hội Mới Nhất', '/banners/fashion_lookbook.jpg', '/clothes', 'active');
+
+-- 14. Thêm bài viết / nội dung (contents)
+INSERT INTO `contents` (`id`, `type`, `title`, `slug`, `content`, `image_url`, `status`) VALUES
+(1, 'page', 'Về Chúng Tôi - PhotoStudio', 'gioi-thieu', 'PhotoStudio tự hào là đơn vị cung cấp dịch vụ chụp ảnh chuyên nghiệp hàng đầu với trang thiết bị hiện đại...', '/contents/about.jpg', 'published'),
+(2, 'post', 'Bí quyết chọn trang phục chụp ảnh cưới studio đẹp nhất', 'bi-quyet-chon-trang-phuc-cuoi', 'Chụp ảnh cưới studio đang là xu hướng được nhiều cặp đôi lựa chọn bởi sự tiện lợi và phong cách tinh tế...', '/contents/tips.jpg', 'published');
+
+-- 15. Thêm dữ liệu mẫu liên hệ (contacts)
+INSERT INTO `contacts` (`id`, `user_id`, `fullname`, `email`, `phone`, `subject`, `message`, `status`, `reply_message`) VALUES
+(1, 4, 'Lê Minh Tuấn', 'minhtuan@gmail.com', '0934567890', 'Tư vấn gói chụp cưới ngoại cảnh', 'Chào studio, mình muốn hỏi gói chụp cưới phong cách vintage có hỗ trợ trang điểm và xe di chuyển không ạ?', 'completed', 'Dạ chào bạn Tuấn, gói chụp cưới bên mình đã bao gồm trọn gói trang điểm và ekip hỗ trợ bạn nhé! Nhân viên sẽ liên hệ tư vấn chi tiết ạ.'),
+(2, NULL, 'Nguyễn Mai Phương', 'maiphuong@outlook.com', '0988776655', 'Hỏi báo giá chụp kỷ yếu nhóm', 'Cho em xin báo giá chi tiết gói chụp ảnh kỷ yếu cho nhóm 15 người tại studio vào cuối tuần này với ạ.', 'pending', NULL);
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =====================================================================
+-- HOÀN TẤT DỮ LIỆU MẪU
+-- =====================================================================
+
+
+-- =====================================================================
+-- DỮ LIỆU GÓI CHỤP MỞ RỘNG
+-- =====================================================================
+-- =====================================================================
+-- DỮ LIỆU MẪU GÓI CHỤP (PACKAGES SAMPLE DATA) CHO PHOTOSTUDIO
+-- File: docx/packages_sample_data.sql
+-- Cơ sở dữ liệu: photo_studio
+-- Bảng liên quan: packages, package_equipments, package_services, package_backgrounds, images
+-- =====================================================================
+
+USE `photo_studio`;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ---------------------------------------------------------------------
+-- 1. XÓA DỮ LIỆU CŨ CỦA CÁC GÓI MẪU (NẾU CẦN RESET)
+-- ---------------------------------------------------------------------
+DELETE FROM `package_equipments` WHERE `package_id` IN (1, 2, 3, 4, 5, 6, 7, 8);
+DELETE FROM `package_services` WHERE `package_id` IN (1, 2, 3, 4, 5, 6, 7, 8);
+DELETE FROM `package_backgrounds` WHERE `package_id` IN (1, 2, 3, 4, 5, 6, 7, 8);
+DELETE FROM `images` WHERE `imageable_type` = 'package' AND `imageable_id` IN (1, 2, 3, 4, 5, 6, 7, 8);
+DELETE FROM `packages` WHERE `id` IN (1, 2, 3, 4, 5, 6, 7, 8);
+
+-- ---------------------------------------------------------------------
+-- 2. THÊM 8 GÓI CHỤP ĐA DẠNG CONCEPT (PACKAGES)
+-- ---------------------------------------------------------------------
+INSERT INTO `packages` (`id`, `name`, `description`, `duration`, `price`, `status`, `created_at`, `updated_at`) VALUES
+(
+    1,
+    'Gói Chụp Ảnh Cá Nhân / Nàng Thơ',
+    'Chụp studio 60 phút tone Pastel Hàn Quốc, hỗ trợ 1 set trang phục Vintage, makeup cơ bản và retouch 15 ảnh chuyên sâu',
+    60,
+    990000.0,
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    2,
+    'Gói Chụp Ảnh Cưới Studio Cơ Bản',
+    'Chụp 120 phút với 2 bối cảnh Cung Điện & Cổ Điển, 1 váy cưới ren Pháp, 1 tuxedo nam cao cấp, makeup cô dâu và tặng album mini 15x21',
+    120,
+    2990000.0,
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    3,
+    'Gói Chụp Ảnh Gia Đình / Nhóm Bạn',
+    'Chụp phòng lớn VIP đa năng trong 90 phút cho nhóm 4-8 thành viên, đạo cụ sofa cổ điển, bàn giao toàn bộ file gốc và chỉnh sửa 25 ảnh',
+    90,
+    1890000.0,
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    4,
+    'Gói Chụp Cưới Luxury & Ngoại Cảnh VIP',
+    'Trải nghiệm đẳng cấp 240 phút kết hợp studio và ngoại cảnh hoàng hôn, 3 bộ trang phục cao cấp, 2 layout makeup, ekip riêng và album photobook 30x30',
+    240,
+    5990000.0,
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    5,
+    'Gói Chụp Kỷ Yếu & Tốt Nghiệp Sáng Tạo',
+    'Dành cho học sinh sinh viên cá nhân hoặc nhóm 2-5 bạn, chụp 90 phút với phông màu tự động, phụ kiện bằng tốt nghiệp và hoa tươi',
+    90,
+    1490000.0,
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    6,
+    'Gói Chụp Doanh Nhân & Profile Thương Hiệu',
+    'Chụp ảnh chân dung lãnh đạo, profile doanh nghiệp chuẩn tạp chí Forbes trong 60 phút, set ánh sáng kịch tính Rembrandt và retouch da tự nhiên',
+    60,
+    1290000.0,
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    7,
+    'Gói Chụp Nghệ Thuật Cổ Trang & Áo Dài',
+    'Chụp 90 phút với bối cảnh phố cổ và sen hồ, hỗ trợ áo dài tơ tằm thêu tay hoặc cổ phục Việt, làm tóc và phụ kiện trâm cài truyền thống',
+    90,
+    1690000.0,
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    8,
+    'Gói Chụp Lookbook Thời Trang & Sản Phẩm',
+    'Dành cho nhà thiết kế và shop thời trang, chụp 120 phút không giới hạn số lượng mẫu trang phục, màn hình live-view tức thì và kỹ thuật viên hỗ trợ',
+    120,
+    2490000.0,
+    'active',
+    NOW(),
+    NOW()
+);
+
+-- ---------------------------------------------------------------------
+-- 3. GÁN TRANG THIẾT BỊ ĐI KÈM CHO TỪNG GÓI CHỤP (PACKAGE_EQUIPMENTS)
+-- ---------------------------------------------------------------------
+INSERT INTO `package_equipments` (`package_id`, `equipment_type`, `quantity`) VALUES
+(1, 'camera', 1),
+(1, 'lighting', 2),
+(2, 'camera', 1),
+(2, 'lighting', 3),
+(2, 'tripod', 1),
+(3, 'camera', 1),
+(3, 'lighting', 3),
+(4, 'camera', 2),
+(4, 'lighting', 4),
+(4, 'tripod', 1),
+(4, 'lens', 2),
+(5, 'camera', 1),
+(5, 'lighting', 2),
+(6, 'camera', 1),
+(6, 'lighting', 3),
+(6, 'other', 1),
+(7, 'camera', 1),
+(7, 'lighting', 2),
+(8, 'camera', 1),
+(8, 'lighting', 4),
+(8, 'other', 2);
+
+-- ---------------------------------------------------------------------
+-- 4. GÁN DỊCH VỤ GIA TĂNG BAO GỒM TRONG GÓI (PACKAGE_SERVICES)
+-- ---------------------------------------------------------------------
+INSERT INTO `package_services` (`package_id`, `service_id`, `quantity`) VALUES
+(1, 1, 1),
+(2, 1, 1),
+(2, 3, 1),
+(3, 3, 1),
+(4, 1, 2),
+(4, 3, 2),
+(4, 4, 1),
+(6, 1, 1),
+(7, 1, 1),
+(7, 4, 1),
+(8, 3, 1);
+
+-- ---------------------------------------------------------------------
+-- 5. GÁN BỐI CẢNH CHO TỪNG GÓI (PACKAGE_BACKGROUNDS)
+-- ---------------------------------------------------------------------
+INSERT INTO `package_backgrounds` (`package_id`, `background_id`) VALUES
+(1, 1),
+(2, 2),
+(2, 3),
+(3, 2),
+(4, 3),
+(5, 1),
+(6, 1),
+(7, 2),
+(8, 1);
+
+-- ---------------------------------------------------------------------
+-- 6. THÊM HÌNH ẢNH TRƯNG BÀY SẢN PHẨM VÀO BẢNG IMAGES (IMAGES TABLE)
+-- ---------------------------------------------------------------------
+INSERT INTO `images` (`imageable_type`, `imageable_id`, `image_url`, `description`, `is_primary`, `created_at`, `updated_at`) VALUES
+('package', 1, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85', 'Ảnh bìa Gói Chụp Cá Nhân Nàng Thơ Pastel', TRUE, NOW(), NOW()),
+('package', 1, 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=85', 'Góc chụp cận cảnh chân dung nghệ thuật', FALSE, NOW(), NOW()),
+('package', 2, 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85', 'Ảnh bìa Gói Chụp Ảnh Cưới Studio Cổ Điển', TRUE, NOW(), NOW()),
+('package', 2, 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=85', 'Khoảnh khắc cô dâu và chú rể trong cung điện hoàng gia', FALSE, NOW(), NOW()),
+('package', 3, 'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&w=1200&q=85', 'Ảnh bìa Gói Chụp Gia Đình Đoàn Viên', TRUE, NOW(), NOW()),
+('package', 4, 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=85', 'Ảnh bìa Gói Cưới Luxury Hoàng Hôn Ngoại Cảnh', TRUE, NOW(), NOW()),
+('package', 4, 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1200&q=85', 'Váy cưới bồng bềnh dưới ánh sáng tự nhiên', FALSE, NOW(), NOW()),
+('package', 5, 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=85', 'Ảnh bìa Gói Chụp Kỷ Yếu Tốt Nghiệp Rực Rỡ', TRUE, NOW(), NOW()),
+('package', 6, 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=85', 'Ảnh bìa Gói Chụp Doanh Nhân Đẳng Cấp Phong Cách Forbes', TRUE, NOW(), NOW()),
+('package', 7, 'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=1200&q=85', 'Ảnh bìa Gói Chụp Áo Dài Truyền Thống Nét Đẹp Á Đông', TRUE, NOW(), NOW()),
+('package', 8, 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=85', 'Ảnh bìa Gói Chụp Lookbook Thương Hiệu High-End', TRUE, NOW(), NOW());
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- =====================================================================
+-- TƯƠNG THÍCH HASH ADMIN TỪ SEED CŨ (không đổi user/employee)
+-- =====================================================================
+-- Chạy một lần trên database photo_studio hiện tại nếu admin đang dùng hash mẫu cũ.
+-- Nếu cần giữ dữ liệu hiện có, chỉ chạy riêng câu UPDATE bên dưới; không chạy toàn bộ file,
+-- vì phần schema ở đầu file sẽ xóa và tạo lại các bảng.
+-- Chỉ cập nhật tài khoản admin có đúng hash seed lỗi; không thay đổi mật khẩu user/employee.
+USE `photo_studio`;
+
+UPDATE `users`
+SET `password` = '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.'
+WHERE `username` = 'admin'
+  AND `password` = '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOcd7qaUfqWg6';
