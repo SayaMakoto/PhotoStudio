@@ -4,8 +4,8 @@ import CountUp from "../../animations/CountUp";
 
 export default function SummaryCards({
   totalRevenue = 285400000,
-  activeUsers = 1248,
-  activeEmployees = 36,
+  activeUsers = null,
+  activeEmployees = null,
   activeResources = 420,
 }) {
   const cards = [
@@ -74,7 +74,9 @@ export default function SummaryCards({
 
             <div className="mt-4 flex items-baseline gap-2">
               <div className="text-2xl font-bold tracking-tight text-white font-mono">
-                {card.isCurrency ? (
+                {card.rawValue == null ? (
+                  <span>—</span>
+                ) : card.isCurrency ? (
                   <>
                     <CountUp
                       to={card.rawValue / 1000000}

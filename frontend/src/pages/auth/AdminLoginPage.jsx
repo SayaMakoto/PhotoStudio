@@ -74,8 +74,8 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-[#07090e] text-white selection:bg-amber-400 selection:text-neutral-950 font-sans relative flex flex-col justify-between p-4 sm:p-6 overflow-hidden">
       {/* Background Matrix/Security Grid & Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 right-10 w-[400px] h-[300px] bg-rose-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-175 h-87.5 bg-amber-500/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 right-10 w-100 h-75 bg-rose-500/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Precision grid pattern */}
       <div
@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
         <div className="relative rounded-3xl bg-neutral-950/90 border border-amber-500/30 p-7 sm:p-9 shadow-2xl shadow-black/95 backdrop-blur-3xl overflow-hidden">
           {/* Security Badge Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 border border-amber-500/40 shadow-lg shadow-amber-500/20 mb-3.5 relative group">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-linear-to-b from-neutral-900 to-neutral-950 border border-amber-500/40 shadow-lg shadow-amber-500/20 mb-3.5 relative group">
               <ShieldAlert className="w-7 h-7 text-amber-400" />
             </div>
 
@@ -202,7 +202,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 font-extrabold text-sm shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 font-mono tracking-wider"
+              className="w-full py-3.5 rounded-xl bg-linear-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 font-extrabold text-sm shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 font-mono tracking-wider"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-neutral-950 border-t-transparent rounded-full animate-spin" />
