@@ -6,10 +6,12 @@ import com.photostudio.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,33 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+
+    private UserResponse getAuthenticatedUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập");
+        }
+        return userService.findByUsername(authentication.getName());
+    }
+
+    private UserResponse updateOwnProfile(UserResponse currentUser, UserRequest request) {
+        // Tài khoản tự cập nhật thông tin cá nhân, không được tự đổi username, role hoặc status.
+        request.setUsername(currentUser.getUsername());
+        request.setRole(null);
+        request.setStatus(null);
+        return userService.update(currentUser.getId(), request);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserResponse> getMyProfile(Authentication authentication) {
+        return ResponseEntity.ok(getAuthenticatedUser(authentication));
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<UserResponse> updateMyProfile(
+            @RequestBody UserRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(updateOwnProfile(getAuthenticatedUser(authentication), request));
+    }
 
     // Lấy tất cả người dùng
     @GetMapping
@@ -72,8 +101,16 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable Long id,
-            @RequestBody UserRequest request) {
-        return ResponseEntity.ok(userService.update(id, request));
+            @RequestBody UserRequest request,
+            Authentication authentication) {
+        UserResponse currentUser = getAuthenticatedUser(authentication);
+        if (!currentUser.getId().equals(id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Bạn chỉ được chỉnh sửa thông tin tài khoản của chính mình"
+            );
+        }
+        return ResponseEntity.ok(updateOwnProfile(currentUser, request));
     }
 
     // Cập nhật trạng thái người dùng (active, inactive, banned)
@@ -87,13 +124,6 @@ public class UserController {
             targetStatus = body.get("status");
         }
         return ResponseEntity.ok(userService.updateStatus(id, targetStatus));
-    }
-
-    // Xóa người dùng
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 
     // Lọc theo Role (Customer, Employee, Admin)

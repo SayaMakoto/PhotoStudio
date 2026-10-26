@@ -27,8 +27,6 @@ public interface UserService {
 
     UserResponse updateStatus(Long id, String status);
 
-    void delete(Long id);
-
     List<UserResponse> findByRole(String role);
 
     List<UserResponse> findByStatus(String status);
@@ -45,8 +43,6 @@ public interface UserService {
     User createUser(User user);
 
     User updateUser(Long id, User userDetails);
-
-    void deleteUser(Long id);
 
     List<User> getUsersByRole(UserRole role);
 

@@ -1,7 +1,8 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../routes/web";
-import { ChevronDown, Building2, X } from "lucide-react";
+import { ChevronDown, Building2, X, LogOut } from "lucide-react";
 import { ADMIN_MENU_CONFIG } from "./adminMenuConfig";
+import adminAuthService from "../../../services/admin/authService";
 
 export default function AdminSidebar({
   openGroup,
@@ -10,7 +11,23 @@ export default function AdminSidebar({
   onCloseMobile,
 }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
+  const admin = adminAuthService.getUser();
+
+  const handleLogout = async () => {
+    await adminAuthService.logout();
+    navigate(ROUTES.AUTH.ADMIN_LOGIN, { replace: true });
+  };
+
+  const adminName = admin?.fullname || admin?.username || "Quản Trị Viên";
+  const adminEmail = admin?.email || "Tài khoản quản trị";
+  const initials = adminName
+    .split(/\s+/)
+    .slice(-2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   const handleGroupClick = (groupId) => {
     onToggleGroup(groupId);
@@ -194,18 +211,27 @@ export default function AdminSidebar({
           <div className="flex items-center gap-3 rounded-xl bg-neutral-900/80 p-2.5 border border-neutral-800/80">
             <div className="relative">
               <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-bold text-neutral-950 text-xs shadow-md">
-                AD
+                {initials || "AD"}
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-900 bg-emerald-500" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="truncate text-xs font-semibold text-white">
-                Quản Trị Viên
+                {adminName}
               </p>
               <p className="truncate text-[11px] text-neutral-400">
-                admin@photostudio.vn
+                {adminEmail}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Đăng xuất admin"
+              aria-label="Đăng xuất admin"
+              className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-rose-500/10 hover:text-rose-300"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </aside>
