@@ -19,6 +19,7 @@ import AdminRoute from '../components/admin/layout/AdminRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
 import AdminUsersPage from '../pages/admin/users';
+import AdminEmployeesPage from '../pages/admin/employees';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -58,13 +59,7 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.ADMIN.ACCOUNTS.EMPLOYEES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Nhân Viên (Employees)"
-              category="Quản lý tài khoản"
-              description="Danh sách đội ngũ nhiếp ảnh gia, trang điểm, hậu kỳ và phân ca làm việc."
-            />
-          }
+          element={<AdminEmployeesPage />}
         />
 
         {/* Quản lý tài nguyên */}

@@ -56,7 +56,7 @@ export default function AdminSidebar({
             onClick={onCloseMobile}
             className="flex items-center gap-3 hover:opacity-90 transition-opacity"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-neutral-950 shadow-lg shadow-amber-500/20 font-bold">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-amber-400 to-amber-600 text-neutral-950 shadow-lg shadow-amber-500/20 font-bold">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
@@ -102,7 +102,7 @@ export default function AdminSidebar({
                   onClick={onCloseMobile}
                   className={`group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200 ${
                     isDirectActive
-                      ? "bg-gradient-to-r from-amber-500/20 to-amber-500/5 text-amber-300 shadow-inner border border-amber-500/30"
+                      ? "bg-linear-to-r from-amber-500/20 to-amber-500/5 text-amber-300 shadow-inner border border-amber-500/30"
                       : "text-neutral-300 hover:bg-neutral-900 hover:text-white"
                   }`}
                 >
@@ -184,7 +184,7 @@ export default function AdminSidebar({
                           }`}
                         >
                           {isSubActive && (
-                            <span className="absolute -left-[9px] top-1.5 bottom-1.5 w-0.5 rounded-r bg-amber-400 shadow-[0_0_6px_#f59e0b]" />
+                            <span className="absolute -left-2.25 top-1.5 bottom-1.5 w-0.5 rounded-r bg-amber-400 shadow-[0_0_6px_#f59e0b]" />
                           )}
                           <SubIcon
                             className={`h-3.5 w-3.5 shrink-0 transition-colors ${
@@ -210,7 +210,7 @@ export default function AdminSidebar({
         <div className="border-t border-neutral-800/80 p-4 bg-neutral-950/60">
           <div className="flex items-center gap-3 rounded-xl bg-neutral-900/80 p-2.5 border border-neutral-800/80">
             <div className="relative">
-              <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-bold text-neutral-950 text-xs shadow-md">
+              <div className="h-9 w-9 rounded-full bg-linear-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-bold text-neutral-950 text-xs shadow-md">
                 {initials || "AD"}
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-900 bg-emerald-500" />
