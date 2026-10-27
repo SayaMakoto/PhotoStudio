@@ -40,6 +40,14 @@ export const BOOKING_ASSIGNMENTS = [
     time: '14:30 - 17:30',
     status: 'in_progress', // upcoming, in_progress, retouched, delivered
     deadline: '2026-10-15 18:00',
+    deadlineTag: { label: 'Còn 2 ngày', type: 'warning' }, // warning | urgent | expired | done
+    commission: 850000, // 850k VNĐ hoa hồng ca
+    photoSelection: {
+      rawCount: 380,
+      selectedCount: 30,
+      retouchedCount: 12,
+      selectionStatus: 'Khách đã chốt 30 ảnh',
+    },
     deliveryLink: 'https://drive.photostudio.vn/shares/BK-1042-raw-retouch',
     note: 'Cô dâu thích tông màu da sáng hồng tự nhiên, góc mặt nghiêng bên trái. Chú rể thích phong cách lịch lãm, tối giản.',
     colleagues: [
@@ -68,7 +76,15 @@ export const BOOKING_ASSIGNMENTS = [
     date: '2026-10-10',
     time: '18:00 - 20:00',
     status: 'upcoming',
-    deadline: '2026-10-13 12:00',
+    deadline: '2026-10-12 12:00',
+    deadlineTag: { label: 'Hạn ngày mai ⚠️', type: 'urgent' },
+    commission: 450000,
+    photoSelection: {
+      rawCount: 220,
+      selectedCount: 15,
+      retouchedCount: 0,
+      selectionStatus: 'Chờ chụp & gửi ảnh thô',
+    },
     deliveryLink: '',
     note: 'Khách chụp kỷ niệm sinh nhật tuổi 25, muốn phong cách nhẹ nhàng, thơ mộng pha chút cổ điển châu Âu.',
     colleagues: [
@@ -95,6 +111,14 @@ export const BOOKING_ASSIGNMENTS = [
     time: '09:00 - 11:30',
     status: 'retouched',
     deadline: '2026-10-12 17:00',
+    deadlineTag: { label: 'Đã hoàn thành ✅', type: 'done' },
+    commission: 550000,
+    photoSelection: {
+      rawCount: 260,
+      selectedCount: 20,
+      retouchedCount: 20,
+      selectionStatus: 'Đã hoàn thiện 20/20 ảnh',
+    },
     deliveryLink: 'https://drive.photostudio.vn/shares/BK-1038-final-retouch',
     note: 'Có 2 bé nhỏ (3 tuổi & 6 tuổi). Cần tạo không khí vui nhộn, chụp bắt khoảnh khắc tự nhiên của các con.',
     colleagues: [
@@ -122,6 +146,14 @@ export const BOOKING_ASSIGNMENTS = [
     time: '14:00 - 16:00',
     status: 'delivered',
     deadline: '2026-10-10 12:00',
+    deadlineTag: { label: 'Đã bàn giao ✅', type: 'done' },
+    commission: 600000,
+    photoSelection: {
+      rawCount: 180,
+      selectedCount: 10,
+      retouchedCount: 10,
+      selectionStatus: 'Đã ký biên bản nhận trọn bộ',
+    },
     deliveryLink: 'https://drive.photostudio.vn/shares/BK-1029-completed',
     note: 'Chụp ảnh phục vụ bài PR Forbes và website tập đoàn. Tone màu uy quyền, sắc cạnh, tương phản cao.',
     colleagues: [
@@ -158,15 +190,6 @@ export const CUSTOMER_REVIEWS = [
   },
   {
     id: 'RV-894',
-    customerName: 'Anh Quốc Bảo',
-    bookingId: 'BK-2026-1029',
-    rating: 5,
-    date: '09/10/2026',
-    comment: 'Tác phong rất chuyên nghiệp, đúng giờ và hiểu rõ góc sáng cho ảnh doanh nhân. Tấm ảnh bìa profile mình nhận được rất nhiều lời khen.',
-    tag: 'Profile Doanh nhân'
-  },
-  {
-    id: 'RV-882',
     customerName: 'Chị Lan & Anh Vũ',
     bookingId: 'BK-2026-1038',
     rating: 4.8,
@@ -205,41 +228,3 @@ export const ADMIN_NOTIFICATIONS = [
     type: 'finance'
   }
 ];
-
-export const CONCEPTS_PRESETS = [
-  {
-    id: 'CP-01',
-    title: 'Tone Màu Nàng Thơ Pastel Hàn Quốc',
-    category: 'Preset Lightroom',
-    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
-    description: 'Tone da trong trẻo mịn màng, làm dịu sắc đỏ, ánh sáng mềm tự nhiên.',
-    downloads: 148,
-    presetFile: 'Studio_Korean_Pastel_2026.xmp'
-  },
-  {
-    id: 'CP-02',
-    title: 'Concept Moodboard Cưới Cinematic Film',
-    category: 'Moodboard Tạo Dáng',
-    image: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=600&q=80',
-    description: 'Hướng dẫn góc máy điện ảnh 35mm, ánh sáng ngược nắng hoàng hôn.',
-    downloads: 230,
-    presetFile: 'Wedding_Cinematic_35mm_Mood.pdf'
-  },
-  {
-    id: 'CP-03',
-    title: 'Profile Doanh Nhân Monochrome & Rimlight',
-    category: 'Lighting Diagram',
-    image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80',
-    description: 'Sơ đồ set up 3 đèn: Key light Grid 45 độ, Rim light sau lưng, Kicker tạo khối.',
-    downloads: 95,
-    presetFile: 'CEO_Lighting_Diagram.pdf'
-  }
-];
-
-export const BOOKING_MESSAGES = {
-  'BK-2026-1042': [
-    { sender: 'Admin', role: 'Quản trị viên', text: 'Đức nhớ kiểm tra trước bối cảnh Neon Studio B nhé, khách muốn chụp thêm 1 outfit cá tính.', time: '13:40', isMe: false },
-    { sender: 'Ngọc Mai', role: 'Makeup Artist', text: 'Mình đang làm tóc xoăn sóng nhẹ cho cô dâu rồi nhé, tầm 14:30 là vào set chụp chuẩn giờ!', time: '14:05', isMe: false },
-    { sender: 'Trần Minh Đức', role: 'Photographer', text: 'Đã sẵn sàng! Đèn và thẻ nhớ đã test ok hết.', time: '14:15', isMe: true },
-  ]
-};

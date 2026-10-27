@@ -13,9 +13,11 @@ import {
   ShieldCheck,
   CheckCircle2,
   Gift,
-  UserPlus
+  UserPlus,
+  AlertCircle
 } from 'lucide-react';
 import { ROUTES } from '../../routes/web';
+import customerAuthService from '../../services/user/authService';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -58,7 +60,7 @@ export default function RegisterPage() {
     if (errorMessage) setErrorMessage('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -93,14 +95,29 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    // Giả lập đăng ký thành công
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await customerAuthService.register({
+        fullname: formData.fullname.trim(),
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+        role: 'Customer',
+      });
+
       setSuccessMessage('Đăng ký tài khoản thành công! Đang chuyển đến trang đăng nhập...');
       setTimeout(() => {
         navigate(ROUTES.AUTH.LOGIN);
-      }, 1200);
-    }, 700);
+      }, 1500);
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message ||
+          error.message ||
+          'Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -108,7 +125,7 @@ export default function RegisterPage() {
       {/* Background Lighting & Glows */}
       <div className="absolute top-1/4 right-1/4 w-[600px] h-[500px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-1/4 left-1/4 w-[500px] h-[500px] bg-amber-600/10 rounded-full blur-[140px] pointer-events-none" />
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
@@ -118,11 +135,10 @@ export default function RegisterPage() {
 
       {/* Main Glassmorphic Container */}
       <div className="relative z-10 w-full max-w-5xl bg-neutral-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl shadow-black/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[700px]">
-        
         {/* Left Side: Benefits Showcase */}
         <div className="hidden lg:flex lg:col-span-5 relative flex-col justify-between p-10 overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900 border-r border-white/10">
           {/* Background Photo with dark gradient */}
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity scale-105 transition-transform duration-1000 hover:scale-100"
             style={{
               backgroundImage: `url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80')`,
@@ -153,7 +169,7 @@ export default function RegisterPage() {
               <Gift className="w-3.5 h-3.5 text-amber-400" />
               <span>Ưu Đãi Thành Viên Mới</span>
             </div>
-            
+
             <h3 className="text-2xl font-bold text-white leading-snug mb-3">
               Gia nhập PhotoStudio & tận hưởng dịch vụ đẳng cấp
             </h3>
@@ -168,7 +184,7 @@ export default function RegisterPage() {
                   <Sparkles className="w-3 h-3" />
                 </div>
                 <p className="text-xs text-neutral-300">
-                  <strong className="text-white">Đặt lịch & chọn concept:</strong> Chọn trang phục, phòng chụp và nhiếp ảnh gia ưng ý trong vài thao tác.
+                  <strong className="text-white">Đặt lịch & chọn concept:</strong> Chọn trang phục, phòng chụp và phong cách ưng ý trong vài thao tác.
                 </p>
               </div>
 
@@ -245,13 +261,13 @@ export default function RegisterPage() {
             {/* Alert Messages */}
             {errorMessage && (
               <div className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2.5">
-                <div className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
-                <span>{errorMessage}</span>
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                <span className="leading-relaxed">{errorMessage}</span>
               </div>
             )}
             {successMessage && (
               <div className="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
                 <span>{successMessage}</span>
               </div>
             )}
@@ -478,7 +494,6 @@ export default function RegisterPage() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

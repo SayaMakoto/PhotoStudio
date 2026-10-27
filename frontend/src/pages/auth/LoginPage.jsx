@@ -14,6 +14,18 @@ import {
   KeyRound
 } from 'lucide-react';
 import { ROUTES } from '../../routes/web';
+import customerAuthService from '../../services/user/authService';
+
+function readTokenPayload(token) {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(normalized));
+  } catch {
+    return null;
+  }
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -36,7 +48,7 @@ export default function LoginPage() {
     if (errorMessage) setErrorMessage('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -51,22 +63,31 @@ export default function LoginPage() {
 
     setIsLoading(true);
 
-    // Giả lập đăng nhập thành công
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const res = await customerAuthService.login(formData.usernameOrEmail.trim(), formData.password);
+      const token = res.accessToken || res.token;
+      const payload = token ? readTokenPayload(token) : null;
+      const roles = Array.isArray(payload?.roles) ? payload.roles : [];
+
       setSuccessMessage('Đăng nhập thành công! Đang chuyển hướng...');
       setTimeout(() => {
-        // Kiểm tra điều hướng dựa trên role giả lập
-        const lowerInput = formData.usernameOrEmail.toLowerCase();
-        if (lowerInput.includes('admin')) {
-          navigate(ROUTES.ADMIN.DASHBOARD);
-        } else if (lowerInput.includes('employee') || lowerInput.includes('nhanvien')) {
-          navigate(ROUTES.EMPLOYEE.DASHBOARD);
+        if (roles.includes('ROLE_ADMIN')) {
+          navigate(ROUTES.ADMIN.DASHBOARD, { replace: true });
+        } else if (roles.includes('ROLE_EMPLOYEE')) {
+          navigate(ROUTES.EMPLOYEE.DASHBOARD, { replace: true });
         } else {
-          navigate(ROUTES.USER.HOME);
+          navigate(ROUTES.USER.HOME, { replace: true });
         }
-      }, 900);
-    }, 600);
+      }, 700);
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message ||
+          error.message ||
+          'Tên đăng nhập hoặc mật khẩu không chính xác.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Nút đăng nhập nhanh cho các vai trò để trải nghiệm thuận tiện
@@ -395,3 +416,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

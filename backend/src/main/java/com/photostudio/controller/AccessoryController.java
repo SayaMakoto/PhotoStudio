@@ -7,7 +7,6 @@ import com.photostudio.model.accessories.Accessory;
 import com.photostudio.model.accessories.AccessoryStatus;
 import com.photostudio.model.accessories.AccessoryType;
 import com.photostudio.service.AccessoryService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
