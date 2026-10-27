@@ -7,11 +7,11 @@ import {
   AlertTriangle,
   Search,
   Filter,
-  CheckSquare
+  Plus
 } from 'lucide-react';
 import { EQUIPMENT_ITEMS } from '../employeeData';
 
-export default function EquipmentAndCostumesSection({ onReportIncident }) {
+export default function EquipmentAndCostumesSection({ onReportIncident, showHeader = true }) {
   const [items, setItems] = useState(EQUIPMENT_ITEMS);
   const [filterCat, setFilterCat] = useState('all');
 
@@ -32,100 +32,122 @@ export default function EquipmentAndCostumesSection({ onReportIncident }) {
     return item.category.toLowerCase().includes(filterCat.toLowerCase());
   });
 
+  const renderStatusBadge = (status) => {
+    switch (status) {
+      case 'holding':
+        return (
+          <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
+            Đang giữ
+          </span>
+        );
+      case 'returned':
+        return (
+          <span className="inline-flex items-center rounded-full border border-neutral-700 bg-neutral-800/70 px-2.5 py-1 text-[11px] font-medium text-neutral-400">
+            Đã hoàn kho
+          </span>
+        );
+      case 'reported':
+        return (
+          <span className="inline-flex items-center rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-medium text-rose-300">
+            Đang báo hỏng
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center rounded-full border border-neutral-700 bg-neutral-800/70 px-2.5 py-1 text-[11px] font-medium text-neutral-400">
+            {status}
+          </span>
+        );
+    }
+  };
+
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5 backdrop-blur-md space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-neutral-800">
-        <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Layers className="h-4.5 w-4.5 text-amber-400" />
-            <span>Quản Lý Thiết Bị, Trang Phục & Phụ Kiện Đang Giữ</span>
-          </h3>
-          <p className="text-xs text-neutral-400 mt-0.5">
-            Xác nhận nhận/trả máy ảnh, ống kính, đèn flash; checklist trước ca chụp và gửi báo hỏng.
-          </p>
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5 backdrop-blur-md space-y-4">
+      {/* Header & Action */}
+      {showHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-neutral-800">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Layers className="h-4.5 w-4.5 text-amber-400" />
+              <span>Thiết Bị & Đạo Cụ Tác Nghiệp Đang Quản Lý</span>
+            </h3>
+            <p className="text-xs text-neutral-400 mt-0.5">
+              Theo dõi máy ảnh, ống kính, đèn flash đang mượn; cập nhật tình trạng và gửi báo cáo sự cố hư hỏng.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Category Filter */}
+            <select
+              value={filterCat}
+              onChange={(e) => setFilterCat(e.target.value)}
+              className="rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-xs text-neutral-300 font-medium focus:border-amber-400 focus:outline-none"
+            >
+              <option value="all">Tất cả phân loại</option>
+              <option value="body">Body Máy Ảnh</option>
+              <option value="ống kính">Ống Kính (Lens)</option>
+              <option value="đèn">Đèn & Ánh Sáng</option>
+            </select>
+
+            {/* Quick Report Button */}
+            <button
+              onClick={() => onReportIncident && onReportIncident(null)}
+              className="flex items-center gap-1.5 rounded-xl bg-rose-500/90 hover:bg-rose-500 text-white font-bold px-3 py-1.5 text-xs transition-colors shadow-sm"
+            >
+              <AlertTriangle className="h-3.5 w-3.5" />
+              <span>Báo hỏng thiết bị</span>
+            </button>
+          </div>
         </div>
+      )}
 
-        {/* Filter & Actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          <select
-            value={filterCat}
-            onChange={(e) => setFilterCat(e.target.value)}
-            className="rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-1.5 text-xs text-neutral-300 font-medium focus:border-amber-400 focus:outline-none whitespace-nowrap shrink-0"
+      {/* Equipment List */}
+      <div className="divide-y divide-neutral-800/80 rounded-xl border border-neutral-800 bg-neutral-950/70 overflow-hidden">
+        {filteredItems.map((item) => (
+          <div
+            key={item.id}
+            className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 gap-3 hover:bg-neutral-900/40 transition-colors"
           >
-            <option value="all">Tất cả phân loại</option>
-            <option value="máy ảnh">Body Máy Ảnh</option>
-            <option value="ống kính">Ống Kính (Lens)</option>
-            <option value="đèn">Đèn & Ánh Sáng</option>
-          </select>
-
-          <button
-            onClick={() => onReportIncident && onReportIncident(null)}
-            className="flex items-center gap-1.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 hover:bg-rose-500/25 px-3.5 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer shadow-sm"
-          >
-            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-            <span className="whitespace-nowrap">Báo sự cố thiết bị</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Equipment Table */}
-      <div className="overflow-x-auto rounded-xl border border-neutral-800 scrollbar-thin scrollbar-thumb-neutral-800">
-        <table className="w-full min-w-[700px] text-left text-xs text-neutral-300">
-          <thead className="bg-neutral-950 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider border-b border-neutral-800">
-            <tr>
-              <th className="px-4 py-3 whitespace-nowrap">Mã & Tên thiết bị</th>
-              <th className="px-4 py-3 whitespace-nowrap">Phân loại</th>
-              <th className="px-4 py-3 whitespace-nowrap">Tình trạng vật lý</th>
-              <th className="px-4 py-3 text-center whitespace-nowrap">Trạng thái giữ đồ</th>
-              <th className="px-4 py-3 text-right whitespace-nowrap">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-800/60 font-sans">
-            {filteredItems.map((item) => (
-              <tr key={item.id} className="hover:bg-neutral-850/40 transition-colors">
-                <td className="px-4 py-3.5 whitespace-nowrap">
-                  <div className="font-bold text-white">{item.name}</div>
-                  <div className="font-mono text-[11px] text-amber-400/80">{item.code}</div>
-                </td>
-                <td className="px-4 py-3.5 whitespace-nowrap text-neutral-400">
-                  {item.category}
-                </td>
-                <td className="px-4 py-3.5 whitespace-nowrap">
-                  <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium ${
-                    item.status === 'reported'
-                      ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                      : 'bg-neutral-800 text-neutral-300'
-                  }`}>
-                    {item.condition}
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 text-amber-400 shrink-0">
+                <Camera className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs sm:text-sm font-bold text-white">{item.name}</h4>
+                  <span className="font-mono text-[10px] text-neutral-400 bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
+                    {item.code}
                   </span>
-                </td>
-                <td className="px-4 py-3.5 text-center whitespace-nowrap">
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                    item.status === 'holding'
-                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                      : item.status === 'returned'
-                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                      : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-                  }`}>
-                    {item.status === 'holding' && '● Đang giữ'}
-                    {item.status === 'returned' && '✓ Đã hoàn trả kho'}
-                    {item.status === 'reported' && '⚠ Báo hỏng'}
-                  </span>
-                </td>
-                <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                  <button
-                    onClick={() => handleToggleStatus(item.id)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-3 py-1.5 text-[11px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    <RotateCcw className="h-3 w-3 text-amber-400" />
-                    <span>{item.status === 'holding' ? 'Bấm Trả Kho' : 'Bấm Nhận Lại'}</span>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+                <p className="text-[11px] text-neutral-400 mt-0.5">
+                  Phân loại: <span className="text-neutral-300">{item.category}</span> • Tình trạng: <span className="text-neutral-300">{item.condition}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              {renderStatusBadge(item.status)}
+
+              <button
+                type="button"
+                onClick={() => handleToggleStatus(item.id)}
+                className="rounded-lg border border-neutral-800 bg-neutral-900 px-2.5 py-1 text-xs text-neutral-300 hover:border-neutral-700 hover:text-white transition-colors"
+                title="Đổi trạng thái giữ / hoàn kho"
+              >
+                {item.status === 'holding' ? 'Hoàn trả kho' : 'Mượn thiết bị'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onReportIncident && onReportIncident({ id: item.code, customerName: item.name })}
+                className="rounded-lg p-1.5 text-neutral-400 hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
+                title="Báo sự cố thiết bị này"
+              >
+                <AlertTriangle className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

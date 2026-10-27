@@ -27,6 +27,9 @@ public class AppUser implements UserDetails {
         if (user.getRole() == UserRole.Admin || user.getRole() == UserRole.ADMIN) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        } else if (user.getRole() == UserRole.Employee) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         } else {
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }

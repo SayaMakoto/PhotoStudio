@@ -16,6 +16,7 @@ import EmployeeLoginPage from '../pages/auth/EmployeeLoginPage';
 // Admin & Employee Pages
 import AdminLayout from '../components/admin/layout/AdminLayout';
 import AdminRoute from '../components/admin/layout/AdminRoute';
+import EmployeeRoute from '../components/employee/layout/EmployeeRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
 import AdminUsersPage from '../pages/admin/users';
@@ -44,7 +45,9 @@ export default function AppRoutes() {
       <Route path={ROUTES.AUTH.ADMIN_REGISTER} element={<AdminRegisterPage />} />
 
       {/* 2. Tuyến đường Nhân viên (Employee) */}
-      <Route path={ROUTES.EMPLOYEE.DASHBOARD} element={<EmployeeDashboard />} />
+      <Route element={<EmployeeRoute />}>
+        <Route path={ROUTES.EMPLOYEE.DASHBOARD} element={<EmployeeDashboard />} />
+      </Route>
 
       {/* 3. Tuyến đường Quản trị (Admin) */}
       <Route element={<AdminRoute />}>

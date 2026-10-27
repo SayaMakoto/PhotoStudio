@@ -116,9 +116,9 @@ public class SecurityConfig {
                         // Khóa/mở khóa tài khoản chỉ dành cho ADMIN; cấm xóa tài khoản qua API.
                         .requestMatchers(HttpMethod.PATCH, "/api/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").denyAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/profile").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users/profile").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
 
                         // Danh sách và thông tin tài khoản khác chỉ admin được phép xem.
                         .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("ADMIN")
