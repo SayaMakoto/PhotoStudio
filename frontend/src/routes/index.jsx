@@ -28,6 +28,7 @@ import AdminClothesPage from '../pages/admin/clothes';
 import AdminAccessoriesPage from '../pages/admin/accessories';
 import AdminServicesPage from '../pages/admin/services';
 import AdminPackagesPage from '../pages/admin/packages';
+import AdminBookingsPage from '../pages/admin/bookings';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -107,13 +108,7 @@ export default function AppRoutes() {
         {/* Vận hành & Thanh toán */}
         <Route
           path={ROUTES.ADMIN.BOOKINGS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Đơn Đặt Lịch (Bookings)"
-              category="Vận hành"
-              description="Tiếp nhận, xác nhận, điều phối lịch chụp của khách hàng."
-            />
-          }
+          element={<AdminBookingsPage />}
         />
         <Route
           path={ROUTES.ADMIN.PAYMENTS.replace('/admin/', '')}
