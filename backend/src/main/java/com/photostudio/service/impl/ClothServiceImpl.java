@@ -7,31 +7,35 @@ import com.photostudio.model.clothes.Cloth;
 import com.photostudio.model.clothes.ClothStatus;
 import com.photostudio.model.clothes.ClothType;
 import com.photostudio.repository.ClothRepository;
+import com.photostudio.repository.BookingClothingRepository;
 import com.photostudio.service.ClothService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
 public class ClothServiceImpl implements ClothService {
 
     private final ClothRepository repository;
+    private final BookingClothingRepository bookingClothingRepository;
 
-    public ClothServiceImpl(ClothRepository repository) {
+    public ClothServiceImpl(ClothRepository repository, BookingClothingRepository bookingClothingRepository) {
         this.repository = repository;
+        this.bookingClothingRepository = bookingClothingRepository;
     }
 
     private Cloth findEntity(Long id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trang phục có id: " + id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ClothResponse> findAll() {
-        return repository.findAll().stream().map(ClothMapper::toResponse).toList();
+        return repository.findByDeletedAtIsNullOrderByIdDesc().stream().map(ClothMapper::toResponse).toList();
     }
 
     @Override
@@ -57,13 +61,15 @@ public class ClothServiceImpl implements ClothService {
 
     @Override
     public void delete(Long id) {
-        repository.delete(findEntity(id));
+        Cloth cloth = findEntity(id);
+        cloth.setDeletedAt(LocalDateTime.now());
+        repository.save(cloth);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ClothResponse> findByName(String name) {
-        return repository.findByNameContainingIgnoreCase(name).stream()
+        return repository.findByDeletedAtIsNullAndNameContainingIgnoreCase(name).stream()
                 .map(ClothMapper::toResponse).toList();
     }
 
@@ -80,7 +86,7 @@ public class ClothServiceImpl implements ClothService {
             throw new IllegalArgumentException(
                     "Loại trang phục không hợp lệ. Các loại hợp lệ: wedding, traditional, casual, suit, cosplay, other");
         }
-        return repository.findByType(clothType).stream().map(ClothMapper::toResponse).toList();
+        return repository.findByDeletedAtIsNullAndType(clothType).stream().map(ClothMapper::toResponse).toList();
     }
 
     @Override
@@ -96,6 +102,31 @@ public class ClothServiceImpl implements ClothService {
             throw new IllegalArgumentException(
                     "Trạng thái trang phục không hợp lệ. Các trạng thái hợp lệ: available, rented, maintenance, damaged, retired");
         }
-        return repository.findByStatus(clothStatus).stream().map(ClothMapper::toResponse).toList();
+        return repository.findByDeletedAtIsNullAndStatus(clothStatus).stream().map(ClothMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ClothResponse> findTrash() {
+        return repository.findByDeletedAtIsNotNullOrderByDeletedAtDesc().stream()
+                .map(ClothMapper::toResponse).toList();
+    }
+
+    @Override
+    public ClothResponse restore(Long id) {
+        Cloth cloth = repository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trang phục trong thùng rác có id: " + id));
+        cloth.setDeletedAt(null);
+        return ClothMapper.toResponse(repository.save(cloth));
+    }
+
+    @Override
+    public void permanentlyDelete(Long id) {
+        Cloth cloth = repository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trang phục trong thùng rác có id: " + id));
+        if (repository.existsBookingReference(id)) {
+            throw new IllegalArgumentException("Không thể xóa vĩnh viễn trang phục đã được sử dụng trong đơn đặt lịch.");
+        }
+        repository.delete(cloth);
     }
 }

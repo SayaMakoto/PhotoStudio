@@ -133,7 +133,8 @@ CREATE TABLE `clothes` (
     `color` VARCHAR(255) NULL COMMENT 'Màu sắc',
     `description` VARCHAR(255) NULL COMMENT 'Mô tả trang phục',
     `price` DOUBLE NOT NULL DEFAULT 0.0 COMMENT 'Giá thuê trang phục',
-    `status` ENUM('available', 'rented', 'maintenance', 'damaged', 'retired') NOT NULL DEFAULT 'available' COMMENT 'Trạng thái trang phục'
+    `status` ENUM('available', 'rented', 'maintenance', 'damaged', 'retired') NOT NULL DEFAULT 'available' COMMENT 'Trạng thái trang phục',
+    `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa trang phục vào thùng rác'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý trang phục cho thuê';
 
 -- Bảng 7: accessories (Phụ kiện)

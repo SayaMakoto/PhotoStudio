@@ -61,7 +61,8 @@ public class ClothMapper {
                 cloth.getColor(),
                 cloth.getDescription(),
                 cloth.getPrice(),
-                cloth.getStatus() != null ? cloth.getStatus().name() : null
+                cloth.getStatus() != null ? cloth.getStatus().name() : null,
+                cloth.getDeletedAt()
         );
     }
 }

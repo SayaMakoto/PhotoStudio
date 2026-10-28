@@ -24,6 +24,7 @@ import AdminEmployeesPage from '../pages/admin/employees';
 import AdminEquipmentsPage from '../pages/admin/equipments';
 import AdminBackgroundsPage from '../pages/admin/backgrounds';
 import AdminRoomsPage from '../pages/admin/rooms';
+import AdminClothesPage from '../pages/admin/clothes';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -83,13 +84,7 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.CLOTHES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Trang Phục (Clothes)"
-              category="Quản lý tài nguyên"
-              description="Quản lý kho trang phục cưới, vest, concept chụp, tình trạng giặt sấy."
-            />
-          }
+          element={<AdminClothesPage />}
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.ACCESSORIES.replace('/admin/', '')}
