@@ -1,57 +1,87 @@
 import React, { useState } from 'react';
 import {
   X,
-  Camera,
-  Shirt,
-  Sparkles,
-  Users,
-  CheckSquare,
-  Square,
+  Calendar,
   Clock,
-  Save,
-  AlertTriangle,
-  Image,
-  CheckCircle2
+  MapPin,
+  User,
+  Phone,
+  FileText,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 
-function InfoItem({ label, value, highlight = false }) {
+const STATUS_OPTIONS = [
+  { value: 'pending', label: 'Chờ xác nhận', color: 'text-amber-700 bg-amber-50 border-amber-200' },
+  { value: 'confirmed', label: 'Đã xác nhận', color: 'text-blue-700 bg-blue-50 border-blue-200' },
+  { value: 'in_progress', label: 'Đang chụp', color: 'text-purple-700 bg-purple-50 border-purple-200' },
+  { value: 'completed', label: 'Hoàn thành', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+  { value: 'cancelled', label: 'Đã hủy', color: 'text-rose-700 bg-rose-50 border-rose-200' },
+];
+
+function InfoCard({ icon: Icon, label, value }) {
   return (
-    <div className="min-w-0">
-      <p className="text-[11px] text-[#7A6C71] font-semibold">{label}</p>
-      <p
-        className={`mt-0.5 break-words text-xs font-bold ${
-          highlight ? 'text-[#B85064]' : 'text-[#261A1E]'
-        }`}
-      >
-        {value || '—'}
-      </p>
+    <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-[#F0E4E6] text-[#B85064] shrink-0 mt-0.5">
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] text-[#7A6C71] font-semibold">{label}</p>
+        <p className="mt-0.5 text-xs font-bold text-[#261A1E] break-words">
+          {value || '—'}
+        </p>
+      </div>
     </div>
   );
 }
 
-export default function ShootDetailModal({ booking, onClose, onOpenIncidentReport }) {
+export default function ShootDetailModal({
+  booking,
+  onClose,
+  onStatusChange,
+}) {
   if (!booking) return null;
 
-  const [checklist, setChecklist] = useState(booking.checklist || []);
-  const [deliveryInput, setDeliveryInput] = useState(booking.deliveryLink || '');
-  const [retouchedCount, setRetouchedCount] = useState(
-    booking.photoSelection?.retouchedCount || 0
-  );
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(booking.status || 'pending');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
 
-  const selectedCount = booking.photoSelection?.selectedCount || 30;
-  const rawCount = booking.photoSelection?.rawCount || 350;
-  const progressPercent = Math.min(Math.round((retouchedCount / selectedCount) * 100), 100);
-
-  const toggleChecklist = (index) => {
-    setChecklist((prev) =>
-      prev.map((item, idx) => (idx === index ? { ...item, done: !item.done } : item))
-    );
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Chưa xếp ngày';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('vi-VN', {
+        weekday: 'long',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    } catch {
+      return dateStr;
+    }
   };
 
-  const handleSaveDelivery = () => {
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2000);
+  const formatTime = (start, end) => {
+    if (!start && !end) return 'Chưa xếp giờ';
+    return `${start || '—'} - ${end || '—'}`;
+  };
+
+  const handleUpdateStatus = async (newStatus) => {
+    if (newStatus === currentStatus) return;
+    setIsUpdating(true);
+    setSuccessMsg('');
+    try {
+      if (onStatusChange) {
+        await onStatusChange(booking.id, newStatus);
+      }
+      setCurrentStatus(newStatus);
+      setSuccessMsg('Đã cập nhật trạng thái ca chụp thành công!');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (err) {
+      console.error('Lỗi khi cập nhật trạng thái:', err);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -61,20 +91,20 @@ export default function ShootDetailModal({ booking, onClose, onOpenIncidentRepor
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-2xl rounded-3xl border border-[#F0E4E6] bg-white p-6 sm:p-7 shadow-[0_20px_60px_rgb(184,80,100,0.15)] text-[#261A1E] max-h-[90vh] flex flex-col space-y-5">
+      <div className="relative w-full max-w-xl rounded-3xl border border-[#F0E4E6] bg-white p-6 sm:p-7 shadow-[0_20px_60px_rgb(184,80,100,0.15)] text-[#261A1E] max-h-[90vh] flex flex-col space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-[#F0E4E6] shrink-0">
           <div>
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs font-bold text-[#B85064] bg-[#FDF0F3] px-2.5 py-0.5 rounded-md border border-[#F5D5DC]">
-                {booking.id}
+                Mã đơn #{booking.id}
               </span>
               <h2 className="text-base font-bold text-[#261A1E]">
-                Hồ Sơ Buổi Chụp: {booking.customerName}
+                Chi Tiết Ca Chụp
               </h2>
             </div>
             <p className="text-xs text-[#7A6C71] mt-0.5">
-              {booking.packageName} • {booking.time} ({booking.date})
+              Dữ liệu đơn đặt lịch thực tế từ bảng bookings trong CSDL.
             </p>
           </div>
 
@@ -88,227 +118,91 @@ export default function ShootDetailModal({ booking, onClose, onOpenIncidentRepor
 
         {/* Modal Scroll Body */}
         <div className="overflow-y-auto space-y-4 pr-1 scrollbar-thin scrollbar-thumb-[#F0E4E6] text-xs">
-          {/* Quick Info Grid + Commission & Deadline Warning */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] p-4">
-            <InfoItem label="Khách hàng" value={booking.customerName} />
-            <InfoItem label="Số điện thoại" value={booking.phone} />
-            <InfoItem label="Email liên hệ" value={booking.email} />
-            <InfoItem label="Phòng chụp" value={booking.room} />
-            <InfoItem label="Concept bối cảnh" value={booking.background} />
-            <InfoItem label="Thời gian ca" value={`${booking.time} • ${booking.date}`} />
-            <InfoItem
-              label="Hạn chót trả ảnh"
-              value={
-                booking.deadlineTag
-                  ? `${booking.deadline} (${booking.deadlineTag.label})`
-                  : booking.deadline || 'Chưa cập nhật'
-              }
-              highlight={booking.deadlineTag?.type === 'urgent'}
+          {/* Quick Info Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InfoCard
+              icon={User}
+              label="Khách hàng"
+              value={booking.customerName}
             />
-            <InfoItem
-              label="Hoa hồng ca chụp"
-              value={
-                booking.commission
-                  ? `+${new Intl.NumberFormat('vi-VN').format(booking.commission)} đ`
-                  : 'Theo quy chế studio'
-              }
-              highlight={true}
+            <InfoCard
+              icon={Phone}
+              label="Số điện thoại"
+              value={booking.customerPhone}
             />
-            <InfoItem
-              label="Trạng thái chọn ảnh"
-              value={booking.photoSelection?.selectionStatus || 'Chưa chọn'}
+            <InfoCard
+              icon={Calendar}
+              label="Ngày chụp"
+              value={formatDate(booking.bookingDate)}
+            />
+            <InfoCard
+              icon={Clock}
+              label="Khung giờ ca chụp"
+              value={formatTime(booking.startTime, booking.endTime)}
+            />
+            <InfoCard
+              icon={MapPin}
+              label="Phòng chụp / Bối cảnh"
+              value={booking.roomName || (booking.roomId ? `Phòng #${booking.roomId}` : 'Chưa phân phòng')}
+            />
+            <InfoCard
+              icon={CheckCircle2}
+              label="Trạng thái hiện tại"
+              value={
+                STATUS_OPTIONS.find((s) => s.value === currentStatus)?.label ||
+                currentStatus
+              }
             />
           </div>
 
-          {/* Customer Specific Request Notes */}
-          {booking.note && (
-            <div className="p-3.5 rounded-2xl bg-[#FDF0F3]/60 border border-[#F5D5DC] space-y-1">
-              <p className="font-bold text-[#B85064] flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Yêu Cầu & Lưu Ý Của Khách Hàng:</span>
-              </p>
-              <p className="text-[#261A1E] leading-relaxed text-[11px]">
-                {booking.note}
-              </p>
-            </div>
-          )}
-
-          {/* Assigned Gears, Clothes, Accessories */}
-          {(booking.equipments?.length > 0 || booking.clothes?.length > 0) && (
-            <div className="p-4 rounded-2xl border border-[#F0E4E6] bg-white space-y-3 shadow-sm">
-              <h4 className="font-bold text-[#261A1E] text-xs">Vật Tư & Thiết Bị Phục Vụ Ca Chụp:</h4>
-              <div className="space-y-2">
-                {booking.equipments && (
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-[#7A6C71] flex items-center gap-1 shrink-0 w-24">
-                      <Camera className="h-3.5 w-3.5 text-[#B85064]" />
-                      Thiết bị:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {booking.equipments.map((eq, i) => (
-                        <span key={i} className="bg-[#FAF5F5] border border-[#F0E4E6] text-[#261A1E] px-2 py-0.5 rounded-md text-[11px] font-medium">
-                          {eq}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {booking.clothes && (
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-[#7A6C71] flex items-center gap-1 shrink-0 w-24">
-                      <Shirt className="h-3.5 w-3.5 text-purple-600" />
-                      Trang phục:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {booking.clothes.map((cl, i) => (
-                        <span key={i} className="bg-purple-50 border border-purple-200 text-purple-800 px-2 py-0.5 rounded-md text-[11px] font-medium">
-                          {cl}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {booking.accessories && (
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-[#7A6C71] flex items-center gap-1 shrink-0 w-24">
-                      <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-                      Phụ kiện:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {booking.accessories.map((ac, i) => (
-                        <span key={i} className="bg-amber-50 border border-amber-200 text-amber-800 px-2 py-0.5 rounded-md text-[11px] font-medium">
-                          {ac}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Retouch & Delivery Progress */}
-          <div className="p-4 rounded-2xl border border-[#F0E4E6] bg-white space-y-3 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-[#261A1E] flex items-center gap-1.5">
-                <Image className="h-4 w-4 text-[#B85064]" />
-                Tiến Độ Hậu Kỳ & Trả File ({retouchedCount}/{selectedCount} ảnh đã hoàn thiện)
-              </span>
-              <span className="font-bold text-[#B85064] text-xs font-mono">{progressPercent}%</span>
-            </div>
-
-            <div className="h-2 w-full rounded-full bg-[#FAF5F5] border border-[#F0E4E6] overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#B85064] to-[#E28E9E] rounded-full transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-
-            {/* Slider or counter update */}
-            <div className="flex items-center justify-between pt-1 text-[11px] text-[#7A6C71]">
-              <span>Ảnh thô gốc: <strong className="text-[#261A1E]">{rawCount} file</strong></span>
-              <div className="flex items-center gap-2">
-                <span>Số ảnh đã sửa xong:</span>
-                <input
-                  type="number"
-                  min="0"
-                  max={selectedCount}
-                  value={retouchedCount}
-                  onChange={(e) => setRetouchedCount(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="w-16 rounded-xl border border-[#F0E4E6] bg-[#FAF5F5] px-2 py-1 text-center font-bold text-[#261A1E] focus:border-[#B85064] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Delivery Link Input */}
-            <div className="pt-2">
-              <label className="text-[11px] font-semibold text-[#7A6C71] block mb-1">
-                Link Drive / Cloud trả file ảnh hoàn thiện cho khách:
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={deliveryInput}
-                  onChange={(e) => setDeliveryInput(e.target.value)}
-                  placeholder="https://drive.google.com/drive/folders/..."
-                  className="flex-1 rounded-xl border border-[#F0E4E6] bg-[#FAF5F5] px-3 py-1.5 text-xs text-[#261A1E] placeholder-[#9E8E93] focus:border-[#B85064] focus:bg-white focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveDelivery}
-                  className="flex items-center gap-1.5 rounded-xl bg-[#B85064] hover:bg-[#913B4D] px-4 py-1.5 text-xs font-bold text-white transition-all shadow-sm"
-                >
-                  <Save className="h-3.5 w-3.5" />
-                  <span>{savedSuccess ? 'Đã lưu ✓' : 'Lưu'}</span>
-                </button>
-              </div>
-            </div>
+          {/* Customer Specific Note */}
+          <div className="p-4 rounded-2xl bg-[#FDF0F3]/60 border border-[#F5D5DC] space-y-1.5">
+            <p className="font-bold text-[#B85064] flex items-center gap-1.5 text-xs">
+              <FileText className="h-3.5 w-3.5" />
+              <span>Ghi Chú Yêu Cầu Của Khách Hàng:</span>
+            </p>
+            <p className="text-[#261A1E] leading-relaxed text-xs italic">
+              {booking.customerNote || 'Không có ghi chú thêm từ khách hàng.'}
+            </p>
           </div>
 
-          {/* Operational Checklist */}
-          {checklist.length > 0 && (
-            <div className="p-4 rounded-2xl border border-[#F0E4E6] bg-[#FAF5F5]/60 space-y-2.5">
-              <h4 className="font-bold text-[#261A1E] flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                Checklist Quy Trình Chuẩn Bị Ca Chụp:
-              </h4>
-              <div className="space-y-1.5">
-                {checklist.map((c, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => toggleChecklist(idx)}
-                    className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white cursor-pointer transition-colors"
+          {/* Real-time Status Changer */}
+          <div className="p-4 rounded-2xl border border-[#F0E4E6] bg-white space-y-3">
+            <label className="font-bold text-xs text-[#261A1E] block">
+              Cập Nhật Trạng Thái Ca Chụp (Lưu trực tiếp vào CSDL):
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {STATUS_OPTIONS.map((opt) => {
+                const isSelected = currentStatus === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    disabled={isUpdating}
+                    onClick={() => handleUpdateStatus(opt.value)}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-center ${
+                      isSelected
+                        ? `${opt.color} ring-2 ring-[#B85064]/30 shadow-sm`
+                        : 'border-[#F0E4E6] bg-[#FAF5F5] text-[#7A6C71] hover:border-[#B85064] hover:bg-white hover:text-[#261A1E]'
+                    }`}
                   >
-                    {c.done ? (
-                      <CheckSquare className="h-4 w-4 text-emerald-600 shrink-0" />
-                    ) : (
-                      <Square className="h-4 w-4 text-[#9E8E93] shrink-0" />
-                    )}
-                    <span className={`text-xs ${c.done ? 'line-through text-[#9E8E93]' : 'text-[#261A1E] font-medium'}`}>
-                      {c.task}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
-          )}
 
-          {/* Co-workers on shoot */}
-          {booking.colleagues && booking.colleagues.length > 0 && (
-            <div className="p-3.5 rounded-2xl border border-[#F0E4E6] bg-white space-y-2">
-              <h4 className="font-bold text-[#261A1E] flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-[#B85064]" />
-                Đồng Nghiệp Phối Hợp Trong Ca:
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {booking.colleagues.map((col, idx) => (
-                  <div key={idx} className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-[#FAF5F5] border border-[#F0E4E6]">
-                    <img src={col.avatar} alt={col.name} className="h-6 w-6 rounded-full object-cover" />
-                    <span className="font-bold text-[#261A1E] text-[11px]">{col.name}</span>
-                    <span className="text-[10px] text-[#B85064]">({col.role})</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            {successMsg && (
+              <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl font-semibold flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                <span>{successMsg}</span>
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Modal Footer Actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-[#F0E4E6] shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              onClose();
-              if (onOpenIncidentReport) onOpenIncidentReport(booking);
-            }}
-            className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-all"
-          >
-            <AlertTriangle className="h-3.5 w-3.5 text-rose-600" />
-            <span>Báo sự cố ca chụp</span>
-          </button>
-
+        {/* Modal Footer */}
+        <div className="flex items-center justify-end pt-3 border-t border-[#F0E4E6] shrink-0">
           <button
             type="button"
             onClick={onClose}

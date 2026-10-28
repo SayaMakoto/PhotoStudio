@@ -1,24 +1,18 @@
 import axiosEmployee from '../../lib/axiosEmployee';
 
 /**
- * Service quản lý ca chụp dành cho Nhân viên (Employee)
+ * Service quản lý ca chụp kết nối trực tiếp CSDL thật (Bảng `bookings`)
  */
 export const employeeBookingService = {
-  // Lấy danh sách ca chụp được phân công cho nhân viên này
-  getAssignedBookings: () => axiosEmployee.get('/api/employee/bookings'),
+  // Lấy toàn bộ danh sách đơn đặt lịch từ CSDL
+  getAll: () => axiosEmployee.get('/api/bookings'),
 
-  // Xem chi tiết một ca chụp
-  getBookingDetail: (id) => axiosEmployee.get(`/api/bookings/${id}`),
+  // Xem chi tiết một đơn đặt lịch theo ID
+  getById: (id) => axiosEmployee.get(`/api/bookings/${id}`),
 
-  // Cập nhật trạng thái ca chụp (Đang chụp, Hoàn tất chụp, Đang chỉnh sửa...)
-  updateBookingStatus: (id, status) =>
+  // Cập nhật trạng thái ca chụp trực tiếp vào CSDL (pending, confirmed, in_progress, completed, cancelled)
+  updateStatus: (id, status) =>
     axiosEmployee.patch(`/api/bookings/${id}/status`, { status }),
-
-  // Tải lên ảnh / file sản phẩm cho khách
-  uploadPhotos: (bookingId, formData) =>
-    axiosEmployee.post(`/api/bookings/${bookingId}/photos`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
 };
 
 export default employeeBookingService;

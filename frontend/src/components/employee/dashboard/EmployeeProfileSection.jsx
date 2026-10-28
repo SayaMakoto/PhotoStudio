@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, ShieldCheck, Lock, CheckCircle2, Save, MapPin, AlertCircle } from 'lucide-react';
+import { User, Mail, Phone, ShieldCheck, Lock, CheckCircle2, Save, MapPin, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import employeeAuthService from '../../../services/employee/authService';
 
 export default function EmployeeProfileSection({ profile: initialProfile, onProfileUpdated }) {
@@ -8,6 +8,7 @@ export default function EmployeeProfileSection({ profile: initialProfile, onProf
   const [phone, setPhone] = useState(initialProfile?.phone || '');
   const [email, setEmail] = useState(initialProfile?.email || '');
   const [address, setAddress] = useState(initialProfile?.address || '');
+  const [avatar, setAvatar] = useState(initialProfile?.avatar || '');
   const [newPass, setNewPass] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -22,6 +23,7 @@ export default function EmployeeProfileSection({ profile: initialProfile, onProf
       setPhone(initialProfile.phone || '');
       setEmail(initialProfile.email || '');
       setAddress(initialProfile.address || '');
+      setAvatar(initialProfile.avatar || '');
     }
   }, [initialProfile]);
 
@@ -47,6 +49,7 @@ export default function EmployeeProfileSection({ profile: initialProfile, onProf
         email: email.trim(),
         phone: phone.trim(),
         address: address.trim(),
+        avatar: avatar.trim(),
       };
 
       if (newPass) {
@@ -76,9 +79,6 @@ export default function EmployeeProfileSection({ profile: initialProfile, onProf
 
   const displayName = profile.fullname || profile.username || 'Nhân viên';
   const displayRole = profile.role === 'Employee' ? 'Nhân viên tác nghiệp' : (profile.role || 'Nhân viên');
-  const avatarUrl =
-    profile.avatar ||
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
 
   return (
     <div className="rounded-3xl border border-[#F0E4E6] bg-white p-6 shadow-[0_4px_20px_rgb(184,80,100,0.04)] space-y-6">
@@ -97,12 +97,26 @@ export default function EmployeeProfileSection({ profile: initialProfile, onProf
         {/* Left Column: Avatar & Account Metadata */}
         <div className="rounded-2xl border border-[#F0E4E6] bg-[#FAF5F5]/70 p-6 flex flex-col items-center text-center space-y-4">
           <div className="relative">
-            <img
-              src={avatarUrl}
-              alt={displayName}
-              className="h-24 w-24 rounded-full object-cover border-4 border-white shadow-[0_8px_20px_rgb(184,80,100,0.15)]"
-            />
-            <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full bg-emerald-500 border-2 border-white" />
+            {profile.avatar ? (
+              <img
+                src={profile.avatar}
+                alt={displayName}
+                className="h-24 w-24 rounded-full object-cover border-4 border-white shadow-[0_8px_20px_rgb(184,80,100,0.15)]"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.parentElement?.querySelector('.avatar-fallback');
+                  if (fallback) fallback.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <div
+              className={`avatar-fallback h-24 w-24 rounded-full bg-gradient-to-tr from-[#B85064] to-[#E28E9E] border-4 border-white shadow-[0_8px_20px_rgb(184,80,100,0.15)] flex items-center justify-center text-white text-3xl font-extrabold uppercase select-none ${
+                profile.avatar ? 'hidden' : 'flex'
+              }`}
+            >
+              {displayName.charAt(0)}
+            </div>
+            <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full bg-emerald-500 border-2 border-white ring-2 ring-emerald-200" />
           </div>
 
           <div>
@@ -212,6 +226,20 @@ export default function EmployeeProfileSection({ profile: initialProfile, onProf
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="Hà Nội, Việt Nam"
+                      className="w-full rounded-2xl border border-[#F0E4E6] bg-white py-2 pl-9 pr-3 text-[#261A1E] font-medium focus:border-[#B85064] focus:outline-none shadow-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-[#7A6C71] mb-1.5 block font-semibold">Đường dẫn ảnh đại diện (Avatar URL)</label>
+                  <div className="relative">
+                    <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9E8E93]" />
+                    <input
+                      type="text"
+                      value={avatar}
+                      onChange={(e) => setAvatar(e.target.value)}
+                      placeholder="https://..."
                       className="w-full rounded-2xl border border-[#F0E4E6] bg-white py-2 pl-9 pr-3 text-[#261A1E] font-medium focus:border-[#B85064] focus:outline-none shadow-sm"
                     />
                   </div>

@@ -1,3 +1,4 @@
-export { default as employeeAuthService } from './authService';
-export { default as employeeBookingService } from './bookingService';
-export { default as employeeEquipmentService } from './equipmentService';
+export { employeeAuthService } from './authService';
+export { employeeBookingService } from './bookingService';
+export { employeeEquipmentService } from './equipmentService';
+export { employeeReviewService } from './reviewService';
