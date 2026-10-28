@@ -953,38 +953,6 @@ INSERT INTO `contacts` (`id`, `user_id`, `fullname`, `email`, `phone`, `subject`
 (1, 4, 'Lê Minh Tuấn', 'minhtuan@gmail.com', '0934567890', 'Tư vấn gói chụp cưới ngoại cảnh', 'Chào studio, mình muốn hỏi gói chụp cưới phong cách vintage có hỗ trợ trang điểm và xe di chuyển không ạ?', 'completed', 'Dạ chào bạn Tuấn, gói chụp cưới bên mình đã bao gồm trọn gói trang điểm và ekip hỗ trợ bạn nhé! Nhân viên sẽ liên hệ tư vấn chi tiết ạ.'),
 (2, NULL, 'Nguyễn Mai Phương', 'maiphuong@outlook.com', '0988776655', 'Hỏi báo giá chụp kỷ yếu nhóm', 'Cho em xin báo giá chi tiết gói chụp ảnh kỷ yếu cho nhóm 15 người tại studio vào cuối tuần này với ạ.', 'pending', NULL);
 
--- =====================================================================
--- MIGRATION: THÊM CỘT DELETED_AT XÓA MỀM (CHO DATABASE ĐÃ TỒN TẠI)
--- =====================================================================
--- Run once against an existing photo_studio database before starting the backend.
--- New databases built from docs/photo_studio.sql already include this column.
-ALTER TABLE `equipments`
-    ADD COLUMN IF NOT EXISTS `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa thiết bị vào thùng rác';
--- Chạy một lần trên database photo_studio hiện có trước khi khởi động backend.
--- Database mới được tạo từ docs/photo_studio.sql đã có cột này.
-ALTER TABLE `services`
-    ADD COLUMN `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa dịch vụ vào thùng rác';
--- Chạy một lần trên database photo_studio hiện có trước khi khởi động backend.
--- Database mới được tạo từ docs/photo_studio.sql đã có cột này.
-ALTER TABLE `rooms`
-    ADD COLUMN `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa phòng chụp vào thùng rác';
--- Chạy một lần trên database photo_studio hiện có trước khi khởi động backend.
--- Database mới được tạo từ docs/photo_studio.sql đã có cột này.
-ALTER TABLE `packages`
-    ADD COLUMN `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa gói chụp vào thùng rác';
--- Chạy một lần trên database photo_studio hiện có trước khi khởi động backend.
--- Database mới được tạo từ docs/photo_studio.sql đã có cột này.
-ALTER TABLE `clothes`
-    ADD COLUMN `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa trang phục vào thùng rác';
--- Chạy một lần trên database photo_studio hiện có trước khi khởi động backend.
--- Database mới được tạo từ docs/photo_studio.sql đã có cột này.
-ALTER TABLE `backgrounds`
-    ADD COLUMN `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa bối cảnh vào thùng rác';
--- Chạy một lần trên database photo_studio hiện có trước khi khởi động backend.
--- Database mới được tạo từ docs/photo_studio.sql đã có cột này.
-ALTER TABLE `accessories`
-    ADD COLUMN `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa phụ kiện vào thùng rác';
-
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- =====================================================================

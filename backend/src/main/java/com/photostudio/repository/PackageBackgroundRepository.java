@@ -10,7 +10,8 @@ import java.util.Optional;
 
 public interface PackageBackgroundRepository extends JpaRepository<PackageBackground, Long> {
 
-    List<PackageBackground> findByPackageEntityId(Long packageId);
+    @Query("SELECT pb FROM PackageBackground pb WHERE pb.packageEntity.id = :packageId")
+    List<PackageBackground> findByPackageEntityId(@Param("packageId") Long packageId);
 
     @Query("SELECT pb FROM PackageBackground pb WHERE pb.packageEntity.id = :packageId AND pb.background.id = :backgroundId")
     Optional<PackageBackground> findByPackageEntityIdAndBackgroundId(

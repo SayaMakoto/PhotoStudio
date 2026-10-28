@@ -64,6 +64,10 @@ export const STATUS_DOMAIN_CONFIG = {
     inactive: { label: "Ngừng hoạt động", className: neutral },
     on_leave: { label: "Đang nghỉ phép", className: amber },
   },
+  notification: {
+    unread: { label: "Chưa đọc", className: amber },
+    read: { label: "Đã đọc", className: green },
+  },
 };
 
 export function getStatusDefinition(status, domain) {

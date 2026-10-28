@@ -14,9 +14,13 @@ import java.util.Optional;
 
 public interface BookingAccessoryRepository extends JpaRepository<BookingAccessory, Long> {
 
-    List<BookingAccessory> findByBookingId(Long bookingId);
+    @Query("SELECT ba FROM BookingAccessory ba WHERE ba.booking.id = :bookingId")
+    List<BookingAccessory> findByBookingId(@Param("bookingId") Long bookingId);
 
-    Optional<BookingAccessory> findByBookingIdAndAccessoryId(Long bookingId, Long accessoryId);
+    @Query("SELECT ba FROM BookingAccessory ba WHERE ba.booking.id = :bookingId AND ba.accessory.id = :accessoryId")
+    Optional<BookingAccessory> findByBookingIdAndAccessoryId(
+            @Param("bookingId") Long bookingId,
+            @Param("accessoryId") Long accessoryId);
 
     @Query("SELECT COALESCE(SUM(ba.quantity), 0) FROM BookingAccessory ba " +
             "WHERE ba.accessory.id = :accessoryId " +

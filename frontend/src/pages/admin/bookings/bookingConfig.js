@@ -6,6 +6,17 @@ export const BOOKING_STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Đã hủy' },
 ];
 
+const NEXT_BOOKING_STATUS = {
+  pending: 'confirmed',
+  confirmed: 'in_progress',
+  in_progress: 'completed',
+};
+
+export function getNextBookingStatus(status) {
+  const nextStatus = NEXT_BOOKING_STATUS[status];
+  return BOOKING_STATUS_OPTIONS.find((option) => option.value === nextStatus) || null;
+}
+
 export function formatBookingDate(value) {
   if (!value) return '—';
   const date = new Date(value);

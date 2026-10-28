@@ -13,11 +13,20 @@ import java.util.Optional;
 
 public interface BookingClothingRepository extends JpaRepository<BookingClothing, Long> {
 
-    List<BookingClothing> findByBookingId(Long bookingId);
+    @Query("SELECT bc FROM BookingClothing bc WHERE bc.booking.id = :bookingId")
+    List<BookingClothing> findByBookingId(@Param("bookingId") Long bookingId);
 
-    Optional<BookingClothing> findByBookingIdAndClothId(Long bookingId, Long clothId);
+    @Query("SELECT bc FROM BookingClothing bc WHERE bc.booking.id = :bookingId AND bc.cloth.id = :clothId")
+    Optional<BookingClothing> findByBookingIdAndClothId(
+            @Param("bookingId") Long bookingId,
+            @Param("clothId") Long clothId);
 
-    boolean existsByBookingIdAndClothIdAndIdNot(Long bookingId, Long clothId, Long id);
+    @Query("SELECT COUNT(bc) > 0 FROM BookingClothing bc WHERE bc.booking.id = :bookingId " +
+            "AND bc.cloth.id = :clothId AND bc.id <> :id")
+    boolean existsByBookingIdAndClothIdAndIdNot(
+            @Param("bookingId") Long bookingId,
+            @Param("clothId") Long clothId,
+            @Param("id") Long id);
 
     @Query("SELECT COUNT(bc) > 0 FROM BookingClothing bc " +
             "WHERE bc.cloth.id = :clothId " +

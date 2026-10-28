@@ -41,6 +41,7 @@ import AdminPaymentsPage from '../pages/admin/payments';
 import AdminReviewsPage from '../pages/admin/reviews';
 import AdminEmployeeReviewsPage from '../pages/admin/employee-reviews';
 import AdminBannersPage from '../pages/admin/banners';
+import AdminNotificationsPage from '../pages/admin/notifications';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -153,13 +154,7 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.ADMIN.SYSTEM.NOTIFICATIONS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Thông Báo (Notifications)"
-              category="Quản lý hệ thống"
-              description="Cấu hình thông báo gửi đến khách hàng và nhân sự."
-            />
-          }
+          element={<AdminNotificationsPage />}
         />
         <Route
           path={ROUTES.ADMIN.SYSTEM.IMAGES.replace('/admin/', '')}
