@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   CalendarDays,
@@ -9,8 +9,6 @@ import {
   LogOut,
   Camera,
   X,
-  ShieldCheck,
-  Building2
 } from 'lucide-react';
 import { EMPLOYEE_PROFILE } from '../employeeData';
 import employeeAuthService from '../../../services/employee/authService';
@@ -48,44 +46,44 @@ export default function EmployeeSidebar({
       {/* Mobile backdrop */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
           onClick={onCloseMobile}
         />
       )}
 
-      {/* Sidebar container */}
+      {/* Sidebar container - Light Studio Theme */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex w-76 flex-col border-r border-neutral-800 bg-neutral-950/95 text-neutral-300 backdrop-blur-xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 flex w-76 flex-col border-r border-[#F0E4E6] bg-white/95 text-[#261A1E] backdrop-blur-xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Brand / Logo - Consistent with Admin */}
-        <div className="flex h-18 items-center justify-between border-b border-neutral-800/80 px-6">
+        {/* Brand / Logo - Consistent with User Studio theme */}
+        <div className="flex h-18 items-center justify-between border-b border-[#F0E4E6] px-6 bg-white">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-neutral-950 font-bold shadow-lg shadow-amber-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] font-bold shadow-sm">
               <Camera className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+              <h1 className="text-base font-bold tracking-tight text-[#261A1E] flex items-center gap-1.5">
                 PhotoStudio{' '}
-                <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 border border-amber-500/30">
+                <span className="rounded-full bg-[#FDF0F3] px-2 py-0.5 text-[10px] font-bold text-[#B85064] border border-[#F5D5DC]">
                   STAFF
                 </span>
               </h1>
-              <p className="text-xs text-neutral-400">Cổng tác nghiệp nhân viên</p>
+              <p className="text-xs text-[#7A6C71]">Cổng tác nghiệp nhân viên</p>
             </div>
           </div>
           <button
             onClick={onCloseMobile}
-            className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-800 hover:text-white lg:hidden"
+            className="rounded-lg p-1 text-[#7A6C71] hover:bg-[#FAF5F5] hover:text-[#261A1E] lg:hidden"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Navigation List */}
-        <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-1.5 scrollbar-thin scrollbar-thumb-neutral-800">
-          <div className="px-2 pb-2 text-[11px] font-semibold tracking-wider text-neutral-400 uppercase">
+        <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1.5 scrollbar-thin scrollbar-thumb-[#F0E4E6]">
+          <div className="px-3 pb-2 text-[11px] font-bold tracking-wider text-[#9E8E93] uppercase">
             Menu Tác Nghiệp
           </div>
 
@@ -101,15 +99,15 @@ export default function EmployeeSidebar({
                   onSelectTab(item.id);
                   if (onCloseMobile) onCloseMobile();
                 }}
-                className={`group flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all duration-200 ${
+                className={`group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-xs font-semibold transition-all duration-200 ${
                   isActive
-                    ? 'bg-amber-400/10 text-amber-300 font-bold border border-amber-400/20 shadow-sm'
-                    : 'text-neutral-400 hover:bg-neutral-900/80 hover:text-neutral-100'
+                    ? 'bg-[#FDF0F3] text-[#B85064] font-bold border border-[#F5D5DC] shadow-[0_2px_12px_rgb(184,80,100,0.08)]'
+                    : 'text-[#7A6C71] hover:bg-[#FAF5F5] hover:text-[#261A1E]'
                 }`}
               >
                 <Icon
-                  className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                    isActive ? 'text-amber-400' : 'text-neutral-400'
+                  className={`h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                    isActive ? 'text-[#B85064]' : 'text-[#9E8E93] group-hover:text-[#B85064]'
                   }`}
                 />
                 <span className="truncate">{item.label}</span>
@@ -118,25 +116,25 @@ export default function EmployeeSidebar({
           })}
         </div>
 
-        {/* User profile card & Logout button in Sidebar bottom (matching AdminSidebar) */}
-        <div className="border-t border-neutral-800/80 p-3 bg-neutral-900/40">
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-neutral-900/80 p-2.5 border border-neutral-800">
+        {/* User profile card & Logout button in Sidebar bottom */}
+        <div className="border-t border-[#F0E4E6] p-4 bg-[#FAF5F5]/60">
+          <div className="flex items-center justify-between gap-3 rounded-2xl bg-white p-3 border border-[#F0E4E6] shadow-sm">
             <div className="flex items-center gap-3 min-w-0">
               <img
                 src={currentProfile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
                 alt={displayName}
-                className="h-9 w-9 rounded-full object-cover border-2 border-amber-400/80 shrink-0"
+                className="h-9 w-9 rounded-full object-cover border-2 border-[#B85064]/30 shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-white" title={displayName}>
+                <p className="truncate text-xs font-bold text-[#261A1E]" title={displayName}>
                   {displayName}
                 </p>
-                <p className="truncate text-[11px] text-amber-400/90 font-medium">
+                <p className="truncate text-[11px] text-[#B85064] font-semibold">
                   {displayRole}
                 </p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] text-neutral-400 truncate">
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] text-[#7A6C71] truncate">
                     {displayStatus}
                   </span>
                 </div>
@@ -146,7 +144,7 @@ export default function EmployeeSidebar({
             <button
               onClick={handleLogout}
               title="Đăng xuất tài khoản"
-              className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-rose-400 transition-colors shrink-0"
+              className="rounded-xl p-2 text-[#9E8E93] hover:bg-[#FDF0F3] hover:text-[#B85064] transition-colors shrink-0"
             >
               <LogOut className="h-4 w-4" />
             </button>
