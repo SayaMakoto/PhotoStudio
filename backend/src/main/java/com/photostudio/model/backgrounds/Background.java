@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "backgrounds")
 @Getter
@@ -25,4 +27,7 @@ public class Background {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private BackgroundStatus status = BackgroundStatus.active;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

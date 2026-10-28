@@ -2,6 +2,7 @@ package com.photostudio.controller;
 
 import com.photostudio.dto.employeereviews.EmployeeReviewRequest;
 import com.photostudio.dto.employeereviews.EmployeeReviewResponse;
+import com.photostudio.dto.reviews.ReviewReplyRequest;
 import com.photostudio.service.EmployeeReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,17 @@ public class EmployeeReviewController {
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeReviewResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
+    }
+
+    @PatchMapping("/{id}/reply")
+    public ResponseEntity<EmployeeReviewResponse> reply(
+            @PathVariable Long id,
+            @RequestBody ReviewReplyRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Dữ liệu phản hồi không được để trống");
+        }
+        request.validate();
+        return ResponseEntity.ok(service.reply(id, request.getReply()));
     }
 
     @GetMapping("/review/{reviewId}")

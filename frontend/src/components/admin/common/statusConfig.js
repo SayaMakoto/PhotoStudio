@@ -33,6 +33,23 @@ export const STATUS_CONFIG = {
 };
 
 export const STATUS_DOMAIN_CONFIG = {
+  payment: {
+    pending: { label: "Chờ thanh toán", className: amber },
+    paid: { label: "Đã thanh toán", className: green },
+    failed: { label: "Thất bại", className: red },
+    refunded: { label: "Đã hoàn tiền", className: purple },
+  },
+  booking: {
+    pending: { label: "Chờ xác nhận", className: amber },
+    confirmed: { label: "Đã xác nhận", className: blue },
+    in_progress: { label: "Đang thực hiện", className: blue },
+    completed: { label: "Hoàn tất", className: green },
+    cancelled: { label: "Đã hủy", className: red },
+  },
+  reviewReply: {
+    replied: { label: "Đã phản hồi", className: green },
+    unreplied: { label: "Chưa phản hồi", className: amber },
+  },
   visibility: {
     active: { label: "Đang hiện", className: green },
     inactive: { label: "Đang ẩn", className: neutral },

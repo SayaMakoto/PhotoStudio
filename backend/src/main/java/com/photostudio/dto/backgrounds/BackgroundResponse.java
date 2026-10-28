@@ -1,5 +1,7 @@
 package com.photostudio.dto.backgrounds;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,4 +17,5 @@ public class BackgroundResponse {
     private String name;
     private String description;
     private String status;
+    private LocalDateTime deletedAt;
 }

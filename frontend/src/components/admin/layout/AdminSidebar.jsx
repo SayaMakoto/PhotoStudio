@@ -3,6 +3,8 @@ import { ROUTES } from "../../../routes/web";
 import { ChevronDown, Building2, X, LogOut } from "lucide-react";
 import { ADMIN_MENU_CONFIG } from "./adminMenuConfig";
 import adminAuthService from "../../../services/admin/authService";
+import adminBookingService from "../../../services/admin/bookingService";
+import { useEffect, useState } from "react";
 
 export default function AdminSidebar({
   openGroup,
@@ -14,6 +16,36 @@ export default function AdminSidebar({
   const navigate = useNavigate();
   const currentPath = location.pathname;
   const admin = adminAuthService.getUser();
+  const [pendingBookingCount, setPendingBookingCount] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+    const refreshPendingCount = () => {
+      adminBookingService.getAll()
+        .then((rows) => {
+          if (!mounted) return;
+          const count = Array.isArray(rows)
+            ? rows.filter((booking) => String(booking.status).toLowerCase() === "pending").length
+            : 0;
+          setPendingBookingCount(count);
+        })
+        .catch(() => {
+          // Giữ số liệu gần nhất nếu API tạm thời không phản hồi.
+        });
+    };
+
+    refreshPendingCount();
+    const intervalId = window.setInterval(refreshPendingCount, 60_000);
+    window.addEventListener("focus", refreshPendingCount);
+    window.addEventListener("admin:bookings-updated", refreshPendingCount);
+
+    return () => {
+      mounted = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshPendingCount);
+      window.removeEventListener("admin:bookings-updated", refreshPendingCount);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await adminAuthService.logout();
@@ -91,6 +123,9 @@ export default function AdminSidebar({
             );
             const isGroupOpen = openGroup === item.id;
             const Icon = item.icon;
+            const badge = item.badgeType === "pendingBookings"
+              ? (pendingBookingCount > 0 ? `${pendingBookingCount} Chờ duyệt` : null)
+              : item.badge;
 
             if (!hasChildren) {
               const isDirectActive = currentPath === item.path;
@@ -121,9 +156,9 @@ export default function AdminSidebar({
                       {item.title}
                     </span>
                   </div>
-                  {item.badge && (
+                  {badge && (
                     <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-medium text-amber-300 border border-amber-500/30">
-                      {item.badge}
+                      {badge}
                     </span>
                   )}
                 </NavLink>

@@ -6,24 +6,32 @@ import com.photostudio.dto.equipment.EquipmentResponse;
 import com.photostudio.mapper.EquipmentMapper;
 import com.photostudio.model.equipment.Equipment;
 import com.photostudio.model.equipment.EquipmentType;
+import com.photostudio.model.bookings.BookingEquipmentStatus;
+import com.photostudio.repository.BookingEquipmentRepository;
 import com.photostudio.repository.EquipmentRepository;
 import com.photostudio.service.EquipmentService;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class EquipmentServiceImpl implements EquipmentService {
 
     private final EquipmentRepository repository;
+    private final BookingEquipmentRepository bookingEquipmentRepository;
 
-    public EquipmentServiceImpl(EquipmentRepository repository) {
+    public EquipmentServiceImpl(
+            EquipmentRepository repository,
+            BookingEquipmentRepository bookingEquipmentRepository) {
         this.repository = repository;
+        this.bookingEquipmentRepository = bookingEquipmentRepository;
     }
 
     private Equipment findEntity(Long id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy thiết bị có id: " + id));
     }
@@ -38,7 +46,8 @@ public class EquipmentServiceImpl implements EquipmentService {
                 e.getSerialNumber(),
                 e.getPurchaseDate(),
                 e.getDescription(),
-                e.getStatus().name());
+                e.getStatus().name(),
+                e.getDeletedAt());
     }
 
     private void copyRequest(
@@ -78,7 +87,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 
     @Override
     public List<EquipmentResponse> findAll() {
-        return repository.findAll()
+        return repository.findByDeletedAtIsNullOrderByIdDesc()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<EquipmentResponse> findTrash() {
+        return repository.findByDeletedAtIsNotNullOrderByDeletedAtDesc()
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -117,14 +134,44 @@ public class EquipmentServiceImpl implements EquipmentService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Equipment equipment = findEntity(id);
+        if (bookingEquipmentRepository.existsByEquipmentIdAndStatus(
+                id, BookingEquipmentStatus.assigned)) {
+            throw new IllegalArgumentException(
+                    "Không thể đưa thiết bị đang được cấp phát vào thùng rác");
+        }
+        equipment.setDeletedAt(LocalDateTime.now());
+        repository.save(equipment);
+    }
+
+    @Override
+    @Transactional
+    public EquipmentResponse restore(Long id) {
+        Equipment equipment = repository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy thiết bị trong thùng rác có id: " + id));
+        equipment.setDeletedAt(null);
+        return toResponse(repository.save(equipment));
+    }
+
+    @Override
+    @Transactional
+    public void permanentlyDelete(Long id) {
+        Equipment equipment = repository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy thiết bị trong thùng rác có id: " + id));
+        if (bookingEquipmentRepository.existsByEquipment_Id(id)) {
+            throw new IllegalArgumentException(
+                    "Không thể xóa vĩnh viễn thiết bị đã có lịch sử cấp phát");
+        }
         repository.delete(equipment);
     }
 
     @Override
     public List<EquipmentResponse> findByName(String name) {
-        return repository.findByNameContaining(name)
+        return repository.findByNameContainingIgnoreCaseAndDeletedAtIsNull(name)
                 .stream()
                 .map(EquipmentMapper::toResponse)
                 .toList();
@@ -141,7 +188,7 @@ public class EquipmentServiceImpl implements EquipmentService {
                     "Loại thiết bị không hợp lệ. Các loại hợp lệ: camera, lens, lighting, tripod, other");
         }
 
-        return repository.findByType(equipmentType)
+        return repository.findByTypeAndDeletedAtIsNull(equipmentType)
                 .stream()
                 .map(EquipmentMapper::toResponse)
                 .toList();

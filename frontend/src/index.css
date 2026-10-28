@@ -63,6 +63,10 @@ select {
   font: inherit;
 }
 
+input.datetime-picker-native::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
@@ -173,4 +177,12 @@ select {
 
 .font-handwriting {
   font-family: 'Alex Brush', cursive;
+}
+
+/* Ẩn biểu tượng con mắt mặc định của trình duyệt (Edge/IE) trên các ô mật khẩu */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL, API_TIMEOUT, DEFAULT_HEADERS } from '../config/api.config';
+import { API_BASE_URL, API_TIMEOUT, DEFAULT_HEADERS } from '../config/api';
 
 const TOKEN_KEY = 'admin_token';
 const USER_KEY = 'admin_user';

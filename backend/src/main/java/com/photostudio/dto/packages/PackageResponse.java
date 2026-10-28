@@ -23,4 +23,5 @@ public class PackageResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<PackageEquipmentItemResponse> equipments;
+    private LocalDateTime deletedAt;
 }

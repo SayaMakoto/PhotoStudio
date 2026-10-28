@@ -31,6 +31,17 @@ const EQUIPMENT_LABELS = {
   softbox: 'Softbox',
 };
 
+const DEFAULT_ADDITIONAL_SERVICES = [
+  { id: 1, name: 'Trang Điểm & Làm Tóc Chuyên Nghiệp (Layout 1)', type: 'makeup', description: 'Layout makeup cá nhân phù hợp từng đường nét gương mặt và concept chụp', duration: 60, price: 300000.0, status: 'active' },
+  { id: 2, name: 'Trang Điểm Thay Layout Thứ 2 Trong Buổi Chụp', type: 'makeup', description: 'Dặm phấn, thay đổi màu son và kiểu tóc sang concept trang phục mới', duration: 30, price: 200000.0, status: 'active' },
+  { id: 3, name: 'Chỉnh Sửa Ảnh Chuyên Sâu (Retouch Da & Dáng 10 Ảnh)', type: 'photography', description: 'Kỹ thuật Frequency Separation giữ vân da thật, cân chỉnh màu sắc điện ảnh', duration: 60, price: 250000.0, status: 'active' },
+  { id: 4, name: 'Thuê Phụ Kiện Không Giới Hạn Toàn Buổi', type: 'accessory', description: 'Sử dụng toàn bộ vương miện, hoa cưới, đạo cụ trong studio', duration: 0, price: 150000.0, status: 'active' },
+  { id: 5, name: 'In Album Photobook Mở Phẳng Cao Cấp 25x25 (20 Trang)', type: 'photography', description: 'In giấy mỹ thuật phủ màng UV chống ẩm mốc, bìa bọc da sang trọng', duration: 0, price: 850000.0, status: 'active' },
+  { id: 6, name: 'In Ảnh Cổng Pha Lê Tráng Gương Khổ Lớn 60x90cm', type: 'photography', description: 'Khung viền mạ vàng, bề mặt tráng gương chống lóa sắc nét', duration: 0, price: 650000.0, status: 'active' },
+  { id: 7, name: 'Quay Video Highlight Hậu Kỳ Cinematic 4K (60 Giây)', type: 'photography', description: 'Video dọc định dạng Reels/TikTok/Shorts ghi lại hậu trường lung linh', duration: 90, price: 900000.0, status: 'active' },
+  { id: 8, name: 'Thuê Thêm Trang Phục Thiết Kế (1 Bộ / Concept)', type: 'clothing', description: 'Tự chọn váy cưới ren Pháp, áo dài hoặc vest cao cấp kèm hỗ trợ là ủi hơi nước', duration: 30, price: 200000.0, status: 'active' },
+];
+
 export default function Services({ onSelectPackage }) {
   const [packages, setPackages] = useState([]);
   const [additionalServices, setAdditionalServices] = useState([]);
@@ -76,11 +87,11 @@ export default function Services({ onSelectPackage }) {
           setPackages([]);
         }
 
-        if (srvRes.status === 'fulfilled' && Array.isArray(srvRes.value)) {
+        if (srvRes.status === 'fulfilled' && Array.isArray(srvRes.value) && srvRes.value.length > 0) {
           const activeSrvs = srvRes.value.filter((s) => !s.status || s.status === 'active');
-          setAdditionalServices(activeSrvs);
+          setAdditionalServices(activeSrvs.length > 0 ? activeSrvs : DEFAULT_ADDITIONAL_SERVICES);
         } else {
-          setAdditionalServices([]);
+          setAdditionalServices(DEFAULT_ADDITIONAL_SERVICES);
         }
       })
       .finally(() => {
@@ -162,7 +173,6 @@ export default function Services({ onSelectPackage }) {
               const formattedPrice = pkg.price
                 ? Number(pkg.price).toLocaleString('vi-VN')
                 : 'Liên hệ';
-              const isHighlighted = idx === 1;
 
               return (
                 <ScrollReveal
@@ -173,11 +183,7 @@ export default function Services({ onSelectPackage }) {
                   className="flex"
                 >
                   <div
-                    className={`group flex flex-col justify-between relative overflow-hidden rounded-3xl p-0 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#B85064]/15 w-full bg-white border ${
-                      isHighlighted
-                        ? 'border-[#B85064] shadow-xl shadow-[#B85064]/10 ring-1 ring-[#B85064]/40 md:-translate-y-2'
-                        : 'border-[#F0E4E6] hover:border-[#B85064]/50'
-                    }`}
+                    className="group flex flex-col justify-between relative overflow-hidden rounded-3xl p-0 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#B85064]/20 hover:border-[#B85064] hover:ring-1 hover:ring-[#B85064]/40 w-full bg-white border border-[#F0E4E6] shadow-sm"
                   >
                     <div>
                       {/* Product Image Cover */}

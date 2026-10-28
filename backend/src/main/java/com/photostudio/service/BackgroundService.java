@@ -20,4 +20,10 @@ public interface BackgroundService {
     List<BackgroundResponse> findByName(String name);
 
     List<BackgroundResponse> findByStatus(String status);
+
+    List<BackgroundResponse> findTrash();
+
+    BackgroundResponse restore(Long id);
+
+    void permanentlyDelete(Long id);
 }

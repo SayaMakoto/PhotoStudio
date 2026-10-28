@@ -10,7 +10,11 @@ import {
   CameraIcon,
   CalendarDaysIcon,
 } from '@heroicons/react/24/solid';
+import { Link } from 'react-router-dom';
 import ScrollReveal from '../../animations/ScrollReveal';
+import Magnet from '../../animations/Magnet';
+import ShinyText from '../../animations/ShinyText';
+import { ROUTES } from '../../../routes/web';
 import userImageService from '../../../services/user/imageService';
 
 // Danh sách ảnh fallback phòng trường hợp đường dẫn ảnh trong CSDL bị lỗi hoặc 404
@@ -266,18 +270,23 @@ export default function Gallery() {
       : photos.filter((photo) => photo.category === activeFilter);
   }, [activeFilter, photos]);
 
+  // Giới hạn hiển thị đúng 12 hình trên trang chủ theo yêu cầu của người dùng
+  const displayedPhotos = useMemo(() => {
+    return filteredPhotos.slice(0, 12);
+  }, [filteredPhotos]);
+
   const bentoSpans = useMemo(() => {
-    return getBentoSpans(filteredPhotos.length);
-  }, [filteredPhotos.length]);
+    return getBentoSpans(displayedPhotos.length);
+  }, [displayedPhotos.length]);
 
   const handleNext = () => {
     setSlideDirection(1);
-    setSelectedIndex((prev) => (prev + 1) % filteredPhotos.length);
+    setSelectedIndex((prev) => (prev + 1) % displayedPhotos.length);
   };
 
   const handlePrev = () => {
     setSlideDirection(-1);
-    setSelectedIndex((prev) => (prev - 1 + filteredPhotos.length) % filteredPhotos.length);
+    setSelectedIndex((prev) => (prev - 1 + displayedPhotos.length) % displayedPhotos.length);
   };
 
   useEffect(() => {
@@ -286,18 +295,18 @@ export default function Gallery() {
       if (e.key === 'Escape') setSelectedIndex(null);
       if (e.key === 'ArrowRight') {
         setSlideDirection(1);
-        setSelectedIndex((prev) => (prev + 1) % filteredPhotos.length);
+        setSelectedIndex((prev) => (prev + 1) % displayedPhotos.length);
       }
       if (e.key === 'ArrowLeft') {
         setSlideDirection(-1);
-        setSelectedIndex((prev) => (prev - 1 + filteredPhotos.length) % filteredPhotos.length);
+        setSelectedIndex((prev) => (prev - 1 + displayedPhotos.length) % displayedPhotos.length);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIndex, filteredPhotos.length]);
+  }, [selectedIndex, displayedPhotos.length]);
 
-  const selectedPhoto = selectedIndex !== null ? filteredPhotos[selectedIndex] : null;
+  const selectedPhoto = selectedIndex !== null ? displayedPhotos[selectedIndex] : null;
 
   const slideVariants = {
     enter: (dir) => ({
@@ -332,7 +341,7 @@ export default function Gallery() {
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
                 <SparklesIcon className="w-4 h-4 text-[#B85064]" />
-                <span>KHO ẢNH TỪ HỆ THỐNG</span>
+                <ShinyText text="KHO ẢNH TỪ HỆ THỐNG" speed={3} className="text-[#B85064]" />
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2A1D22] font-serif-luxury tracking-tight">
                 Bộ Sưu Tập Tác Phẩm
@@ -401,7 +410,7 @@ export default function Gallery() {
 
             {/* BỐ CỤC BENTO NGHỆ THUẬT ĐA DẠNG KÍCH THƯỚC - KHÔNG BAO GIỜ BỊ HỞ HAY TRỐNG */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[250px] sm:auto-rows-[270px] lg:auto-rows-[290px] gap-4 sm:gap-5">
-              {filteredPhotos.map((photo, index) => {
+              {displayedPhotos.map((photo, index) => {
                 const spanClass = bentoSpans[index] || 'col-span-1 sm:col-span-1 lg:col-span-1 row-span-1';
 
                 return (
@@ -434,7 +443,7 @@ export default function Gallery() {
                       />
 
                       {/* Lớp phủ Gradient điện ảnh */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-65 group-hover:opacity-90 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-40 group-hover:opacity-65 transition-opacity duration-300" />
 
                       {/* Nội dung thông tin trên thẻ ảnh */}
                       <div className="absolute inset-0 p-5 sm:p-6 flex flex-col justify-end transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
@@ -455,6 +464,19 @@ export default function Gallery() {
                   </ScrollReveal>
                 );
               })}
+            </div>
+            {/* Nút Khám Phá Trang Bộ Sưu Tập 3D Hoàn Chỉnh */}
+            <div className="mt-12 text-center">
+              <Magnet padding={30} magnetStrength={3}>
+                <Link
+                  to={ROUTES.USER.GALLERY}
+                  className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs sm:text-sm font-bold shadow-lg shadow-rose-950/20 hover:scale-105 transition-all"
+                >
+                  <SparklesIcon className="w-4 h-4 text-white" />
+                  <span>Xem Thêm Tác Phẩm Khác Trong Bộ Sưu Tập ({photos.length}+ Tác Phẩm)</span>
+                  <ChevronRightIcon className="w-4 h-4 text-white" />
+                </Link>
+              </Magnet>
             </div>
           </>
         )}

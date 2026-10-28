@@ -1,6 +1,7 @@
 package com.photostudio.service;
 
 import com.photostudio.model.rooms.Room;
+import com.photostudio.dto.rooms.RoomResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,10 @@ public interface RoomService {
     List<Room> searchRoomsByName(String name);
 
     List<Room> getRoomsByStatus(String status);
+
+    List<RoomResponse> getTrash();
+
+    RoomResponse restoreRoom(Long id);
+
+    void permanentlyDeleteRoom(Long id);
 }

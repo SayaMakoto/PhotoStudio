@@ -10,6 +10,8 @@ public interface EquipmentService {
 
     List<EquipmentResponse> findAll();
 
+    List<EquipmentResponse> findTrash();
+
     EquipmentResponse findById(Long id);
 
     List<EquipmentResponse> findByName(String name);
@@ -21,4 +23,8 @@ public interface EquipmentService {
     EquipmentResponse update(Long id, EquipmentRequest request);
 
     void delete(Long id);
+
+    EquipmentResponse restore(Long id);
+
+    void permanentlyDelete(Long id);
 }

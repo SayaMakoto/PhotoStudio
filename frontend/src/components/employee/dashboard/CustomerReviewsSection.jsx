@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import { Star, MessageSquare } from 'lucide-react';
 
@@ -24,6 +25,10 @@ export default function CustomerReviewsSection({ reviews = [] }) {
       return dateStr;
     }
   };
+=======
+import { Star } from 'lucide-react';
+import { CUSTOMER_REVIEWS, EMPLOYEE_PROFILE } from '../employeeData';
+>>>>>>> origin/main
 
   return (
     <div className="rounded-3xl border border-[#F0E4E6] bg-white p-6 shadow-[0_4px_20px_rgb(184,80,100,0.04)] space-y-5">

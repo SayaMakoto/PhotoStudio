@@ -22,4 +22,10 @@ public interface ClothService {
     List<ClothResponse> findByType(String type);
 
     List<ClothResponse> findByStatus(String status);
+
+    List<ClothResponse> findTrash();
+
+    ClothResponse restore(Long id);
+
+    void permanentlyDelete(Long id);
 }

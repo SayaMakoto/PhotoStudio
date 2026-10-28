@@ -12,6 +12,9 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END FROM Booking b WHERE b.room.id = :roomId")
+    boolean existsByRoomId(@Param("roomId") Long roomId);
+
     // Tìm kiếm các lịch đặt theo mã khách hàng
     @Query("SELECT b FROM Booking b WHERE b.customer.id = :customerId")
     List<Booking> findByCustomerId(@Param("customerId") Long customerId);

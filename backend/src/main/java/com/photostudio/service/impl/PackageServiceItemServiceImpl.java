@@ -88,6 +88,8 @@ public class PackageServiceItemServiceImpl implements PackageServiceItemService 
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói chụp với ID: " + id));
         if (pkg.getStatus() != PackageStatus.active)
             throw new IllegalArgumentException("Gói chụp '" + pkg.getName() + "' hiện không hoạt động");
+        if (pkg.getDeletedAt() != null)
+            throw new IllegalArgumentException("Gói chụp '" + pkg.getName() + "' đang nằm trong thùng rác");
         return pkg;
     }
 
@@ -96,6 +98,8 @@ public class PackageServiceItemServiceImpl implements PackageServiceItemService 
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dịch vụ với ID: " + id));
         if (service.getStatus() != ServiceStatus.active)
             throw new IllegalArgumentException("Dịch vụ '" + service.getName() + "' hiện không hoạt động");
+        if (service.getDeletedAt() != null)
+            throw new IllegalArgumentException("Dịch vụ '" + service.getName() + "' đang nằm trong thùng rác");
         return service;
     }
 

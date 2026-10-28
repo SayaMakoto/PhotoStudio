@@ -162,17 +162,17 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-xs">
               <li>
-                <Link to={`${ROUTES.USER.HOME}#gallery`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.GALLERY} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Bộ Sưu Tập Nghệ Thuật
                 </Link>
               </li>
               <li>
-                <Link to={`${ROUTES.USER.HOME}#studios`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.STUDIOS} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Hệ Thống Phòng Studio
                 </Link>
               </li>
               <li>
-                <Link to={`${ROUTES.USER.HOME}#studios`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.STUDIOS} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Dàn Thiết Bị Full-Frame
                 </Link>
               </li>
@@ -182,7 +182,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to={`${ROUTES.USER.HOME}#testimonials`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.REVIEWS} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Đánh Giá Khách Hàng (5.0★)
                 </Link>
               </li>

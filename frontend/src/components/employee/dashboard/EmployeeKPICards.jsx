@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import React from 'react';
 import { Camera, CalendarDays, Layers, Star } from 'lucide-react';
+=======
+import { Camera, CalendarDays, DollarSign, Star } from 'lucide-react';
+>>>>>>> origin/main
 import CountUp from '../../animations/CountUp';
 
 const POSITION_LABELS = {

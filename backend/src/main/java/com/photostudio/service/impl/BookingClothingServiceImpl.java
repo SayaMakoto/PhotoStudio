@@ -126,6 +126,9 @@ public class BookingClothingServiceImpl implements BookingClothingService {
     private Cloth findAvailableCloth(Long clothId) {
         Cloth cloth = clothRepository.findById(clothId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trang phục với ID: " + clothId));
+        if (cloth.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Trang phục '" + cloth.getName() + "' đang nằm trong thùng rác");
+        }
         if (cloth.getStatus() != ClothStatus.available) {
             throw new IllegalArgumentException("Trang phục '" + cloth.getName() + "' hiện không khả dụng");
         }

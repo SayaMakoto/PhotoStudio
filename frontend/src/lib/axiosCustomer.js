@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL, API_TIMEOUT, DEFAULT_HEADERS } from '../config/api.config';
+import { API_BASE_URL, API_TIMEOUT, DEFAULT_HEADERS } from '../config/api';
 
 const TOKEN_KEY = 'customer_token';
 const USER_KEY = 'customer_user';
@@ -25,6 +25,14 @@ export const customerAuth = {
   clearAuth: () => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem('user');
+    localStorage.removeItem('customer');
+    localStorage.removeItem('token');
+    try {
+      sessionStorage.clear();
+    } catch {
+      // Bỏ qua lỗi sessionStorage
+    }
   },
   isAuthenticated: () => Boolean(localStorage.getItem(TOKEN_KEY)),
 };
@@ -75,7 +83,17 @@ axiosCustomer.interceptors.request.use(
 );
 
 axiosCustomer.interceptors.response.use(
-  (response) => cleanPayload(response.data),
+  (response) => {
+    const newToken =
+      response.headers?.['x-new-token'] ||
+      (response.headers?.['authorization']
+        ? response.headers['authorization'].replace(/^Bearer\s+/i, '')
+        : null);
+    if (newToken) {
+      customerAuth.setToken(newToken);
+    }
+    return cleanPayload(response.data);
+  },
   (error) => {
     if (error.response?.status === 401) {
       customerAuth.clearAuth();

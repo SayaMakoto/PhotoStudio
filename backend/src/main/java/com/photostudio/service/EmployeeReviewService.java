@@ -12,6 +12,8 @@ public interface EmployeeReviewService {
 
     EmployeeReviewResponse findById(Long id);
 
+    EmployeeReviewResponse reply(Long id, String reply);
+
     EmployeeReviewResponse create(EmployeeReviewRequest request);
 
     EmployeeReviewResponse update(Long id, EmployeeReviewRequest request);

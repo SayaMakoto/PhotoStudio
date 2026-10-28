@@ -24,7 +24,7 @@ public class ImageRequest {
     private Boolean isPrimary;
 
     private static final Set<String> VALID_TYPES = Set.of(
-            "background", "equipment", "clothing", "accessory", "package", "service");
+            "room", "background", "equipment", "clothing", "accessory", "package", "service");
 
     public void validate() {
         if (imageableType == null || imageableType.isBlank()) {
@@ -32,7 +32,7 @@ public class ImageRequest {
         }
         if (!VALID_TYPES.contains(imageableType.trim().toLowerCase())) {
             throw new IllegalArgumentException(
-                    "Loại đối tượng gắn ảnh không hợp lệ. Hợp lệ: background, equipment, clothing, accessory, package, service");
+                    "Loại đối tượng gắn ảnh không hợp lệ. Hợp lệ: room, background, equipment, clothing, accessory, package, service");
         }
         if (imageableId == null || imageableId <= 0) {
             throw new IllegalArgumentException("Mã đối tượng gắn ảnh (imageableId) không hợp lệ");

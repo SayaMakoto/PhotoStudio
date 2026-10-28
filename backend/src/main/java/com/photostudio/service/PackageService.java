@@ -19,4 +19,10 @@ public interface PackageService {
     List<PackageResponse> findByName(String name);
 
     List<PackageResponse> findByStatus(String status);
+
+    List<PackageResponse> findTrash();
+
+    PackageResponse restore(Long id);
+
+    void permanentlyDelete(Long id);
 }

@@ -8,11 +8,12 @@ import {
   PhoneIcon, 
   CalendarDaysIcon,
   UserCircleIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/solid';
 import Magnet from '../../animations/Magnet';
 import { ROUTES } from '../../../routes/web';
 import { customerAuth } from '../../../lib/axiosCustomer';
+import customerAuthService from '../../../services/user/authService';
 
 export default function Navbar({ onOpenBooking }) {
   const [scrolled, setScrolled] = useState(false);
@@ -34,7 +35,8 @@ export default function Navbar({ onOpenBooking }) {
   const handleLogout = () => {
     customerAuth.clearAuth();
     setUser(null);
-    window.location.reload();
+    void customerAuthService.logout();
+    window.location.href = ROUTES.USER.HOME;
   };
 
   const handleScrollToTop = (e) => {
@@ -50,9 +52,9 @@ export default function Navbar({ onOpenBooking }) {
   const navLinks = [
     { name: 'Trang Chủ', href: ROUTES.USER.HOME, isRoute: true, onClick: handleScrollToTop },
     { name: 'Gói Chụp & Báo Giá', href: ROUTES.USER.PACKAGES, isRoute: true },
-    { name: 'Bộ Sưu Tập', href: '/#gallery', isRoute: false },
-    { name: 'Không Gian Studio', href: '/#studios', isRoute: false },
-    { name: 'Đánh Giá', href: '/#testimonials', isRoute: false },
+    { name: 'Bộ Sưu Tập', href: ROUTES.USER.GALLERY, isRoute: true },
+    { name: 'Không Gian Studio', href: ROUTES.USER.STUDIOS, isRoute: true },
+    { name: 'Đánh Giá', href: ROUTES.USER.REVIEWS, isRoute: true },
   ];
 
   return (
@@ -114,30 +116,43 @@ export default function Navbar({ onOpenBooking }) {
           {/* Actions */}
           <div className="hidden lg:flex items-center gap-3">
             {user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-rose-300 bg-[#1E171A] px-3.5 py-1.5 rounded-full border border-rose-500/30">
-                  👋 {user.fullname || user.username || 'Khách Hàng'}
-                </span>
+              <div className="flex items-center gap-1.5 bg-[#1E171A] p-1 pr-2 rounded-full border border-rose-500/30">
+                <Link
+                  to={ROUTES.USER.PROFILE}
+                  className="flex items-center gap-2 text-xs font-semibold text-rose-200 hover:text-white px-2.5 py-1 rounded-full hover:bg-white/10 transition-all group"
+                  title="Xem và chỉnh sửa hồ sơ cá nhân"
+                >
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#BE4B5E] to-[#E295A2] flex items-center justify-center text-white text-[10px] font-bold overflow-hidden shadow-xs shrink-0">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{(user.fullname || user.username || 'U').charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                  <span className="font-medium text-[13px] max-w-[120px] truncate">
+                    {user.fullname || user.username || 'Khách Hàng'}
+                  </span>
+                </Link>
                 <button
+                  type="button"
                   onClick={handleLogout}
-                  className="cursor-pointer flex items-center gap-1.5 text-xs text-neutral-400 hover:text-rose-400 py-1.5 px-3 rounded-full hover:bg-neutral-900 transition-colors"
-                  title="Đăng xuất"
+                  className="cursor-pointer p-1.5 rounded-full text-rose-300/70 hover:text-rose-300 hover:bg-rose-500/20 transition-all"
+                  title="Đăng xuất tài khoản"
                 >
                   <ArrowRightOnRectangleIcon className="w-4 h-4" />
-                  <span>Đăng Xuất</span>
                 </button>
               </div>
             ) : (
               <Link
                 to={ROUTES.AUTH.LOGIN}
-                className="flex items-center gap-2 text-xs font-semibold text-neutral-200 hover:text-white transition-all py-2 px-4 rounded-full bg-[#1C1518]/90 border border-white/15 hover:border-rose-400/60 hover:bg-neutral-800 shadow-sm group"
+                className="relative z-10 flex items-center gap-2 text-xs font-semibold text-neutral-200 hover:text-white transition-all py-2 px-4 rounded-full bg-[#1C1518]/90 border border-white/15 hover:border-rose-400/60 hover:bg-neutral-800 shadow-sm group"
               >
                 <UserCircleIcon className="w-4 h-4 text-[#E899A8] group-hover:scale-110 transition-transform" />
                 <span>Đăng Nhập</span>
               </Link>
             )}
 
-            <Magnet padding={40} magnetStrength={3}>
+            <Magnet padding={0} magnetStrength={2.5} maxOffset={8}>
               <button
                 onClick={onOpenBooking}
                 className="cursor-pointer relative group overflow-hidden px-5 py-2.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white font-bold text-sm shadow-lg shadow-rose-900/40 hover:shadow-rose-700/50 hover:scale-105 transition-all duration-300 flex items-center gap-2"
@@ -189,12 +204,17 @@ export default function Navbar({ onOpenBooking }) {
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
               {user ? (
                 <div className="flex items-center justify-between p-3 rounded-xl bg-neutral-900 border border-rose-500/30">
-                  <span className="text-sm font-semibold text-rose-300">
-                    Chào, {user.fullname || user.username}
-                  </span>
+                  <Link
+                    to={ROUTES.USER.PROFILE}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 text-sm font-semibold text-rose-300 hover:text-white transition-colors"
+                  >
+                    <UserCircleIcon className="w-5 h-5 text-[#E899A8]" />
+                    <span>Chào, {user.fullname || user.username}</span>
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="text-xs text-rose-400 hover:underline"
+                    className="text-xs text-rose-400 hover:underline cursor-pointer"
                   >
                     Đăng Xuất
                   </button>
