@@ -25,6 +25,7 @@ import AdminEquipmentsPage from '../pages/admin/equipments';
 import AdminBackgroundsPage from '../pages/admin/backgrounds';
 import AdminRoomsPage from '../pages/admin/rooms';
 import AdminClothesPage from '../pages/admin/clothes';
+import AdminAccessoriesPage from '../pages/admin/accessories';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -88,13 +89,7 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.ACCESSORIES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Phụ Kiện (Accessories)"
-              category="Quản lý tài nguyên"
-              description="Quản lý đạo cụ, trang sức, hoa cầm tay và phụ kiện chụp ảnh."
-            />
-          }
+          element={<AdminAccessoriesPage />}
         />
 
         {/* Quản lý dịch vụ & gói chụp */}

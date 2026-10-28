@@ -64,6 +64,9 @@ public class BookingAccessoryServiceImpl implements BookingAccessoryService {
         Accessory accessory = accessoryRepository.findById(request.getAccessoryId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy phụ kiện với ID: " + request.getAccessoryId()));
+        if (accessory.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Phụ kiện '" + accessory.getName() + "' đang nằm trong thùng rác");
+        }
         if (accessory.getStatus() != AccessoryStatus.available) {
             throw new IllegalArgumentException("Phụ kiện '" + accessory.getName() + "' hiện không khả dụng");
         }

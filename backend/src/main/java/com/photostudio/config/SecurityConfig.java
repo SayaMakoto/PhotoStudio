@@ -114,6 +114,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/backgrounds/trash", "/api/backgrounds/trash/**").hasRole("ADMIN")
                         .requestMatchers("/api/rooms/trash", "/api/rooms/trash/**").hasRole("ADMIN")
                         .requestMatchers("/api/clothes/trash", "/api/clothes/trash/**").hasRole("ADMIN")
+                        .requestMatchers("/api/accessories/trash", "/api/accessories/trash/**").hasRole("ADMIN")
+                        .requestMatchers("/api/categories/trash", "/api/categories/trash/**").hasRole("ADMIN")
 
                         // Cho phép xem thiết bị và phụ kiện công khai không cần token (GET /api/equipments và GET /api/products)
                         .requestMatchers(HttpMethod.GET, "/api/equipments/**", "/api/products/**").permitAll()
