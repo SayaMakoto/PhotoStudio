@@ -8,13 +8,15 @@ import java.util.List;
 
 public interface BookingEquipmentRepository extends JpaRepository<BookingEquipment, Long> {
 
-    List<BookingEquipment> findByBookingId(Long bookingId);
+    List<BookingEquipment> findByBooking_Id(Long bookingId);
 
-    List<BookingEquipment> findByEquipmentId(Long equipmentId);
+    List<BookingEquipment> findByEquipment_Id(Long equipmentId);
 
     List<BookingEquipment> findByStatus(BookingEquipmentStatus status);
 
-    boolean existsByEquipmentIdAndStatus(Long equipmentId, BookingEquipmentStatus status);
+    boolean existsByEquipment_IdAndStatus(Long equipmentId, BookingEquipmentStatus status);
 
-    void deleteByBookingId(Long bookingId);
+    boolean existsByEquipment_Id(Long equipmentId);
+
+    void deleteByBooking_Id(Long bookingId);
 }

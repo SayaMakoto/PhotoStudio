@@ -1,4 +1,6 @@
-import { RotateCcw, Search } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import GlideSelect from "./GlideSelect";
+import CurvedInput from "./CurvedInput";
 
 const DEFAULT_SORT_OPTIONS = [
   { value: "newest", label: "Mới nhất" },
@@ -22,13 +24,37 @@ export default function AdminFilterBar({
           <span className="mb-1.5 block text-[11px] font-medium text-neutral-400">
             Tìm kiếm
           </span>
-          <Search className="pointer-events-none absolute left-3 top-[2.15rem] h-4 w-4 -translate-y-1/2 text-neutral-500" />
-          <input
+          <CurvedInput
             type="search"
             value={searchValue}
-            onChange={(event) => onSearchChange(event.target.value)}
+            onChange={onSearchChange}
             placeholder={searchPlaceholder}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-950/80 py-2.5 pl-9 pr-3 text-xs text-neutral-200 outline-none placeholder:text-neutral-500 focus:border-amber-400/60"
+            ariaLabel="Tìm kiếm"
+            width="100%"
+            height={30}
+            bend={0}
+            cornerRadius={12}
+            fontSize={12}
+            borderWidth={1.5}
+            backgroundColor="#0a0a0a"
+            textColor="#e5e5e5"
+            placeholderColor="#737373"
+            borderColor="#262626"
+            buttonColor="#fbbf24"
+            showButton={false}
+            showIcon
+            icon={
+              <g
+                fill="none"
+                stroke="#fbbf24"
+                strokeLinecap="round"
+                strokeWidth="1.8"
+              >
+                <circle cx="-1.5" cy="-1.5" r="4.5" />
+                <path d="m2 2 3.2 3.2" />
+              </g>
+            }
+            className="w-full"
           />
         </label>
       )}
@@ -38,19 +64,24 @@ export default function AdminFilterBar({
           <span className="mb-1.5 block text-[11px] font-medium text-neutral-400">
             {filter.label}
           </span>
-          <select
+          <GlideSelect
+            options={[
+              { value: "", label: filter.allLabel || "Tất cả" },
+              ...(filter.options || []),
+            ]}
             value={filter.value ?? ""}
-            onChange={(event) => filter.onChange?.(event.target.value)}
-            aria-label={filter.label}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-950/80 px-3 py-2.5 text-xs text-neutral-200 outline-none focus:border-amber-400/60"
-          >
-            <option value="">{filter.allLabel || "Tất cả"}</option>
-            {filter.options?.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => filter.onChange?.(value)}
+            placeholder={filter.allLabel || "Tất cả"}
+            ariaLabel={filter.label}
+            showTags={false}
+            size="lg"
+            accentColor="#fbbf24"
+            surfaceColor="#0a0a0a"
+            highlightColor="#262626"
+            textColor="#e5e5e5"
+            menuWidth={220}
+            className="w-full [&>button]:w-full [&>button]:justify-between"
+          />
         </label>
       ))}
 
@@ -59,18 +90,20 @@ export default function AdminFilterBar({
           <span className="mb-1.5 block text-[11px] font-medium text-neutral-400">
             Sắp xếp theo thời gian
           </span>
-          <select
+          <GlideSelect
+            options={sortOptions}
             value={sortValue}
-            onChange={(event) => onSortChange(event.target.value)}
-            aria-label="Sắp xếp theo thời gian"
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-950/80 px-3 py-2.5 text-xs text-neutral-200 outline-none focus:border-amber-400/60"
-          >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => onSortChange(value)}
+            ariaLabel="Sắp xếp theo thời gian"
+            showTags={false}
+            size="lg"
+            accentColor="#fbbf24"
+            surfaceColor="#0a0a0a"
+            highlightColor="#262626"
+            textColor="#e5e5e5"
+            menuWidth={220}
+            className="w-full [&>button]:w-full [&>button]:justify-between"
+          />
         </label>
       )}
 
@@ -78,7 +111,7 @@ export default function AdminFilterBar({
         <button
           type="button"
           onClick={onReset}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-700 px-3.5 py-2.5 text-xs font-medium text-neutral-300 transition-colors hover:border-amber-400/40 hover:bg-neutral-800 hover:text-white"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-neutral-700 px-3.5 text-xs font-medium text-neutral-300 transition-colors hover:border-amber-400/40 hover:bg-neutral-800 hover:text-white"
         >
           <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
           Đặt lại

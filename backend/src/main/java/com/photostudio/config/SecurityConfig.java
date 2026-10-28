@@ -109,6 +109,9 @@ public class SecurityConfig {
                         // Cho phép truy cập công khai các API xác thực: Login, Register, Logout
                         .requestMatchers(HttpMethod.POST, "/api/auth/**", "/api/users/login", "/api/users/register", "/api/users/logout").permitAll()
 
+                        // Thùng rác thiết bị chỉ dành cho ADMIN.
+                        .requestMatchers("/api/equipments/trash", "/api/equipments/trash/**", "/api/products/trash", "/api/products/trash/**").hasRole("ADMIN")
+
                         // Cho phép xem thiết bị và phụ kiện công khai không cần token (GET /api/equipments và GET /api/products)
                         .requestMatchers(HttpMethod.GET, "/api/equipments/**", "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/accessories/**", "/api/categories/**").permitAll()
