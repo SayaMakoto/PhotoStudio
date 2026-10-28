@@ -50,7 +50,8 @@ public class ServiceMapper {
                 service.getPrice(),
                 service.getStatus() != null ? service.getStatus().name() : null,
                 service.getCreatedAt(),
-                service.getUpdatedAt()
+                service.getUpdatedAt(),
+                service.getDeletedAt()
         );
     }
 }

@@ -22,4 +22,5 @@ public class ServiceResponse {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 }

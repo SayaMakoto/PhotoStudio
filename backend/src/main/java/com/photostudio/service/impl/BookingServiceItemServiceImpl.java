@@ -106,6 +106,8 @@ public class BookingServiceItemServiceImpl implements BookingServiceItemService 
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dịch vụ với ID: " + id));
         if (service.getStatus() != ServiceStatus.active)
             throw new IllegalArgumentException("Dịch vụ '" + service.getName() + "' hiện không hoạt động");
+        if (service.getDeletedAt() != null)
+            throw new IllegalArgumentException("Dịch vụ '" + service.getName() + "' đang nằm trong thùng rác");
         return service;
     }
 

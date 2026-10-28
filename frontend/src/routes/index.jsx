@@ -26,6 +26,7 @@ import AdminBackgroundsPage from '../pages/admin/backgrounds';
 import AdminRoomsPage from '../pages/admin/rooms';
 import AdminClothesPage from '../pages/admin/clothes';
 import AdminAccessoriesPage from '../pages/admin/accessories';
+import AdminServicesPage from '../pages/admin/services';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -95,13 +96,7 @@ export default function AppRoutes() {
         {/* Quản lý dịch vụ & gói chụp */}
         <Route
           path={ROUTES.ADMIN.SERVICES_PACKAGES.SERVICES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Dịch Vụ (Services)"
-              category="Quản lý dịch vụ & gói chụp"
-              description="Các dịch vụ chụp ảnh chân dung, tiệc cưới, sự kiện, makeup và in ấn."
-            />
-          }
+          element={<AdminServicesPage />}
         />
         <Route
           path={ROUTES.ADMIN.SERVICES_PACKAGES.PACKAGES.replace('/admin/', '')}
