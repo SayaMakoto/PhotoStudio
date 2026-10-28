@@ -118,6 +118,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").denyAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/profile").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/api/users/change-password", "/api/users/profile/password").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
 
                         // Danh sách và thông tin tài khoản khác chỉ admin được phép xem.

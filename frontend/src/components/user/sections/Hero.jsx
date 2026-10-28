@@ -63,6 +63,16 @@ export default function Hero({ onOpenBooking }) {
 
   return (
     <section id="hero" className="relative min-h-screen pt-32 pb-24 flex items-center justify-center overflow-hidden bg-[#141012]">
+      {/* Background Image & Cinematic Studio Effects với độ sáng rõ nét cao */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-65 scale-105 pointer-events-none"
+        style={{
+          backgroundImage:
+            'url(https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=1920&q=80)',
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#141012]/90 via-[#141012]/60 to-[#141012]/35 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#141012] pointer-events-none" />
       {/* Background Studio Glow & Lights */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-rose-500/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-1/3 -left-32 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />

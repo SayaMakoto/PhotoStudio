@@ -6,6 +6,7 @@ package com.photostudio.model.images;
  * vì vậy enum dùng trường value để ánh xạ giá trị DB <-> hằng số (xem ImageableTypeConverter).
  */
 public enum ImageableType {
+    ROOM("room"),
     BACKGROUND("background"),
     EQUIPMENT("equipment"),
     CLOTHING("clothing"),

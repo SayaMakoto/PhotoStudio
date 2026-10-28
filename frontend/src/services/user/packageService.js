@@ -9,6 +9,12 @@ export const customerPackageService = {
 
   // Xem chi tiết một gói chụp
   getPackageById: (id) => axiosCustomer.get(`/api/packages/${id}`),
+
+  // Lấy dịch vụ đính kèm gói chụp từ CSDL
+  getPackageServices: (packageId) => axiosCustomer.get(`/api/package-services/package/${packageId}`),
+
+  // Lấy bối cảnh đính kèm gói chụp từ CSDL
+  getPackageBackgrounds: (packageId) => axiosCustomer.get(`/api/package-backgrounds/package/${packageId}`),
 };
 
 export default customerPackageService;

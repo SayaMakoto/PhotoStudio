@@ -1,15 +1,23 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Navbar from '../components/user/layout/Navbar';
 import Footer from '../components/user/layout/Footer';
 import QuickContact from '../components/user/layout/QuickContact';
+import { ROUTES } from '../routes/web';
+import { customerAuth } from '../lib/axiosCustomer';
 
 export default function UserLayout() {
+  const navigate = useNavigate();
+
   const handleOpenBooking = () => {
-    const bookingEl = document.getElementById('booking');
-    if (bookingEl) {
-      bookingEl.scrollIntoView({ behavior: 'smooth' });
+    if (!customerAuth.isAuthenticated()) {
+      navigate(ROUTES.AUTH.LOGIN, {
+        state: {
+          from: ROUTES.USER.BOOKING,
+          message: 'Vui lòng đăng nhập để tiến hành đặt lịch chụp tại PhotoStudio!',
+        },
+      });
     } else {
-      window.location.href = '/#booking';
+      navigate(ROUTES.USER.BOOKING);
     }
   };
 

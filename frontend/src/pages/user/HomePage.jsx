@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Hero from '../../components/user/sections/Hero';
 import Stats from '../../components/user/sections/Stats';
 import Pricing from '../../components/user/sections/Pricing';
@@ -8,22 +8,36 @@ import AboutStudio from '../../components/user/sections/AboutStudio';
 import Reviews from '../../components/user/sections/Reviews';
 import Booking from '../../components/user/sections/Booking';
 import { FloralBranchCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
+import { ROUTES } from '../../routes/web';
+import { customerAuth } from '../../lib/axiosCustomer';
 
 export default function HomePage() {
-  const [selectedPackage, setSelectedPackage] = useState(null);
+  const navigate = useNavigate();
 
-  const handleSelectPackage = (pkg) => {
-    setSelectedPackage(pkg);
-    const bookingEl = document.getElementById('booking');
-    if (bookingEl) {
-      bookingEl.scrollIntoView({ behavior: 'smooth' });
+  const handleSelectPackage = (pkgId) => {
+    const targetUrl = `${ROUTES.USER.BOOKING}?packageId=${pkgId}`;
+    if (!customerAuth.isAuthenticated()) {
+      navigate(ROUTES.AUTH.LOGIN, {
+        state: {
+          from: targetUrl,
+          message: 'Vui lòng đăng nhập tài khoản để tiến hành đặt gói chụp này!',
+        },
+      });
+    } else {
+      navigate(targetUrl);
     }
   };
 
   const handleOpenBooking = () => {
-    const bookingEl = document.getElementById('booking');
-    if (bookingEl) {
-      bookingEl.scrollIntoView({ behavior: 'smooth' });
+    if (!customerAuth.isAuthenticated()) {
+      navigate(ROUTES.AUTH.LOGIN, {
+        state: {
+          from: ROUTES.USER.BOOKING,
+          message: 'Vui lòng đăng nhập tài khoản để tiến hành đặt lịch chụp trực tuyến!',
+        },
+      });
+    } else {
+      navigate(ROUTES.USER.BOOKING);
     }
   };
 
@@ -41,7 +55,7 @@ export default function HomePage() {
       <BeforeAfter />
       <AboutStudio />
       <Reviews />
-      <Booking selectedPackage={selectedPackage} />
+      <Booking />
 
       {/* Cánh hoa đào bay phất phơ trải đều khắp chiều cao Trang Chủ từ trên xuống dưới */}
       <ScatteredPetals className="z-20 pointer-events-none" />

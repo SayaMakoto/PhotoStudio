@@ -9,6 +9,7 @@ const springValues = {
 
 export default function TiltedCard({
   imageSrc,
+  fallbackSrc = '',
   altText = 'Tilted card image',
   captionText = '',
   containerHeight = '360px',
@@ -20,6 +21,8 @@ export default function TiltedCard({
   showTooltip = true,
   overlayContent = null,
   className = '',
+  onClick,
+  ...props
 }) {
   const ref = useRef(null);
 
@@ -57,6 +60,7 @@ export default function TiltedCard({
   return (
     <figure
       ref={ref}
+      onClick={onClick}
       className={`relative [perspective:800px] flex flex-col items-center justify-center cursor-pointer select-none ${className}`}
       style={{
         height: containerHeight,
@@ -65,9 +69,10 @@ export default function TiltedCard({
       onMouseMove={handleMouse}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      {...props}
     >
       <motion.div
-        className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl [transform-style:preserve-3d] will-change-transform bg-neutral-900"
+        className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl [transform-style:preserve-3d] will-change-transform bg-neutral-900 w-full h-full"
         style={{
           width: imageWidth,
           height: imageHeight,
@@ -79,10 +84,16 @@ export default function TiltedCard({
         <motion.img
           src={imageSrc}
           alt={altText}
+          onError={(e) => {
+            if (fallbackSrc && e.target.src !== fallbackSrc) {
+              e.target.onerror = null;
+              e.target.src = fallbackSrc;
+            }
+          }}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
 
         {overlayContent && (
           <div className="absolute inset-0 p-5 flex flex-col justify-end z-10 pointer-events-none">

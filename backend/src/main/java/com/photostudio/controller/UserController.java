@@ -1,12 +1,17 @@
 package com.photostudio.controller;
 
+import com.photostudio.dto.users.ChangePasswordRequest;
 import com.photostudio.dto.users.UserRequest;
 import com.photostudio.dto.users.UserResponse;
+import com.photostudio.security.DatabaseUserDetailsService;
+import com.photostudio.security.JwtService;
 import com.photostudio.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +27,8 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
+    private final DatabaseUserDetailsService userDetailsService;
 
     private UserResponse getAuthenticatedUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -31,8 +38,10 @@ public class UserController {
     }
 
     private UserResponse updateOwnProfile(UserResponse currentUser, UserRequest request) {
-        // Tài khoản tự cập nhật thông tin cá nhân, không được tự đổi username, role hoặc status.
-        request.setUsername(currentUser.getUsername());
+        // Cho phép cập nhật username mới nếu có nhập mới; nếu bỏ trống thì giữ nguyên username cũ
+        if (request.getUsername() == null || request.getUsername().isBlank()) {
+            request.setUsername(currentUser.getUsername());
+        }
         request.setRole(null);
         request.setStatus(null);
         return userService.update(currentUser.getId(), request);
@@ -47,7 +56,34 @@ public class UserController {
     public ResponseEntity<UserResponse> updateMyProfile(
             @RequestBody UserRequest request,
             Authentication authentication) {
-        return ResponseEntity.ok(updateOwnProfile(getAuthenticatedUser(authentication), request));
+        UserResponse updated = updateOwnProfile(getAuthenticatedUser(authentication), request);
+
+        HttpHeaders headers = new HttpHeaders();
+        if (jwtService != null && userDetailsService != null && updated != null) {
+            try {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(updated.getUsername());
+                String newToken = jwtService.generateToken(userDetails);
+                headers.set("Authorization", "Bearer " + newToken);
+                headers.set("X-New-Token", newToken);
+                headers.set("Access-Control-Expose-Headers", "Authorization, X-New-Token");
+            } catch (Exception ignored) {
+            }
+        }
+        return ResponseEntity.ok().headers(headers).body(updated);
+    }
+
+    @PostMapping({"/change-password", "/profile/password"})
+    public ResponseEntity<Map<String, String>> changePassword(
+            @RequestBody ChangePasswordRequest request,
+            Authentication authentication) {
+        if (request != null) {
+            request.validate();
+        } else {
+            throw new IllegalArgumentException("Thông tin đổi mật khẩu không hợp lệ");
+        }
+        UserResponse currentUser = getAuthenticatedUser(authentication);
+        userService.changePassword(currentUser.getId(), request.getOldPassword(), request.getNewPassword());
+        return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công"));
     }
 
     // Lấy tất cả người dùng

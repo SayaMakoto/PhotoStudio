@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   StarIcon,
   ShieldCheckIcon,
   CheckBadgeIcon,
+  ArrowRightIcon,
 } from '@heroicons/react/24/solid';
 import ScrollReveal from '../../animations/ScrollReveal';
 import customerReviewService from '../../../services/user/reviewService';
+import { ROUTES } from '../../../routes/web';
 
 // Đánh giá thực tế chuẩn studio làm dữ liệu khởi tạo & dự phòng chất lượng cao
 const DEFAULT_REVIEWS = [
@@ -173,6 +176,19 @@ export default function Testimonials() {
             })}
           </div>
         )}
+
+        {/* CTA Xem Tất Cả Đánh Giá & Trust Badge */}
+        <ScrollReveal direction="up" delay={0.25}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <Link
+              to={ROUTES.USER.REVIEWS}
+              className="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#B85064]/25 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2"
+            >
+              <span>Xem Toàn Bộ 30+ Đánh Giá Của Khách Hàng</span>
+              <ArrowRightIcon className="w-4 h-4" />
+            </Link>
+          </div>
+        </ScrollReveal>
 
         {/* Bottom Trust Badge */}
         <ScrollReveal direction="up" delay={0.3}>
