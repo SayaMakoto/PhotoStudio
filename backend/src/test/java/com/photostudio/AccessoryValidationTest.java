@@ -94,7 +94,7 @@ class AccessoryServiceTest {
         detailsToUpdate.setPrice(750.0);
         detailsToUpdate.setStatus(AccessoryStatus.maintenance);
 
-        when(accessoryRepository.findById(1L)).thenReturn(Optional.of(validAccessory));
+        when(accessoryRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(validAccessory));
         when(accessoryRepository.save(any(Accessory.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Accessory updated = accessoryService.updateAccessory(1L, detailsToUpdate);
@@ -105,14 +105,14 @@ class AccessoryServiceTest {
         assertEquals(8, updated.getQuantity());
         assertEquals(750.0, updated.getPrice());
         assertEquals(AccessoryStatus.maintenance, updated.getStatus());
-        verify(accessoryRepository, times(1)).findById(1L);
+        verify(accessoryRepository, times(1)).findByIdAndDeletedAtIsNull(1L);
         verify(accessoryRepository, times(1)).save(validAccessory);
     }
 
     @Test
     @DisplayName("Ném ngoại lệ RuntimeException khi cập nhật phụ kiện không tồn tại ID")
     void testUpdateAccessory_NotFound_ThrowsException() {
-        when(accessoryRepository.findById(99L)).thenReturn(Optional.empty());
+        when(accessoryRepository.findByIdAndDeletedAtIsNull(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(
                 RuntimeException.class,
@@ -126,18 +126,18 @@ class AccessoryServiceTest {
     @Test
     @DisplayName("Xóa phụ kiện thành công khi ID tồn tại")
     void testDeleteAccessory_Success() {
-        when(accessoryRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(accessoryRepository).deleteById(1L);
+        when(accessoryRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(validAccessory));
+        when(accessoryRepository.save(any(Accessory.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         assertDoesNotThrow(() -> accessoryService.deleteAccessory(1L));
-        verify(accessoryRepository, times(1)).existsById(1L);
-        verify(accessoryRepository, times(1)).deleteById(1L);
+        verify(accessoryRepository, times(1)).findByIdAndDeletedAtIsNull(1L);
+        verify(accessoryRepository, times(1)).save(validAccessory);
     }
 
     @Test
     @DisplayName("Ném ngoại lệ RuntimeException khi xóa phụ kiện không tồn tại ID")
     void testDeleteAccessory_NotFound_ThrowsException() {
-        when(accessoryRepository.existsById(99L)).thenReturn(false);
+        when(accessoryRepository.findByIdAndDeletedAtIsNull(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(
                 RuntimeException.class,
@@ -145,20 +145,20 @@ class AccessoryServiceTest {
         );
 
         assertTrue(ex.getMessage().contains("Không tìm thấy phụ kiện với ID: 99"));
-        verify(accessoryRepository, never()).deleteById(anyLong());
+        verify(accessoryRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Tìm kiếm phụ kiện theo tên trả về danh sách chính xác")
     void testSearchAccessoriesByName() {
         List<Accessory> mockList = List.of(validAccessory);
-        when(accessoryRepository.findByNameContainingIgnoreCase("Váy")).thenReturn(mockList);
+        when(accessoryRepository.findByDeletedAtIsNullAndNameContainingIgnoreCase("Váy")).thenReturn(mockList);
 
         List<Accessory> result = accessoryService.searchAccessoriesByName("Váy");
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Váy cưới công chúa", result.get(0).getName());
-        verify(accessoryRepository, times(1)).findByNameContainingIgnoreCase("Váy");
+        verify(accessoryRepository, times(1)).findByDeletedAtIsNullAndNameContainingIgnoreCase("Váy");
     }
 }

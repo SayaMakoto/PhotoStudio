@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   X,
-<<<<<<< HEAD
   Calendar,
   Clock,
   MapPin,
@@ -10,18 +9,6 @@ import {
   FileText,
   CheckCircle2,
   AlertCircle,
-=======
-  Camera,
-  Shirt,
-  Sparkles,
-  Users,
-  CheckSquare,
-  Square,
-  Save,
-  AlertTriangle,
-  Image,
-  CheckCircle2
->>>>>>> origin/main
 } from 'lucide-react';
 
 const STATUS_OPTIONS = [
@@ -48,7 +35,6 @@ function InfoCard({ icon: Icon, label, value }) {
   );
 }
 
-<<<<<<< HEAD
 export default function ShootDetailModal({
   booking,
   onClose,
@@ -73,26 +59,6 @@ export default function ShootDetailModal({
     } catch {
       return dateStr;
     }
-=======
-export default function ShootDetailModal({ booking, onClose, onOpenIncidentReport }) {
-  const [checklist, setChecklist] = useState(booking?.checklist || []);
-  const [deliveryInput, setDeliveryInput] = useState(booking?.deliveryLink || '');
-  const [retouchedCount, setRetouchedCount] = useState(
-    booking?.photoSelection?.retouchedCount || 0
-  );
-  const [savedSuccess, setSavedSuccess] = useState(false);
-
-  if (!booking) return null;
-
-  const selectedCount = booking.photoSelection?.selectedCount || 30;
-  const rawCount = booking.photoSelection?.rawCount || 350;
-  const progressPercent = Math.min(Math.round((retouchedCount / selectedCount) * 100), 100);
-
-  const toggleChecklist = (index) => {
-    setChecklist((prev) =>
-      prev.map((item, idx) => (idx === index ? { ...item, done: !item.done } : item))
-    );
->>>>>>> origin/main
   };
 
   const formatTime = (start, end) => {

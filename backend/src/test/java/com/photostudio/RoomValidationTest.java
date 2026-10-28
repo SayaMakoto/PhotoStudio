@@ -157,37 +157,37 @@ class RoomValidationTest {
     @Test
     @DisplayName("Lấy danh sách tất cả phòng chụp")
     void testGetAllRooms_Success() {
-        when(roomRepository.findAll()).thenReturn(List.of(validRoom));
+        when(roomRepository.findByDeletedAtIsNull()).thenReturn(List.of(validRoom));
 
         List<Room> rooms = roomService.getAllRooms();
 
         assertEquals(1, rooms.size());
         assertEquals("Phòng Studio Vintage", rooms.get(0).getName());
-        verify(roomRepository, times(1)).findAll();
+        verify(roomRepository, times(1)).findByDeletedAtIsNull();
     }
 
     @Test
     @DisplayName("Lấy chi tiết phòng theo ID thành công")
     void testGetRoomById_Success() {
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(validRoom));
+        when(roomRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(validRoom));
 
         Optional<Room> result = roomService.getRoomById(1L);
 
         assertTrue(result.isPresent());
         assertEquals(1L, result.get().getId());
         assertEquals("Phòng Studio Vintage", result.get().getName());
-        verify(roomRepository, times(1)).findById(1L);
+        verify(roomRepository, times(1)).findByIdAndDeletedAtIsNull(1L);
     }
 
     @Test
     @DisplayName("Trả về Optional rỗng khi không tìm thấy phòng theo ID")
     void testGetRoomById_NotFound() {
-        when(roomRepository.findById(99L)).thenReturn(Optional.empty());
+        when(roomRepository.findByIdAndDeletedAtIsNull(99L)).thenReturn(Optional.empty());
 
         Optional<Room> result = roomService.getRoomById(99L);
 
         assertTrue(result.isEmpty());
-        verify(roomRepository, times(1)).findById(99L);
+        verify(roomRepository, times(1)).findByIdAndDeletedAtIsNull(99L);
     }
 
     @Test
@@ -199,7 +199,7 @@ class RoomValidationTest {
         updateDetails.setCapacity(8);
         updateDetails.setStatus(RoomStatus.maintenance);
 
-        when(roomRepository.findById(1L)).thenReturn(Optional.of(validRoom));
+        when(roomRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(validRoom));
         when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Room updated = roomService.updateRoom(1L, updateDetails);
@@ -215,7 +215,7 @@ class RoomValidationTest {
     @Test
     @DisplayName("Ném ngoại lệ khi cập nhật phòng không tồn tại")
     void testUpdateRoom_NotFound_ThrowsException() {
-        when(roomRepository.findById(99L)).thenReturn(Optional.empty());
+        when(roomRepository.findByIdAndDeletedAtIsNull(99L)).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
@@ -229,19 +229,19 @@ class RoomValidationTest {
     @Test
     @DisplayName("Xóa phòng chụp thành công khi ID tồn tại")
     void testDeleteRoom_Success() {
-        when(roomRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(roomRepository).deleteById(1L);
+        when(roomRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(validRoom));
+        when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         assertDoesNotThrow(() -> roomService.deleteRoom(1L));
 
-        verify(roomRepository, times(1)).existsById(1L);
-        verify(roomRepository, times(1)).deleteById(1L);
+        verify(roomRepository, times(1)).findByIdAndDeletedAtIsNull(1L);
+        verify(roomRepository, times(1)).save(validRoom);
     }
 
     @Test
     @DisplayName("Ném ngoại lệ khi xóa phòng không tồn tại")
     void testDeleteRoom_NotFound_ThrowsException() {
-        when(roomRepository.existsById(99L)).thenReturn(false);
+        when(roomRepository.findByIdAndDeletedAtIsNull(99L)).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
@@ -249,32 +249,32 @@ class RoomValidationTest {
         );
 
         assertTrue(ex.getMessage().contains("Không tìm thấy phòng với ID: 99"));
-        verify(roomRepository, never()).deleteById(any());
+        verify(roomRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Tìm kiếm phòng theo tên không phân biệt hoa thường (search)")
     void testSearchRoomsByName_Success() {
-        when(roomRepository.findByNameContainingIgnoreCase("vintage")).thenReturn(List.of(validRoom));
+        when(roomRepository.findByDeletedAtIsNullAndNameContainingIgnoreCase("vintage")).thenReturn(List.of(validRoom));
 
         List<Room> results = roomService.searchRoomsByName("vintage");
 
         assertFalse(results.isEmpty());
         assertEquals(1, results.size());
         assertEquals("Phòng Studio Vintage", results.get(0).getName());
-        verify(roomRepository, times(1)).findByNameContainingIgnoreCase("vintage");
+        verify(roomRepository, times(1)).findByDeletedAtIsNullAndNameContainingIgnoreCase("vintage");
     }
 
     @Test
     @DisplayName("Lọc danh sách phòng theo trạng thái hợp lệ (active, maintenance)")
     void testGetRoomsByStatus_Success() {
-        when(roomRepository.findByStatus(RoomStatus.active)).thenReturn(List.of(validRoom));
+        when(roomRepository.findByDeletedAtIsNullAndStatus(RoomStatus.active)).thenReturn(List.of(validRoom));
 
         List<Room> results = roomService.getRoomsByStatus("active");
 
         assertEquals(1, results.size());
         assertEquals(RoomStatus.active, results.get(0).getStatus());
-        verify(roomRepository, times(1)).findByStatus(RoomStatus.active);
+        verify(roomRepository, times(1)).findByDeletedAtIsNullAndStatus(RoomStatus.active);
     }
 
     @Test

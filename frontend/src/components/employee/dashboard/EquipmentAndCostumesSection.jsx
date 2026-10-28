@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useMemo } from 'react';
 import {
   Layers,
@@ -8,13 +7,6 @@ import {
   Wrench,
   AlertCircle,
   Search,
-=======
-import { useState } from 'react';
-import {
-  Layers,
-  Camera,
-  AlertTriangle,
->>>>>>> origin/main
 } from 'lucide-react';
 
 const TYPE_LABELS = {

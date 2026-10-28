@@ -118,7 +118,7 @@ class ImageValidationTest {
     @Test
     @DisplayName("Ném ngoại lệ khi loại đối tượng gắn ảnh không hợp lệ")
     void testCreateImage_InvalidType_ThrowsException() {
-        validRequest.setImageableType("room");
+        validRequest.setImageableType("invalid_type");
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
@@ -262,7 +262,7 @@ class ImageValidationTest {
 
         IllegalArgumentException ex3 = assertThrows(
                 IllegalArgumentException.class,
-                () -> imageService.findByImageable("room", 3L)
+                () -> imageService.findByImageable("invalid_type", 3L)
         );
         assertTrue(ex3.getMessage().contains("Loại đối tượng gắn ảnh không hợp lệ"));
 

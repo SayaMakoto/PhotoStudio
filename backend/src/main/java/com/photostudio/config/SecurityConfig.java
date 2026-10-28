@@ -118,8 +118,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/categories/trash", "/api/categories/trash/**").hasRole("ADMIN")
                         .requestMatchers("/api/services/trash", "/api/services/trash/**").hasRole("ADMIN")
                         .requestMatchers("/api/packages/trash", "/api/packages/trash/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/*/reply").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/employee-reviews/*/reply").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/*/reply").hasAnyRole("ADMIN", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.PATCH, "/api/employee-reviews/*/reply").hasAnyRole("ADMIN", "EMPLOYEE")
 
                         // Cho phép xem thiết bị và phụ kiện công khai không cần token (GET /api/equipments và GET /api/products)
                         .requestMatchers(HttpMethod.GET, "/api/equipments/**", "/api/products/**").permitAll()

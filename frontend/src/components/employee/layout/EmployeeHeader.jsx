@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useRef, useEffect } from 'react';
 import { Menu, Bell, CheckCheck, User, Calendar, ShieldCheck, X } from 'lucide-react';
 import axiosEmployee from '../../../lib/axiosEmployee';
@@ -9,11 +8,6 @@ const DEFAULT_PROFILE = {
   role: 'Employee',
   status: 'active',
 };
-=======
-import { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, CheckCheck } from 'lucide-react';
-import { EMPLOYEE_PROFILE, ADMIN_NOTIFICATIONS } from '../employeeData';
->>>>>>> origin/main
 
 export default function EmployeeHeader({
   activeTabTitle = 'Tổng Quan & KPI',

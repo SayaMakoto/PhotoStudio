@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
-=======
-import { useState, useEffect } from 'react';
->>>>>>> origin/main
 import EmployeeSidebar from '../../components/employee/layout/EmployeeSidebar';
 import EmployeeHeader from '../../components/employee/layout/EmployeeHeader';
 import EmployeeKPICards from '../../components/employee/dashboard/EmployeeKPICards';
@@ -48,6 +44,7 @@ export default function EmployeeDashboard() {
   const [bookings, setBookings] = useState([]);
   const [equipments, setEquipments] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [generalReviews, setGeneralReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // 3. Modal State
@@ -102,20 +99,42 @@ export default function EmployeeDashboard() {
           setEquipments(equipmentsRes.value);
         }
 
-        // Reviews: Ưu tiên lấy đánh giá riêng của nhân viên từ /api/employee-reviews
+        // Reviews: Lưu danh sách đánh giá chung studio và đánh giá riêng của nhân viên
+        const generalList =
+          reviewsRes.status === 'fulfilled' && Array.isArray(reviewsRes.value)
+            ? reviewsRes.value
+            : [];
+        if (isMounted) {
+          setGeneralReviews(generalList);
+        }
+
+        const reviewMap = new Map(generalList.map((r) => [r.id, r]));
+
         let employeeReviewsList = [];
         if (currentEmployee?.id) {
           try {
             const specificReviews = await employeeReviewService.getByEmployeeId(currentEmployee.id);
             if (Array.isArray(specificReviews) && specificReviews.length > 0) {
-              employeeReviewsList = specificReviews;
+              employeeReviewsList = specificReviews.map((sr) => {
+                const parent = reviewMap.get(sr.reviewId);
+                return {
+                  ...sr,
+                  isEmployeeReview: true,
+                  customerName:
+                    parent?.customerName ||
+                    sr.customerName ||
+                    `Khách hàng (Đơn #${sr.reviewId})`,
+                  bookingId: parent?.bookingId || sr.bookingId,
+                  createdAt: parent?.createdAt || sr.createdAt,
+                };
+              });
             }
           } catch (revErr) {
             console.warn('Không tải được đánh giá cá nhân của nhân viên:', revErr);
           }
         }
-        if (employeeReviewsList.length === 0 && reviewsRes.status === 'fulfilled' && Array.isArray(reviewsRes.value)) {
-          employeeReviewsList = reviewsRes.value;
+        if (employeeReviewsList.length === 0 && generalList.length > 0) {
+          employeeReviewsList = generalList.map((r) => ({ ...r, isEmployeeReview: false }));
         }
         if (isMounted) {
           setReviews(employeeReviewsList);
@@ -273,7 +292,19 @@ export default function EmployeeDashboard() {
                 </p>
               </div>
 
-              <CustomerReviewsSection reviews={reviews} />
+              <CustomerReviewsSection
+                reviews={reviews}
+                generalReviews={generalReviews}
+                currentEmployee={employeeDetails}
+                onReviewUpdated={(updated) => {
+                  setReviews((prev) =>
+                    prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r))
+                  );
+                  setGeneralReviews((prev) =>
+                    prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r))
+                  );
+                }}
+              />
             </div>
           )}
 

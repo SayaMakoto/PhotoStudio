@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 import React, { useMemo } from 'react';
-=======
->>>>>>> origin/main
 import {
   CalendarDays,
   Clock,
