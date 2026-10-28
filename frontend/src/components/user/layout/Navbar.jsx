@@ -130,14 +130,14 @@ export default function Navbar({ onOpenBooking }) {
             ) : (
               <Link
                 to={ROUTES.AUTH.LOGIN}
-                className="flex items-center gap-2 text-xs font-semibold text-neutral-200 hover:text-white transition-all py-2 px-4 rounded-full bg-[#1C1518]/90 border border-white/15 hover:border-rose-400/60 hover:bg-neutral-800 shadow-sm group"
+                className="relative z-10 flex items-center gap-2 text-xs font-semibold text-neutral-200 hover:text-white transition-all py-2 px-4 rounded-full bg-[#1C1518]/90 border border-white/15 hover:border-rose-400/60 hover:bg-neutral-800 shadow-sm group"
               >
                 <UserCircleIcon className="w-4 h-4 text-[#E899A8] group-hover:scale-110 transition-transform" />
                 <span>Đăng Nhập</span>
               </Link>
             )}
 
-            <Magnet padding={40} magnetStrength={3}>
+            <Magnet padding={0} magnetStrength={2.5} maxOffset={8}>
               <button
                 onClick={onOpenBooking}
                 className="cursor-pointer relative group overflow-hidden px-5 py-2.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white font-bold text-sm shadow-lg shadow-rose-900/40 hover:shadow-rose-700/50 hover:scale-105 transition-all duration-300 flex items-center gap-2"

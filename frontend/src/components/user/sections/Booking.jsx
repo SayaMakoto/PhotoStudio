@@ -22,6 +22,7 @@ import customerRoomService from '../../../services/user/roomService';
 import customerBookingService from '../../../services/user/bookingService';
 import { customerAuth } from '../../../lib/axiosCustomer';
 import axiosCustomer from '../../../lib/axiosCustomer';
+import { FloralBranchCorner, FloatingPetals, FloralCardCorner } from '../../common/FloralDecorations';
 
 const MONTH_NAMES = [
   'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
@@ -308,11 +309,17 @@ export default function Booking({ selectedPackage }) {
       {/* Background Studio Illumination */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-rose-500/5 rounded-full blur-[170px] pointer-events-none" />
 
+      {/* Hoa lá màu nước nghệ thuật trang trí góc phần Đặt Lịch */}
+      <FloralBranchCorner position="top-left" opacity="opacity-80" />
+      <FloralBranchCorner position="bottom-right" opacity="opacity-75" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Promotional Banner */}
         <ScrollReveal direction="down">
           <div className="mb-16 relative overflow-hidden rounded-3xl border border-[#F5D5DC] bg-gradient-to-r from-white via-[#FDF0F3] to-white p-8 sm:p-12 shadow-[0_8px_30px_rgb(184,80,100,0.06)]">
+            {/* Hoa trang trí góc banner ưu đãi */}
+            <FloralCardCorner position="top-right" opacity="opacity-50" />
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               
               <div className="lg:col-span-8">
@@ -410,7 +417,10 @@ export default function Booking({ selectedPackage }) {
           {/* Right Column: Form Đặt Lịch Hoàn Chỉnh */}
           <div className="lg:col-span-7">
             <ScrollReveal direction="left" delay={0.2}>
-              <div className="relative rounded-3xl border border-[#F0E4E6] bg-white p-8 sm:p-10 shadow-[0_8px_30px_rgb(184,80,100,0.06)]">
+              <div className="relative rounded-3xl border border-[#F0E4E6] bg-white p-8 sm:p-10 shadow-[0_8px_30px_rgb(184,80,100,0.06)] overflow-hidden">
+                {/* Hoa lá màu nước trang trí khung đặt lịch */}
+                <FloralCardCorner position="top-right" opacity="opacity-75" />
+                <FloralCardCorner position="bottom-left" opacity="opacity-65" />
                 
                 {/* MÀN HÌNH XÁC NHẬN ĐẶT LỊCH THÀNH CÔNG */}
                 {submittedBooking ? (

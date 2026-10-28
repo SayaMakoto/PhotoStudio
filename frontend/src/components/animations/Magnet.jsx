@@ -5,6 +5,7 @@ export default function Magnet({
   padding = 50,
   disabled = false,
   magnetStrength = 2,
+  maxOffset = null,
   className = '',
   ...props
 }) {
@@ -25,8 +26,14 @@ export default function Magnet({
       const distY = Math.abs(centerY - e.clientY);
 
       if (distX < width / 2 + padding && distY < height / 2 + padding) {
-        const offsetX = (e.clientX - centerX) / magnetStrength;
-        const offsetY = (e.clientY - centerY) / magnetStrength;
+        let offsetX = (e.clientX - centerX) / magnetStrength;
+        let offsetY = (e.clientY - centerY) / magnetStrength;
+
+        if (typeof maxOffset === 'number' && maxOffset > 0) {
+          offsetX = Math.max(-maxOffset, Math.min(maxOffset, offsetX));
+          offsetY = Math.max(-maxOffset, Math.min(maxOffset, offsetY));
+        }
+
         setPosition({ x: offsetX, y: offsetY });
       } else {
         setPosition((prev) => (prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0 }));
@@ -37,7 +44,7 @@ export default function Magnet({
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [padding, disabled, magnetStrength]);
+  }, [padding, disabled, magnetStrength, maxOffset]);
 
   const activePosition = disabled ? { x: 0, y: 0 } : position;
   const isMoved = activePosition.x !== 0 || activePosition.y !== 0;
