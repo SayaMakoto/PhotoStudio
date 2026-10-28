@@ -29,6 +29,7 @@ import AdminAccessoriesPage from '../pages/admin/accessories';
 import AdminServicesPage from '../pages/admin/services';
 import AdminPackagesPage from '../pages/admin/packages';
 import AdminBookingsPage from '../pages/admin/bookings';
+import AdminPaymentsPage from '../pages/admin/payments';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -112,13 +113,7 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.ADMIN.PAYMENTS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Thanh Toán (Payments)"
-              category="Tài chính"
-              description="Quản lý hóa đơn, đặt cọc, thanh toán chuyển khoản và đối soát doanh thu."
-            />
-          }
+          element={<AdminPaymentsPage />}
         />
 
         {/* Quản lý đánh giá */}
