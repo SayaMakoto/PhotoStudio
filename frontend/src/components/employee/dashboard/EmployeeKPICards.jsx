@@ -1,47 +1,73 @@
-import { Camera, CalendarDays, DollarSign, Star } from 'lucide-react';
+import React from 'react';
+import { Camera, CalendarDays, Layers, Star } from 'lucide-react';
 import CountUp from '../../animations/CountUp';
-import { EMPLOYEE_KPIS } from '../employeeData';
 
-export default function EmployeeKPICards({ onOpenTab }) {
-  const formatVND = (num) => new Intl.NumberFormat('vi-VN').format(num) + ' đ';
+const POSITION_LABELS = {
+  photographer: 'Nhiếp ảnh gia',
+  makeup: 'Chuyên viên trang điểm',
+  logistics: 'Hậu cần & Ánh sáng',
+};
 
-  const bookingProgress = Math.round(
-    (EMPLOYEE_KPIS.completedBookings / EMPLOYEE_KPIS.targetBookings) * 100
-  );
-  const shiftProgress = Math.round(
-    (EMPLOYEE_KPIS.shiftsThisMonth / EMPLOYEE_KPIS.targetShifts) * 100
-  );
+export default function EmployeeKPICards({
+  onOpenTab,
+  bookings = [],
+  equipments = [],
+  reviews = [],
+  employeeDetails = null,
+}) {
+  // 1. Thống kê ca chụp thật từ CSDL
+  const totalBookings = bookings.length;
+  const inProgressBookings = bookings.filter((b) => b.status === 'in_progress').length;
+  const completedBookings = bookings.filter((b) => b.status === 'completed').length;
+
+  // 2. Thống kê thiết bị thật từ CSDL
+  const totalEquipments = equipments.length;
+  const availableEquipments = equipments.filter((e) => e.status === 'available').length;
+
+  // 3. Vị trí chuyên môn thật từ bảng employees
+  const positionLabel = employeeDetails?.position
+    ? (POSITION_LABELS[employeeDetails.position] || employeeDetails.position)
+    : 'Nhân viên tác nghiệp';
+  const hireDate = employeeDetails?.hireDate
+    ? `Vào làm: ${employeeDetails.hireDate}`
+    : 'Đang hoạt động';
+
+  // 4. Thống kê đánh giá thật từ bảng reviews
+  const totalReviews = reviews.length;
+  const avgRating = totalReviews > 0
+    ? (reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / totalReviews).toFixed(1)
+    : '5.0';
 
   const cards = [
     {
-      title: 'Ca Chụp Hoàn Thành',
-      value: EMPLOYEE_KPIS.completedBookings,
-      targetText: `/ ${EMPLOYEE_KPIS.targetBookings} ca`,
-      progress: bookingProgress,
-      progressLabel: 'Tiến độ chỉ tiêu',
-      icon: Camera,
-      tab: 'schedule',
-    },
-    {
-      title: 'Ca Trực Đã Hoàn Thành',
-      value: EMPLOYEE_KPIS.shiftsThisMonth,
-      targetText: `/ ${EMPLOYEE_KPIS.targetShifts} ca trực`,
-      progress: shiftProgress,
-      progressLabel: 'Lịch trực tháng',
+      title: 'Ca Chụp Trong CSDL',
+      value: totalBookings,
+      targetText: 'ca chụp',
+      subtext: totalBookings > 0
+        ? `${inProgressBookings} đang chụp • ${completedBookings} hoàn thành`
+        : 'Chưa có ca chụp',
       icon: CalendarDays,
       tab: 'schedule',
     },
     {
-      title: 'Hoa Hồng Tạm Tính',
-      customValue: formatVND(EMPLOYEE_KPIS.commission),
-      subtext: `Lương cứng: ${formatVND(EMPLOYEE_KPIS.baseSalary)}`,
-      icon: DollarSign,
+      title: 'Thiết Bị Studio',
+      value: totalEquipments,
+      targetText: 'thiết bị',
+      subtext: `${availableEquipments} sẵn sàng sử dụng`,
+      icon: Camera,
+      tab: 'equipment',
+    },
+    {
+      title: 'Vị Trí Tác Nghiệp',
+      customValue: positionLabel,
+      subtext: hireDate,
+      icon: Layers,
       tab: 'profile',
     },
     {
       title: 'Đánh Giá Khách Hàng',
-      customValue: `${EMPLOYEE_KPIS.ratingScore} / 5.0`,
-      subtext: `Từ ${EMPLOYEE_KPIS.ratingTotalCount} lượt đánh giá thực tế`,
+      customValue: totalReviews > 0 ? `★ ${avgRating} / 5.0` : 'Chưa có',
+      subtext: totalReviews > 0 ? `Từ ${totalReviews} lượt đánh giá thực tế` : 'CSDL chưa có đánh giá',
       icon: Star,
       tab: 'reviews',
     },
@@ -69,7 +95,7 @@ export default function EmployeeKPICards({ onOpenTab }) {
 
               <div className="mt-4">
                 {card.customValue ? (
-                  <div className="text-2xl lg:text-3xl font-extrabold text-[#261A1E] tracking-tight font-sans">
+                  <div className="text-xl lg:text-2xl font-extrabold text-[#261A1E] tracking-tight font-sans">
                     {card.customValue}
                   </div>
                 ) : (
@@ -85,25 +111,10 @@ export default function EmployeeKPICards({ onOpenTab }) {
               </div>
             </div>
 
-            <div className="mt-4">
-              {card.progress !== undefined ? (
-                <div>
-                  <div className="flex justify-between text-[11px] font-semibold text-[#7A6C71] mb-1.5">
-                    <span>{card.progressLabel}</span>
-                    <span className="text-[#B85064]">{card.progress}%</span>
-                  </div>
-                  <div className="h-1.5 w-full rounded-full bg-[#FAF5F5] border border-[#F0E4E6] overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-[#B85064] to-[#E28E9E] rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(card.progress, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <p className="text-[11px] text-[#7A6C71] font-medium truncate">
-                  {card.subtext}
-                </p>
-              )}
+            <div className="mt-3">
+              <p className="text-[11px] text-[#7A6C71] font-medium truncate">
+                {card.subtext}
+              </p>
             </div>
 
             {/* Subtle bottom indicator on hover */}

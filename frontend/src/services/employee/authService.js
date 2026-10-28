@@ -12,8 +12,7 @@ function readTokenPayload(token) {
 }
 
 /**
- * Service xác thực dành riêng cho Nhân viên (Employee)
- * Căn cứ theo đúng chuẩn quản lý và phân quyền vai trò (Role-based access control)
+ * Service xác thực dành riêng cho Nhân viên (Employee) kết nối CSDL thật
  */
 export const employeeAuthService = {
   // Đăng nhập Nhân viên
@@ -58,6 +57,9 @@ export const employeeAuthService = {
 
   // Lấy hồ sơ người dùng thật từ CSDL
   getProfile: () => axiosEmployee.get('/api/users/profile'),
+
+  // Lấy thông tin nhân sự (vị trí, ngày vào làm) theo userId
+  getEmployeeByUserId: (userId) => axiosEmployee.get(`/api/employees/user/${userId}`),
 
   // Cập nhật hồ sơ người dùng thật vào CSDL
   updateProfile: (userData) => axiosEmployee.put('/api/users/profile', userData),

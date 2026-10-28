@@ -1,14 +1,14 @@
 import axiosEmployee from '../../lib/axiosEmployee';
 
 /**
- * Service kiểm tra thiết bị và báo cáo sự cố dành cho Nhân viên
+ * Service quản lý thiết bị kết nối trực tiếp CSDL thật (Bảng `equipments`)
  */
 export const employeeEquipmentService = {
-  // Xem danh sách thiết bị và trạng thái sẵn sàng
-  getEquipments: () => axiosEmployee.get('/api/equipments'),
+  // Lấy toàn bộ danh sách thiết bị từ CSDL thật
+  getAll: () => axiosEmployee.get('/api/equipments'),
 
-  // Gửi báo cáo sự cố thiết bị (hỏng, lỗi, cần bảo dưỡng)
-  reportIncident: (data) => axiosEmployee.post('/api/incidents/report', data),
+  // Xem chi tiết một thiết bị
+  getById: (id) => axiosEmployee.get(`/api/equipments/${id}`),
 };
 
 export default employeeEquipmentService;
