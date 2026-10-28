@@ -116,6 +116,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/clothes/trash", "/api/clothes/trash/**").hasRole("ADMIN")
                         .requestMatchers("/api/accessories/trash", "/api/accessories/trash/**").hasRole("ADMIN")
                         .requestMatchers("/api/categories/trash", "/api/categories/trash/**").hasRole("ADMIN")
+                        .requestMatchers("/api/services/trash", "/api/services/trash/**").hasRole("ADMIN")
 
                         // Cho phép xem thiết bị và phụ kiện công khai không cần token (GET /api/equipments và GET /api/products)
                         .requestMatchers(HttpMethod.GET, "/api/equipments/**", "/api/products/**").permitAll()
@@ -126,6 +127,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/clothes/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/clothes/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/clothes/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/services/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/services/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/services/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/services/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/rooms/**").hasRole("ADMIN")

@@ -164,7 +164,8 @@ CREATE TABLE `services` (
     `price` DOUBLE NOT NULL DEFAULT 0.0 COMMENT 'Giá dịch vụ',
     `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active' COMMENT 'Trạng thái dịch vụ',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày tạo dịch vụ',
-    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ngày cập nhật dịch vụ'
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ngày cập nhật dịch vụ',
+    `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa dịch vụ vào thùng rác'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý danh mục dịch vụ';
 
 -- Bảng 9: packages (Gói chụp ảnh)

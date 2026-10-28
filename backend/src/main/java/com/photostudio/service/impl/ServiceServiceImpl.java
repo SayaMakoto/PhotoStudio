@@ -7,31 +7,40 @@ import com.photostudio.model.services.ServiceStatus;
 import com.photostudio.model.services.ServiceType;
 import com.photostudio.model.services.StudioService;
 import com.photostudio.repository.ServiceRepository;
+import com.photostudio.repository.PackageServiceRepository;
+import com.photostudio.repository.BookingServiceRepository;
 import com.photostudio.service.ServiceService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
 public class ServiceServiceImpl implements ServiceService {
 
     private final ServiceRepository repository;
+    private final PackageServiceRepository packageServiceRepository;
+    private final BookingServiceRepository bookingServiceRepository;
 
-    public ServiceServiceImpl(ServiceRepository repository) {
+    public ServiceServiceImpl(ServiceRepository repository,
+                              PackageServiceRepository packageServiceRepository,
+                              BookingServiceRepository bookingServiceRepository) {
         this.repository = repository;
+        this.packageServiceRepository = packageServiceRepository;
+        this.bookingServiceRepository = bookingServiceRepository;
     }
 
     private StudioService findEntity(Long id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dịch vụ có id: " + id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ServiceResponse> findAll() {
-        return repository.findAll().stream().map(ServiceMapper::toResponse).toList();
+        return repository.findByDeletedAtIsNullOrderByIdDesc().stream().map(ServiceMapper::toResponse).toList();
     }
 
     @Override
@@ -57,13 +66,18 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public void delete(Long id) {
-        repository.delete(findEntity(id));
+        StudioService service = findEntity(id);
+        if (bookingServiceRepository.existsByServiceId(id)) {
+            throw new IllegalArgumentException("Không thể chuyển dịch vụ vào thùng rác vì dịch vụ đã được sử dụng trong đơn đặt lịch. Hãy chuyển trạng thái sang ngừng hoạt động.");
+        }
+        service.setDeletedAt(LocalDateTime.now());
+        repository.save(service);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ServiceResponse> findByName(String name) {
-        return repository.findByNameContainingIgnoreCase(name).stream()
+        return repository.findByDeletedAtIsNullAndNameContainingIgnoreCase(name).stream()
                 .map(ServiceMapper::toResponse).toList();
     }
 
@@ -80,7 +94,7 @@ public class ServiceServiceImpl implements ServiceService {
             throw new IllegalArgumentException(
                     "Loại dịch vụ không hợp lệ. Các loại hợp lệ: photography, makeup, clothing, accessory, background");
         }
-        return repository.findByType(serviceType).stream().map(ServiceMapper::toResponse).toList();
+        return repository.findByDeletedAtIsNullAndType(serviceType).stream().map(ServiceMapper::toResponse).toList();
     }
 
     @Override
@@ -96,6 +110,34 @@ public class ServiceServiceImpl implements ServiceService {
             throw new IllegalArgumentException(
                     "Trạng thái dịch vụ không hợp lệ. Các trạng thái hợp lệ: active, inactive");
         }
-        return repository.findByStatus(serviceStatus).stream().map(ServiceMapper::toResponse).toList();
+        return repository.findByDeletedAtIsNullAndStatus(serviceStatus).stream().map(ServiceMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ServiceResponse> findTrash() {
+        return repository.findByDeletedAtIsNotNullOrderByDeletedAtDesc().stream()
+                .map(ServiceMapper::toResponse).toList();
+    }
+
+    @Override
+    public ServiceResponse restore(Long id) {
+        StudioService service = repository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dịch vụ trong thùng rác có id: " + id));
+        service.setDeletedAt(null);
+        return ServiceMapper.toResponse(repository.save(service));
+    }
+
+    @Override
+    public void permanentlyDelete(Long id) {
+        StudioService service = repository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dịch vụ trong thùng rác có id: " + id));
+        if (bookingServiceRepository.existsByServiceId(id)) {
+            throw new IllegalArgumentException("Không thể xóa vĩnh viễn dịch vụ đã được sử dụng trong đơn đặt lịch.");
+        }
+        if (packageServiceRepository.existsByServiceId(id)) {
+            throw new IllegalArgumentException("Không thể xóa vĩnh viễn dịch vụ đang nằm trong gói chụp. Hãy gỡ dịch vụ khỏi các gói trước.");
+        }
+        repository.delete(service);
     }
 }
