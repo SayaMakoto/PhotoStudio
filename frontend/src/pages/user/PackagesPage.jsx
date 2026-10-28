@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Camera,
   Shirt,
@@ -16,13 +16,22 @@ import {
   Check,
   X,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ArrowRight,
+  Star,
+  Tag,
+  Flame,
+  ArrowDownWideNarrow,
+  ArrowUpNarrowWide,
+  Sparkles,
 } from 'lucide-react';
 import customerPackageService from '../../services/user/packageService';
 import customerBookingService from '../../services/user/bookingService';
 import userImageService from '../../services/user/imageService';
 import customerRoomService from '../../services/user/roomService';
 import { customerAuth } from '../../lib/axiosCustomer';
+import { FloralBranchCorner, FloatingPetals, FloralCardCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
 
 const CATEGORIES_CONFIG = [
   { id: 'all', label: 'Tất cả', icon: LayoutGrid },
@@ -30,6 +39,45 @@ const CATEGORIES_CONFIG = [
   { id: 'portrait', label: 'Nàng Thơ & Profile', icon: User },
   { id: 'family', label: 'Gia Đình & Nhóm', icon: Users },
   { id: 'commercial', label: 'Doanh Nhân & Thời Trang', icon: Briefcase },
+];
+
+const SORT_OPTIONS = [
+  {
+    id: 'popular',
+    label: 'Phổ biến nhất',
+    subtext: 'Được nhiều khách chọn nhất',
+    icon: Flame,
+  },
+  {
+    id: 'price-asc',
+    label: 'Giá thấp đến cao',
+    subtext: 'Tiết kiệm chi phí nhất',
+    icon: ArrowDownWideNarrow,
+  },
+  {
+    id: 'price-desc',
+    label: 'Giá cao đến thấp',
+    subtext: 'Các gói cao cấp & VIP',
+    icon: ArrowUpNarrowWide,
+  },
+  {
+    id: 'rating',
+    label: 'Đánh giá cao nhất',
+    subtext: 'Điểm 5.0 sao & nhiều review',
+    icon: Star,
+  },
+  {
+    id: 'newest',
+    label: 'Mới nhất',
+    subtext: 'Concept ra mắt gần đây',
+    icon: Sparkles,
+  },
+  {
+    id: 'best-deal',
+    label: 'Ưu đãi tốt nhất',
+    subtext: 'Mức chiết khấu cao nhất',
+    icon: Tag,
+  },
 ];
 
 const TIME_SLOTS = [
@@ -47,12 +95,16 @@ export default function PackagesPage() {
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Bộ lọc
+  // Bộ lọc & Sắp xếp
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('default');
+  const [sortBy, setSortBy] = useState('popular');
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef(null);
+  const packagesContainerRef = useRef(null);
   const [maxPrice, setMaxPrice] = useState(10000000);
-  const [displayCount, setDisplayCount] = useState(6);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [favorites, setFavorites] = useState({});
 
@@ -196,6 +248,21 @@ export default function PackagesPage() {
               pkg.imageUrl ||
               fallbackCurated[idx % fallbackCurated.length];
 
+            // Các chỉ số phục vụ tính năng sắp xếp (Đánh giá, Độ phổ biến, Ưu đãi)
+            const idNum = Number(pkg.id) || (idx + 1);
+            const defaultRatings = [5.0, 4.9, 4.8, 5.0, 4.9, 4.8, 5.0, 4.7];
+            const defaultRatingCounts = [128, 96, 64, 150, 42, 85, 110, 58];
+            const defaultBookedCounts = [340, 280, 195, 410, 120, 230, 315, 160];
+            const defaultDiscounts = [15, 20, 10, 25, 0, 15, 30, 0];
+
+            const rating = defaultRatings[(idNum - 1) % defaultRatings.length];
+            const ratingCount = defaultRatingCounts[(idNum - 1) % defaultRatingCounts.length];
+            const bookedCount = defaultBookedCounts[(idNum - 1) % defaultBookedCounts.length];
+            const discountPercent = defaultDiscounts[(idNum - 1) % defaultDiscounts.length];
+            const originalPrice = discountPercent > 0
+              ? Math.round((priceNum / (1 - discountPercent / 100)) / 10000) * 10000
+              : null;
+
             return {
               id: pkg.id,
               name: pkg.name,
@@ -207,6 +274,12 @@ export default function PackagesPage() {
               displayImage,
               specs,
               duration: pkg.duration || 60,
+              rating,
+              ratingCount,
+              bookedCount,
+              discountPercent,
+              originalPrice,
+              createdAt: pkg.createdAt,
             };
           });
 
@@ -223,6 +296,17 @@ export default function PackagesPage() {
       .finally(() => {
         setIsLoading(false);
       });
+  }, []);
+
+  // Đóng dropdown sắp xếp khi nhấp ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sortRef.current && !sortRef.current.contains(e.target)) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const toggleFavorite = (pkgId, e) => {
@@ -244,6 +328,11 @@ export default function PackagesPage() {
     return counts;
   }, [packages]);
 
+  // Reset trang về 1 khi người dùng đổi bộ lọc hoặc tìm kiếm
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchTerm, maxPrice, sortBy]);
+
   // Lọc và sắp xếp
   const filteredPackages = useMemo(() => {
     return packages
@@ -260,15 +349,39 @@ export default function PackagesPage() {
       .sort((a, b) => {
         if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
         if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
-        if (sortBy === 'duration') return (b.duration || 0) - (a.duration || 0);
-        return 0;
+        if (sortBy === 'popular') return (b.bookedCount || 0) - (a.bookedCount || 0);
+        if (sortBy === 'rating') {
+          const diff = (b.rating || 0) - (a.rating || 0);
+          return diff !== 0 ? diff : (b.ratingCount || 0) - (a.ratingCount || 0);
+        }
+        if (sortBy === 'newest') {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : Number(a.id);
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : Number(b.id);
+          return timeB - timeA;
+        }
+        if (sortBy === 'best-deal') {
+          return (b.discountPercent || 0) - (a.discountPercent || 0);
+        }
+        return (b.bookedCount || 0) - (a.bookedCount || 0);
       });
   }, [packages, selectedCategory, searchTerm, maxPrice, sortBy]);
 
+  // Tổng số trang phân trang
+  const totalPages = Math.ceil(filteredPackages.length / ITEMS_PER_PAGE) || 1;
+
+  // Danh sách gói chụp phân theo trang hiện tại (6 gói / trang)
   const displayedPackages = useMemo(() => {
-    if (displayCount === 'all') return filteredPackages;
-    return filteredPackages.slice(0, Number(displayCount));
-  }, [filteredPackages, displayCount]);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredPackages.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredPackages, currentPage]);
+
+  // Đổi trang & cuộn mượt lên đầu danh sách gói
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    if (packagesContainerRef.current) {
+      packagesContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // Xử lý gửi đặt lịch
   const handleSubmitBooking = async (e) => {
@@ -325,7 +438,7 @@ export default function PackagesPage() {
   };
 
   return (
-    <div className="bg-[#FAF5F5] min-h-screen text-[#261A1E] font-sans selection:bg-[#B85064]/20 selection:text-[#B85064]">
+    <div className="bg-[#FAF5F5] min-h-screen text-[#261A1E] font-sans selection:bg-[#B85064]/20 selection:text-[#B85064] relative overflow-hidden">
       {/* ========================================================================= */}
       {/* 1. HERO BANNER: Nền studio điện ảnh với font chữ tiếng Việt chuẩn đẹp */}
       {/* ========================================================================= */}
@@ -344,30 +457,9 @@ export default function PackagesPage() {
         {/* Ambient spotlight glow */}
         <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[350px] bg-[#E5A8B4]/10 rounded-full blur-[140px] pointer-events-none" />
 
-        {/* Cành hoa đào rủ xuống góc trái phía trên */}
-        <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none opacity-85 z-10">
-          <svg viewBox="0 0 200 200" fill="none" className="w-full h-full">
-            <path
-              d="M-20 -10 C 30 20, 60 70, 75 130"
-              stroke="#543C3A"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <path
-              d="M20 15 C 50 10, 90 35, 110 50"
-              stroke="#543C3A"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <circle cx="75" cy="130" r="10" fill="#EFA9B7" opacity="0.9" />
-            <circle cx="70" cy="122" r="8" fill="#F8C6CE" opacity="0.95" />
-            <circle cx="83" cy="125" r="9" fill="#E695A5" opacity="0.9" />
-            <circle cx="110" cy="50" r="9" fill="#EFA9B7" opacity="0.85" />
-            <circle cx="118" cy="45" r="7" fill="#F8C6CE" opacity="0.9" />
-            <circle cx="35" cy="40" r="11" fill="#E896A7" opacity="0.8" />
-            <circle cx="20" cy="70" r="8" fill="#F7C4CD" opacity="0.75" />
-          </svg>
-        </div>
+        {/* Họa tiết cành hoa đào nghệ thuật trên nền Hero */}
+        <FloralBranchCorner position="top-left" opacity="opacity-90" />
+        <FloralBranchCorner position="top-right" opacity="opacity-80" />
 
         {/* Chữ script viết tay mờ góc trái */}
         <div className="absolute top-28 left-6 sm:left-14 text-white/35 font-handwriting text-2xl sm:text-3xl select-none pointer-events-none transform -rotate-12">
@@ -432,25 +524,24 @@ export default function PackagesPage() {
       {/* 2. MAIN CONTENT: 2 CỘT (Sidebar bên trái + Lưới 3 card/hàng bên phải) */}
       {/* ========================================================================= */}
       <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-        {/* Cánh hoa đào bay phất phơ trang trí góc dưới bên trái */}
-        <div className="absolute bottom-8 left-0 w-72 h-72 pointer-events-none opacity-40 z-0 select-none">
-          <svg viewBox="0 0 200 200" fill="none" className="w-full h-full">
-            <ellipse cx="60" cy="140" rx="14" ry="8" fill="#F7CAD1" transform="rotate(-25 60 140)" />
-            <ellipse cx="95" cy="165" rx="12" ry="7" fill="#F5BCC5" transform="rotate(15 95 165)" />
-            <ellipse cx="40" cy="180" rx="16" ry="9" fill="#FAB8C3" transform="rotate(-40 40 180)" />
-            <ellipse cx="120" cy="120" rx="10" ry="6" fill="#F8C9D1" transform="rotate(35 120 120)" />
-          </svg>
-        </div>
+        {/* Họa tiết hoa đào trang trí góc nền trang */}
+        <FloralBranchCorner position="bottom-left" opacity="opacity-70" />
+        <FloralBranchCorner position="top-right" opacity="opacity-55" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
           
           {/* ===================================================================== */}
           {/* CỘT TRÁI: BỘ LỌC GÓI CHỤP (SIDEBAR - 3 CỘT) */}
           {/* ===================================================================== */}
-          <div className="lg:col-span-3 xl:col-span-3">
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#F2E8E9] shadow-[0_8px_30px_rgb(184,80,100,0.06)] relative overflow-hidden space-y-6">
+          <div className="lg:col-span-3 xl:col-span-3 space-y-8">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#F2E8E9] shadow-[0_8px_30px_rgb(184,80,100,0.06)] relative space-y-6">
               
-              <div className="absolute -top-12 -right-12 w-40 h-40 bg-gradient-to-br from-[#FCECEF] to-[#FAF5F5] rounded-full blur-2xl pointer-events-none" />
+              {/* Lớp nền bo góc riêng biệt để không cắt mất dropdown khi xổ xuống */}
+              <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none z-0">
+                {/* Hoa trang trí góc trên bên phải khung lọc */}
+                <FloralCardCorner position="top-right" opacity="opacity-45" />
+                <div className="absolute -top-12 -right-12 w-40 h-40 bg-gradient-to-br from-[#FCECEF] to-[#FAF5F5] rounded-full blur-2xl pointer-events-none" />
+              </div>
 
               {/* Header Sidebar */}
               <div>
@@ -531,27 +622,95 @@ export default function PackagesPage() {
                 </div>
               </div>
 
-              {/* Sắp xếp theo */}
-              <div className="pt-2 border-t border-[#F2E8E9] space-y-2">
+              {/* Sắp xếp theo (Dropdown tùy chỉnh chuẩn sang trọng như trang chủ) */}
+              <div className="pt-2 border-t border-[#F2E8E9] space-y-2 relative z-30" ref={sortRef}>
                 <span className="block text-xs font-bold text-[#2A1D22]">
                   Sắp xếp theo
                 </span>
                 <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full appearance-none px-3.5 py-2.5 rounded-xl bg-white border border-[#E8DCDE] text-xs font-medium text-[#3E2F35] focus:outline-none focus:border-[#B85064] cursor-pointer"
+                  <button
+                    type="button"
+                    onClick={() => setIsSortOpen(!isSortOpen)}
+                    className={`cursor-pointer w-full px-3.5 py-2.5 rounded-xl bg-white border text-left flex items-center justify-between transition-all duration-200 ${
+                      isSortOpen
+                        ? 'border-[#B85064] ring-2 ring-[#B85064]/20 shadow-sm'
+                        : 'border-[#E8DCDE] hover:border-[#B85064]/60'
+                    }`}
                   >
-                    <option value="default">Mặc định từ CSDL</option>
-                    <option value="price-asc">Giá tăng dần</option>
-                    <option value="price-desc">Giá giảm dần</option>
-                    <option value="duration">Thời lượng chụp lâu nhất</option>
-                  </select>
-                  <ChevronDown className="w-4 h-4 text-[#8C7D82] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <div className="w-7 h-7 rounded-lg bg-[#FDF0F3] text-[#B85064] flex items-center justify-center shrink-0">
+                        {(() => {
+                          const CurrentIcon = SORT_OPTIONS.find((s) => s.id === sortBy)?.icon || Flame;
+                          return <CurrentIcon className="w-3.5 h-3.5" />;
+                        })()}
+                      </div>
+                      <div className="truncate">
+                        <span className="block text-xs font-bold text-[#2A1D22] truncate">
+                          {SORT_OPTIONS.find((s) => s.id === sortBy)?.label || 'Phổ biến nhất'}
+                        </span>
+                        <span className="block text-[10px] font-semibold text-[#B85064] truncate">
+                          {SORT_OPTIONS.find((s) => s.id === sortBy)?.subtext || ''}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 text-[#7A6C71] transition-transform duration-200 shrink-0 ${
+                        isSortOpen ? 'rotate-180 text-[#B85064]' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {/* Danh sách tiêu chí sắp xếp xổ xuống dạng overlay phủ lên chữ viết tay bên dưới mà không đẩy nội dung xuống */}
+                  {isSortOpen && (
+                    <div className="absolute left-0 right-0 top-full mt-2 bg-white/98 backdrop-blur-md border border-[#F0E4E6] rounded-2xl max-h-56 overflow-y-auto p-1.5 space-y-1 shadow-2xl z-50 [scrollbar-width:thin] [scrollbar-color:#E2B3BC_transparent] animate-in fade-in zoom-in-95 duration-150">
+                      {SORT_OPTIONS.map((opt) => {
+                        const isSelected = sortBy === opt.id;
+                        const OptIcon = opt.icon;
+                        return (
+                          <button
+                            type="button"
+                            key={opt.id}
+                            onClick={() => {
+                              setSortBy(opt.id);
+                              setIsSortOpen(false);
+                            }}
+                            className={`cursor-pointer w-full p-2.5 rounded-xl flex items-center justify-between text-left transition-all ${
+                              isSelected
+                                ? 'bg-[#FDF0F3] border border-[#F5D5DC]'
+                                : 'hover:bg-[#FAF5F6]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 truncate pr-2">
+                              <div
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                                  isSelected
+                                    ? 'bg-[#B85064] text-white'
+                                    : 'bg-[#FDF0F3] text-[#B85064]'
+                                }`}
+                              >
+                                <OptIcon className="w-3.5 h-3.5" />
+                              </div>
+                              <div className="truncate">
+                                <div className="text-xs font-bold text-[#2A1D22] truncate">
+                                  {opt.label}
+                                </div>
+                                <div className="text-[10px] font-medium text-[#7A6C71] truncate">
+                                  {opt.subtext}
+                                </div>
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <Check className="w-4 h-4 text-[#B85064] shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Chữ viết tay góc dưới sidebar */}
+              {/* Chữ viết tay góc dưới sidebar (giữ nguyên vị trí ngay dưới nút sắp xếp) */}
               <div className="pt-4 text-center select-none">
                 <p className="font-handwriting text-lg text-[#A87B84] leading-relaxed">
                   Chọn phong cách của bạn
@@ -561,71 +720,123 @@ export default function PackagesPage() {
               </div>
 
             </div>
+
+            {/* CARD BANNER TƯ VẤN KÈM THEO: NẰM NGAY DƯỚI BẢNG LỌC */}
+            <div className="bg-gradient-to-br from-[#FDF0F3] via-[#FCF2F4] to-[#FBF4F5] rounded-3xl border border-[#F5D5DC] p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+              {/* Hoa trang trí góc dưới bên phải card tư vấn */}
+              <FloralCardCorner position="bottom-right" opacity="opacity-70" />
+              <div className="space-y-3 relative z-10">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#B85064] block">
+                  CẦN TƯ VẤN THÊM?
+                </span>
+
+                <h3 className="text-lg font-bold text-[#2A1D22] font-serif-luxury leading-snug">
+                  Liên hệ ngay
+                  <br />
+                  để được tư vấn gói chụp
+                  <br />
+                  phù hợp nhất!
+                </h3>
+
+                <div className="space-y-2.5 pt-2">
+                  <a
+                    href="tel:0987654321"
+                    className="flex items-center gap-2.5 text-xs text-[#4A393E] hover:text-[#B85064] transition-colors"
+                  >
+                    <Phone className="w-4 h-4 text-[#B85064]" />
+                    <span className="font-semibold">0987 654 321</span>
+                  </a>
+                  <a
+                    href="#chat"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (packages.length > 0) openBookingModal(packages[0]);
+                    }}
+                    className="flex items-center gap-2.5 text-xs text-[#4A393E] hover:text-[#B85064] transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4 text-[#B85064]" />
+                    <span>Chat với chúng tôi</span>
+                  </a>
+                </div>
+              </div>
+
+              <div className="pt-6 space-y-3 relative z-10">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (packages.length > 0) openBookingModal(packages[0]);
+                  }}
+                  className="cursor-pointer w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap transition-all shadow-md shadow-[#B85064]/20 hover:scale-[1.01]"
+                >
+                  <span>Đặt lịch ngay</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+
+                <p className="text-center font-handwriting text-base text-[#A87B84] select-none">
+                  Capture your story ♡
+                </p>
+              </div>
+            </div>
+
           </div>
 
           {/* ===================================================================== */}
           {/* CỘT PHẢI: LƯỚI 3 CỘT MỖI HÀNG (TRÁNH BỊ TRÀN CHỮ, RỘNG RÃI & ĐẸP MẮT) */}
           {/* ===================================================================== */}
-          <div className="lg:col-span-9 xl:col-span-9 space-y-6">
+          <div className="lg:col-span-9 xl:col-span-9 space-y-6" ref={packagesContainerRef}>
             
-            {/* Thanh Toolbar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="relative w-full sm:max-w-md">
-                <Search className="w-4 h-4 text-[#9E8E93] absolute left-4 top-1/2 -translate-y-1/2" />
+            {/* Thanh Toolbar: Tìm kiếm tràn rộng + 2 Nút Chế độ xem */}
+            <div className="flex items-center gap-3">
+              {/* Thanh tìm kiếm tràn rộng liền mạch, phong cách sang trọng */}
+              <div className="relative flex-1 group">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#FAF5F6] group-focus-within:bg-[#FDF0F3] text-[#9E8E93] group-focus-within:text-[#B85064] flex items-center justify-center transition-colors">
+                  <Search className="w-4 h-4" />
+                </div>
                 <input
                   type="text"
-                  placeholder="Tìm gói chụp theo tên hoặc mô tả..."
+                  placeholder="Tìm gói chụp theo tên hoặc mô tả phong cách..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-[#EFE5E7] text-xs sm:text-[13px] text-[#2A1D22] placeholder-[#9E8E93] focus:outline-none focus:border-[#B85064] transition-colors shadow-sm"
+                  className="w-full pl-13 pr-10 py-3 rounded-2xl bg-white border border-[#EADCE0] text-xs sm:text-[13px] text-[#2A1D22] placeholder-[#A09095] shadow-xs hover:border-[#D9BDC4] focus:outline-none focus:border-[#B85064] focus:ring-4 focus:ring-[#B85064]/10 transition-all duration-200"
                 />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                    className="cursor-pointer absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-[#7A6C71] flex items-center justify-center transition-colors"
+                    title="Xóa tìm kiếm"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
               </div>
 
-              <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
-                <div className="flex items-center gap-2 text-xs text-[#6F6066]">
-                  <span>Hiển thị</span>
-                  <div className="relative">
-                    <select
-                      value={displayCount}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDisplayCount(val === 'all' ? 'all' : Number(val));
-                      }}
-                      className="appearance-none pl-3 pr-7 py-1.5 rounded-xl bg-white border border-[#EFE5E7] text-xs font-semibold text-[#2A1D22] focus:outline-none focus:border-[#B85064] cursor-pointer shadow-sm"
-                    >
-                      <option value={3}>3</option>
-                      <option value={6}>6</option>
-                      <option value={9}>9</option>
-                      <option value="all">Tất cả ({filteredPackages.length})</option>
-                    </select>
-                    <ChevronDown className="w-3.5 h-3.5 text-[#8C7D82] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    title="Chế độ xem lưới"
-                    className={`cursor-pointer p-2 rounded-xl transition-all ${
-                      viewMode === 'grid'
-                        ? 'bg-[#B85064] text-white shadow-sm'
-                        : 'bg-white text-[#8C7D82] border border-[#EFE5E7] hover:text-[#B85064]'
-                    }`}
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    title="Chế độ xem danh sách"
-                    className={`cursor-pointer p-2 rounded-xl transition-all ${
-                      viewMode === 'list'
-                        ? 'bg-[#B85064] text-white shadow-sm'
-                        : 'bg-white text-[#8C7D82] border border-[#EFE5E7] hover:text-[#B85064]'
-                    }`}
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                </div>
+              {/* 2 Nút Chế độ xem: Grid & List */}
+              <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-[#EADCE0] shadow-xs shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  title="Chế độ xem lưới"
+                  className={`cursor-pointer p-2.5 rounded-xl transition-all duration-200 ${
+                    viewMode === 'grid'
+                      ? 'bg-[#B85064] text-white shadow-sm shadow-[#B85064]/25'
+                      : 'text-[#8C7D82] hover:text-[#B85064] hover:bg-[#FAF5F6]'
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  title="Chế độ xem danh sách"
+                  className={`cursor-pointer p-2.5 rounded-xl transition-all duration-200 ${
+                    viewMode === 'list'
+                      ? 'bg-[#B85064] text-white shadow-sm shadow-[#B85064]/25'
+                      : 'text-[#8C7D82] hover:text-[#B85064] hover:bg-[#FAF5F6]'
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
@@ -665,7 +876,7 @@ export default function PackagesPage() {
                     setSelectedCategory('all');
                     setSearchTerm('');
                     setMaxPrice(10000000);
-                    setSortBy('default');
+                    setSortBy('popular');
                   }}
                   className="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors shadow-sm"
                 >
@@ -706,6 +917,16 @@ export default function PackagesPage() {
                             </span>
                           </div>
 
+                          {/* Tag ưu đãi góc dưới trái ảnh */}
+                          {pkg.discountPercent > 0 && (
+                            <div className="absolute bottom-2.5 left-3">
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-[#E84360] text-white shadow-sm flex items-center gap-1">
+                                <Tag className="w-2.5 h-2.5" />
+                                <span>-{pkg.discountPercent}% Ưu đãi</span>
+                              </span>
+                            </div>
+                          )}
+
                           {/* Nút tim góc trên phải ảnh */}
                           <button
                             type="button"
@@ -724,10 +945,24 @@ export default function PackagesPage() {
                         {/* Body Details */}
                         <div className="p-4 sm:p-5 space-y-3">
                           <div>
-                            <h3 className="text-[15px] font-bold text-[#2A1D22] group-hover:text-[#B85064] transition-colors line-clamp-1">
-                              {pkg.name}
-                            </h3>
-                            <p className="text-xs text-[#7A6C71] font-light leading-relaxed line-clamp-2 mt-1 min-h-[34px]">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <h3 className="text-[15px] font-bold text-[#2A1D22] group-hover:text-[#B85064] transition-colors line-clamp-1">
+                                {pkg.name}
+                              </h3>
+                            </div>
+                            <div className="flex items-center justify-between text-xs mb-1.5">
+                              <div className="flex items-center gap-1 font-semibold text-[#D97706]">
+                                <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
+                                <span>{pkg.rating?.toFixed(1) || '5.0'}</span>
+                                <span className="text-[#9E8E93] font-normal text-[11px]">
+                                  ({pkg.ratingCount || 0})
+                                </span>
+                              </div>
+                              <span className="text-[11px] text-[#8C7D82]">
+                                Đã đặt {pkg.bookedCount || 0}+
+                              </span>
+                            </div>
+                            <p className="text-xs text-[#7A6C71] font-light leading-relaxed line-clamp-2 min-h-[34px]">
                               {pkg.description}
                             </p>
                           </div>
@@ -749,9 +984,16 @@ export default function PackagesPage() {
 
                       {/* Footer: Giá & Nút Đặt gói này (không bao giờ bị tràn xuống 3 dòng) */}
                       <div className="px-4 sm:px-5 pb-5 pt-3 border-t border-[#F8EFEF] flex items-center justify-between gap-3">
-                        <span className="text-base sm:text-lg font-bold text-[#B85064]">
-                          {pkg.priceDisplay}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-base sm:text-lg font-bold text-[#B85064]">
+                            {pkg.priceDisplay}
+                          </span>
+                          {pkg.originalPrice && pkg.discountPercent > 0 && (
+                            <span className="text-[11px] text-[#A89A9F] line-through">
+                              {pkg.originalPrice.toLocaleString('vi-VN')}đ
+                            </span>
+                          )}
+                        </div>
                         <button
                           type="button"
                           onClick={() => openBookingModal(pkg)}
@@ -764,62 +1006,6 @@ export default function PackagesPage() {
                     </div>
                   );
                 })}
-
-                {/* Card Banner Tư Vấn Kèm Theo ở cuối danh sách */}
-                <div className="bg-gradient-to-br from-[#FDF0F3] via-[#FCF2F4] to-[#FBF4F5] rounded-2xl border border-[#F5D5DC] p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
-                  <div className="space-y-3 relative z-10">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#B85064] block">
-                      CẦN TƯ VẤN THÊM?
-                    </span>
-
-                    <h3 className="text-lg font-bold text-[#2A1D22] font-serif-luxury leading-snug">
-                      Liên hệ ngay
-                      <br />
-                      để được tư vấn gói chụp
-                      <br />
-                      phù hợp nhất!
-                    </h3>
-
-                    <div className="space-y-2.5 pt-2">
-                      <a
-                        href="tel:0987654321"
-                        className="flex items-center gap-2.5 text-xs text-[#4A393E] hover:text-[#B85064] transition-colors"
-                      >
-                        <Phone className="w-4 h-4 text-[#B85064]" />
-                        <span className="font-semibold">0987 654 321</span>
-                      </a>
-                      <a
-                        href="#chat"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (packages.length > 0) openBookingModal(packages[0]);
-                        }}
-                        className="flex items-center gap-2.5 text-xs text-[#4A393E] hover:text-[#B85064] transition-colors"
-                      >
-                        <MessageCircle className="w-4 h-4 text-[#B85064]" />
-                        <span>Chat với chúng tôi</span>
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="pt-6 space-y-3 relative z-10">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (packages.length > 0) openBookingModal(packages[0]);
-                      }}
-                      className="cursor-pointer w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap transition-all shadow-md shadow-[#B85064]/20 hover:scale-[1.01]"
-                    >
-                      <span>Đặt lịch ngay</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-
-                    <p className="text-center font-handwriting text-base text-[#A87B84] select-none">
-                      Capture your story ♡
-                    </p>
-                  </div>
-                </div>
-
               </div>
             )}
 
@@ -841,9 +1027,25 @@ export default function PackagesPage() {
                           onClick={() => setQuickViewPkg(pkg)}
                         />
                         <div className="space-y-1">
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[#FCECEF] text-[#B85064]">
-                            {pkg.categoryLabel}
-                          </span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[#FCECEF] text-[#B85064]">
+                              {pkg.categoryLabel}
+                            </span>
+                            {pkg.discountPercent > 0 && (
+                              <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-[#E84360] text-white flex items-center gap-0.5">
+                                <Tag className="w-2.5 h-2.5" />
+                                <span>-{pkg.discountPercent}% Ưu đãi</span>
+                              </span>
+                            )}
+                            <div className="flex items-center gap-1 text-[11px] font-semibold text-[#D97706]">
+                              <Star className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" />
+                              <span>{pkg.rating?.toFixed(1) || '5.0'}</span>
+                              <span className="text-[#9E8E93] font-normal">({pkg.ratingCount || 0})</span>
+                            </div>
+                            <span className="text-[11px] text-[#8C7D82]">
+                              • Đã đặt {pkg.bookedCount || 0}+
+                            </span>
+                          </div>
                           <h3 className="text-base font-bold text-[#2A1D22]">
                             {pkg.name}
                           </h3>
@@ -862,9 +1064,16 @@ export default function PackagesPage() {
                       </div>
 
                       <div className="flex items-center justify-between sm:flex-col sm:items-end gap-3 w-full sm:w-auto border-t sm:border-t-0 border-[#F8EFEF] pt-3 sm:pt-0">
-                        <span className="text-lg font-bold text-[#B85064]">
-                          {pkg.priceDisplay}
-                        </span>
+                        <div className="flex flex-col sm:items-end">
+                          <span className="text-lg font-bold text-[#B85064]">
+                            {pkg.priceDisplay}
+                          </span>
+                          {pkg.originalPrice && pkg.discountPercent > 0 && (
+                            <span className="text-[11px] text-[#A89A9F] line-through">
+                              {pkg.originalPrice.toLocaleString('vi-VN')}đ
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
@@ -893,6 +1102,69 @@ export default function PackagesPage() {
               </div>
             )}
 
+            {/* Phân trang gói chụp */}
+            {!isLoading && filteredPackages.length > 0 && totalPages > 1 && (
+              <div className="pt-6 border-t border-[#F2E8E9] flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-[#7A6C71]">
+                  Hiển thị{' '}
+                  <span className="font-bold text-[#2A1D22]">
+                    {(currentPage - 1) * ITEMS_PER_PAGE + 1}
+                  </span>{' '}
+                  -{' '}
+                  <span className="font-bold text-[#2A1D22]">
+                    {Math.min(currentPage * ITEMS_PER_PAGE, filteredPackages.length)}
+                  </span>{' '}
+                  trên tổng số{' '}
+                  <span className="font-bold text-[#B85064]">
+                    {filteredPackages.length}
+                  </span>{' '}
+                  gói chụp
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={currentPage === 1}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className="cursor-pointer px-3 py-2 rounded-xl border border-[#EFE5E7] bg-white text-xs font-semibold text-[#55464B] hover:border-[#B85064] hover:text-[#B85064] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-xs"
+                    title="Trang trước"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span className="hidden sm:inline">Trước</span>
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                    const isActive = pageNum === currentPage;
+                    return (
+                      <button
+                        type="button"
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`cursor-pointer w-9 h-9 rounded-xl text-xs font-bold transition-all ${
+                          isActive
+                            ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/25 scale-105'
+                            : 'bg-white text-[#55464B] border border-[#EFE5E7] hover:border-[#B85064] hover:text-[#B85064] shadow-xs'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    disabled={currentPage === totalPages}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="cursor-pointer px-3 py-2 rounded-xl border border-[#EFE5E7] bg-white text-xs font-semibold text-[#55464B] hover:border-[#B85064] hover:text-[#B85064] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-xs"
+                    title="Trang sau"
+                  >
+                    <span className="hidden sm:inline">Sau</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
           </div>
 
         </div>
@@ -910,6 +1182,11 @@ export default function PackagesPage() {
             className="relative w-full max-w-lg rounded-3xl bg-white border border-[#F2E8E9] shadow-2xl p-6 sm:p-8 overflow-hidden text-[#2A1D22]"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Hoa lá màu nước trang trí khung đặt lịch */}
+            <FloralCardCorner position="top-right" opacity="opacity-70" />
+            <FloralCardCorner position="bottom-left" opacity="opacity-60" />
+            <FloatingPetals count={4} opacity="opacity-50" />
+
             <button
               onClick={() => setBookingModalPkg(null)}
               className="cursor-pointer absolute top-4 right-4 p-2 rounded-full text-[#8C7D82] hover:text-[#2A1D22] hover:bg-[#FCECEF] transition-colors"
@@ -1168,6 +1445,9 @@ export default function PackagesPage() {
           </div>
         </div>
       )}
+
+      {/* Cánh hoa đào bay phất phơ trải đều khắp chiều cao trang từ trên xuống dưới */}
+      <ScatteredPetals className="z-20 pointer-events-none" />
     </div>
   );
 }

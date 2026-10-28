@@ -162,7 +162,6 @@ export default function Services({ onSelectPackage }) {
               const formattedPrice = pkg.price
                 ? Number(pkg.price).toLocaleString('vi-VN')
                 : 'Liên hệ';
-              const isHighlighted = idx === 1;
 
               return (
                 <ScrollReveal
@@ -173,11 +172,7 @@ export default function Services({ onSelectPackage }) {
                   className="flex"
                 >
                   <div
-                    className={`group flex flex-col justify-between relative overflow-hidden rounded-3xl p-0 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#B85064]/15 w-full bg-white border ${
-                      isHighlighted
-                        ? 'border-[#B85064] shadow-xl shadow-[#B85064]/10 ring-1 ring-[#B85064]/40 md:-translate-y-2'
-                        : 'border-[#F0E4E6] hover:border-[#B85064]/50'
-                    }`}
+                    className="group flex flex-col justify-between relative overflow-hidden rounded-3xl p-0 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#B85064]/20 hover:border-[#B85064] hover:ring-1 hover:ring-[#B85064]/40 w-full bg-white border border-[#F0E4E6] shadow-sm"
                   >
                     <div>
                       {/* Product Image Cover */}

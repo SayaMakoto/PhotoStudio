@@ -9,6 +9,7 @@ import ScrollReveal from '../../animations/ScrollReveal';
 import userBannerService from '../../../services/user/bannerService';
 import customerReviewService from '../../../services/user/reviewService';
 import { ROUTES } from '../../../routes/web';
+import { FloralBranchCorner, FloatingPetals } from '../../common/FloralDecorations';
 
 export default function Hero({ onOpenBooking }) {
   const [heroData, setHeroData] = useState({
@@ -69,6 +70,11 @@ export default function Hero({ onOpenBooking }) {
 
       {/* Chuyển sắc mượt mà xuống nền sáng bên dưới */}
       <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#FAF5F5] via-[#141012]/60 to-transparent pointer-events-none z-10" />
+
+      {/* Hoa lá màu nước rải ở nền Hero */}
+      <FloralBranchCorner position="top-left" opacity="opacity-80" />
+      <FloralBranchCorner position="top-right" opacity="opacity-75" />
+      <FloatingPetals count={8} opacity="opacity-55" />
 
       {/* Subtle Studio grid overlay */}
       <div 
