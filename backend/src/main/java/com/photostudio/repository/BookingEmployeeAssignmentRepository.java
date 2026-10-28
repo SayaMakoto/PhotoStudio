@@ -14,9 +14,13 @@ import java.util.Optional;
 
 public interface BookingEmployeeAssignmentRepository extends JpaRepository<BookingEmployeeAssignment, Long> {
 
-    List<BookingEmployeeAssignment> findByBookingId(Long bookingId);
+    @Query("SELECT a FROM BookingEmployeeAssignment a WHERE a.booking.id = :bookingId")
+    List<BookingEmployeeAssignment> findByBookingId(@Param("bookingId") Long bookingId);
 
-    Optional<BookingEmployeeAssignment> findByBookingIdAndEmployeeId(Long bookingId, Long employeeId);
+    @Query("SELECT a FROM BookingEmployeeAssignment a WHERE a.booking.id = :bookingId AND a.employee.id = :employeeId")
+    Optional<BookingEmployeeAssignment> findByBookingIdAndEmployeeId(
+            @Param("bookingId") Long bookingId,
+            @Param("employeeId") Long employeeId);
 
     @Query("SELECT COUNT(a) > 0 FROM BookingEmployeeAssignment a " +
             "WHERE a.employee.id = :employeeId " +

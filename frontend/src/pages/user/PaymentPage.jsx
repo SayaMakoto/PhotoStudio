@@ -347,28 +347,10 @@ export default function PaymentPage() {
     setIsProcessing(true);
 
     try {
-      // 1. Tạo đơn booking trong CSDL
-      const currentCust = customerAuth.getUser();
-      const validCustomerId = currentCust?.id || 4; // Khách hàng hợp lệ mặc định
-
-      const bookingPayload = {
-        customerId: validCustomerId,
-        roomId: 1,
-        bookingDate: `${bookingDate}T09:30:00`,
-        startTime: '09:30:00',
-        endTime: '11:30:00',
-        status: 'pending',
-        customerNote: `[Thanh Toán ${paymentType === 'deposit' ? `Cọc ${depositPercent}%` : 'Toàn Bộ 100%'}] Khách: ${customerName} - SĐT: ${customerPhone} - Gói: ${currentPackage.name} - Tổng tiền: ${calculation.finalPackagePrice.toLocaleString('vi-VN')}đ - Đã thanh toán: ${calculation.amountToPay.toLocaleString('vi-VN')}đ${appliedPromo ? ` - Mã KM: ${appliedPromo.code} (-20% giá gốc)` : ''}`,
-      };
-
-      let bookingId = 1;
-      try {
-        const res = await customerBookingService.createBooking(bookingPayload);
-        bookingId = res?.id || res?.data?.id || Math.floor(100 + Math.random() * 900);
-      } catch (err) {
-        console.warn('Lỗi tạo booking API, dùng bookingId tạm:', err.message);
-        bookingId = Math.floor(100 + Math.random() * 900);
-      }
+      // BookingPage đã tạo đơn và liên kết gói chụp. Dùng đúng đơn đó để tránh
+      // tạo một booking thứ hai chỉ để thanh toán.
+      let bookingId = Number(stateData.bookingId) || null;
+      if (!bookingId) throw new Error('Không tìm thấy đơn đặt lịch. Vui lòng quay lại trang đặt lịch để tạo đơn trước khi thanh toán.');
 
       // 2. Nếu chọn Cổng thanh toán VNPay Sandbox:
       if (paymentMethod === 'vnpay') {

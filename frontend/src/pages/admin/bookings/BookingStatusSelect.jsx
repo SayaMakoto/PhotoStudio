@@ -1,20 +1,24 @@
 import GlideSelect from '../../../components/admin/common/GlideSelect';
 import { BOOKING_STATUS_OPTIONS } from './bookingConfig';
 
-export default function BookingStatusSelect({ value, onChange, disabled = false, compact = false }) {
+export default function BookingStatusSelect({ nextStatus, onChange, disabled = false }) {
+  const nextOption = BOOKING_STATUS_OPTIONS.find((option) => option.value === nextStatus);
+  if (!nextOption) return null;
+
   return <GlideSelect
-    options={BOOKING_STATUS_OPTIONS}
-    value={value || 'pending'}
+    options={[nextOption]}
+    value=""
     onChange={onChange}
     disabled={disabled}
-    ariaLabel="Cập nhật trạng thái đơn đặt lịch"
+    ariaLabel={`Chuyển sang trạng thái ${nextOption.label}`}
+    placeholder="Chọn trạng thái tiếp theo"
     showTags={false}
-    size={compact ? 'sm' : 'md'}
+    size="md"
     accentColor="#fbbf24"
     surfaceColor="#0a0a0a"
     highlightColor="#262626"
     textColor="#e5e5e5"
-    menuWidth={200}
-    className={compact ? 'w-44 [&>button]:w-full [&>button]:justify-between' : 'w-full [&>button]:w-full [&>button]:justify-between'}
+    menuWidth={220}
+    className="w-full [&>button]:w-full [&>button]:justify-between [&>button]:border [&>button]:border-neutral-800"
   />;
 }

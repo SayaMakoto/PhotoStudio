@@ -13,6 +13,13 @@ export const customerBookingService = {
   // Tạo mới đơn đặt lịch
   createBooking: (data) => axiosCustomer.post('/api/bookings', data),
 
+  // Gắn gói chụp vào đơn sau khi tạo booking
+  addPackage: (data) => axiosCustomer.post('/api/booking-packages', data),
+
+  addService: (data) => axiosCustomer.post('/api/booking-services', data),
+  addBackground: (data) => axiosCustomer.post('/api/booking-backgrounds', data),
+  addEquipment: (data) => axiosCustomer.post('/api/booking-equipments', data),
+
   // Hủy đơn đặt lịch
   cancelBooking: (id, reason) => axiosCustomer.patch(`/api/bookings/${id}/cancel`, { reason }),
 

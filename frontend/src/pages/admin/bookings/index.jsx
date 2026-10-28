@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, CalendarDays, CheckCircle2, CircleAlert, Clock3, Eye, ListChecks, XCircle } from 'lucide-react';
 import AdminFilterBar from '../../../components/admin/common/AdminFilterBar';
 import AdminTable from '../../../components/admin/common/AdminTable';
+import StatusBadge from '../../../components/admin/common/StatusBadge';
 import useAdminNotification from '../../../components/admin/common/useAdminNotification';
 import adminBookingService from '../../../services/admin/bookingService';
-import BookingStatusSelect from './BookingStatusSelect';
 import BookingDialog from './BookingDialog';
-import { BOOKING_STATUS_OPTIONS, formatBookingDate, formatBookingTime, getBookingErrorMessage } from './bookingConfig';
+import { BOOKING_STATUS_OPTIONS, formatBookingDate, formatBookingTime, getBookingErrorMessage, getNextBookingStatus } from './bookingConfig';
 
 const asRows = (rows) => Array.isArray(rows) ? rows : [];
 const inputClass = 'min-h-11 rounded-xl border border-neutral-800 bg-neutral-950 px-3 text-xs text-neutral-100 outline-none focus:border-amber-400/60';
@@ -63,7 +63,8 @@ export default function AdminBookingsPage() {
   }), [bookings]);
 
   const updateBookingStatus = async (booking, nextStatus) => {
-    if (booking.status === nextStatus || updatingId) return;
+    const allowedNextStatus = getNextBookingStatus(booking.status);
+    if (!allowedNextStatus || allowedNextStatus.value !== nextStatus || updatingId) return;
     const label = BOOKING_STATUS_OPTIONS.find((option) => option.value === nextStatus)?.label || nextStatus;
     if (!window.confirm(`Cập nhật đơn #${booking.id} (${booking.customerName || 'khách hàng'}) sang trạng thái “${label}”?`)) return;
     setUpdatingId(booking.id);
@@ -82,7 +83,7 @@ export default function AdminBookingsPage() {
     { key: 'customerName', title: 'Khách hàng', render: (name, booking) => <div className="min-w-40"><p className="font-medium text-neutral-100">{name || 'Khách hàng'}</p><p className="mt-0.5 text-[11px] text-neutral-500">{booking.customerPhone || `ID #${booking.customerId}`}</p></div> },
     { key: 'roomName', title: 'Phòng chụp', render: (roomName, booking) => roomName || `Phòng #${booking.roomId}` },
     { key: 'bookingDate', title: 'Ngày & giờ chụp', render: (date, booking) => <div className="min-w-32"><p>{formatBookingDate(date)}</p><p className="mt-0.5 text-[11px] text-neutral-500">{formatBookingTime(booking.startTime)} – {formatBookingTime(booking.endTime)}</p></div> },
-    { key: 'status', title: 'Trạng thái', render: (value, booking) => <BookingStatusSelect value={value} compact disabled={updatingId === booking.id || updatingId !== null} onChange={(nextStatus) => updateBookingStatus(booking, nextStatus)} /> },
+    { key: 'status', title: 'Trạng thái', render: (value) => <StatusBadge status={value} domain="booking" /> },
     { key: 'createdAt', title: 'Ngày đặt', render: formatBookingDate },
   ];
 
@@ -93,7 +94,7 @@ export default function AdminBookingsPage() {
     <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-3"><label className="grid gap-1.5 text-[11px] font-medium text-neutral-400">Từ ngày đặt<input aria-label="Lọc từ ngày đặt" type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} className={inputClass} /></label><label className="grid gap-1.5 text-[11px] font-medium text-neutral-400">Đến ngày đặt<input aria-label="Lọc đến ngày đặt" type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} className={inputClass} /></label><p className="ml-auto text-xs text-neutral-500">{filtered.length} đơn phù hợp</p></div>
     {pageError && <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><span>{pageError}</span><button type="button" onClick={loadBookings} className="ml-auto whitespace-nowrap font-medium underline">Tải lại</button></div>}
     {loading ? <div className="flex min-h-48 items-center justify-center rounded-2xl border border-neutral-800 bg-neutral-900/50 text-sm text-neutral-400"><span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-amber-300" />Đang tải đơn đặt lịch...</div> : <AdminTable columns={columns} data={filtered} emptyMessage="Không có đơn đặt lịch phù hợp với bộ lọc." onDetail={setSelectedBooking} />}
-    <p className="flex items-center gap-2 text-[11px] text-neutral-500"><Eye className="h-3.5 w-3.5 shrink-0" />Admin chỉ xem chi tiết và cập nhật trạng thái. Trạng thái đơn đã hủy có thể đổi lại nếu lịch phòng không bị trùng.</p>
+    <p className="flex items-center gap-2 text-[11px] text-neutral-500"><Eye className="h-3.5 w-3.5 shrink-0" />Admin chỉ xem chi tiết và chuyển đơn sang mốc trạng thái kế tiếp. Việc hủy đơn do khách hàng thực hiện.</p>
     {selectedBooking && <BookingDialog key={selectedBooking.id} booking={selectedBooking} onClose={() => setSelectedBooking(null)} onStatusChange={updateBookingStatus} updating={updatingId === selectedBooking.id} />}
   </section>;
 }

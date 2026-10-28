@@ -16,7 +16,8 @@ public interface BookingBackgroundRepository extends JpaRepository<BookingBackgr
     @Query("SELECT CASE WHEN COUNT(bb) > 0 THEN true ELSE false END FROM BookingBackground bb WHERE bb.background.id = :backgroundId")
     boolean existsByBackgroundId(@Param("backgroundId") Long backgroundId);
 
-    List<BookingBackground> findByBookingId(Long bookingId);
+    @Query("SELECT bb FROM BookingBackground bb WHERE bb.booking.id = :bookingId")
+    List<BookingBackground> findByBookingId(@Param("bookingId") Long bookingId);
 
     @Query("SELECT bb FROM BookingBackground bb WHERE bb.booking.id = :bookingId AND bb.background.id = :backgroundId")
     Optional<BookingBackground> findByBookingIdAndBackgroundId(
