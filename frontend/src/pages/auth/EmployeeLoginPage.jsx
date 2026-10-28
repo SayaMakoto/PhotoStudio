@@ -249,20 +249,6 @@ export default function EmployeeLoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Autofill */}
-          <div className="mt-5 p-3 rounded-2xl bg-neutral-900/60 border border-white/5 flex items-center justify-between">
-            <span className="text-[11px] text-neutral-400">
-              Tài khoản mẫu: <strong className="text-amber-400">photographer1</strong>
-            </span>
-            <button
-              type="button"
-              onClick={handleQuickFill}
-              className="text-[11px] text-amber-400 hover:text-amber-300 underline font-medium cursor-pointer"
-            >
-              Điền nhanh
-            </button>
-          </div>
-
           {/* Footer Note */}
           <div className="pt-4 mt-5 border-t border-neutral-800/80 text-center text-[11px] text-neutral-400 leading-relaxed">
             Hệ thống chỉ cho phép tài khoản có quyền <strong className="text-neutral-200">Nhân viên (Employee)</strong> truy cập.

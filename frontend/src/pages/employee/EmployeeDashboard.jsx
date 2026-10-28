@@ -80,8 +80,8 @@ export default function EmployeeDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex font-sans selection:bg-amber-400 selection:text-neutral-950">
-      {/* 1. Employee Sidebar (Admin-styled & streamlined) */}
+    <div className="min-h-screen bg-[#FAF5F5] text-[#261A1E] flex font-sans selection:bg-[#B85064]/20 selection:text-[#B85064]">
+      {/* 1. Employee Sidebar (Matching User Studio Warm Minimalist Palette) */}
       <EmployeeSidebar
         activeTab={activeTab}
         onSelectTab={setActiveTab}
@@ -102,13 +102,13 @@ export default function EmployeeDashboard() {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
-          {/* TAB 1: DASHBOARD (Chỉ hiển thị tổng quan & dữ liệu mẫu) */}
+          {/* TAB 1: DASHBOARD (Tổng quan tác nghiệp gọn gàng, phong cách Studio thanh lịch) */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
-              {/* Title Section (Matching Admin Dashboard) */}
+              {/* Title Section */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-[#261A1E] tracking-tight">
                     <BlurText
                       text="Bàn Làm Việc & Tiến Độ Tác Nghiệp"
                       delay={30}
@@ -117,19 +117,23 @@ export default function EmployeeDashboard() {
                       className="inline-block"
                     />
                   </h1>
-                  <p className="mt-1 text-xs sm:text-sm text-neutral-400">
-                    Chào mừng trở lại, <strong className="text-amber-400">{profile.fullname || profile.username}</strong>! Theo dõi chỉ tiêu ca chụp và tiến độ tác nghiệp studio.
+                  <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
+                    Chào mừng trở lại, <strong className="text-[#B85064] font-semibold">{profile.fullname || profile.username}</strong>! Theo dõi ca chụp hôm nay và tiến độ tác nghiệp studio.
                   </p>
                 </div>
               </div>
 
-              {/* 4 Clean Spotlight KPI Cards */}
+              {/* 4 Clean Studio KPI Cards */}
               <EmployeeKPICards onOpenTab={setActiveTab} />
 
-              {/* Khối tổng quan mẫu (Không kéo bảng từ các mục khác vào đây) */}
+              {/* Khối tổng quan công việc thực tế (Ca hôm nay - Ca tiếp theo - Thiết bị & Phím tắt) */}
               <EmployeeDashboardOverview
                 profile={profile}
                 onNavigateTab={setActiveTab}
+                bookings={bookings}
+                onSelectBooking={setSelectedBookingForDetail}
+                onOpenIncident={handleOpenIncident}
+                onOpenShiftSwap={() => setShiftSwapOpen(true)}
               />
             </div>
           )}
@@ -138,10 +142,10 @@ export default function EmployeeDashboard() {
           {activeTab === 'schedule' && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
                   Lịch Chụp & Ca Phân Công
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-neutral-400">
+                <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
                   Danh sách đầy đủ các buổi chụp được giao, tra cứu phòng chụp và cập nhật trạng thái tác nghiệp.
                 </p>
               </div>
@@ -161,10 +165,10 @@ export default function EmployeeDashboard() {
           {activeTab === 'equipment' && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
                   Thiết Bị, Đạo Cụ & Sự Cố
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-neutral-400">
+                <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
                   Kiểm soát máy ảnh, lens, đèn flash đang mượn và gửi báo cáo sự cố hư hỏng khẩn cấp.
                 </p>
               </div>
@@ -180,10 +184,10 @@ export default function EmployeeDashboard() {
           {activeTab === 'reviews' && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
                   Đánh Giá & Phản Hồi Từ Khách Hàng
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-neutral-400">
+                <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
                   Nhận xét và điểm số đánh giá thực tế của khách hàng sau các buổi chụp hoàn thành.
                 </p>
               </div>
@@ -196,10 +200,10 @@ export default function EmployeeDashboard() {
           {activeTab === 'profile' && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
                   Hồ Sơ Nhân Viên
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-neutral-400">
+                <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
                   Dữ liệu tài khoản thực tế từ CSDL, cập nhật thông tin cá nhân và bảo mật tài khoản.
                 </p>
               </div>
