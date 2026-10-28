@@ -164,3 +164,13 @@ select {
 .animate-shimmer {
   animation: shimmer 4s linear infinite;
 }
+
+
+.font-serif-luxury {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-feature-settings: "liga" 1, "dlig" 1;
+}
+
+.font-handwriting {
+  font-family: 'Alex Brush', cursive;
+}

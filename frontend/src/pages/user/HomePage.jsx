@@ -27,7 +27,7 @@ export default function HomePage() {
   };
 
   return (
-    <>
+    <div className="bg-[#FAF5F5] min-h-screen text-[#261A1E] font-sans selection:bg-[#B85064]/20 selection:text-[#B85064]">
       <Hero onOpenBooking={handleOpenBooking} />
       <Stats />
       <Pricing onSelectPackage={handleSelectPackage} />
@@ -36,6 +36,6 @@ export default function HomePage() {
       <AboutStudio />
       <Reviews />
       <Booking selectedPackage={selectedPackage} />
-    </>
+    </div>
   );
 }
