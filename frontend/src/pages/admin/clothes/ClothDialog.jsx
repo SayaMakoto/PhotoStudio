@@ -1,0 +1,50 @@
+import { useEffect, useState } from 'react';
+import { Shirt, X } from 'lucide-react';
+import GlideSelect from '../../../components/admin/common/GlideSelect';
+import StatusBadge from '../../../components/admin/common/StatusBadge';
+import { CLOTH_GENDER_OPTIONS, CLOTH_STATUS_OPTIONS, CLOTH_TYPE_LABELS, CLOTH_TYPE_OPTIONS, formatClothDate, formatClothPrice, getClothErrorMessage } from './clothConfig';
+
+const EMPTY = { type: 'wedding', name: '', size: '', gender: '', color: '', description: '', price: 0, status: 'available' };
+const inputClass = 'mt-1.5 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-neutral-100 outline-none transition focus:border-amber-400/60';
+
+function Detail({ label, children }) {
+  return <div className="border-b border-neutral-800/80 py-3 last:border-0"><dt className="text-[11px] text-neutral-500">{label}</dt><dd className="mt-1 wrap-break-word text-sm text-neutral-200">{children || '—'}</dd></div>;
+}
+
+export default function ClothDialog({ cloth, mode, onClose, onSave }) {
+  const [form, setForm] = useState(() => ({ ...EMPTY, ...cloth, gender: cloth?.gender?.toLowerCase() || '' }));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const detail = mode === 'detail';
+  const title = mode === 'create' ? 'Thêm trang phục' : mode === 'edit' ? 'Cập nhật trang phục' : 'Chi tiết trang phục';
+
+  useEffect(() => {
+    const onKey = (event) => { if (event.key === 'Escape' && !saving) onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose, saving]);
+
+  const submit = async (event) => {
+    event.preventDefault(); setSaving(true); setError('');
+    try { await onSave({ ...form, price: Number(form.price), gender: form.gender || null }); }
+    catch (e) { setError(getClothErrorMessage(e)); }
+    finally { setSaving(false); }
+  };
+
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) onClose(); }}>
+    <section role="dialog" aria-modal="true" aria-labelledby="cloth-dialog-title" className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-900 shadow-2xl">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-800 bg-neutral-900/95 px-5 py-4 backdrop-blur"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-amber-400/10 text-amber-300"><Shirt className="h-5 w-5" /></span><div><h2 id="cloth-dialog-title" className="font-semibold text-white">{title}</h2><p className="mt-0.5 text-xs text-neutral-500">{cloth?.id ? `Mã trang phục #${cloth.id}` : 'Kho trang phục studio'}</p></div></div><button type="button" onClick={onClose} aria-label="Đóng" className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white"><X className="h-4 w-4" /></button></header>
+      {detail ? <dl className="grid gap-x-8 px-5 py-2 sm:grid-cols-2"><Detail label="Tên trang phục">{cloth?.name}</Detail><Detail label="Loại trang phục">{CLOTH_TYPE_LABELS[cloth?.type] || cloth?.type}</Detail><Detail label="Kích cỡ">{cloth?.size}</Detail><Detail label="Giới tính">{cloth?.gender === 'Male' ? 'Nam' : cloth?.gender === 'Female' ? 'Nữ' : 'Không phân biệt'}</Detail><Detail label="Màu sắc">{cloth?.color}</Detail><Detail label="Giá thuê">{formatClothPrice(cloth?.price)}</Detail><Detail label="Trạng thái"><StatusBadge status={cloth?.status} /></Detail><Detail label="Mô tả">{cloth?.description}</Detail>{cloth?.deletedAt && <div className="sm:col-span-2"><Detail label="Ngày chuyển vào thùng rác">{formatClothDate(cloth.deletedAt)}</Detail></div>}</dl> : <form onSubmit={submit} className="space-y-4 px-5 py-5">
+        {error && <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-xs text-rose-200">{error}</div>}
+        <label className="block text-xs font-medium text-neutral-300">Tên trang phục <span className="text-rose-300">*</span><input autoFocus required maxLength={255} value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className={inputClass} placeholder="Ví dụ: Áo dài cưới đỏ" /></label>
+        <div className="grid gap-4 sm:grid-cols-2"><div className="text-xs font-medium text-neutral-300">Loại trang phục <span className="text-rose-300">*</span><GlideSelect options={CLOTH_TYPE_OPTIONS} value={form.type} onChange={(type) => setForm((current) => ({ ...current, type }))} ariaLabel="Loại trang phục" showTags={false} size="md" accentColor="#fbbf24" surfaceColor="#0a0a0a" highlightColor="#262626" textColor="#e5e5e5" menuWidth={260} className="mt-1.5 w-full [&>button]:min-h-10 [&>button]:w-full [&>button]:justify-between [&>button]:border [&>button]:border-neutral-800" /></div><div className="text-xs font-medium text-neutral-300">Trạng thái<GlideSelect options={CLOTH_STATUS_OPTIONS} value={form.status} onChange={(status) => setForm((current) => ({ ...current, status }))} ariaLabel="Trạng thái trang phục" showTags={false} size="md" accentColor="#fbbf24" surfaceColor="#0a0a0a" highlightColor="#262626" textColor="#e5e5e5" menuWidth={260} className="mt-1.5 w-full [&>button]:min-h-10 [&>button]:w-full [&>button]:justify-between [&>button]:border [&>button]:border-neutral-800" /></div>
+          <label className="block text-xs font-medium text-neutral-300">Kích cỡ<input maxLength={255} value={form.size || ''} onChange={(e) => setForm((current) => ({ ...current, size: e.target.value }))} className={inputClass} placeholder="S, M, L, XL, Free size..." /></label><div className="text-xs font-medium text-neutral-300">Dành cho<GlideSelect options={CLOTH_GENDER_OPTIONS} value={form.gender || ''} onChange={(gender) => setForm((current) => ({ ...current, gender }))} ariaLabel="Giới tính trang phục" showTags={false} size="md" accentColor="#fbbf24" surfaceColor="#0a0a0a" highlightColor="#262626" textColor="#e5e5e5" menuWidth={220} className="mt-1.5 w-full [&>button]:min-h-10 [&>button]:w-full [&>button]:justify-between [&>button]:border [&>button]:border-neutral-800" /></div>
+          <label className="block text-xs font-medium text-neutral-300">Màu sắc<input maxLength={255} value={form.color || ''} onChange={(e) => setForm((current) => ({ ...current, color: e.target.value }))} className={inputClass} placeholder="Đỏ, trắng, đen..." /></label><label className="block text-xs font-medium text-neutral-300">Giá thuê (VND)<input type="number" min="0" step="1000" required value={form.price ?? 0} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} className={inputClass} /></label>
+        </div>
+        <label className="block text-xs font-medium text-neutral-300">Mô tả<textarea rows={3} maxLength={255} value={form.description || ''} onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))} className={`${inputClass} resize-y`} placeholder="Mô tả chất liệu, kiểu dáng hoặc lưu ý bảo quản" /></label>
+        <footer className="flex justify-end gap-2 border-t border-neutral-800 pt-4"><button type="button" disabled={saving} onClick={onClose} className="rounded-xl border border-neutral-700 px-4 py-2.5 text-xs font-medium text-neutral-300 hover:bg-neutral-800">Hủy</button><button type="submit" disabled={saving} className="rounded-xl bg-amber-400 px-4 py-2.5 text-xs font-semibold text-neutral-950 hover:bg-amber-300 disabled:opacity-60">{saving ? 'Đang lưu...' : mode === 'create' ? 'Thêm trang phục' : 'Lưu thay đổi'}</button></footer>
+      </form>}
+      {detail && <footer className="flex justify-end border-t border-neutral-800 px-5 py-4"><button type="button" onClick={onClose} className="rounded-xl border border-neutral-700 px-4 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800">Đóng</button></footer>}
+    </section>
+  </div>;
+}
