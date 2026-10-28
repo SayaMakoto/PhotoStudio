@@ -31,4 +31,8 @@ public class ReviewResponse {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    private String adminReply;
+
+    private LocalDateTime adminRepliedAt;
 }

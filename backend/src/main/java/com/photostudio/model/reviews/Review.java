@@ -40,6 +40,12 @@ public class Review {
     @Column(name = "comment", length = 255)
     private String comment;
 
+    @Column(name = "admin_reply", columnDefinition = "TEXT")
+    private String adminReply;
+
+    @Column(name = "admin_replied_at")
+    private LocalDateTime adminRepliedAt;
+
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmployeeReview> employeeReviews = new ArrayList<>();
 

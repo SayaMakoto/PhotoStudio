@@ -78,6 +78,23 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public ReviewResponse reply(Long id, String reply) {
+        checkId(id, "Mã đánh giá không hợp lệ");
+        if (reply == null || reply.isBlank()) {
+            throw new IllegalArgumentException("Nội dung phản hồi không được để trống");
+        }
+        String normalizedReply = reply.trim();
+        if (normalizedReply.length() > 2000) {
+            throw new IllegalArgumentException("Nội dung phản hồi tối đa 2000 ký tự");
+        }
+
+        Review review = findEntity(id);
+        review.setAdminReply(normalizedReply);
+        review.setAdminRepliedAt(java.time.LocalDateTime.now());
+        return ReviewMapper.toResponse(repository.save(review));
+    }
+
+    @Override
     public ReviewResponse create(ReviewRequest request) {
         request.validate();
 

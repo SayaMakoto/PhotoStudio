@@ -348,6 +348,8 @@ CREATE TABLE `reviews` (
     `customer_id` BIGINT NOT NULL COMMENT 'FK - users (Khách hàng đánh giá)',
     `rating` DOUBLE NOT NULL DEFAULT 5.0 COMMENT 'Số sao đánh giá (ví dụ: 1.0 - 5.0)',
     `comment` VARCHAR(255) NULL COMMENT 'Bình luận nhận xét của khách hàng',
+    `admin_reply` TEXT NULL COMMENT 'Phản hồi của quản trị viên',
+    `admin_replied_at` DATETIME NULL COMMENT 'Thời điểm quản trị viên phản hồi',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày tạo đánh giá',
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ngày sửa bài đánh giá',
     CONSTRAINT `fk_reviews_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -361,6 +363,8 @@ CREATE TABLE `employee_reviews` (
     `employee_id` BIGINT NOT NULL COMMENT 'FK - employees',
     `rating` DOUBLE NOT NULL DEFAULT 5.0 COMMENT 'Số sao đánh giá cho nhân viên',
     `comment` VARCHAR(255) NULL COMMENT 'Bình luận đánh giá nhân viên',
+    `admin_reply` TEXT NULL COMMENT 'Phản hồi của quản trị viên',
+    `admin_replied_at` DATETIME NULL COMMENT 'Thời điểm quản trị viên phản hồi',
     CONSTRAINT `fk_er_review` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_er_employee` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Đánh giá chi tiết thái độ và tay nghề của từng nhân viên';

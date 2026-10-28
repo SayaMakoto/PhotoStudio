@@ -12,6 +12,8 @@ public interface ReviewService {
 
     ReviewResponse findById(Long id);
 
+    ReviewResponse reply(Long id, String reply);
+
     ReviewResponse create(ReviewRequest request);
 
     ReviewResponse update(Long id, ReviewRequest request);

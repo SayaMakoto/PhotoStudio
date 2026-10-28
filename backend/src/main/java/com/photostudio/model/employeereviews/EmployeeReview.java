@@ -1,5 +1,7 @@
 package com.photostudio.model.employeereviews;
 
+import java.time.LocalDateTime;
+
 import com.photostudio.model.employees.Employee;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -33,4 +35,10 @@ public class EmployeeReview {
 
     @Column(name = "comment", length = 255)
     private String comment;
+
+    @Column(name = "admin_reply", columnDefinition = "TEXT")
+    private String adminReply;
+
+    @Column(name = "admin_replied_at")
+    private LocalDateTime adminRepliedAt;
 }

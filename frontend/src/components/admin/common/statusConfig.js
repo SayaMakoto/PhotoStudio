@@ -46,6 +46,10 @@ export const STATUS_DOMAIN_CONFIG = {
     completed: { label: "Hoàn tất", className: green },
     cancelled: { label: "Đã hủy", className: red },
   },
+  reviewReply: {
+    replied: { label: "Đã phản hồi", className: green },
+    unreplied: { label: "Chưa phản hồi", className: amber },
+  },
   visibility: {
     active: { label: "Đang hiện", className: green },
     inactive: { label: "Đang ẩn", className: neutral },

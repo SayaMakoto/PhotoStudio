@@ -21,4 +21,7 @@ public class EmployeeReviewResponse {
 
     private Double rating;
     private String comment;
+
+    private String adminReply;
+    private java.time.LocalDateTime adminRepliedAt;
 }
