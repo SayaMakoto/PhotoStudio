@@ -24,6 +24,22 @@ public class PackageController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @GetMapping("/trash")
+    public ResponseEntity<List<PackageResponse>> findTrash() {
+        return ResponseEntity.ok(service.findTrash());
+    }
+
+    @PutMapping("/trash/{id}/restore")
+    public ResponseEntity<PackageResponse> restore(@PathVariable Long id) {
+        return ResponseEntity.ok(service.restore(id));
+    }
+
+    @DeleteMapping("/trash/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDelete(@PathVariable Long id) {
+        service.permanentlyDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PackageResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));

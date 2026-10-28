@@ -103,6 +103,9 @@ public class PackageBackgroundServiceImpl implements PackageBackgroundService {
         if (pkg.getStatus() != PackageStatus.active) {
             throw new IllegalArgumentException("Gói chụp '" + pkg.getName() + "' hiện không hoạt động");
         }
+        if (pkg.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Gói chụp '" + pkg.getName() + "' đang nằm trong thùng rác");
+        }
         return pkg;
     }
 
