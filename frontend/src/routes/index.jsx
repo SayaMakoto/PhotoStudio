@@ -5,6 +5,14 @@ import { ROUTES } from './web';
 import UserLayout from '../layouts/UserLayout';
 import HomePage from '../pages/user/HomePage';
 import PackagesPage from '../pages/user/PackagesPage';
+import PackageDetailPage from '../pages/user/PackageDetailPage';
+import ProfilePage from '../pages/user/ProfilePage';
+import GalleryPage from '../pages/user/GalleryPage';
+import StudiosPage from '../pages/user/StudiosPage';
+import ReviewsPage from '../pages/user/ReviewsPage';
+import BookingPage from '../pages/user/BookingPage';
+import PaymentPage from '../pages/user/PaymentPage';
+import VNPayReturnPage from '../pages/user/VNPayReturnPage';
 
 // Auth Pages (Đã phân loại vào từng vai trò user, admin, employee)
 import LoginPage from '../pages/user/LoginPage';
@@ -39,6 +47,15 @@ export default function AppRoutes() {
       <Route element={<UserLayout />}>
         <Route path={ROUTES.USER.HOME} element={<HomePage />} />
         <Route path={ROUTES.USER.PACKAGES} element={<PackagesPage />} />
+        <Route path={ROUTES.USER.PACKAGE_DETAIL} element={<PackageDetailPage />} />
+        <Route path={ROUTES.USER.GALLERY} element={<GalleryPage />} />
+        <Route path={ROUTES.USER.STUDIOS} element={<StudiosPage />} />
+        <Route path={ROUTES.USER.REVIEWS} element={<ReviewsPage />} />
+        <Route path={ROUTES.USER.BOOKING} element={<BookingPage />} />
+        <Route path={ROUTES.USER.PAYMENT} element={<PaymentPage />} />
+        <Route path={ROUTES.USER.CHECKOUT} element={<PaymentPage />} />
+        <Route path={ROUTES.USER.VNPAY_RETURN} element={<VNPayReturnPage />} />
+        <Route path={ROUTES.USER.PROFILE} element={<ProfilePage />} />
       </Route>
 
       {/* Tuyến đường Xác thực (Auth) - Khách hàng */}

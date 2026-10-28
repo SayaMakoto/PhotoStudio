@@ -25,6 +25,8 @@ public interface UserService {
 
     UserResponse update(Long id, UserRequest request);
 
+    void changePassword(Long userId, String oldPassword, String newPassword);
+
     UserResponse updateStatus(Long id, String status);
 
     List<UserResponse> findByRole(String role);

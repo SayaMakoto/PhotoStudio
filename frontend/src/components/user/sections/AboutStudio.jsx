@@ -1,34 +1,103 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   SparklesIcon,
   CheckIcon,
   CubeIcon,
   ChevronRightIcon,
-  AdjustmentsHorizontalIcon,
   EyeIcon,
   UserGroupIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/solid';
 import ScrollReveal from '../../animations/ScrollReveal';
+import { ROUTES } from '../../../routes/web';
+import { customerAuth } from '../../../lib/axiosCustomer';
 import customerRoomService from '../../../services/user/roomService';
+import userImageService from '../../../services/user/imageService';
+
+// Fallback ảnh không gian phòng chụp nếu backend đang kết nối
+const ROOM_FALLBACK_IMAGES = {
+  1: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85',
+  2: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85',
+  3: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85',
+  4: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=85',
+  5: 'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=85',
+  6: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85',
+};
 
 export default function StudioExperience() {
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [activeRoomIndex, setActiveRoomIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleBookThisRoom = (roomId) => {
+    const rId = roomId || (rooms[activeRoomIndex]?.id) || 1;
+    const targetUrl = `${ROUTES.USER.BOOKING}?roomId=${rId}`;
+    if (!customerAuth.isAuthenticated()) {
+      navigate(ROUTES.AUTH.LOGIN, {
+        state: {
+          from: targetUrl,
+          message: 'Vui lòng đăng nhập tài khoản để tiến hành đặt lịch với phòng này!',
+        },
+      });
+    } else {
+      navigate(targetUrl);
+    }
+  };
+
   useEffect(() => {
-    void customerRoomService
-      .getAllRooms()
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const activeRooms = data.filter((r) => !r.status || r.status === 'active' || r.status === 'available');
-          setRooms(activeRooms.length > 0 ? activeRooms : data);
+    // Tải đồng thời danh sách phòng và kho ảnh từ CSDL
+    Promise.allSettled([
+      customerRoomService.getAllRooms(),
+      userImageService.getAllImages(),
+    ])
+      .then(([roomsRes, imagesRes]) => {
+        const rawRooms =
+          roomsRes.status === 'fulfilled' && Array.isArray(roomsRes.value?.data || roomsRes.value)
+            ? roomsRes.value?.data || roomsRes.value
+            : [];
+
+        const rawImages =
+          imagesRes.status === 'fulfilled' && Array.isArray(imagesRes.value?.data || imagesRes.value)
+            ? imagesRes.value?.data || imagesRes.value
+            : [];
+
+        if (rawRooms.length > 0) {
+          const activeRooms = rawRooms.filter((r) => !r.status || r.status === 'active' || r.status === 'available');
+          const finalRooms = activeRooms.length > 0 ? activeRooms : rawRooms;
+
+          const mapped = finalRooms.map((room) => {
+            const matchingImg =
+              rawImages.find(
+                (img) =>
+                  (img.imageableType === 'room' || img.imageableType === 'ROOM') &&
+                  Number(img.imageableId) === Number(room.id) &&
+                  img.isPrimary
+              ) ||
+              rawImages.find(
+                (img) =>
+                  (img.imageableType === 'room' || img.imageableType === 'ROOM') &&
+                  Number(img.imageableId) === Number(room.id)
+              );
+
+            const fallbackImg = ROOM_FALLBACK_IMAGES[room.id] || ROOM_FALLBACK_IMAGES[1];
+
+            return {
+              ...room,
+              image: matchingImg?.imageUrl || fallbackImg,
+              area: room.description?.match(/(\d+\s*m2)/i)?.[1] || '60m²',
+              ceiling: '4.0m',
+            };
+          });
+
+          setRooms(mapped);
         } else {
           setRooms([]);
         }
       })
       .catch((err) => {
-        console.warn('[AboutStudio] Lỗi tải phòng:', err.message);
+        console.warn('[AboutStudio] Lỗi tải phòng từ CSDL:', err.message);
         setRooms([]);
       })
       .finally(() => {
@@ -67,13 +136,13 @@ export default function StudioExperience() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
               <CubeIcon className="w-4 h-4 text-[#B85064]" />
-              <span>HỆ THỐNG PHÒNG TỪ CSDL</span>
+              <span>HỆ THỐNG PHÒNG CHỤP TỪ CSDL</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2A1D22] font-serif-luxury tracking-tight mb-4">
               Không Gian Studio & Phòng Chụp
             </h2>
             <p className="text-[#7A6C71] text-base sm:text-lg font-light leading-relaxed">
-              Danh sách phòng studio được đồng bộ trực tiếp từ cơ sở dữ liệu hệ thống, đáp ứng đa dạng phong cách chụp ảnh.
+              Khám phá thực tế các phòng studio nghệ thuật được đồng bộ trực tiếp từ cơ sở dữ liệu hệ thống, đáp ứng trọn vẹn mọi phong cách nhiếp ảnh.
             </p>
           </div>
         </ScrollReveal>
@@ -99,121 +168,127 @@ export default function StudioExperience() {
         {!isLoading && rooms.length > 0 && (
           <>
             <ScrollReveal direction="up" delay={0.1}>
-              <div className="flex flex-wrap justify-center gap-3 mb-12">
+              <div className="flex flex-wrap justify-center gap-2.5 sm:gap-3 mb-10">
                 {rooms.map((room, idx) => (
                   <button
                     key={room.id}
                     onClick={() => setActiveRoomIndex(idx)}
-                    className={`cursor-pointer px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2.5 ${
+                    className={`cursor-pointer px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
                       activeRoomIndex === idx
                         ? 'bg-[#B85064] text-white shadow-xl shadow-[#B85064]/25 scale-105'
                         : 'bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/40 shadow-sm'
                     }`}
                   >
-                    <SparklesIcon className={`w-4 h-4 ${activeRoomIndex === idx ? 'text-white' : 'text-[#B85064]'}`} />
-                    <span>{room.name}</span>
+                    <SparklesIcon className={`w-3.5 h-3.5 ${activeRoomIndex === idx ? 'text-white' : 'text-[#B85064]'}`} />
+                    <span>{room.name.split(' - ')[0]}</span>
                   </button>
                 ))}
               </div>
             </ScrollReveal>
 
-            {/* Featured Studio Showcase Card */}
+            {/* Featured Studio Showcase Card có HÌNH ẢNH THỰC TẾ CỦA PHÒNG */}
             {currentRoom && (
               <ScrollReveal direction="up" delay={0.2}>
-                <div className="overflow-hidden rounded-3xl border border-[#F0E4E6] bg-white p-0 shadow-xl mb-16 transition-all duration-500">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[450px]">
+                <div className="overflow-hidden rounded-3xl border border-[#F0E4E6] bg-white shadow-xl mb-12 transition-all duration-500">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[480px]">
                     
-                    {/* Left: Room Badge & Specs Info */}
-                    <div className="lg:col-span-6 p-8 sm:p-10 flex flex-col justify-between bg-white relative">
-                      <div>
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-bold mb-4">
-                          <EyeIcon className="w-3.5 h-3.5" />
-                          <span>Phòng Studio ID: #{currentRoom.id}</span>
-                        </div>
+                    {/* LEFT COLUMN: ẢNH KHÔNG GIAN PHÒNG CHỤP THỰC TẾ */}
+                    <div className="lg:col-span-6 relative min-h-[320px] lg:min-h-full overflow-hidden bg-neutral-900 group">
+                      <img
+                        src={currentRoom.image || ROOM_FALLBACK_IMAGES[currentRoom.id] || ROOM_FALLBACK_IMAGES[1]}
+                        alt={currentRoom.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
-                        <h3 className="text-2xl sm:text-3xl font-bold text-[#2A1D22] font-serif-luxury mb-4">
+                      {/* Floating Badges trên ảnh */}
+                      <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
+                        <span className="text-xs font-bold uppercase tracking-wider text-white bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+                          {currentRoom.area || '60m²'} • Trần 4.0m
+                        </span>
+
+                        <span className="text-xs font-semibold text-white bg-[#B85064]/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5">
+                          <UserGroupIcon className="w-3.5 h-3.5" />
+                          <span>Tối đa {currentRoom.capacity || 8} người</span>
+                        </span>
+                      </div>
+
+                      {/* Tiêu đề phòng ghim góc dưới ảnh */}
+                      <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-none">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#E899A8] block mb-1">
+                          ẢNH CHỤP KHÔNG GIAN THỰC TẾ
+                        </span>
+                        <h4 className="text-xl sm:text-2xl font-bold text-white font-serif-luxury drop-shadow-md">
                           {currentRoom.name}
-                        </h3>
+                        </h4>
+                      </div>
+                    </div>
 
-                        <p className="text-sm text-[#7A6C71] font-light leading-relaxed mb-6">
-                          {currentRoom.description || 'Không gian studio được thiết kế chuyên dụng cho nhiếp ảnh nghệ thuật.'}
-                        </p>
+                    {/* RIGHT COLUMN: CHI TIẾT THÔNG SỐ & ĐẶC ĐIỂM NỔI BẬT */}
+                    <div className="lg:col-span-6 p-8 sm:p-10 flex flex-col justify-between bg-white relative">
+                      <div className="space-y-6">
+                        <div>
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-bold mb-3">
+                            <EyeIcon className="w-3.5 h-3.5" />
+                            <span>Phòng Studio ID #{currentRoom.id} • Đạt Chuẩn Điện Ảnh</span>
+                          </div>
 
-                        <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] mb-6 flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-[#FDF0F3] text-[#B85064] flex items-center justify-center shrink-0 border border-[#F5D5DC]">
-                            <UserGroupIcon className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <span className="text-xs text-[#7A6C71] block">Sức chứa phục vụ</span>
-                            <span className="text-base font-bold text-[#2A1D22]">
-                              {currentRoom.capacity ? `Tối đa ${currentRoom.capacity} người` : 'Tiêu chuẩn'}
-                            </span>
-                          </div>
+                          <h3 className="text-2xl sm:text-3xl font-bold text-[#2A1D22] font-serif-luxury mb-3">
+                            {currentRoom.name}
+                          </h3>
+
+                          <p className="text-sm text-[#7A6C71] font-light leading-relaxed">
+                            {currentRoom.description || 'Không gian studio được thiết kế chuyên dụng cho nhiếp ảnh nghệ thuật.'}
+                          </p>
                         </div>
 
-                        <div className="space-y-3 mb-6">
-                          {getRoomHighlights(currentRoom).map((highlight, hIdx) => (
-                            <div key={hIdx} className="flex items-start gap-3">
-                              <div className="w-5 h-5 rounded-full bg-[#FDF0F3] text-[#B85064] flex items-center justify-center shrink-0 mt-0.5">
-                                <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
+                        {/* Điểm nổi bật của phòng */}
+                        <div className="space-y-3 pt-2">
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-[#2A1D22]">
+                            Đặc Điểm & Bối Cảnh Nổi Bật:
+                          </h5>
+                          <div className="space-y-2">
+                            {getRoomHighlights(currentRoom).map((highlight, hIdx) => (
+                              <div key={hIdx} className="flex items-start gap-2.5">
+                                <div className="w-5 h-5 rounded-full bg-[#FDF0F3] text-[#B85064] flex items-center justify-center shrink-0 mt-0.5">
+                                  <CheckIcon className="w-3 h-3 stroke-[3]" />
+                                </div>
+                                <span className="text-xs sm:text-sm text-[#55464B] font-light leading-snug">
+                                  {highlight}
+                                </span>
                               </div>
-                              <span className="text-xs sm:text-sm text-[#55464B] font-light leading-snug">
-                                {highlight}
-                              </span>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       </div>
 
                       {/* Bottom Action */}
-                      <div className="pt-6 border-t border-[#F0E4E6] flex items-center justify-between gap-4">
+                      <div className="pt-6 mt-6 border-t border-[#F0E4E6] flex flex-wrap items-center justify-between gap-4">
                         <div>
-                          <span className="text-xs text-[#7A6C71] block">Trạng thái</span>
-                          <span className="text-sm font-bold text-[#B85064]">
-                            {currentRoom.status === 'active' || currentRoom.status === 'available'
-                              ? 'Đang hoạt động'
-                              : currentRoom.status}
+                          <span className="text-xs text-[#7A6C71] block">Trạng thái phòng</span>
+                          <span className="text-sm font-bold text-emerald-600 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>Sẵn sàng hoạt động</span>
                           </span>
                         </div>
-                        <a
-                          href="#booking"
-                          className="px-6 py-3 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white font-bold text-xs shadow-md shadow-[#B85064]/25 transition-all flex items-center gap-2 hover:scale-105"
-                        >
-                          <span>Đặt Lịch Studio</span>
-                          <ChevronRightIcon className="w-4 h-4 text-white" />
-                        </a>
-                      </div>
-                    </div>
 
-                    {/* Right: Studio Room Feature Cards */}
-                    <div className="lg:col-span-6 p-8 sm:p-10 bg-[#FCF8F9] border-t lg:border-t-0 lg:border-l border-[#F0E4E6] flex flex-col justify-center">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#B85064] mb-6">
-                        Tiêu Chuẩn Kỹ Thuật Studio
-                      </h4>
+                        <div className="flex items-center gap-3">
+                          <Link
+                            to={ROUTES.USER.STUDIOS}
+                            className="px-5 py-2.5 rounded-xl bg-white hover:bg-[#FAF5F5] text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 font-bold text-xs transition-all flex items-center gap-1.5"
+                          >
+                            <span>Xem 12 Phòng Chụp</span>
+                            <ChevronRightIcon className="w-3.5 h-3.5" />
+                          </Link>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
-                          <span className="text-[#B85064] text-xs font-semibold block mb-1">Ánh Sáng</span>
-                          <h5 className="text-[#2A1D22] font-bold text-sm">Godox Pro Studio</h5>
-                          <p className="text-[11px] text-[#7A6C71] mt-1">Đồng bộ ánh sáng tiêu chuẩn điện ảnh</p>
-                        </div>
-
-                        <div className="p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
-                          <span className="text-[#B85064] text-xs font-semibold block mb-1">Điều Hòa & Nhiệt Độ</span>
-                          <h5 className="text-[#2A1D22] font-bold text-sm">22°C - 24°C Liên Tục</h5>
-                          <p className="text-[11px] text-[#7A6C71] mt-1">Bảo vệ lớp trang điểm luôn hoàn hảo</p>
-                        </div>
-
-                        <div className="p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
-                          <span className="text-[#B85064] text-xs font-semibold block mb-1">Không Gian Riêng</span>
-                          <h5 className="text-[#2A1D22] font-bold text-sm">Phòng Thay Đồ Khép Kín</h5>
-                          <p className="text-[11px] text-[#7A6C71] mt-1">Riêng tư tuyệt đối cho khách hàng</p>
-                        </div>
-
-                        <div className="p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
-                          <span className="text-[#B85064] text-xs font-semibold block mb-1">Kiểm Tra Ảnh</span>
-                          <h5 className="text-[#2A1D22] font-bold text-sm">Tethering Màn Hình</h5>
-                          <p className="text-[11px] text-[#7A6C71] mt-1">Xem ảnh ngay sau mỗi lần bấm máy</p>
+                          <button
+                            type="button"
+                            onClick={() => handleBookThisRoom(currentRoom?.id)}
+                            className="cursor-pointer px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white font-bold text-xs shadow-md shadow-[#B85064]/25 transition-all flex items-center gap-2 hover:scale-105"
+                          >
+                            <CalendarDaysIcon className="w-4 h-4 text-white" />
+                            <span>Đặt Lịch Với Phòng Này</span>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -222,49 +297,20 @@ export default function StudioExperience() {
                 </div>
               </ScrollReveal>
             )}
+
+            {/* CTA Button dẫn tới trang đầy đủ 12 phòng studio */}
+            <div className="text-center mt-6">
+              <Link
+                to={ROUTES.USER.STUDIOS}
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs sm:text-sm font-bold shadow-lg shadow-rose-950/20 hover:scale-105 transition-all"
+              >
+                <SparklesIcon className="w-4 h-4 text-white" />
+                <span>Khám Phá Toàn Diện 12 Phòng Chụp & Bối Cảnh Studio</span>
+                <ChevronRightIcon className="w-4 h-4 text-white" />
+              </Link>
+            </div>
           </>
         )}
-
-        {/* Equipment & Gear Showcase Bar */}
-        <ScrollReveal direction="up" delay={0.3}>
-          <div className="rounded-3xl border border-[#F0E4E6] bg-white p-8 sm:p-10 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 rounded-xl bg-[#FDF0F3] text-[#B85064] border border-[#F5D5DC]">
-                <AdjustmentsHorizontalIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-lg font-bold text-[#2A1D22] font-serif-luxury">Dàn Thiết Bị Đẳng Cấp Studio Trang Bị Sẵn</h4>
-                <p className="text-xs text-[#7A6C71]">Đảm bảo độ nét phân giải cao nhất và ánh sáng mượt mà nhất</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
-                <span className="text-[#B85064] text-xs font-semibold block mb-1">Máy Ảnh Full-Frame</span>
-                <h5 className="text-[#2A1D22] font-bold text-sm">Sony & Canon Cinema</h5>
-                <p className="text-[11px] text-[#7A6C71] mt-1">Lấy nét mắt thời gian thực</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
-                <span className="text-[#B85064] text-xs font-semibold block mb-1">Hệ Thống Đèn</span>
-                <h5 className="text-[#2A1D22] font-bold text-sm">Godox AD600 Pro</h5>
-                <p className="text-[11px] text-[#7A6C71] mt-1">Công suất flash 600W điện ảnh</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
-                <span className="text-[#B85064] text-xs font-semibold block mb-1">Ống Kính Cao Cấp</span>
-                <h5 className="text-[#2A1D22] font-bold text-sm">Dòng GM & L-Series</h5>
-                <p className="text-[11px] text-[#7A6C71] mt-1">Bokeh mượt mà, độ nét xuất sắc</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
-                <span className="text-[#B85064] text-xs font-semibold block mb-1">Màn Hình Màu Chuẩn</span>
-                <h5 className="text-[#2A1D22] font-bold text-sm">ColorEdge 4K</h5>
-                <p className="text-[11px] text-[#7A6C71] mt-1">Chuẩn màu 99% Adobe RGB</p>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
 
       </div>
     </section>

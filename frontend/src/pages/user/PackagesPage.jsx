@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Camera,
   Shirt,
@@ -25,11 +26,13 @@ import {
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
   Sparkles,
+  Eye,
 } from 'lucide-react';
 import customerPackageService from '../../services/user/packageService';
 import customerBookingService from '../../services/user/bookingService';
 import userImageService from '../../services/user/imageService';
 import customerRoomService from '../../services/user/roomService';
+import { ROUTES } from '../../routes/web';
 import { customerAuth } from '../../lib/axiosCustomer';
 import { FloralBranchCorner, FloatingPetals, FloralCardCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
 
@@ -91,6 +94,7 @@ const TIME_SLOTS = [
 ];
 
 export default function PackagesPage() {
+  const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,7 +110,6 @@ export default function PackagesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 6;
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-  const [favorites, setFavorites] = useState({});
 
   // Modal Đặt Lịch
   const [bookingModalPkg, setBookingModalPkg] = useState(null);
@@ -309,14 +312,6 @@ export default function PackagesPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const toggleFavorite = (pkgId, e) => {
-    e.stopPropagation();
-    setFavorites((prev) => ({
-      ...prev,
-      [pkgId]: !prev[pkgId],
-    }));
-  };
-
   // Tính số lượng từng danh mục
   const categoryCounts = useMemo(() => {
     const counts = { all: packages.length };
@@ -413,8 +408,18 @@ export default function PackagesPage() {
   };
 
   const openBookingModal = (pkg) => {
-    setBookingModalPkg(pkg);
-    setIsSubmitted(false);
+    const pkgId = pkg?.id || 1;
+    const targetUrl = `${ROUTES.USER.BOOKING}?packageId=${pkgId}`;
+    if (!customerAuth.isAuthenticated()) {
+      navigate(ROUTES.AUTH.LOGIN, {
+        state: {
+          from: targetUrl,
+          message: 'Vui lòng đăng nhập tài khoản để tiến hành đặt gói chụp này!',
+        },
+      });
+    } else {
+      navigate(targetUrl, { state: { packageId: pkgId, package: pkg } });
+    }
   };
 
   const renderSpecIcon = (type) => {
@@ -438,19 +443,19 @@ export default function PackagesPage() {
       {/* 1. HERO BANNER: Nền studio điện ảnh với font chữ tiếng Việt chuẩn đẹp */}
       {/* ========================================================================= */}
       <section className="relative w-full min-h-[440px] lg:min-h-[480px] bg-[#141012] overflow-hidden flex items-center pt-24 pb-16">
-        {/* Background Image & Lighting Studio Effects */}
+        {/* Background Image & Lighting Studio Effects với độ sáng rõ nét cao */}
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-35 mix-blend-luminosity scale-105"
+          className="absolute inset-0 bg-cover bg-center opacity-70 scale-105 pointer-events-none"
           style={{
             backgroundImage:
               'url(https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=1920&q=80)',
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#141012] via-[#141012]/85 to-[#1c1518]/90" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[#141012]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#141012]/90 via-[#141012]/60 to-[#141012]/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#141012] pointer-events-none" />
 
         {/* Ambient spotlight glow */}
-        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[350px] bg-[#E5A8B4]/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[350px] bg-[#E5A8B4]/15 rounded-full blur-[140px] pointer-events-none" />
 
         {/* Họa tiết cành hoa đào nghệ thuật trên nền Hero */}
         <FloralBranchCorner position="top-left" opacity="opacity-90" />
@@ -497,7 +502,7 @@ export default function PackagesPage() {
                 <img
                   src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
                   alt="Studio Preview"
-                  className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
                   <div className="text-white text-xs space-y-0.5">
@@ -894,33 +899,29 @@ export default function PackagesPage() {
               </div>
             )}
 
-            {/* LƯỚI CHUẨN: 1 HÀNG 3 CÁI (KHÔNG BỊ TRÀN CHỮ, NÚT THẲNG HÀNG 100%) */}
+            {/* LƯỚI CHUẨN: 1 HÀNG 3 CÁI (CLICK VÀO CARD/ẢNH VÀO TRANG CHI TIẾT) */}
             {!isLoading && viewMode === 'grid' && displayedPackages.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                 {displayedPackages.map((pkg) => {
-                  const isFav = Boolean(favorites[pkg.id]);
-
                   return (
                     <div
                       key={pkg.id}
-                      className="bg-white rounded-2xl overflow-hidden border border-[#F0E4E6] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
+                      onClick={() => navigate(`/packages/${pkg.id}`, { state: { pkg } })}
+                      className="cursor-pointer bg-white rounded-2xl overflow-hidden border border-[#F0E4E6] shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group"
                     >
-                      {/* Top: Image + Tag + Heart */}
+                      {/* Top: Image + Tag + Hover Action */}
                       <div>
-                        <div
-                          className="relative h-48 w-full overflow-hidden bg-[#EFEBEB] cursor-pointer"
-                          onClick={() => setQuickViewPkg(pkg)}
-                        >
+                        <div className="relative h-48 w-full overflow-hidden bg-[#EFEBEB] group/img">
                           <img
                             src={pkg.displayImage}
                             alt={pkg.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
 
                           {/* Tag danh mục góc trên trái ảnh */}
-                          <div className="absolute top-3 left-3">
+                          <div className="absolute top-3 left-3 z-10">
                             <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/95 backdrop-blur-sm text-[#B85064] border border-[#F5D5DC] shadow-sm">
                               {pkg.categoryLabel}
                             </span>
@@ -928,7 +929,7 @@ export default function PackagesPage() {
 
                           {/* Tag ưu đãi góc dưới trái ảnh */}
                           {pkg.discountPercent > 0 && (
-                            <div className="absolute bottom-2.5 left-3">
+                            <div className="absolute bottom-2.5 left-3 z-10">
                               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-[#E84360] text-white shadow-sm flex items-center gap-1">
                                 <Tag className="w-2.5 h-2.5" />
                                 <span>-{pkg.discountPercent}% Ưu đãi</span>
@@ -936,26 +937,20 @@ export default function PackagesPage() {
                             </div>
                           )}
 
-                          {/* Nút tim góc trên phải ảnh */}
-                          <button
-                            type="button"
-                            onClick={(e) => toggleFavorite(pkg.id, e)}
-                            className="cursor-pointer absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-all shadow-sm"
-                            title={isFav ? 'Bỏ thích' : 'Yêu thích'}
-                          >
-                            <Heart
-                              className={`w-4 h-4 transition-colors ${
-                                isFav ? 'fill-[#E84360] text-[#E84360]' : 'text-white'
-                              }`}
-                            />
-                          </button>
+                          {/* Nút Xem chi tiết hiện ra khi rê chuột vào hình ảnh */}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[1.5px] z-10">
+                            <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/95 text-[#B85064] text-xs font-bold shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                              <Eye className="w-3.5 h-3.5 text-[#B85064]" />
+                              <span>Xem chi tiết</span>
+                            </span>
+                          </div>
                         </div>
 
                         {/* Body Details */}
                         <div className="p-4 sm:p-5 space-y-3">
                           <div>
                             <div className="flex items-center justify-between gap-2 mb-1">
-                              <h3 className="text-[15px] font-bold text-[#2A1D22] group-hover:text-[#B85064] transition-colors line-clamp-1">
+                              <h3 className="text-[15px] font-bold text-[#2A1D22] group-hover:text-[#B85064] transition-colors line-clamp-1 block">
                                 {pkg.name}
                               </h3>
                             </div>
@@ -991,8 +986,8 @@ export default function PackagesPage() {
                         </div>
                       </div>
 
-                      {/* Footer: Giá & Nút Đặt gói này (không bao giờ bị tràn xuống 3 dòng) */}
-                      <div className="px-4 sm:px-5 pb-5 pt-3 border-t border-[#F8EFEF] flex items-center justify-between gap-3">
+                      {/* Footer: Giá & Nút Đặt gói này */}
+                      <div className="px-4 sm:px-5 pb-5 pt-3 border-t border-[#F8EFEF] flex items-center justify-between gap-2">
                         <div className="flex flex-col">
                           <span className="text-base sm:text-lg font-bold text-[#B85064]">
                             {pkg.priceDisplay}
@@ -1005,8 +1000,11 @@ export default function PackagesPage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => openBookingModal(pkg)}
-                          className="cursor-pointer shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap transition-all shadow-sm shadow-[#B85064]/20 hover:scale-[1.02] active:scale-[0.98]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openBookingModal(pkg);
+                          }}
+                          className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap transition-all shadow-sm shadow-[#B85064]/20 hover:scale-[1.02] active:scale-[0.98]"
                         >
                           <span>Đặt gói này</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -1022,19 +1020,25 @@ export default function PackagesPage() {
             {!isLoading && viewMode === 'list' && displayedPackages.length > 0 && (
               <div className="space-y-4">
                 {displayedPackages.map((pkg) => {
-                  const isFav = Boolean(favorites[pkg.id]);
                   return (
                     <div
                       key={pkg.id}
-                      className="bg-white rounded-2xl p-4 sm:p-5 border border-[#F0E4E6] shadow-sm hover:shadow-lg transition-all flex flex-col sm:flex-row gap-5 items-center justify-between"
+                      onClick={() => navigate(`/packages/${pkg.id}`, { state: { pkg } })}
+                      className="cursor-pointer bg-white rounded-2xl p-4 sm:p-5 border border-[#F0E4E6] shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all flex flex-col sm:flex-row gap-5 items-center justify-between group"
                     >
                       <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <img
-                          src={pkg.displayImage}
-                          alt={pkg.name}
-                          className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover shrink-0 cursor-pointer"
-                          onClick={() => setQuickViewPkg(pkg)}
-                        />
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 relative group/thumb">
+                          <img
+                            src={pkg.displayImage}
+                            alt={pkg.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[1px]">
+                            <span className="p-1.5 rounded-full bg-white/95 text-[#B85064] shadow-md transform scale-90 group-hover:scale-100 transition-transform">
+                              <Eye className="w-4 h-4 text-[#B85064]" />
+                            </span>
+                          </div>
+                        </div>
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[#FCECEF] text-[#B85064]">
@@ -1055,7 +1059,7 @@ export default function PackagesPage() {
                               • Đã đặt {pkg.bookedCount || 0}+
                             </span>
                           </div>
-                          <h3 className="text-base font-bold text-[#2A1D22]">
+                          <h3 className="text-base font-bold text-[#2A1D22] group-hover:text-[#B85064] transition-colors block">
                             {pkg.name}
                           </h3>
                           <p className="text-xs text-[#7A6C71] max-w-md line-clamp-1">
@@ -1086,18 +1090,10 @@ export default function PackagesPage() {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={(e) => toggleFavorite(pkg.id, e)}
-                            className="p-2 rounded-xl border border-[#EFE5E7] hover:border-[#B85064] text-[#8C7D82] hover:text-[#B85064]"
-                          >
-                            <Heart
-                              className={`w-4 h-4 ${
-                                isFav ? 'fill-[#E84360] text-[#E84360]' : ''
-                              }`}
-                            />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openBookingModal(pkg)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openBookingModal(pkg);
+                            }}
                             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap shadow-sm shadow-[#B85064]/20"
                           >
                             <span>Đặt gói này</span>
@@ -1434,20 +1430,30 @@ export default function PackagesPage() {
                   ))}
                 </div>
 
-                <div className="pt-4 flex items-center justify-between border-t border-[#F8EFEF]">
+                <div className="pt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#F8EFEF]">
                   <span className="text-xl font-bold text-[#B85064]">
                     {quickViewPkg.priceDisplay}
                   </span>
-                  <button
-                    onClick={() => {
-                      setQuickViewPkg(null);
-                      openBookingModal(quickViewPkg);
-                    }}
-                    className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors"
-                  >
-                    <span>Đặt gói này ngay</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to={`/packages/${quickViewPkg.id}`}
+                      onClick={() => setQuickViewPkg(null)}
+                      className="cursor-pointer inline-flex items-center gap-1 px-3.5 py-2 rounded-xl border border-[#F2C0CA] text-[#B85064] hover:bg-[#FDF5F6] text-xs font-semibold transition-colors"
+                    >
+                      <span>Xem trang chi tiết</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setQuickViewPkg(null);
+                        openBookingModal(quickViewPkg);
+                      }}
+                      className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors shadow-xs"
+                    >
+                      <span>Đặt gói này ngay</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

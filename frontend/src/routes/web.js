@@ -10,11 +10,17 @@ export const ROUTES = {
   USER: {
     HOME: '/',
     PACKAGES: '/packages',
-    BOOKING: '/#booking',
+    PACKAGE_DETAIL: '/packages/:id',
+    BOOKING: '/booking',
     PRICING: '/packages',
-    GALLERY: '/#gallery',
-    ABOUT: '/#studios',
-    REVIEWS: '/#testimonials',
+    GALLERY: '/gallery',
+    STUDIOS: '/studios',
+    ABOUT: '/studios',
+    REVIEWS: '/reviews',
+    PAYMENT: '/payment',
+    CHECKOUT: '/checkout',
+    VNPAY_RETURN: '/payment/vnpay-return',
+    PROFILE: '/profile',
   },
 
   // Tuyến đường Xác thực (Authentication)
