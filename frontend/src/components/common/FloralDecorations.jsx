@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Cành hoa đào / hoa mộc lan nghệ thuật trang trí các góc (Top-Left, Top-Right, Bottom-Left, Bottom-Right)
  */
@@ -382,7 +380,7 @@ export function ScatteredPetals({ className = '', density = 'normal' }) {
 /**
  * Cụm cánh hoa đào bay phất phơ (Tương thích ngược)
  */
-export function FloatingPetals({ count = 6, className = '', opacity = 'opacity-80' }) {
+export function FloatingPetals({ className = '', opacity = 'opacity-80' }) {
   return <ScatteredPetals className={`${className} ${opacity}`} />;
 }
 

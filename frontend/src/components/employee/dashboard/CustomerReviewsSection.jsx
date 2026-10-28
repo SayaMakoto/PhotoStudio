@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star } from 'lucide-react';
 import { CUSTOMER_REVIEWS, EMPLOYEE_PROFILE } from '../employeeData';
 

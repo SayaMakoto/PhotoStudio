@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
-import Navbar from './Navbar';
-import Footer from './Footer';
-import QuickContact from './QuickContact';
+import Navbar from '../components/user/layout/Navbar';
+import Footer from '../components/user/layout/Footer';
+import QuickContact from '../components/user/layout/QuickContact';
 
 export default function UserLayout() {
   const handleOpenBooking = () => {

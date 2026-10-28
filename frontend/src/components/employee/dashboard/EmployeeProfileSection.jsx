@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { User, Mail, Phone, ShieldCheck, Lock, CheckCircle2, Save, MapPin, AlertCircle } from 'lucide-react';
 import employeeAuthService from '../../../services/employee/authService';
 
@@ -14,16 +14,16 @@ export default function EmployeeProfileSection({ profile: initialProfile, onProf
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Sync when initialProfile changes from parent
-  useEffect(() => {
-    if (initialProfile) {
-      setProfile(initialProfile);
-      setFullname(initialProfile.fullname || '');
-      setPhone(initialProfile.phone || '');
-      setEmail(initialProfile.email || '');
-      setAddress(initialProfile.address || '');
-    }
-  }, [initialProfile]);
+  // Sync state when initialProfile changes from parent during render
+  const [prevProfile, setPrevProfile] = useState(initialProfile);
+  if (initialProfile !== prevProfile) {
+    setPrevProfile(initialProfile);
+    setProfile(initialProfile || {});
+    setFullname(initialProfile?.fullname || '');
+    setPhone(initialProfile?.phone || '');
+    setEmail(initialProfile?.email || '');
+    setAddress(initialProfile?.address || '');
+  }
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();

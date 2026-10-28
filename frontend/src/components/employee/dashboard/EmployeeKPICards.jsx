@@ -1,4 +1,3 @@
-import React from 'react';
 import { Camera, CalendarDays, DollarSign, Star } from 'lucide-react';
 import CountUp from '../../animations/CountUp';
 import { EMPLOYEE_KPIS } from '../employeeData';

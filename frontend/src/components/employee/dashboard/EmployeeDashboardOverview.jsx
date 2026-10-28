@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   CalendarDays,
   Clock,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react';
 
 export default function EmployeeDashboardOverview({
-  profile,
   onNavigateTab,
   bookings = [],
   onSelectBooking,

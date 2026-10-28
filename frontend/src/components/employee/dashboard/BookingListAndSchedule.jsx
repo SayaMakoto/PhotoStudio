@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   CalendarDays,
   Clock,
@@ -22,7 +22,6 @@ const STATUS_LABELS = {
 export default function BookingListAndSchedule({
   bookings = [],
   onSelectBooking,
-  onOpenIncident,
   onOpenShiftSwap,
   onStatusChange,
   showTitle = true,

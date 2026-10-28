@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, Send, CheckCircle2, X, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { Send, CheckCircle2, X, RefreshCw } from 'lucide-react';
 
 export default function ShiftSwapModal({ onClose }) {
   const [requestType, setRequestType] = useState('swap'); // 'swap' | 'leave'

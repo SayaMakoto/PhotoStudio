@@ -2,21 +2,21 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from './web';
 
 // User Layout & Pages
-import UserLayout from '../components/user/layout/UserLayout';
+import UserLayout from '../layouts/UserLayout';
 import HomePage from '../pages/user/HomePage';
 import PackagesPage from '../pages/user/PackagesPage';
 
-// Auth Pages
-import LoginPage from '../pages/auth/LoginPage';
-import RegisterPage from '../pages/auth/RegisterPage';
-import AdminLoginPage from '../pages/auth/AdminLoginPage';
-import AdminRegisterPage from '../pages/auth/AdminRegisterPage';
-import EmployeeLoginPage from '../pages/auth/EmployeeLoginPage';
+// Auth Pages (Đã phân loại vào từng vai trò user, admin, employee)
+import LoginPage from '../pages/user/LoginPage';
+import RegisterPage from '../pages/user/RegisterPage';
+import AdminLoginPage from '../pages/admin/AdminLoginPage';
+import AdminRegisterPage from '../pages/admin/AdminRegisterPage';
+import EmployeeLoginPage from '../pages/employee/EmployeeLoginPage';
 
-// Admin & Employee Pages
-import AdminLayout from '../components/admin/layout/AdminLayout';
-import AdminRoute from '../components/admin/layout/AdminRoute';
-import EmployeeRoute from '../components/employee/layout/EmployeeRoute';
+// Admin & Employee Layouts & Pages
+import AdminLayout from '../layouts/AdminLayout';
+import AdminRoute from '../layouts/AdminRoute';
+import EmployeeRoute from '../layouts/EmployeeRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
 import AdminUsersPage from '../pages/admin/users';
