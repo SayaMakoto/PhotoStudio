@@ -14,7 +14,7 @@ export default function UserLayout() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-950 text-white selection:bg-amber-400 selection:text-neutral-950 font-sans">
+    <div className="min-h-screen flex flex-col bg-[#141012] text-white selection:bg-[#BE4B5E] selection:text-white font-sans">
       <Navbar onOpenBooking={handleOpenBooking} />
       <main className="flex-1">
         <Outlet />

@@ -8,7 +8,6 @@ import {
   EyeIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/solid';
-import SpotlightCard from '../../cards/SpotlightCard';
 import ScrollReveal from '../../animations/ScrollReveal';
 import customerRoomService from '../../../services/user/roomService';
 
@@ -34,15 +33,11 @@ export default function StudioExperience() {
       })
       .finally(() => {
         setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error('[AboutStudio] Lỗi không xử lý:', err);
       });
   }, []);
 
   const currentRoom = rooms[activeRoomIndex] || rooms[0] || null;
 
-  // Tách mô tả thành danh sách điểm nổi bật thực tế
   const getRoomHighlights = (room) => {
     if (!room) return [];
     const list = [];
@@ -61,24 +56,23 @@ export default function StudioExperience() {
   };
 
   return (
-    <section id="studios" className="py-24 bg-neutral-950 border-t border-white/10 relative overflow-hidden">
+    <section id="studios" className="py-24 bg-[#FAF5F5] border-t border-[#F0E4E6] relative overflow-hidden">
       {/* Background ambient lighting */}
-      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-500/5 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
         <ScrollReveal direction="down">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
-              <CubeIcon className="w-4 h-4 text-amber-400 animate-bounce" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
+              <CubeIcon className="w-4 h-4 text-[#B85064]" />
               <span>HỆ THỐNG PHÒNG TỪ CSDL</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2A1D22] font-serif-luxury tracking-tight mb-4">
               Không Gian Studio & Phòng Chụp
             </h2>
-            <p className="text-neutral-400 text-base sm:text-lg font-light leading-relaxed">
+            <p className="text-[#7A6C71] text-base sm:text-lg font-light leading-relaxed">
               Danh sách phòng studio được đồng bộ trực tiếp từ cơ sở dữ liệu hệ thống, đáp ứng đa dạng phong cách chụp ảnh.
             </p>
           </div>
@@ -86,18 +80,18 @@ export default function StudioExperience() {
 
         {/* Loading state */}
         {isLoading && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-900/40 p-12 text-center animate-pulse mb-16">
-            <div className="h-6 w-48 bg-white/10 rounded-full mx-auto mb-4" />
-            <div className="h-4 w-64 bg-white/10 rounded mx-auto" />
+          <div className="rounded-3xl border border-[#F0E4E6] bg-white p-12 text-center animate-pulse mb-16 shadow-sm">
+            <div className="h-6 w-48 bg-neutral-200 rounded-full mx-auto mb-4" />
+            <div className="h-4 w-64 bg-neutral-100 rounded mx-auto" />
           </div>
         )}
 
         {/* Empty state */}
         {!isLoading && rooms.length === 0 && (
-          <div className="rounded-3xl border border-white/10 bg-neutral-900/40 p-12 text-center mb-16">
-            <CubeIcon className="w-12 h-12 text-neutral-600 mx-auto mb-3" />
-            <h4 className="text-white font-bold text-lg mb-1">Chưa có thông tin phòng chụp</h4>
-            <p className="text-xs text-neutral-400">Dữ liệu phòng chụp đang được cập nhật trong cơ sở dữ liệu.</p>
+          <div className="rounded-3xl border border-[#F0E4E6] bg-white p-12 text-center mb-16 shadow-sm">
+            <CubeIcon className="w-12 h-12 text-[#CBB9BD] mx-auto mb-3" />
+            <h4 className="text-[#2A1D22] font-bold text-lg mb-1 font-serif-luxury">Chưa có thông tin phòng chụp</h4>
+            <p className="text-xs text-[#7A6C71]">Dữ liệu phòng chụp đang được cập nhật trong cơ sở dữ liệu.</p>
           </div>
         )}
 
@@ -112,11 +106,11 @@ export default function StudioExperience() {
                     onClick={() => setActiveRoomIndex(idx)}
                     className={`cursor-pointer px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-300 flex items-center gap-2.5 ${
                       activeRoomIndex === idx
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 shadow-xl shadow-amber-500/30 scale-105'
-                        : 'bg-neutral-900/80 text-neutral-300 hover:text-white border border-white/10 hover:border-amber-400/40 hover:bg-neutral-900'
+                        ? 'bg-[#B85064] text-white shadow-xl shadow-[#B85064]/25 scale-105'
+                        : 'bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/40 shadow-sm'
                     }`}
                   >
-                    <SparklesIcon className={`w-4 h-4 ${activeRoomIndex === idx ? 'text-neutral-950' : 'text-amber-400'}`} />
+                    <SparklesIcon className={`w-4 h-4 ${activeRoomIndex === idx ? 'text-white' : 'text-[#B85064]'}`} />
                     <span>{room.name}</span>
                   </button>
                 ))}
@@ -126,37 +120,32 @@ export default function StudioExperience() {
             {/* Featured Studio Showcase Card */}
             {currentRoom && (
               <ScrollReveal direction="up" delay={0.2}>
-                <SpotlightCard
-                  className="overflow-hidden rounded-3xl border-white/15 bg-neutral-900/60 p-0 shadow-2xl mb-16 transition-all duration-500"
-                  spotlightColor="rgba(245, 158, 11, 0.2)"
-                >
+                <div className="overflow-hidden rounded-3xl border border-[#F0E4E6] bg-white p-0 shadow-xl mb-16 transition-all duration-500">
                   <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[450px]">
                     
                     {/* Left: Room Badge & Specs Info */}
-                    <div className="lg:col-span-6 p-8 sm:p-10 flex flex-col justify-between bg-neutral-950/80 relative">
-                      <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-                      
+                    <div className="lg:col-span-6 p-8 sm:p-10 flex flex-col justify-between bg-white relative">
                       <div>
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-bold mb-4">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-bold mb-4">
                           <EyeIcon className="w-3.5 h-3.5" />
                           <span>Phòng Studio ID: #{currentRoom.id}</span>
                         </div>
 
-                        <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
+                        <h3 className="text-2xl sm:text-3xl font-bold text-[#2A1D22] font-serif-luxury mb-4">
                           {currentRoom.name}
                         </h3>
 
-                        <p className="text-sm text-neutral-300 font-light leading-relaxed mb-6">
+                        <p className="text-sm text-[#7A6C71] font-light leading-relaxed mb-6">
                           {currentRoom.description || 'Không gian studio được thiết kế chuyên dụng cho nhiếp ảnh nghệ thuật.'}
                         </p>
 
-                        <div className="p-4 rounded-2xl bg-neutral-900/80 border border-white/10 mb-6 flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                            <UserGroupIcon className="w-6 h-6 text-amber-400" />
+                        <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] mb-6 flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-[#FDF0F3] text-[#B85064] flex items-center justify-center shrink-0 border border-[#F5D5DC]">
+                            <UserGroupIcon className="w-6 h-6" />
                           </div>
                           <div>
-                            <span className="text-xs text-neutral-400 block">Sức chứa phục vụ</span>
-                            <span className="text-base font-bold text-white">
+                            <span className="text-xs text-[#7A6C71] block">Sức chứa phục vụ</span>
+                            <span className="text-base font-bold text-[#2A1D22]">
                               {currentRoom.capacity ? `Tối đa ${currentRoom.capacity} người` : 'Tiêu chuẩn'}
                             </span>
                           </div>
@@ -165,10 +154,10 @@ export default function StudioExperience() {
                         <div className="space-y-3 mb-6">
                           {getRoomHighlights(currentRoom).map((highlight, hIdx) => (
                             <div key={hIdx} className="flex items-start gap-3">
-                              <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <CheckIcon className="w-3.5 h-3.5 stroke-[3] text-amber-400" />
+                              <div className="w-5 h-5 rounded-full bg-[#FDF0F3] text-[#B85064] flex items-center justify-center shrink-0 mt-0.5">
+                                <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
                               </div>
-                              <span className="text-xs sm:text-sm text-neutral-200 font-light leading-snug">
+                              <span className="text-xs sm:text-sm text-[#55464B] font-light leading-snug">
                                 {highlight}
                               </span>
                             </div>
@@ -177,10 +166,10 @@ export default function StudioExperience() {
                       </div>
 
                       {/* Bottom Action */}
-                      <div className="pt-6 border-t border-white/10 flex items-center justify-between gap-4">
+                      <div className="pt-6 border-t border-[#F0E4E6] flex items-center justify-between gap-4">
                         <div>
-                          <span className="text-xs text-neutral-400 block">Trạng thái</span>
-                          <span className="text-sm font-bold text-amber-400">
+                          <span className="text-xs text-[#7A6C71] block">Trạng thái</span>
+                          <span className="text-sm font-bold text-[#B85064]">
                             {currentRoom.status === 'active' || currentRoom.status === 'available'
                               ? 'Đang hoạt động'
                               : currentRoom.status}
@@ -188,49 +177,49 @@ export default function StudioExperience() {
                         </div>
                         <a
                           href="#booking"
-                          className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-neutral-950 font-bold text-xs shadow-lg shadow-amber-500/30 transition-all flex items-center gap-2 hover:scale-105"
+                          className="px-6 py-3 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white font-bold text-xs shadow-md shadow-[#B85064]/25 transition-all flex items-center gap-2 hover:scale-105"
                         >
                           <span>Đặt Lịch Studio</span>
-                          <ChevronRightIcon className="w-4 h-4 text-neutral-950" />
+                          <ChevronRightIcon className="w-4 h-4 text-white" />
                         </a>
                       </div>
                     </div>
 
                     {/* Right: Studio Room Feature Cards */}
-                    <div className="lg:col-span-6 p-8 sm:p-10 bg-neutral-900/60 border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col justify-center">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-6">
+                    <div className="lg:col-span-6 p-8 sm:p-10 bg-[#FCF8F9] border-t lg:border-t-0 lg:border-l border-[#F0E4E6] flex flex-col justify-center">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#B85064] mb-6">
                         Tiêu Chuẩn Kỹ Thuật Studio
                       </h4>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="p-5 rounded-2xl bg-neutral-950/60 border border-white/10">
-                          <span className="text-amber-400 text-xs font-semibold block mb-1">Ánh Sáng</span>
-                          <h5 className="text-white font-bold text-sm">Godox Pro Studio</h5>
-                          <p className="text-[11px] text-neutral-400 mt-1">Đồng bộ ánh sáng tiêu chuẩn điện ảnh</p>
+                        <div className="p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
+                          <span className="text-[#B85064] text-xs font-semibold block mb-1">Ánh Sáng</span>
+                          <h5 className="text-[#2A1D22] font-bold text-sm">Godox Pro Studio</h5>
+                          <p className="text-[11px] text-[#7A6C71] mt-1">Đồng bộ ánh sáng tiêu chuẩn điện ảnh</p>
                         </div>
 
-                        <div className="p-5 rounded-2xl bg-neutral-950/60 border border-white/10">
-                          <span className="text-amber-400 text-xs font-semibold block mb-1">Điều Hòa & Nhiệt Độ</span>
-                          <h5 className="text-white font-bold text-sm">22°C - 24°C Liên Tục</h5>
-                          <p className="text-[11px] text-neutral-400 mt-1">Bảo vệ lớp trang điểm luôn hoàn hảo</p>
+                        <div className="p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
+                          <span className="text-[#B85064] text-xs font-semibold block mb-1">Điều Hòa & Nhiệt Độ</span>
+                          <h5 className="text-[#2A1D22] font-bold text-sm">22°C - 24°C Liên Tục</h5>
+                          <p className="text-[11px] text-[#7A6C71] mt-1">Bảo vệ lớp trang điểm luôn hoàn hảo</p>
                         </div>
 
-                        <div className="p-5 rounded-2xl bg-neutral-950/60 border border-white/10">
-                          <span className="text-amber-400 text-xs font-semibold block mb-1">Không Gian Riêng</span>
-                          <h5 className="text-white font-bold text-sm">Phòng Thay Đồ Khép Kín</h5>
-                          <p className="text-[11px] text-neutral-400 mt-1">Riêng tư tuyệt đối cho khách hàng</p>
+                        <div className="p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
+                          <span className="text-[#B85064] text-xs font-semibold block mb-1">Không Gian Riêng</span>
+                          <h5 className="text-[#2A1D22] font-bold text-sm">Phòng Thay Đồ Khép Kín</h5>
+                          <p className="text-[11px] text-[#7A6C71] mt-1">Riêng tư tuyệt đối cho khách hàng</p>
                         </div>
 
-                        <div className="p-5 rounded-2xl bg-neutral-950/60 border border-white/10">
-                          <span className="text-amber-400 text-xs font-semibold block mb-1">Kiểm Tra Ảnh</span>
-                          <h5 className="text-white font-bold text-sm">Tethering Màn Hình</h5>
-                          <p className="text-[11px] text-neutral-400 mt-1">Xem ảnh ngay sau mỗi lần bấm máy</p>
+                        <div className="p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
+                          <span className="text-[#B85064] text-xs font-semibold block mb-1">Kiểm Tra Ảnh</span>
+                          <h5 className="text-[#2A1D22] font-bold text-sm">Tethering Màn Hình</h5>
+                          <p className="text-[11px] text-[#7A6C71] mt-1">Xem ảnh ngay sau mỗi lần bấm máy</p>
                         </div>
                       </div>
                     </div>
 
                   </div>
-                </SpotlightCard>
+                </div>
               </ScrollReveal>
             )}
           </>
@@ -238,40 +227,40 @@ export default function StudioExperience() {
 
         {/* Equipment & Gear Showcase Bar */}
         <ScrollReveal direction="up" delay={0.3}>
-          <div className="rounded-3xl border border-white/10 bg-neutral-900/30 p-8 sm:p-10 backdrop-blur-xl">
+          <div className="rounded-3xl border border-[#F0E4E6] bg-white p-8 sm:p-10 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                <AdjustmentsHorizontalIcon className="w-5 h-5 text-amber-400" />
+              <div className="p-2.5 rounded-xl bg-[#FDF0F3] text-[#B85064] border border-[#F5D5DC]">
+                <AdjustmentsHorizontalIcon className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-lg font-bold text-white">Dàn Thiết Bị Đẳng Cấp Studio Trang Bị Sẵn</h4>
-                <p className="text-xs text-neutral-400">Đảm bảo độ nét phân giải cao nhất và ánh sáng mượt mà nhất</p>
+                <h4 className="text-lg font-bold text-[#2A1D22] font-serif-luxury">Dàn Thiết Bị Đẳng Cấp Studio Trang Bị Sẵn</h4>
+                <p className="text-xs text-[#7A6C71]">Đảm bảo độ nét phân giải cao nhất và ánh sáng mượt mà nhất</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="p-5 rounded-2xl bg-neutral-950/70 border border-white/10">
-                <span className="text-amber-400 text-xs font-semibold block mb-1">Máy Ảnh Full-Frame</span>
-                <h5 className="text-white font-bold text-sm">Sony & Canon Cinema</h5>
-                <p className="text-[11px] text-neutral-400 mt-1">Lấy nét mắt thời gian thực</p>
+              <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
+                <span className="text-[#B85064] text-xs font-semibold block mb-1">Máy Ảnh Full-Frame</span>
+                <h5 className="text-[#2A1D22] font-bold text-sm">Sony & Canon Cinema</h5>
+                <p className="text-[11px] text-[#7A6C71] mt-1">Lấy nét mắt thời gian thực</p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-neutral-950/70 border border-white/10">
-                <span className="text-amber-400 text-xs font-semibold block mb-1">Hệ Thống Đèn</span>
-                <h5 className="text-white font-bold text-sm">Godox AD600 Pro</h5>
-                <p className="text-[11px] text-neutral-400 mt-1">Công suất flash 600W điện ảnh</p>
+              <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
+                <span className="text-[#B85064] text-xs font-semibold block mb-1">Hệ Thống Đèn</span>
+                <h5 className="text-[#2A1D22] font-bold text-sm">Godox AD600 Pro</h5>
+                <p className="text-[11px] text-[#7A6C71] mt-1">Công suất flash 600W điện ảnh</p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-neutral-950/70 border border-white/10">
-                <span className="text-amber-400 text-xs font-semibold block mb-1">Ống Kính Cao Cấp</span>
-                <h5 className="text-white font-bold text-sm">Dòng GM & L-Series</h5>
-                <p className="text-[11px] text-neutral-400 mt-1">Bokeh mượt mà, độ nét xuất sắc</p>
+              <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
+                <span className="text-[#B85064] text-xs font-semibold block mb-1">Ống Kính Cao Cấp</span>
+                <h5 className="text-[#2A1D22] font-bold text-sm">Dòng GM & L-Series</h5>
+                <p className="text-[11px] text-[#7A6C71] mt-1">Bokeh mượt mà, độ nét xuất sắc</p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-neutral-950/70 border border-white/10">
-                <span className="text-amber-400 text-xs font-semibold block mb-1">Màn Hình Màu Chuẩn</span>
-                <h5 className="text-white font-bold text-sm">ColorEdge 4K</h5>
-                <p className="text-[11px] text-neutral-400 mt-1">Chuẩn màu 99% Adobe RGB</p>
+              <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
+                <span className="text-[#B85064] text-xs font-semibold block mb-1">Màn Hình Màu Chuẩn</span>
+                <h5 className="text-[#2A1D22] font-bold text-sm">ColorEdge 4K</h5>
+                <p className="text-[11px] text-[#7A6C71] mt-1">Chuẩn màu 99% Adobe RGB</p>
               </div>
             </div>
           </div>

@@ -63,8 +63,8 @@ export default function Stats() {
       icon: TrophyIcon,
       value: counts.rooms,
       suffix: counts.rooms > 0 ? ' Phòng' : '',
-      label: 'Phòng Studio Khép Kín',
-      description: 'Đầy đủ hệ thống đèn chiếu sáng và bối cảnh',
+      label: 'Phòng Studio Độc Bản',
+      description: 'Không gian bối cảnh chuẩn phong cách điện ảnh',
     },
     {
       icon: SparklesIcon,
@@ -83,9 +83,9 @@ export default function Stats() {
   ];
 
   return (
-    <section className="relative py-16 bg-neutral-950 border-y border-white/10 overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-neutral-900/40 to-amber-500/5 pointer-events-none" />
+    <section className="relative py-16 bg-[#FAF5F5] border-y border-[#F0E4E6] overflow-hidden">
+      {/* Background glow nhẹ */}
+      <div className="absolute inset-0 bg-gradient-to-r from-rose-500/5 via-white/40 to-rose-500/5 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -98,16 +98,16 @@ export default function Stats() {
                 delay={idx * 0.1}
                 duration={0.7}
               >
-                <div className="group relative p-6 rounded-3xl bg-neutral-900/70 border border-white/10 hover:border-amber-400/60 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-1">
+                <div className="group relative p-6 sm:p-7 rounded-3xl bg-white border border-[#F0E4E6] hover:border-[#B85064]/60 transition-all duration-300 shadow-[0_4px_20px_rgb(184,80,100,0.04)] hover:shadow-[0_12px_30px_rgb(184,80,100,0.12)] hover:-translate-y-1">
                   
                   {/* Icon */}
-                  <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-amber-400 group-hover:text-neutral-950 transition-all duration-300 shadow-md">
-                    <Icon className="w-6 h-6 text-amber-400 group-hover:text-neutral-950" />
+                  <div className="w-12 h-12 rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-[#B85064] group-hover:text-white transition-all duration-300 shadow-sm">
+                    <Icon className="w-6 h-6 text-[#B85064] group-hover:text-white transition-colors" />
                   </div>
 
                   {/* Value */}
                   <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight font-sans">
+                    <span className="text-4xl lg:text-5xl font-extrabold text-[#2A1D22] tracking-tight font-sans">
                       {isLoading ? (
                         <span className="animate-pulse opacity-40">--</span>
                       ) : (
@@ -121,23 +121,23 @@ export default function Stats() {
                         />
                       )}
                     </span>
-                    <span className="text-xl font-bold text-amber-400">
+                    <span className="text-xl font-bold text-[#B85064]">
                       {stat.suffix}
                     </span>
                   </div>
 
                   {/* Label */}
-                  <h3 className="text-base font-bold text-neutral-200 group-hover:text-white transition-colors mb-1">
+                  <h3 className="text-base font-bold text-[#2A1D22] group-hover:text-[#B85064] transition-colors mb-1">
                     {stat.label}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-xs text-neutral-400 font-light leading-relaxed">
+                  <p className="text-xs text-[#7A6C71] font-light leading-relaxed">
                     {stat.description}
                   </p>
 
                   {/* Bottom Line Glow */}
-                  <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-gradient-to-r from-transparent via-amber-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-gradient-to-r from-transparent via-[#B85064]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
               </ScrollReveal>
             );

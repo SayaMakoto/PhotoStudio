@@ -18,21 +18,21 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-neutral-950 border-t border-white/10 pt-20 pb-12 text-neutral-400 text-sm relative overflow-hidden">
+    <footer className="bg-[#141012] border-t border-white/10 pt-20 pb-12 text-neutral-400 text-sm relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-rose-500/10 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Top VIP Invitation Bar with ScrollReveal */}
         <ScrollReveal direction="down">
-          <div className="mb-16 p-8 rounded-3xl bg-neutral-900/70 border border-amber-500/30 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl shadow-amber-500/5">
+          <div className="mb-16 p-8 rounded-3xl bg-[#1C1619]/80 border border-rose-500/30 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl shadow-rose-950/20">
             <div className="flex items-center gap-4 text-center md:text-left">
-              <div className="w-13 h-13 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/40 shadow-md">
-                <SparklesIcon className="w-7 h-7 text-amber-400 animate-pulse" />
+              <div className="w-13 h-13 rounded-2xl bg-rose-500/20 text-[#E899A8] flex items-center justify-center shrink-0 border border-rose-500/40 shadow-md">
+                <SparklesIcon className="w-7 h-7 text-[#E899A8] animate-pulse" />
               </div>
               <div>
-                <h4 className="text-lg font-bold text-white">Bạn Cần Tư Vấn Concept Độc Bản Riêng?</h4>
+                <h4 className="text-lg font-bold text-white font-serif-luxury">Bạn Cần Tư Vấn Concept Độc Bản Riêng?</h4>
                 <p className="text-xs text-neutral-300 mt-1">Nhiếp ảnh gia và Stylist của chúng tôi sẵn sàng lắng nghe ý tưởng của bạn.</p>
               </div>
             </div>
@@ -40,17 +40,17 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <a
                 href="tel:0901234567"
-                className="px-6 py-3 rounded-full bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold transition-all border border-amber-500/30 flex items-center gap-2 shadow-sm"
+                className="px-6 py-3 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition-all border border-rose-500/30 flex items-center gap-2 shadow-sm"
               >
-                <PhoneIcon className="w-4 h-4 text-amber-400" />
+                <PhoneIcon className="w-4 h-4 text-[#E899A8]" />
                 <span>Gọi 0901 234 567</span>
               </a>
               <Link
                 to={ROUTES.USER.PACKAGES}
                 onClick={scrollToTop}
-                className="px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-neutral-950 text-xs font-extrabold shadow-lg shadow-amber-500/30 hover:scale-105 transition-all flex items-center gap-1.5"
+                className="px-6 py-3 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-extrabold shadow-lg shadow-rose-950/40 hover:scale-105 transition-all flex items-center gap-1.5"
               >
-                <SparklesIcon className="w-4 h-4 text-neutral-950" />
+                <SparklesIcon className="w-4 h-4 text-white" />
                 <span>Xem Báo Giá Trực Tuyến</span>
               </Link>
             </div>
@@ -63,11 +63,11 @@ export default function Footer() {
           {/* Col 1 & 2: Brand Info & Vibrant Social Icons */}
           <div className="lg:col-span-2 space-y-4">
             <Link to={ROUTES.USER.HOME} onClick={scrollToTop} className="flex items-center gap-3 group w-fit">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#BE4B5E] to-[#E295A2] flex items-center justify-center shadow-lg shadow-rose-500/25 group-hover:scale-110 transition-transform duration-300">
                 <CameraIcon className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold tracking-wider text-white font-sans">
-                PHOTO<span className="text-amber-400 font-extrabold">STUDIO</span>
+                PHOTO<span className="text-[#E899A8] font-extrabold">STUDIO</span>
               </span>
             </Link>
 
@@ -128,27 +128,27 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-xs">
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Tất Cả Gói Chụp & Báo Giá
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Concept Nàng Thơ / Cá Nhân
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Chụp Ảnh Cưới Studio & Ngoại Cảnh
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Chụp Ảnh Gia Đình VIP
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Dịch Vụ Phụ Trợ & Cho Thuê
                 </Link>
               </li>
@@ -162,27 +162,27 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-xs">
               <li>
-                <Link to={`${ROUTES.USER.HOME}#gallery`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.HOME}#gallery`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Bộ Sưu Tập Nghệ Thuật
                 </Link>
               </li>
               <li>
-                <Link to={`${ROUTES.USER.HOME}#studios`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.HOME}#studios`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Hệ Thống Phòng Studio
                 </Link>
               </li>
               <li>
-                <Link to={`${ROUTES.USER.HOME}#studios`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.HOME}#studios`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Dàn Thiết Bị Full-Frame
                 </Link>
               </li>
               <li>
-                <Link to={`${ROUTES.USER.HOME}#booking`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.HOME}#booking`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Đặt Lịch Trực Tuyến
                 </Link>
               </li>
               <li>
-                <Link to={`${ROUTES.USER.HOME}#testimonials`} className="text-neutral-300 hover:text-amber-400 hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.HOME}#testimonials`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Đánh Giá Khách Hàng (5.0★)
                 </Link>
               </li>
@@ -196,19 +196,19 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3.5 text-xs">
               <li className="flex items-start gap-2.5">
-                <MapPinIcon className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                <MapPinIcon className="w-5 h-5 text-[#E899A8] shrink-0 mt-0.5" />
                 <span className="text-neutral-200">Số 88 Phố Tràng Thi, Hoàn Kiếm, Hà Nội</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <PhoneIcon className="w-5 h-5 text-amber-400 shrink-0" />
+                <PhoneIcon className="w-5 h-5 text-[#E899A8] shrink-0" />
                 <span className="text-neutral-200">0901 234 567 / 0912 345 678</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <EnvelopeIcon className="w-5 h-5 text-amber-400 shrink-0" />
+                <EnvelopeIcon className="w-5 h-5 text-[#E899A8] shrink-0" />
                 <span className="text-neutral-200">contact@photostudio.com</span>
               </li>
               <li className="pt-2 text-neutral-200 text-[11px] bg-neutral-900 border border-white/10 p-3 rounded-xl shadow-inner">
-                ⏰ Giờ mở cửa: <strong className="text-amber-300">08:00 - 21:00</strong> tất cả các ngày
+                ⏰ Giờ mở cửa: <strong className="text-rose-300">08:00 - 21:00</strong> tất cả các ngày
               </li>
             </ul>
           </div>
@@ -219,15 +219,15 @@ export default function Footer() {
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
           <p className="flex items-center gap-1.5 text-neutral-300">
             <span>© 2026 PhotoStudio. Được tạo nên với</span>
-            <HeartIcon className="w-4 h-4 text-rose-500 fill-rose-500 inline-block" />
+            <HeartIcon className="w-4 h-4 text-[#BE4B5E] fill-[#BE4B5E] inline-block" />
             <span>và Nghệ Thuật Ánh Sáng.</span>
           </p>
 
           <div className="flex items-center gap-6">
-            <a href="#privacy" className="text-neutral-300 hover:text-amber-400 transition-colors">
+            <a href="#privacy" className="text-neutral-300 hover:text-[#E899A8] transition-colors">
               Chính Sách Bảo Mật
             </a>
-            <a href="#terms" className="text-neutral-300 hover:text-amber-400 transition-colors">
+            <a href="#terms" className="text-neutral-300 hover:text-[#E899A8] transition-colors">
               Điều Khoản Dịch Vụ
             </a>
             
@@ -235,11 +235,11 @@ export default function Footer() {
             <Magnet padding={20} magnetStrength={2}>
               <button
                 onClick={scrollToTop}
-                className="cursor-pointer w-10 h-10 rounded-full bg-neutral-900 border border-amber-500/40 text-amber-400 hover:text-white hover:bg-amber-500 flex items-center justify-center transition-all duration-300 shadow-lg shadow-amber-500/10 hover:scale-110"
+                className="cursor-pointer w-10 h-10 rounded-full bg-neutral-900 border border-rose-500/40 text-[#E899A8] hover:text-white hover:bg-[#BE4B5E] flex items-center justify-center transition-all duration-300 shadow-lg shadow-rose-950/20 hover:scale-110"
                 title="Lên đầu trang"
                 aria-label="Lên đầu trang"
               >
-                <ArrowUpIcon className="w-5 h-5 text-amber-400" />
+                <ArrowUpIcon className="w-5 h-5" />
               </button>
             </Magnet>
           </div>

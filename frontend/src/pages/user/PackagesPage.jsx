@@ -1,83 +1,66 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  SparklesIcon,
-  CheckIcon,
-  ClockIcon,
-  PhotoIcon,
-  ArrowRightIcon,
-  TrophyIcon,
-  ShieldCheckIcon,
-  PhoneIcon,
-  CalendarDaysIcon,
-  WrenchScrewdriverIcon,
-  StarIcon,
-  ArrowsPointingOutIcon,
-  XMarkIcon,
-  CheckCircleIcon,
-  PaperAirplaneIcon,
-  MagnifyingGlassIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  TagIcon,
-  AdjustmentsVerticalIcon,
-} from '@heroicons/react/24/solid';
-import SpotlightCard from '../../components/cards/SpotlightCard';
-import ScrollReveal from '../../components/animations/ScrollReveal';
-import ShinyText from '../../components/animations/ShinyText';
+  Camera,
+  Shirt,
+  Image as ImageIcon,
+  Clock,
+  Heart,
+  LayoutGrid,
+  List,
+  Search,
+  Briefcase,
+  Users,
+  User,
+  Phone,
+  MessageCircle,
+  Check,
+  X,
+  ChevronDown,
+  ArrowRight,
+} from 'lucide-react';
 import customerPackageService from '../../services/user/packageService';
-import customerServiceService from '../../services/user/serviceService';
-import customerRoomService from '../../services/user/roomService';
 import customerBookingService from '../../services/user/bookingService';
 import userImageService from '../../services/user/imageService';
+import customerRoomService from '../../services/user/roomService';
 import { customerAuth } from '../../lib/axiosCustomer';
 
-// Danh mục ảnh mẫu chất lượng cao dự phòng (fallback) khi CSDL chưa có ảnh cho gói
-const CURATED_FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85', // Nàng thơ
-  'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85', // Cưới studio
-  'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&w=1200&q=85', // Gia đình
-  'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=85', // Cưới luxury
-  'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=85', // Kỷ yếu
-  'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=85', // Doanh nhân
-  'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=1200&q=85', // Cổ trang
-  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=85', // Lookbook
+const CATEGORIES_CONFIG = [
+  { id: 'all', label: 'Tất cả', icon: LayoutGrid },
+  { id: 'wedding', label: 'Ảnh Cưới & Couple', icon: Heart },
+  { id: 'portrait', label: 'Nàng Thơ & Profile', icon: User },
+  { id: 'family', label: 'Gia Đình & Nhóm', icon: Users },
+  { id: 'commercial', label: 'Doanh Nhân & Thời Trang', icon: Briefcase },
 ];
 
-const EQUIPMENT_LABELS = {
-  camera: 'Máy ảnh Cinema Full-Frame',
-  lighting: 'Dàn đèn Godox Pro Studio',
-  tripod: 'Chân máy chống rung Manfrotto',
-  backdrop: 'Phông nền điện tử đa sắc',
-  lens: 'Ống kính chân dung GM / L-series',
-  reflector: 'Tấm hắt sáng chuyên dụng',
-  softbox: 'Softbox tản sáng điện ảnh',
-};
-
-const padZero = (n) => (n < 10 ? `0${n}` : `${n}`);
+const TIME_SLOTS = [
+  { id: 'm1', label: '08:30 – 10:30', period: 'Sáng', start: '08:30:00', end: '10:30:00' },
+  { id: 'm2', label: '09:30 – 11:30', period: 'Sáng', start: '09:30:00', end: '11:30:00' },
+  { id: 'a1', label: '13:30 – 15:30', period: 'Chiều', start: '13:30:00', end: '15:30:00' },
+  { id: 'a2', label: '15:00 – 17:00', period: 'Chiều', start: '15:00:00', end: '17:00:00' },
+  { id: 'a3', label: '16:30 – 18:30', period: 'Chiều', start: '16:30:00', end: '18:30:00' },
+  { id: 'e1', label: '18:30 – 20:30', period: 'Tối', start: '18:30:00', end: '20:30:00' },
+  { id: 'e2', label: '19:30 – 21:30', period: 'Tối', start: '19:30:00', end: '21:30:00' },
+];
 
 export default function PackagesPage() {
   const [packages, setPackages] = useState([]);
-  const [additionalServices, setAdditionalServices] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Bộ lọc sản phẩm
+  // Bộ lọc
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('default'); // 'default', 'price-asc', 'price-desc', 'duration'
+  const [sortBy, setSortBy] = useState('default');
+  const [maxPrice, setMaxPrice] = useState(10000000);
+  const [displayCount, setDisplayCount] = useState(6);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [favorites, setFavorites] = useState({});
 
-  // Phân trang (Pagination)
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
-
-  // Modal xem chi tiết sản phẩm / lookbook
-  const [quickViewPkg, setQuickViewPkg] = useState(null);
-
-  // Trạng thái form đặt lịch tích hợp
-  const [selectedBookingPkg, setSelectedBookingPkg] = useState(null);
+  // Modal Đặt Lịch
+  const [bookingModalPkg, setBookingModalPkg] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(TIME_SLOTS[1]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -85,192 +68,207 @@ export default function PackagesPage() {
     note: '',
   });
 
-  const bookingSectionRef = useRef(null);
-  const productsTopRef = useRef(null);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Modal Xem ảnh chi tiết
+  const [quickViewPkg, setQuickViewPkg] = useState(null);
 
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // Tải dữ liệu thực tế từ CSDL Backend
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     void Promise.allSettled([
       customerPackageService.getAllPackages(),
-      customerServiceService.getAllServices(),
-      customerRoomService.getAllRooms(),
       userImageService.getAllImages(),
+      customerRoomService.getAllRooms(),
     ])
-      .then(([packagesRes, servicesRes, roomsRes, imagesRes]) => {
+      .then(([pkgRes, imgRes, roomRes]) => {
         const allImages =
-          imagesRes.status === 'fulfilled' && Array.isArray(imagesRes.value)
-            ? imagesRes.value
-            : [];
+          imgRes.status === 'fulfilled' && Array.isArray(imgRes.value) ? imgRes.value : [];
 
-        // 1. Tải và xử lý Packages kèm hình ảnh từ CSDL / fallback
-        if (packagesRes.status === 'fulfilled' && Array.isArray(packagesRes.value)) {
-          const activePkgs = packagesRes.value.filter(
+        if (roomRes.status === 'fulfilled' && Array.isArray(roomRes.value)) {
+          setRooms(roomRes.value);
+        }
+
+        if (pkgRes.status === 'fulfilled' && Array.isArray(pkgRes.value)) {
+          // Lọc các gói chụp đang hoạt động từ CSDL
+          const activeApiPkgs = pkgRes.value.filter(
             (p) => !p.status || p.status === 'active'
           );
 
-          const mapped = activePkgs.map((pkg, idx) => {
-            // ĐK: Tìm ảnh từ bảng images khớp với imageable_type = 'package' và imageable_id = pkg.id
+          const mapped = activeApiPkgs.map((pkg, idx) => {
+            // Lấy ảnh thực tế từ bảng images khớp với imageableId
             const pkgImages = allImages.filter(
               (img) =>
                 img.imageableType?.toLowerCase() === 'package' &&
                 Number(img.imageableId) === Number(pkg.id)
             );
-
-            // Ưu tiên ảnh is_primary = true hoặc ảnh đầu tiên tìm thấy trong CSDL
             const primaryImg =
               pkgImages.find((img) => img.isPrimary) || pkgImages[0];
 
-            // Nếu CSDL có ảnh -> Lấy ảnh CSDL; Nếu CSDL chưa có ảnh -> Lấy ảnh mẫu chất lượng cao
+            // Phân loại danh mục theo tên gói trong CSDL
+            const nameLower = (pkg.name || '').toLowerCase();
+            let category = 'portrait';
+            let categoryLabel = 'SẢN PHẨM STUDIO';
+
+            if (
+              nameLower.includes('cưới') ||
+              nameLower.includes('wedding') ||
+              nameLower.includes('couple') ||
+              nameLower.includes('đôi')
+            ) {
+              category = 'wedding';
+              categoryLabel = 'CƯỚI & COUPLE';
+            } else if (
+              nameLower.includes('nàng thơ') ||
+              nameLower.includes('profile') ||
+              nameLower.includes('cá nhân') ||
+              nameLower.includes('beauty')
+            ) {
+              category = 'portrait';
+              categoryLabel = 'NÀNG THƠ & PROFILE';
+            } else if (
+              nameLower.includes('gia đình') ||
+              nameLower.includes('nhóm') ||
+              nameLower.includes('family')
+            ) {
+              category = 'family';
+              categoryLabel = 'GIA ĐÌNH';
+            } else if (nameLower.includes('sự kiện') || nameLower.includes('event')) {
+              category = 'commercial';
+              categoryLabel = 'SỰ KIỆN';
+            } else if (nameLower.includes('doanh nhân')) {
+              category = 'commercial';
+              categoryLabel = 'DOANH NHÂN';
+            } else if (nameLower.includes('thời trang') || nameLower.includes('lookbook')) {
+              category = 'commercial';
+              categoryLabel = 'THỜI TRANG';
+            }
+
+            // Trích xuất các thông số thực tế từ mô tả CSDL
+            const specs = [];
+            const desc = pkg.description || '';
+
+            // Concept
+            if (/concept/i.test(desc)) {
+              const m = desc.match(/(\d+(?:\s*[-–]\s*\d+)?)\s*concept/i);
+              specs.push({ icon: 'camera', text: m ? `${m[1]} concept chụp` : 'Concept theo yêu cầu' });
+            } else {
+              specs.push({ icon: 'camera', text: '1 – 2 concept chụp' });
+            }
+
+            // Trang phục
+            if (/trang phục|váy/i.test(desc)) {
+              const m = desc.match(/(\d+(?:\s*[-–]\s*\d+)?)\s*trang phục/i);
+              specs.push({ icon: 'outfit', text: m ? `${m[1]} trang phục (tự chọn)` : 'Hỗ trợ trang phục studio' });
+            } else {
+              specs.push({ icon: 'outfit', text: '1 trang phục (tự chọn)' });
+            }
+
+            // Số ảnh chỉnh sửa
+            if (/ảnh|file/i.test(desc)) {
+              const m = desc.match(/(\d+)\s*ảnh/i);
+              specs.push({ icon: 'photo', text: m ? `${m[1]} ảnh chỉnh sửa` : 'File ảnh gốc + chỉnh sửa' });
+            } else {
+              specs.push({ icon: 'photo', text: '30+ ảnh chỉnh sửa kỹ lưỡng' });
+            }
+
+            // Thời gian chụp
+            if (pkg.duration) {
+              const hours = (pkg.duration / 60).toFixed(1).replace('.0', '');
+              specs.push({ icon: 'clock', text: `${pkg.duration} phút (${hours} giờ chụp)` });
+            } else {
+              specs.push({ icon: 'clock', text: '1 - 2 giờ chụp' });
+            }
+
+            const priceNum = pkg.price ? Number(pkg.price) : 0;
+            const priceDisplay = priceNum > 0 ? `${priceNum.toLocaleString('vi-VN')}đ` : 'Liên hệ';
+
+            // Ảnh ưu tiên từ CSDL: primary image -> package imageUrl -> ảnh chất lượng cao
+            const fallbackCurated = [
+              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85',
+              'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=85',
+              'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&w=800&q=85',
+              'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=85',
+            ];
             const displayImage =
               primaryImg?.imageUrl ||
               pkg.imageUrl ||
-              CURATED_FALLBACK_IMAGES[idx % CURATED_FALLBACK_IMAGES.length];
-
-            // Xác định category tag
-            const nameLower = (pkg.name || '').toLowerCase();
-            let category = 'other';
-            let categoryLabel = 'Sản Phẩm Studio';
-            let badgeTag = 'Hot Concept';
-
-            if (nameLower.includes('cưới') || nameLower.includes('wedding')) {
-              category = 'wedding';
-              categoryLabel = 'Ảnh Cưới & Couple';
-              badgeTag = idx === 1 ? 'Best Seller' : 'Luxury Wedding';
-            } else if (nameLower.includes('cá nhân') || nameLower.includes('nàng thơ') || nameLower.includes('beauty')) {
-              category = 'portrait';
-              categoryLabel = 'Nàng Thơ & Profile';
-              badgeTag = 'Xu Hướng 2026';
-            } else if (nameLower.includes('gia đình') || nameLower.includes('nhóm')) {
-              category = 'family';
-              categoryLabel = 'Gia Đình & Nhóm';
-              badgeTag = 'Ấm Cúng & Gắn Kết';
-            } else if (nameLower.includes('doanh nhân') || nameLower.includes('thời trang') || nameLower.includes('lookbook')) {
-              category = 'commercial';
-              categoryLabel = 'Doanh Nhân & Lookbook';
-              badgeTag = 'High-End Editorial';
-            }
+              fallbackCurated[idx % fallbackCurated.length];
 
             return {
-              ...pkg,
-              displayImage,
-              galleryImages: pkgImages.length > 0 ? pkgImages.map((i) => i.imageUrl) : [displayImage],
-              hasDbImage: Boolean(primaryImg?.imageUrl || pkg.imageUrl),
+              id: pkg.id,
+              name: pkg.name,
               category,
               categoryLabel,
-              badgeTag,
-              rating: 5.0,
+              price: priceNum,
+              priceDisplay,
+              description: desc || 'Gói dịch vụ chụp ảnh nghệ thuật chuyên nghiệp của PhotoStudio.',
+              displayImage,
+              specs,
+              duration: pkg.duration || 60,
             };
           });
 
+          // Lấy đúng và duy nhất dữ liệu từ CSDL
           setPackages(mapped);
-          if (mapped.length > 0) {
-            setSelectedBookingPkg(mapped[0]);
-          }
         } else {
           setPackages([]);
         }
-
-        // 2. Tải Dịch vụ cộng thêm
-        if (servicesRes.status === 'fulfilled' && Array.isArray(servicesRes.value)) {
-          const activeSrvs = servicesRes.value.filter(
-            (s) => !s.status || s.status === 'active'
-          );
-          setAdditionalServices(activeSrvs);
-        } else {
-          setAdditionalServices([]);
-        }
-
-        // 3. Tải Phòng Studio
-        if (roomsRes.status === 'fulfilled' && Array.isArray(roomsRes.value)) {
-          setRooms(roomsRes.value);
-        }
+      })
+      .catch((err) => {
+        console.error('[PackagesPage] Lỗi tải dữ liệu gói chụp từ CSDL:', err);
+        setPackages([]);
       })
       .finally(() => {
         setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error('[PackagesPage] Lỗi tải dữ liệu gói chụp:', err);
       });
   }, []);
 
-  // Tách mô tả hoặc thiết bị thành danh sách đặc quyền thực tế
-  const getPackageFeatures = (pkg) => {
-    const list = [];
-    if (pkg.description) {
-      const parts = pkg.description
-        .split(/[,;\n]/)
-        .map((p) => p.trim())
-        .filter(Boolean);
-      list.push(...parts);
-    }
-    if (Array.isArray(pkg.equipments) && pkg.equipments.length > 0) {
-      pkg.equipments.forEach((eq) => {
-        const typeLabel = EQUIPMENT_LABELS[eq.equipmentType] || eq.equipmentType;
-        list.push(`Trang bị: ${eq.quantity}x ${typeLabel}`);
-      });
-    }
-    return list.length > 0 ? list : ['Bao gồm trọn gói dịch vụ và không gian phòng chụp'];
+  const toggleFavorite = (pkgId, e) => {
+    e.stopPropagation();
+    setFavorites((prev) => ({
+      ...prev,
+      [pkgId]: !prev[pkgId],
+    }));
   };
-
-  // Cuộn mượt đến phần đặt lịch và chọn gói
-  const handleSelectAndScrollToBooking = (pkg) => {
-    setSelectedBookingPkg(pkg);
-    if (quickViewPkg) setQuickViewPkg(null);
-    if (bookingSectionRef.current) {
-      bookingSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  // Danh mục bộ sưu tập
-  const categories = [
-    { id: 'all', label: 'Tất Cả Sản Phẩm' },
-    { id: 'wedding', label: 'Ảnh Cưới & Couple' },
-    { id: 'portrait', label: 'Nàng Thơ & Profile' },
-    { id: 'family', label: 'Gia Đình & Nhóm' },
-    { id: 'commercial', label: 'Doanh Nhân & Thời Trang' },
-  ];
 
   // Tính số lượng từng danh mục
-  const getCategoryCount = (catId) => {
-    if (catId === 'all') return packages.length;
-    return packages.filter((p) => p.category === catId).length;
-  };
-
-  // Lọc và Sắp xếp danh sách gói chụp
-  const filteredAndSortedPackages = packages
-    .filter((pkg) => {
-      const matchesCategory =
-        selectedCategory === 'all' || pkg.category === selectedCategory;
-      const matchesSearch =
-        !searchTerm.trim() ||
-        pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (pkg.description && pkg.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchesCategory && matchesSearch;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
-      if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
-      if (sortBy === 'duration') return (b.duration || 0) - (a.duration || 0);
-      return 0;
+  const categoryCounts = useMemo(() => {
+    const counts = { all: packages.length };
+    CATEGORIES_CONFIG.forEach((cat) => {
+      if (cat.id !== 'all') {
+        counts[cat.id] = packages.filter((p) => p.category === cat.id).length;
+      }
     });
+    return counts;
+  }, [packages]);
 
-  // Phân trang dữ liệu
-  const totalPages = Math.ceil(filteredAndSortedPackages.length / itemsPerPage) || 1;
-  const paginatedPackages = filteredAndSortedPackages.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Lọc và sắp xếp
+  const filteredPackages = useMemo(() => {
+    return packages
+      .filter((pkg) => {
+        const matchesCat =
+          selectedCategory === 'all' || pkg.category === selectedCategory;
+        const matchesSearch =
+          !searchTerm.trim() ||
+          pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          pkg.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesPrice = (pkg.price || 0) <= maxPrice;
+        return matchesCat && matchesSearch && matchesPrice;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
+        if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
+        if (sortBy === 'duration') return (b.duration || 0) - (a.duration || 0);
+        return 0;
+      });
+  }, [packages, selectedCategory, searchTerm, maxPrice, sortBy]);
 
-  const handlePageChange = (page) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-    if (productsTopRef.current) {
-      productsTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+  const displayedPackages = useMemo(() => {
+    if (displayCount === 'all') return filteredPackages;
+    return filteredPackages.slice(0, Number(displayCount));
+  }, [filteredPackages, displayCount]);
 
   // Xử lý gửi đặt lịch
   const handleSubmitBooking = async (e) => {
@@ -281,20 +279,19 @@ export default function PackagesPage() {
     }
 
     setIsSubmitting(true);
-    const bookingDateStr =
-      formData.date ||
-      `${today.getFullYear()}-${padZero(today.getMonth() + 1)}-${padZero(today.getDate())}`;
+    const bookingDateStr = formData.date || todayStr;
     const roomIdToUse = rooms.length > 0 ? rooms[0].id : 1;
     const currentCustomer = customerAuth.getUser();
+    const validCustomerId = (currentCustomer?.id && currentCustomer.role === 'Customer') ? currentCustomer.id : 4;
 
     const payload = {
-      customerId: currentCustomer?.id || 1,
+      customerId: validCustomerId,
       roomId: roomIdToUse,
-      bookingDate: `${bookingDateStr}T09:00:00`,
-      startTime: '09:00:00',
-      endTime: '11:00:00',
+      bookingDate: `${bookingDateStr}T${selectedTimeSlot.start}`,
+      startTime: selectedTimeSlot.start,
+      endTime: selectedTimeSlot.end,
       status: 'pending',
-      customerNote: `[Trưng bày gói] Khách: ${formData.name} - SĐT: ${formData.phone} - Gói đặt: ${selectedBookingPkg?.name || 'Tùy chọn'} (${selectedBookingPkg?.price ? Number(selectedBookingPkg.price).toLocaleString('vi-VN') + 'đ' : ''})${formData.note ? ` - Ghi chú: ${formData.note}` : ''}`,
+      customerNote: `[Gói Chụp & Báo Giá] Khách: ${formData.name.trim()} - SĐT: ${formData.phone.trim()} - Gói đặt: ${bookingModalPkg?.name || 'Tùy chọn'} (${bookingModalPkg?.priceDisplay || ''}) - Khung giờ: ${selectedTimeSlot.label}${formData.note ? ` - Ghi chú: ${formData.note}` : ''}`,
     };
 
     try {
@@ -307,750 +304,863 @@ export default function PackagesPage() {
     }
   };
 
-  return (
-    <div className="pt-28 pb-24 overflow-hidden bg-neutral-950 min-h-screen">
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[500px] bg-amber-500/10 rounded-full blur-[170px] pointer-events-none" />
+  const openBookingModal = (pkg) => {
+    setBookingModalPkg(pkg);
+    setIsSubmitted(false);
+  };
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Page Header */}
-        <ScrollReveal direction="down">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
-              <SparklesIcon className="w-4 h-4 text-amber-400 animate-pulse" />
-              <ShinyText text="SHOWCASE BỘ SƯU TẬP & BÁO GIÁ CHÍNH HÃNG 2026" />
+  const renderSpecIcon = (type) => {
+    switch (type) {
+      case 'camera':
+        return <Camera className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+      case 'outfit':
+        return <Shirt className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+      case 'photo':
+        return <ImageIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+      case 'clock':
+        return <Clock className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+      default:
+        return <Camera className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+    }
+  };
+
+  return (
+    <div className="bg-[#FAF5F5] min-h-screen text-[#261A1E] font-sans selection:bg-[#B85064]/20 selection:text-[#B85064]">
+      {/* ========================================================================= */}
+      {/* 1. HERO BANNER: Nền studio điện ảnh với font chữ tiếng Việt chuẩn đẹp */}
+      {/* ========================================================================= */}
+      <section className="relative w-full min-h-[440px] lg:min-h-[480px] bg-[#141012] overflow-hidden flex items-center pt-24 pb-16">
+        {/* Background Image & Lighting Studio Effects */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-35 mix-blend-luminosity scale-105"
+          style={{
+            backgroundImage:
+              'url(https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=1920&q=80)',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#141012] via-[#141012]/85 to-[#1c1518]/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[#141012]" />
+
+        {/* Ambient spotlight glow */}
+        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[350px] bg-[#E5A8B4]/10 rounded-full blur-[140px] pointer-events-none" />
+
+        {/* Cành hoa đào rủ xuống góc trái phía trên */}
+        <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none opacity-85 z-10">
+          <svg viewBox="0 0 200 200" fill="none" className="w-full h-full">
+            <path
+              d="M-20 -10 C 30 20, 60 70, 75 130"
+              stroke="#543C3A"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            <path
+              d="M20 15 C 50 10, 90 35, 110 50"
+              stroke="#543C3A"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+            <circle cx="75" cy="130" r="10" fill="#EFA9B7" opacity="0.9" />
+            <circle cx="70" cy="122" r="8" fill="#F8C6CE" opacity="0.95" />
+            <circle cx="83" cy="125" r="9" fill="#E695A5" opacity="0.9" />
+            <circle cx="110" cy="50" r="9" fill="#EFA9B7" opacity="0.85" />
+            <circle cx="118" cy="45" r="7" fill="#F8C6CE" opacity="0.9" />
+            <circle cx="35" cy="40" r="11" fill="#E896A7" opacity="0.8" />
+            <circle cx="20" cy="70" r="8" fill="#F7C4CD" opacity="0.75" />
+          </svg>
+        </div>
+
+        {/* Chữ script viết tay mờ góc trái */}
+        <div className="absolute top-28 left-6 sm:left-14 text-white/35 font-handwriting text-2xl sm:text-3xl select-none pointer-events-none transform -rotate-12">
+          More than just photos,
+          <br />
+          it's your story ♡
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Content - Sửa triệt để lỗi tách dấu tiếng Việt */}
+            <div className="lg:col-span-7 space-y-4 pt-4">
+              <span className="inline-block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-[#E5A8B4]">
+                GÓI CHỤP & BÁO GIÁ
+              </span>
+
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-bold text-white leading-[1.25] font-serif-luxury">
+                Lưu giữ khoảnh khắc
+                <br />
+                <span className="italic font-normal text-[#E899A8] font-serif-luxury mr-2">
+                  đẹp nhất
+                </span>
+                của bạn
+              </h1>
+
+              <p className="text-[#CFC2C6] text-xs sm:text-sm md:text-base font-light max-w-xl leading-relaxed pt-1">
+                Tại PhotoStudio, chúng tôi mang đến các gói chụp chuyên nghiệp,
+                linh hoạt, phù hợp với mọi nhu cầu: cá nhân, cặp đôi, gia đình,
+                sự kiện...
+              </p>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-5 leading-tight font-sans">
-              Trưng Bày Gói Chụp & Báo Giá
-            </h1>
+            {/* Right Visual Element */}
+            <div className="lg:col-span-5 relative hidden sm:flex items-center justify-end">
+              <div className="absolute -top-8 right-8 text-white/50 font-handwriting text-xl sm:text-2xl select-none pointer-events-none transform rotate-3 text-right">
+                Mỗi bức ảnh là một câu chuyện đáng nhớ ♡
+              </div>
 
-            <p className="text-neutral-300 text-base sm:text-lg font-light leading-relaxed">
-              Khám phá các bộ sưu tập concept độc bản của PhotoStudio. Toàn bộ thông tin báo giá, thời lượng và thiết bị được đồng bộ minh bạch từ hệ thống CSDL.
-            </p>
-          </div>
-        </ScrollReveal>
-
-        {/* ============================================================= */}
-        {/* LAYOUT: BỘ LỌC BÊN TRÁI (3) + DANH SÁCH SẢN PHẨM BÊN PHẢI (7) - TỈ LỆ 3:7 */}
-        {/* ============================================================= */}
-        <div ref={productsTopRef} className="grid grid-cols-1 lg:grid-cols-10 gap-8 items-start mb-24 scroll-mt-28">
-          
-          {/* CỘT BÊN TRÁI: BỘ LỌC SẢN PHẨM (SIDEBAR FILTER - CHIẾM 3 PHẦN) */}
-          <div className="lg:col-span-3 space-y-6 lg:sticky lg:top-28">
-            <ScrollReveal direction="right">
-              <div className="p-6 rounded-3xl bg-neutral-900/85 border border-white/10 backdrop-blur-xl shadow-2xl space-y-6">
-                
-                {/* Header Bộ lọc */}
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                  <div className="flex items-center gap-2 text-white font-bold text-base">
-                    <AdjustmentsVerticalIcon className="w-5 h-5 text-amber-400" />
-                    <span>Bộ Lọc Sản Phẩm</span>
-                  </div>
-                  {(selectedCategory !== 'all' || searchTerm || sortBy !== 'default') && (
-                    <button
-                      onClick={() => {
-                        setSelectedCategory('all');
-                        setSearchTerm('');
-                        setSortBy('default');
-                        setCurrentPage(1);
-                      }}
-                      className="cursor-pointer text-[11px] text-amber-400 hover:text-amber-300 font-medium transition-colors"
-                    >
-                      Đặt lại
-                    </button>
-                  )}
-                </div>
-
-                {/* 1. Tìm kiếm theo tên */}
-                <div>
-                  <label className="block text-xs font-bold text-neutral-300 mb-2">
-                    Tìm Kiếm Concept
-                  </label>
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      placeholder="Nhập tên gói chụp..."
-                      value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-neutral-950 border border-white/15 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-amber-400 transition-colors"
-                    />
-                  </div>
-                </div>
-
-                {/* 2. Danh mục Bộ Sưu Tập (NẰM BÊN TRÁI) */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <TagIcon className="w-4 h-4 text-amber-400" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-neutral-300">
-                      Bộ Sưu Tập
+              <div className="relative w-72 sm:w-80 h-52 rounded-2xl overflow-hidden border border-white/15 shadow-2xl bg-black/60 group cursor-pointer hover:border-[#E295A2]/60 transition-all">
+                <img
+                  src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
+                  alt="Studio Preview"
+                  className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+                  <div className="text-white text-xs space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-[#E295A2] block">
+                      Live Studio Session
+                    </span>
+                    <span className="font-medium text-neutral-200">
+                      Couple & Wedding Highlights
                     </span>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                  <div className="space-y-1.5">
-                    {categories.map((cat) => {
-                      const count = getCategoryCount(cat.id);
-                      const isSelected = selectedCategory === cat.id;
+      {/* ========================================================================= */}
+      {/* 2. MAIN CONTENT: 2 CỘT (Sidebar bên trái + Lưới 3 card/hàng bên phải) */}
+      {/* ========================================================================= */}
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+        {/* Cánh hoa đào bay phất phơ trang trí góc dưới bên trái */}
+        <div className="absolute bottom-8 left-0 w-72 h-72 pointer-events-none opacity-40 z-0 select-none">
+          <svg viewBox="0 0 200 200" fill="none" className="w-full h-full">
+            <ellipse cx="60" cy="140" rx="14" ry="8" fill="#F7CAD1" transform="rotate(-25 60 140)" />
+            <ellipse cx="95" cy="165" rx="12" ry="7" fill="#F5BCC5" transform="rotate(15 95 165)" />
+            <ellipse cx="40" cy="180" rx="16" ry="9" fill="#FAB8C3" transform="rotate(-40 40 180)" />
+            <ellipse cx="120" cy="120" rx="10" ry="6" fill="#F8C9D1" transform="rotate(35 120 120)" />
+          </svg>
+        </div>
 
-                      return (
-                        <button
-                          key={cat.id}
-                          onClick={() => {
-                            setSelectedCategory(cat.id);
-                            setCurrentPage(1);
-                          }}
-                          className={`cursor-pointer w-full px-4 py-2.5 rounded-2xl flex items-center justify-between text-left text-xs sm:text-sm font-semibold transition-all duration-200 ${
-                            isSelected
-                              ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 font-extrabold shadow-lg shadow-amber-500/25 scale-[1.02]'
-                              : 'text-neutral-300 hover:text-white hover:bg-neutral-800/80'
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+          
+          {/* ===================================================================== */}
+          {/* CỘT TRÁI: BỘ LỌC GÓI CHỤP (SIDEBAR - 3 CỘT) */}
+          {/* ===================================================================== */}
+          <div className="lg:col-span-3 xl:col-span-3">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#F2E8E9] shadow-[0_8px_30px_rgb(184,80,100,0.06)] relative overflow-hidden space-y-6">
+              
+              <div className="absolute -top-12 -right-12 w-40 h-40 bg-gradient-to-br from-[#FCECEF] to-[#FAF5F5] rounded-full blur-2xl pointer-events-none" />
+
+              {/* Header Sidebar */}
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#B85064] block mb-1.5">
+                  LỌC GÓI CHỤP
+                </span>
+                <h2 className="text-xl sm:text-[22px] font-bold text-[#2A1D22] font-serif-luxury leading-snug">
+                  Tìm gói chụp
+                  <br />
+                  phù hợp với bạn
+                </h2>
+                <p className="text-xs text-[#7A6C71] font-light mt-1.5 leading-relaxed">
+                  Chọn danh mục để xem các gói chụp tương ứng hoặc lọc theo mức giá.
+                </p>
+              </div>
+
+              {/* Danh mục (Category Tabs) */}
+              <div className="space-y-1.5 pt-1">
+                {CATEGORIES_CONFIG.map((cat) => {
+                  const IconComp = cat.icon;
+                  const isSelected = selectedCategory === cat.id;
+                  const count = categoryCounts[cat.id] || 0;
+
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs sm:text-[13px] font-medium transition-all duration-200 ${
+                        isSelected
+                          ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/25'
+                          : 'text-[#3E2F35] hover:bg-[#FDF3F5] hover:text-[#B85064]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <IconComp
+                          className={`w-4 h-4 shrink-0 ${
+                            isSelected ? 'text-white' : 'text-[#8C7D82]'
                           }`}
-                        >
-                          <span className="truncate">{cat.label}</span>
-                          <span
-                            className={`text-[11px] px-2 py-0.5 rounded-full font-bold ml-2 ${
-                              isSelected
-                                ? 'bg-neutral-950/20 text-neutral-950'
-                                : 'bg-neutral-800 text-neutral-400'
-                            }`}
-                          >
-                            {count}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                        />
+                        <span className="truncate">{cat.label}</span>
+                      </div>
+                      <span
+                        className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ml-2 shrink-0 ${
+                          isSelected
+                            ? 'bg-white/25 text-white'
+                            : 'bg-[#F4EBED] text-[#7A6C71]'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Khoảng giá */}
+              <div className="pt-2 border-t border-[#F2E8E9] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#2A1D22]">Khoảng giá</span>
+                  <span className="text-[11px] font-semibold text-[#B85064]">
+                    Tối đa: {maxPrice.toLocaleString('vi-VN')}đ
+                  </span>
                 </div>
 
-                {/* 3. Sắp xếp giá */}
-                <div className="pt-4 border-t border-white/10">
-                  <label className="block text-xs font-bold text-neutral-300 mb-2">
-                    Sắp Xếp Giá & Thời Lượng
-                  </label>
+                <input
+                  type="range"
+                  min="500000"
+                  max="10000000"
+                  step="200000"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  className="w-full h-1.5 bg-[#F2DFE2] rounded-lg appearance-none cursor-pointer accent-[#B85064]"
+                />
+
+                <div className="flex items-center justify-between text-[11px] font-semibold text-[#B85064]">
+                  <span>Từ 500.000đ</span>
+                  <span>Đến 10.000.000đ+</span>
+                </div>
+              </div>
+
+              {/* Sắp xếp theo */}
+              <div className="pt-2 border-t border-[#F2E8E9] space-y-2">
+                <span className="block text-xs font-bold text-[#2A1D22]">
+                  Sắp xếp theo
+                </span>
+                <div className="relative">
                   <select
                     value={sortBy}
-                    onChange={(e) => {
-                      setSortBy(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-950 border border-white/15 text-white text-xs font-semibold focus:outline-none focus:border-amber-400 cursor-pointer"
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full appearance-none px-3.5 py-2.5 rounded-xl bg-white border border-[#E8DCDE] text-xs font-medium text-[#3E2F35] focus:outline-none focus:border-[#B85064] cursor-pointer"
                   >
-                    <option value="default">Mặc định hệ thống</option>
-                    <option value="price-asc">Giá: Thấp đến Cao</option>
-                    <option value="price-desc">Giá: Cao đến Thấp</option>
+                    <option value="default">Mặc định từ CSDL</option>
+                    <option value="price-asc">Giá tăng dần</option>
+                    <option value="price-desc">Giá giảm dần</option>
                     <option value="duration">Thời lượng chụp lâu nhất</option>
                   </select>
+                  <ChevronDown className="w-4 h-4 text-[#8C7D82] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
-
-                {/* Cam kết chất lượng studio */}
-                <div className="p-4 rounded-2xl bg-neutral-950/60 border border-amber-500/20 text-xs text-neutral-300 space-y-2">
-                  <div className="flex items-center gap-2 text-amber-400 font-bold">
-                    <ShieldCheckIcon className="w-4 h-4 shrink-0" />
-                    <span>Cam Kết Báo Giá</span>
-                  </div>
-                  <p className="text-[11px] text-neutral-400 leading-relaxed">
-                    Minh bạch 100%, trọn gói không phụ thu bối cảnh & thiết bị.
-                  </p>
-                </div>
-
               </div>
-            </ScrollReveal>
+
+              {/* Chữ viết tay góc dưới sidebar */}
+              <div className="pt-4 text-center select-none">
+                <p className="font-handwriting text-lg text-[#A87B84] leading-relaxed">
+                  Chọn phong cách của bạn
+                  <br />
+                  chúng tôi sẽ lo phần còn lại! ♡
+                </p>
+              </div>
+
+            </div>
           </div>
 
-          {/* CỘT BÊN PHẢI: DANH SÁCH SẢN PHẨM TRƯNG BÀY + PHÂN TRANG (CHIẾM 7 PHẦN) */}
-          <div className="lg:col-span-7">
+          {/* ===================================================================== */}
+          {/* CỘT PHẢI: LƯỚI 3 CỘT MỖI HÀNG (TRÁNH BỊ TRÀN CHỮ, RỘNG RÃI & ĐẸP MẮT) */}
+          {/* ===================================================================== */}
+          <div className="lg:col-span-9 xl:col-span-9 space-y-6">
             
-            {/* Top Status Bar */}
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10 text-xs text-neutral-400">
-              <div>
-                Đang hiển thị{' '}
-                <strong className="text-white">
-                  {filteredAndSortedPackages.length > 0
-                    ? `${(currentPage - 1) * itemsPerPage + 1} - ${Math.min(
-                        currentPage * itemsPerPage,
-                        filteredAndSortedPackages.length
-                      )}`
-                    : '0'}{' '}
-                </strong>
-                trên tổng số <strong className="text-amber-400">{filteredAndSortedPackages.length}</strong> gói sản phẩm
+            {/* Thanh Toolbar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="relative w-full sm:max-w-md">
+                <Search className="w-4 h-4 text-[#9E8E93] absolute left-4 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Tìm gói chụp theo tên hoặc mô tả..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-[#EFE5E7] text-xs sm:text-[13px] text-[#2A1D22] placeholder-[#9E8E93] focus:outline-none focus:border-[#B85064] transition-colors shadow-sm"
+                />
               </div>
 
-              {selectedCategory !== 'all' && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold">
-                  <span>{categories.find((c) => c.id === selectedCategory)?.label}</span>
+              <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                <div className="flex items-center gap-2 text-xs text-[#6F6066]">
+                  <span>Hiển thị</span>
+                  <div className="relative">
+                    <select
+                      value={displayCount}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setDisplayCount(val === 'all' ? 'all' : Number(val));
+                      }}
+                      className="appearance-none pl-3 pr-7 py-1.5 rounded-xl bg-white border border-[#EFE5E7] text-xs font-semibold text-[#2A1D22] focus:outline-none focus:border-[#B85064] cursor-pointer shadow-sm"
+                    >
+                      <option value={3}>3</option>
+                      <option value={6}>6</option>
+                      <option value={9}>9</option>
+                      <option value="all">Tất cả ({filteredPackages.length})</option>
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-[#8C7D82] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </div>
-              )}
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    title="Chế độ xem lưới"
+                    className={`cursor-pointer p-2 rounded-xl transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-[#B85064] text-white shadow-sm'
+                        : 'bg-white text-[#8C7D82] border border-[#EFE5E7] hover:text-[#B85064]'
+                    }`}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    title="Chế độ xem danh sách"
+                    className={`cursor-pointer p-2 rounded-xl transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-[#B85064] text-white shadow-sm'
+                        : 'bg-white text-[#8C7D82] border border-[#EFE5E7] hover:text-[#B85064]'
+                    }`}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Loading Skeletons */}
+            {/* Skeleton Loading khi đang đọc CSDL */}
             {isLoading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((n) => (
                   <div
                     key={n}
-                    className="rounded-3xl border border-white/10 bg-neutral-900/60 p-0 overflow-hidden animate-pulse space-y-4"
+                    className="bg-white rounded-2xl overflow-hidden border border-[#F0E4E6] p-4 space-y-4 animate-pulse"
                   >
-                    <div className="h-64 w-full bg-white/10" />
-                    <div className="p-6 space-y-4">
-                      <div className="h-5 w-24 bg-white/10 rounded-full" />
-                      <div className="h-7 w-3/4 bg-white/10 rounded-lg" />
-                      <div className="h-4 w-full bg-white/10 rounded" />
-                      <div className="h-9 w-1/2 bg-amber-500/20 rounded-lg" />
+                    <div className="h-44 bg-[#F2DFE2]/50 rounded-xl" />
+                    <div className="h-5 bg-neutral-200 rounded w-3/4" />
+                    <div className="h-3 bg-neutral-100 rounded w-full" />
+                    <div className="h-3 bg-neutral-100 rounded w-2/3" />
+                    <div className="flex justify-between items-center pt-2">
+                      <div className="h-6 bg-[#B85064]/20 rounded w-1/3" />
+                      <div className="h-8 bg-[#B85064]/30 rounded w-1/3" />
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Empty State */}
-            {!isLoading && filteredAndSortedPackages.length === 0 && (
-              <div className="text-center py-20 px-4 rounded-3xl border border-white/10 bg-neutral-900/40">
-                <PhotoIcon className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">Không tìm thấy gói chụp phù hợp</h3>
-                <p className="text-sm text-neutral-400 max-w-md mx-auto mb-6">
-                  Không có sản phẩm nào khớp với tiêu chí bạn chọn. Vui lòng thử lại với từ khóa khác hoặc đặt lại bộ lọc.
+            {/* Trạng thái nếu không có gói nào trong CSDL khớp bộ lọc */}
+            {!isLoading && displayedPackages.length === 0 && (
+              <div className="bg-white rounded-3xl p-12 text-center border border-[#F2E8E9] shadow-sm space-y-3">
+                <ImageIcon className="w-12 h-12 text-[#CBB9BD] mx-auto" />
+                <h3 className="text-base font-bold text-[#2A1D22]">
+                  Không tìm thấy gói chụp nào phù hợp
+                </h3>
+                <p className="text-xs text-[#7A6C71] max-w-sm mx-auto">
+                  Hiện không có gói chụp nào trong CSDL khớp với tiêu chí bạn chọn. Hãy thử lại với từ khóa khác hoặc đặt lại bộ lọc.
                 </p>
                 <button
                   onClick={() => {
                     setSelectedCategory('all');
                     setSearchTerm('');
+                    setMaxPrice(10000000);
                     setSortBy('default');
-                    setCurrentPage(1);
                   }}
-                  className="px-6 py-2.5 rounded-full bg-amber-500 text-neutral-950 font-bold text-xs"
+                  className="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors shadow-sm"
                 >
-                  Xem Tất Cả Sản Phẩm
+                  <span>Đặt lại bộ lọc</span>
                 </button>
               </div>
             )}
 
-            {/* Products Grid (Paginated: Cố định 2 sản phẩm mỗi hàng) */}
-            {!isLoading && paginatedPackages.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {paginatedPackages.map((pkg, idx) => {
-                  const features = getPackageFeatures(pkg);
-                  const formattedPrice = pkg.price
-                    ? Number(pkg.price).toLocaleString('vi-VN')
-                    : 'Liên hệ';
-                  const isSelected = selectedBookingPkg?.id === pkg.id;
+            {/* LƯỚI CHUẨN: 1 HÀNG 3 CÁI (KHÔNG BỊ TRÀN CHỮ, NÚT THẲNG HÀNG 100%) */}
+            {!isLoading && viewMode === 'grid' && displayedPackages.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                {displayedPackages.map((pkg) => {
+                  const isFav = Boolean(favorites[pkg.id]);
 
                   return (
-                    <ScrollReveal
+                    <div
                       key={pkg.id}
-                      direction="up"
-                      delay={idx * 0.06}
-                      duration={0.5}
-                      className="flex"
+                      className="bg-white rounded-2xl overflow-hidden border border-[#F0E4E6] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
                     >
-                      <SpotlightCard
-                        onClick={() => setQuickViewPkg(pkg)}
-                        className={`group cursor-pointer flex flex-col justify-between relative overflow-hidden rounded-3xl p-0 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/20 w-full ${
-                          isSelected
-                            ? 'border-amber-500 bg-neutral-900/95 ring-2 ring-amber-500/50 shadow-2xl shadow-amber-500/20'
-                            : 'bg-neutral-900/70 border-white/10 hover:border-amber-500/50'
-                        }`}
-                        spotlightColor="rgba(245, 158, 11, 0.22)"
-                      >
-                        <div>
-                          {/* Product Showcase Image */}
-                          <div className="relative h-64 sm:h-72 w-full overflow-hidden bg-neutral-950">
-                            <img
-                              src={pkg.displayImage}
-                              alt={pkg.name}
-                              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                              loading="lazy"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/20 to-transparent" />
+                      {/* Top: Image + Tag + Heart */}
+                      <div>
+                        <div
+                          className="relative h-48 w-full overflow-hidden bg-[#EFEBEB] cursor-pointer"
+                          onClick={() => setQuickViewPkg(pkg)}
+                        >
+                          <img
+                            src={pkg.displayImage}
+                            alt={pkg.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
 
-                            {/* Top Badges: Category & Tag on Left, Rating on Right */}
-                            <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2 z-10 pointer-events-none">
-                              <div className="flex flex-wrap items-center gap-1.5 max-w-[70%]">
-                                <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 shadow-lg">
-                                  {pkg.badgeTag}
-                                </span>
-                                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider bg-neutral-950/85 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-500/30 shadow-md">
-                                  {pkg.categoryLabel}
-                                </span>
-                              </div>
-
-                              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-950/85 backdrop-blur-md border border-white/20 text-white text-xs shrink-0 shadow-md">
-                                <StarIcon className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                                <span className="font-bold">5.0</span>
-                              </div>
-                            </div>
-
-                            {/* HOVER OVERLAY: Rê chuột vào hình sẽ hiện nút Xem Chi Tiết */}
-                            <div className="absolute inset-0 flex items-center justify-center bg-neutral-950/45 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
-                              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 text-xs sm:text-sm font-extrabold shadow-2xl shadow-amber-500/40 transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
-                                <ArrowsPointingOutIcon className="w-4 h-4 text-neutral-950" />
-                                <span>Xem Chi Tiết</span>
-                              </span>
-                            </div>
+                          {/* Tag danh mục góc trên trái ảnh */}
+                          <div className="absolute top-3 left-3">
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/95 backdrop-blur-sm text-[#B85064] border border-[#F5D5DC] shadow-sm">
+                              {pkg.categoryLabel}
+                            </span>
                           </div>
 
-                          {/* Product Content Body */}
-                          <div className="p-6 sm:p-7 pb-8">
-                            <div className="flex items-center justify-between mb-2.5">
-                              <span className="text-xs text-neutral-400 font-medium">Mã #{pkg.id}</span>
-                              {pkg.duration && (
-                                <span className="flex items-center gap-1.5 text-xs text-neutral-300 bg-neutral-800/80 px-2.5 py-0.5 rounded-lg border border-white/10">
-                                  <ClockIcon className="w-3.5 h-3.5 text-amber-400" />
-                                  <span>{pkg.duration} phút</span>
-                                </span>
-                              )}
-                            </div>
+                          {/* Nút tim góc trên phải ảnh */}
+                          <button
+                            type="button"
+                            onClick={(e) => toggleFavorite(pkg.id, e)}
+                            className="cursor-pointer absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-all shadow-sm"
+                            title={isFav ? 'Bỏ thích' : 'Yêu thích'}
+                          >
+                            <Heart
+                              className={`w-4 h-4 transition-colors ${
+                                isFav ? 'fill-[#E84360] text-[#E84360]' : 'text-white'
+                              }`}
+                            />
+                          </button>
+                        </div>
 
-                            <h3 className="text-xl font-bold text-white mb-2.5 group-hover:text-amber-300 transition-colors leading-snug line-clamp-2">
+                        {/* Body Details */}
+                        <div className="p-4 sm:p-5 space-y-3">
+                          <div>
+                            <h3 className="text-[15px] font-bold text-[#2A1D22] group-hover:text-[#B85064] transition-colors line-clamp-1">
                               {pkg.name}
                             </h3>
-
-                            <p className="text-xs sm:text-sm text-neutral-300 font-light mb-6 min-h-[40px] leading-relaxed line-clamp-2">
-                              {pkg.description || 'Gói dịch vụ chụp ảnh nghệ thuật chuyên nghiệp.'}
+                            <p className="text-xs text-[#7A6C71] font-light leading-relaxed line-clamp-2 mt-1 min-h-[34px]">
+                              {pkg.description}
                             </p>
+                          </div>
 
-                            {/* Price Tag */}
-                            <div className="mb-6 pb-6 border-b border-white/10 flex items-center justify-between">
-                              <div>
-                                <span className="text-[11px] text-neutral-400 block mb-1">Giá trọn gói niêm yết:</span>
-                                <div className="flex items-baseline gap-2">
-                                  <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-sans">
-                                    {formattedPrice}
-                                  </span>
-                                  <span className="text-sm font-bold text-amber-400">VNĐ</span>
-                                </div>
+                          {/* 4 dòng specs icon */}
+                          <div className="space-y-2 pt-1 border-t border-[#F8EFEF]">
+                            {pkg.specs?.map((spec, sIdx) => (
+                              <div
+                                key={sIdx}
+                                className="flex items-center gap-2.5 text-xs text-[#55464B]"
+                              >
+                                {renderSpecIcon(spec.icon)}
+                                <span className="truncate">{spec.text}</span>
                               </div>
-
-                              <div className="text-xs text-amber-400/80 flex items-center gap-1 font-semibold group-hover:text-amber-300 group-hover:translate-x-1 transition-all">
-                                <span>Xem chi tiết</span>
-                                <ArrowRightIcon className="w-3.5 h-3.5" />
-                              </div>
-                            </div>
-
-                            {/* Feature Checklist */}
-                            <div className="space-y-2.5">
-                              {features.slice(0, 3).map((feat, fIdx) => (
-                                <div key={fIdx} className="flex items-start gap-2.5">
-                                  <div className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                                    <CheckIcon className="w-3 h-3 stroke-[3]" />
-                                  </div>
-                                  <span className="text-xs sm:text-sm text-neutral-300 font-light leading-snug truncate">
-                                    {feat}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
+                            ))}
                           </div>
                         </div>
-                      </SpotlightCard>
-                    </ScrollReveal>
+                      </div>
+
+                      {/* Footer: Giá & Nút Đặt gói này (không bao giờ bị tràn xuống 3 dòng) */}
+                      <div className="px-4 sm:px-5 pb-5 pt-3 border-t border-[#F8EFEF] flex items-center justify-between gap-3">
+                        <span className="text-base sm:text-lg font-bold text-[#B85064]">
+                          {pkg.priceDisplay}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => openBookingModal(pkg)}
+                          className="cursor-pointer shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap transition-all shadow-sm shadow-[#B85064]/20 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          <span>Đặt gói này</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
                   );
                 })}
+
+                {/* Card Banner Tư Vấn Kèm Theo ở cuối danh sách */}
+                <div className="bg-gradient-to-br from-[#FDF0F3] via-[#FCF2F4] to-[#FBF4F5] rounded-2xl border border-[#F5D5DC] p-5 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+                  <div className="space-y-3 relative z-10">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#B85064] block">
+                      CẦN TƯ VẤN THÊM?
+                    </span>
+
+                    <h3 className="text-lg font-bold text-[#2A1D22] font-serif-luxury leading-snug">
+                      Liên hệ ngay
+                      <br />
+                      để được tư vấn gói chụp
+                      <br />
+                      phù hợp nhất!
+                    </h3>
+
+                    <div className="space-y-2.5 pt-2">
+                      <a
+                        href="tel:0987654321"
+                        className="flex items-center gap-2.5 text-xs text-[#4A393E] hover:text-[#B85064] transition-colors"
+                      >
+                        <Phone className="w-4 h-4 text-[#B85064]" />
+                        <span className="font-semibold">0987 654 321</span>
+                      </a>
+                      <a
+                        href="#chat"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (packages.length > 0) openBookingModal(packages[0]);
+                        }}
+                        className="flex items-center gap-2.5 text-xs text-[#4A393E] hover:text-[#B85064] transition-colors"
+                      >
+                        <MessageCircle className="w-4 h-4 text-[#B85064]" />
+                        <span>Chat với chúng tôi</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="pt-6 space-y-3 relative z-10">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (packages.length > 0) openBookingModal(packages[0]);
+                      }}
+                      className="cursor-pointer w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap transition-all shadow-md shadow-[#B85064]/20 hover:scale-[1.01]"
+                    >
+                      <span>Đặt lịch ngay</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+
+                    <p className="text-center font-handwriting text-base text-[#A87B84] select-none">
+                      Capture your story ♡
+                    </p>
+                  </div>
+                </div>
+
               </div>
             )}
 
-            {/* ============================================================= */}
-            {/* PHẦN PHÂN TRANG (PAGINATION) */}
-            {/* ============================================================= */}
-            {!isLoading && totalPages > 1 && (
-              <div className="pt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 mt-8">
-                <div className="text-xs text-neutral-400">
-                  Trang <strong className="text-white">{currentPage}</strong> / <strong className="text-white">{totalPages}</strong> ({filteredAndSortedPackages.length} sản phẩm)
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {/* Nút Trước */}
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="cursor-pointer px-4 py-2 rounded-xl text-xs font-bold border border-white/15 bg-neutral-900 text-white hover:bg-neutral-800 hover:border-amber-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1.5"
-                  >
-                    <ChevronLeftIcon className="w-3.5 h-3.5" />
-                    <span>Trước</span>
-                  </button>
-
-                  {/* Danh sách các số trang */}
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      type="button"
-                      onClick={() => handlePageChange(page)}
-                      className={`cursor-pointer w-9 h-9 rounded-xl text-xs font-bold transition-all flex items-center justify-center ${
-                        currentPage === page
-                          ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 shadow-lg shadow-amber-500/30 scale-105'
-                          : 'border border-white/10 bg-neutral-900 text-neutral-300 hover:text-white hover:bg-neutral-800 hover:border-amber-400/50'
-                      }`}
+            {/* CHẾ ĐỘ XEM LIST VIEW */}
+            {!isLoading && viewMode === 'list' && displayedPackages.length > 0 && (
+              <div className="space-y-4">
+                {displayedPackages.map((pkg) => {
+                  const isFav = Boolean(favorites[pkg.id]);
+                  return (
+                    <div
+                      key={pkg.id}
+                      className="bg-white rounded-2xl p-4 sm:p-5 border border-[#F0E4E6] shadow-sm hover:shadow-lg transition-all flex flex-col sm:flex-row gap-5 items-center justify-between"
                     >
-                      {page}
-                    </button>
-                  ))}
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <img
+                          src={pkg.displayImage}
+                          alt={pkg.name}
+                          className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover shrink-0 cursor-pointer"
+                          onClick={() => setQuickViewPkg(pkg)}
+                        />
+                        <div className="space-y-1">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[#FCECEF] text-[#B85064]">
+                            {pkg.categoryLabel}
+                          </span>
+                          <h3 className="text-base font-bold text-[#2A1D22]">
+                            {pkg.name}
+                          </h3>
+                          <p className="text-xs text-[#7A6C71] max-w-md line-clamp-1">
+                            {pkg.description}
+                          </p>
+                          <div className="flex flex-wrap gap-3 text-xs text-[#55464B] pt-1">
+                            {pkg.specs?.slice(0, 3).map((spec, sIdx) => (
+                              <div key={sIdx} className="flex items-center gap-1">
+                                {renderSpecIcon(spec.icon)}
+                                <span>{spec.text}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
 
-                  {/* Nút Sau */}
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="cursor-pointer px-4 py-2 rounded-xl text-xs font-bold border border-white/15 bg-neutral-900 text-white hover:bg-neutral-800 hover:border-amber-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1.5"
-                  >
-                    <span>Sau</span>
-                    <ChevronRightIcon className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                      <div className="flex items-center justify-between sm:flex-col sm:items-end gap-3 w-full sm:w-auto border-t sm:border-t-0 border-[#F8EFEF] pt-3 sm:pt-0">
+                        <span className="text-lg font-bold text-[#B85064]">
+                          {pkg.priceDisplay}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => toggleFavorite(pkg.id, e)}
+                            className="p-2 rounded-xl border border-[#EFE5E7] hover:border-[#B85064] text-[#8C7D82] hover:text-[#B85064]"
+                          >
+                            <Heart
+                              className={`w-4 h-4 ${
+                                isFav ? 'fill-[#E84360] text-[#E84360]' : ''
+                              }`}
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openBookingModal(pkg)}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap shadow-sm shadow-[#B85064]/20"
+                          >
+                            <span>Đặt gói này</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
           </div>
 
         </div>
+      </section>
 
-        {/* ============================================================= */}
-        {/* INTEGRATED BOOKING SHOWCASE SECTION (LỊCH ĐẶT & TRƯNG BÀY) */}
-        {/* ============================================================= */}
-        <div ref={bookingSectionRef} className="pt-8 mb-24 scroll-mt-28">
-          <ScrollReveal direction="up">
-            <div className="rounded-3xl border border-amber-500/40 bg-gradient-to-b from-neutral-900 via-neutral-900/90 to-neutral-950 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                
-                {/* Left: Selected Package Showcase Summary */}
-                <div className="lg:col-span-5 space-y-6">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider border border-amber-500/30">
-                    <CalendarDaysIcon className="w-4 h-4 text-amber-400" />
-                    <span>LỊCH HẸN & GIỮ CHỖ TRỰC TUYẾN</span>
-                  </div>
-
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-2">
-                      Đăng Ký Trải Nghiệm Gói Chụp
-                    </h2>
-                    <p className="text-xs sm:text-sm text-neutral-300 font-light leading-relaxed">
-                      Lựa chọn gói chụp ưng ý và gửi thông tin. Studio sẽ liên hệ xác nhận trong vòng 15 phút.
-                    </p>
-                  </div>
-
-                  {/* Selected Product Card Preview */}
-                  {selectedBookingPkg ? (
-                    <div className="p-5 rounded-2xl bg-neutral-950/80 border border-amber-500/40 shadow-xl space-y-4">
-                      <div className="flex items-center gap-4">
-                        <img
-                          src={selectedBookingPkg.displayImage}
-                          alt={selectedBookingPkg.name}
-                          className="w-16 h-16 rounded-xl object-cover shrink-0 border border-white/10"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
-                            Gói đã chọn trưng bày:
-                          </span>
-                          <h4 className="text-sm font-bold text-white truncate">
-                            {selectedBookingPkg.name}
-                          </h4>
-                          <span className="text-sm font-extrabold text-amber-400">
-                            {selectedBookingPkg.price ? Number(selectedBookingPkg.price).toLocaleString('vi-VN') + 'đ' : 'Liên hệ'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-xs text-neutral-300 space-y-1.5 pt-3 border-t border-white/10">
-                        <div className="flex justify-between">
-                          <span className="text-neutral-400">Thời lượng chụp:</span>
-                          <span className="font-semibold text-white">{selectedBookingPkg.duration} phút</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-neutral-400">Trạng thái:</span>
-                          <span className="text-emerald-400 font-semibold">Khả dụng trong CSDL</span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10 text-xs text-neutral-400">
-                      Vui lòng chọn một gói chụp ở danh sách phía trên.
-                    </div>
-                  )}
-
-                  {/* Studio Guarantees */}
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center gap-3 text-xs text-neutral-300">
-                      <ShieldCheckIcon className="w-5 h-5 text-amber-400 shrink-0" />
-                      <span>Không phát sinh chi phí bối cảnh và thiết bị</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-neutral-300">
-                      <TrophyIcon className="w-5 h-5 text-amber-400 shrink-0" />
-                      <span>Cam kết chụp đến khi khách hàng hoàn toàn ưng ý</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-neutral-300">
-                      <PhoneIcon className="w-5 h-5 text-amber-400 shrink-0" />
-                      <span>Hotline hỗ trợ 24/7: <strong>0901 234 567</strong></span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right: Booking Form */}
-                <div className="lg:col-span-7">
-                  <div className="p-6 sm:p-8 rounded-3xl bg-neutral-950/90 border border-white/15 backdrop-blur-xl shadow-2xl">
-                    {isSubmitted ? (
-                      <div className="text-center py-10 space-y-4">
-                        <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border-2 border-emerald-500/40 shadow-xl shadow-emerald-500/20 animate-bounce">
-                          <CheckCircleIcon className="w-9 h-9 text-emerald-400" />
-                        </div>
-                        <h3 className="text-2xl font-bold text-white">Đăng Ký Giữ Chỗ Thành Công!</h3>
-                        <p className="text-neutral-300 text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
-                          Cảm ơn bạn đã lựa chọn <strong>{selectedBookingPkg?.name}</strong>. Ekip PhotoStudio sẽ liên hệ qua số điện thoại <strong>{formData.phone}</strong> trong vòng 15 phút!
-                        </p>
-                        <button
-                          onClick={() => {
-                            setIsSubmitted(false);
-                            setFormData({ name: '', phone: '', date: '', note: '' });
-                          }}
-                          className="cursor-pointer mt-4 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all"
-                        >
-                          Đặt Thêm Lịch Hẹn Khác
-                        </button>
-                      </div>
-                    ) : (
-                      <form onSubmit={(e) => { void handleSubmitBooking(e); }} className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-neutral-200 mb-1.5">
-                              Họ và Tên của bạn *
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="Nguyễn Văn A"
-                              value={formData.name}
-                              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-white/15 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-amber-400 transition-colors"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-neutral-200 mb-1.5">
-                              Số Điện Thoại / Zalo *
-                            </label>
-                            <input
-                              type="tel"
-                              required
-                              placeholder="0901 234 567"
-                              value={formData.phone}
-                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-white/15 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-amber-400 transition-colors"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {/* Selected Package Selector */}
-                          <div>
-                            <label className="block text-xs font-bold text-neutral-200 mb-1.5">
-                              Gói Chụp Được Chọn
-                            </label>
-                            <select
-                              value={selectedBookingPkg?.id || ''}
-                              onChange={(e) => {
-                                const found = packages.find((p) => String(p.id) === e.target.value);
-                                if (found) setSelectedBookingPkg(found);
-                              }}
-                              className="w-full px-3.5 py-3 rounded-xl bg-neutral-900 border border-white/15 text-white text-xs font-semibold focus:outline-none focus:border-amber-400 cursor-pointer"
-                            >
-                              {packages.map((pkg) => (
-                                <option key={pkg.id} value={pkg.id}>
-                                  {pkg.name} — {pkg.price ? Number(pkg.price).toLocaleString('vi-VN') + 'đ' : ''}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          {/* Date Input */}
-                          <div>
-                            <label className="block text-xs font-bold text-neutral-200 mb-1.5">
-                              Ngày Chụp Dự Kiến
-                            </label>
-                            <input
-                              type="date"
-                              min={today.toISOString().split('T')[0]}
-                              value={formData.date}
-                              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                              className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-900 border border-white/15 text-white text-xs font-semibold focus:outline-none focus:border-amber-400 cursor-pointer"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-neutral-200 mb-1.5">
-                            Ghi Chú Yêu Cầu Riêng (Layout makeup, trang phục...)
-                          </label>
-                          <textarea
-                            rows={3}
-                            placeholder="Ví dụ: Mình muốn chụp tone màu ấm Hàn Quốc, cần hỗ trợ thêm làm tóc..."
-                            value={formData.note}
-                            onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                            className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-white/15 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-amber-400 transition-colors resize-none"
-                          />
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="cursor-pointer w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 font-extrabold text-sm shadow-xl shadow-amber-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                          <PaperAirplaneIcon className="w-4 h-4 text-neutral-950" />
-                          <span>{isSubmitting ? 'Đang gửi đăng ký...' : 'Xác Nhận Giữ Lịch & Tư Vấn Concept'}</span>
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-
-        {/* Additional Services Showcase */}
-        {!isLoading && additionalServices.length > 0 && (
-          <ScrollReveal direction="up" delay={0.2}>
-            <div className="rounded-3xl border border-white/10 bg-neutral-900/40 p-8 sm:p-10 backdrop-blur-xl relative overflow-hidden shadow-2xl mb-16">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 border-b border-white/10 pb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center border border-amber-500/30 shadow-inner">
-                    <WrenchScrewdriverIcon className="w-6 h-6 text-amber-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">Dịch Vụ Phụ Trợ & Tiện Ích Kèm Theo</h3>
-                    <p className="text-xs text-neutral-400">Các dịch vụ mở rộng từ CSDL có thể bổ sung vào buổi chụp</p>
-                  </div>
-                </div>
-                <span className="text-xs text-amber-400 bg-amber-500/15 px-3.5 py-1.5 rounded-full border border-amber-500/30 w-fit">
-                  ✨ {additionalServices.length} Dịch vụ khả dụng
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {additionalServices.map((service) => (
-                  <div
-                    key={service.id}
-                    className="group relative p-6 rounded-2xl bg-neutral-950/70 border border-white/10 hover:border-amber-400/60 hover:bg-neutral-900/90 hover:shadow-xl hover:shadow-amber-500/15 transition-all duration-300 hover:-translate-y-1.5"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 shadow-md">
-                      <SparklesIcon className="w-5 h-5 text-amber-400" />
-                    </div>
-                    <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400/80 mb-1 block">
-                      Loại: {service.type || 'Dịch vụ'}
-                    </span>
-                    <h4 className="text-sm font-bold text-neutral-200 group-hover:text-white mb-1.5 transition-colors">
-                      {service.name}
-                    </h4>
-                    <p className="text-xs text-neutral-400 mb-4 font-light leading-relaxed min-h-[36px]">
-                      {service.description || 'Dịch vụ tiện ích studio hỗ trợ buổi chụp hoàn hảo'}
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                      <p className="text-sm font-extrabold text-amber-400 group-hover:text-amber-300 transition-colors">
-                        {service.price ? `${Number(service.price).toLocaleString('vi-VN')}đ` : 'Liên hệ'}
-                      </p>
-                      {service.duration ? (
-                        <span className="text-[11px] text-neutral-400 flex items-center gap-1">
-                          <ClockIcon className="w-3 h-3 text-amber-400" />
-                          {service.duration}p
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </ScrollReveal>
-        )}
-
-      </div>
-
-      {/* QUICK VIEW / LOOKBOOK SHOWCASE MODAL */}
-      {quickViewPkg && (
+      {/* ========================================================================= */}
+      {/* 3. MODAL ĐẶT LỊCH NHANH CHO KHÁCH HÀNG */}
+      {/* ========================================================================= */}
+      {bookingModalPkg && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-6"
-          onClick={() => setQuickViewPkg(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setBookingModalPkg(null)}
         >
           <div
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-neutral-900 border border-amber-500/50 shadow-2xl shadow-black p-6 sm:p-8"
+            className="relative w-full max-w-lg rounded-3xl bg-white border border-[#F2E8E9] shadow-2xl p-6 sm:p-8 overflow-hidden text-[#2A1D22]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button
-              onClick={() => setQuickViewPkg(null)}
-              className="cursor-pointer absolute top-5 right-5 p-2 rounded-full bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors"
+              onClick={() => setBookingModalPkg(null)}
+              className="cursor-pointer absolute top-4 right-4 p-2 rounded-full text-[#8C7D82] hover:text-[#2A1D22] hover:bg-[#FCECEF] transition-colors"
             >
-              <XMarkIcon className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-              {/* Modal Image */}
-              <div className="md:col-span-6 rounded-2xl overflow-hidden border border-white/10 relative">
-                <img
-                  src={quickViewPkg.displayImage}
-                  alt={quickViewPkg.name}
-                  className="w-full h-80 object-cover"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500 text-neutral-950 uppercase shadow-lg">
-                    {quickViewPkg.badgeTag}
-                  </span>
+            {isSubmitted ? (
+              <div className="text-center py-8 space-y-4">
+                <div className="w-16 h-16 rounded-full bg-[#EBF8F2] text-[#2EA46D] flex items-center justify-center mx-auto border border-[#B4E8D0]">
+                  <Check className="w-8 h-8 stroke-[3]" />
                 </div>
+                <h3 className="text-xl font-bold font-serif-luxury text-[#1F1418]">
+                  Đăng Ký Đặt Lịch Thành Công!
+                </h3>
+                <p className="text-xs sm:text-sm text-[#7A6C71] max-w-sm mx-auto leading-relaxed">
+                  Cảm ơn bạn đã lựa chọn <strong>{bookingModalPkg.name}</strong>.
+                  Lịch hẹn dự kiến: <strong>{formData.date || todayStr}</strong> (khung giờ <strong>{selectedTimeSlot.label}</strong>).
+                  Đội ngũ PhotoStudio sẽ liên hệ qua số <strong>{formData.phone}</strong> trong vòng 15 phút để tư vấn chi tiết concept.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSubmitted(false);
+                    setBookingModalPkg(null);
+                    setFormData({ name: '', phone: '', date: '', note: '' });
+                  }}
+                  className="cursor-pointer px-6 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors shadow-md"
+                >
+                  Hoàn tất
+                </button>
               </div>
-
-              {/* Modal Specs */}
-              <div className="md:col-span-6 space-y-5">
+            ) : (
+              <form onSubmit={handleSubmitBooking} className="space-y-4">
                 <div>
-                  <span className="text-xs uppercase font-bold text-amber-400 tracking-wider">
-                    {quickViewPkg.categoryLabel}
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#B85064] block">
+                    ĐẶT LỊCH GÓI CHỤP TỪ CSDL
                   </span>
-                  <h3 className="text-2xl font-bold text-white mt-1">
-                    {quickViewPkg.name}
+                  <h3 className="text-xl font-bold font-serif-luxury text-[#1F1418] mt-0.5">
+                    {bookingModalPkg.name}
                   </h3>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-neutral-950 border border-white/10 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-neutral-400 block">Báo giá trọn gói:</span>
-                    <span className="text-2xl font-extrabold text-amber-400 font-sans">
-                      {quickViewPkg.price ? Number(quickViewPkg.price).toLocaleString('vi-VN') + ' VNĐ' : 'Liên hệ'}
+                <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-[#FDF5F6] border border-[#F5D5DC]">
+                  <img
+                    src={bookingModalPkg.displayImage}
+                    alt={bookingModalPkg.name}
+                    className="w-14 h-14 rounded-xl object-cover shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-bold text-[#B85064] block">
+                      {bookingModalPkg.priceDisplay}
                     </span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-neutral-400 block">Thời lượng:</span>
-                    <span className="text-sm font-bold text-white">{quickViewPkg.duration} phút</span>
+                    <span className="text-xs text-[#7A6C71] truncate block">
+                      {bookingModalPkg.description}
+                    </span>
                   </div>
                 </div>
 
-                <p className="text-xs sm:text-sm text-neutral-300 font-light leading-relaxed">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-[#3E2F35] mb-1">
+                        Họ và tên của bạn *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ví dụ: Nguyễn Thị Mai"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E8DCDE] text-xs sm:text-sm text-[#2A1D22] focus:outline-none focus:border-[#B85064]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#3E2F35] mb-1">
+                        Số điện thoại / Zalo *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="0987 654 321"
+                        value={formData.phone}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E8DCDE] text-xs sm:text-sm text-[#2A1D22] focus:outline-none focus:border-[#B85064]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-[#3E2F35] mb-1">
+                        Ngày chụp dự kiến *
+                      </label>
+                      <input
+                        type="date"
+                        min={todayStr}
+                        value={formData.date}
+                        onChange={(e) =>
+                          setFormData({ ...formData, date: e.target.value })
+                        }
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E8DCDE] text-xs text-[#2A1D22] focus:outline-none focus:border-[#B85064] cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#3E2F35] mb-1">
+                        Khung giờ chụp *
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={selectedTimeSlot.id}
+                          onChange={(e) => {
+                            const found = TIME_SLOTS.find((s) => s.id === e.target.value);
+                            if (found) setSelectedTimeSlot(found);
+                          }}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E8DCDE] text-xs text-[#2A1D22] focus:outline-none focus:border-[#B85064] cursor-pointer appearance-none pr-8 font-medium"
+                        >
+                          <optgroup label="☀️ Buổi Sáng">
+                            {TIME_SLOTS.filter((s) => s.period === 'Sáng').map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.label} (Sáng)
+                              </option>
+                            ))}
+                          </optgroup>
+                          <optgroup label="⛅ Buổi Chiều">
+                            {TIME_SLOTS.filter((s) => s.period === 'Chiều').map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.label} (Chiều)
+                              </option>
+                            ))}
+                          </optgroup>
+                          <optgroup label="🌙 Buổi Tối">
+                            {TIME_SLOTS.filter((s) => s.period === 'Tối').map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.label} (Tối)
+                              </option>
+                            ))}
+                          </optgroup>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-[#7A6C71] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#3E2F35] mb-1">
+                      Ghi chú mong muốn (Tone màu, trang phục, makeup...)
+                    </label>
+                    <textarea
+                      rows={2}
+                      placeholder="Ví dụ: Mình thích phong cách nhẹ nhàng Hàn Quốc..."
+                      value={formData.note}
+                      onChange={(e) =>
+                        setFormData({ ...formData, note: e.target.value })
+                      }
+                      className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E8DCDE] text-xs text-[#2A1D22] focus:outline-none focus:border-[#B85064] resize-none"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="cursor-pointer w-full py-3 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-[#B85064]/25 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <span>
+                    {isSubmitting
+                      ? 'Đang gửi đăng ký...'
+                      : 'Xác Nhận Giữ Lịch & Tư Vấn'}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 4. MODAL XEM ẢNH CHI TIẾT (QUICK VIEW) */}
+      {/* ========================================================================= */}
+      {quickViewPkg && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setQuickViewPkg(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl rounded-3xl bg-white border border-[#F2E8E9] shadow-2xl overflow-hidden p-6 text-[#2A1D22]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setQuickViewPkg(null)}
+              className="cursor-pointer absolute top-4 right-4 p-2 rounded-full text-[#8C7D82] hover:text-[#2A1D22] hover:bg-[#FCECEF]"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+              <div className="h-64 sm:h-80 rounded-2xl overflow-hidden bg-neutral-100">
+                <img
+                  src={quickViewPkg.displayImage}
+                  alt={quickViewPkg.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="space-y-4">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[#FCECEF] text-[#B85064]">
+                  {quickViewPkg.categoryLabel}
+                </span>
+
+                <h3 className="text-xl font-bold font-serif-luxury text-[#1F1418]">
+                  {quickViewPkg.name}
+                </h3>
+
+                <p className="text-xs text-[#7A6C71] leading-relaxed">
                   {quickViewPkg.description}
                 </p>
 
-                {/* Features List */}
-                <div className="space-y-2">
-                  <span className="text-xs uppercase font-bold text-amber-400 tracking-wider block">
-                    Đặc quyền & Thiết bị bao gồm:
+                <div className="space-y-2 pt-2 border-t border-[#F8EFEF]">
+                  <span className="text-[11px] font-bold uppercase text-[#8C7D82] block">
+                    Đặc quyền trọn gói:
                   </span>
-                  {getPackageFeatures(quickViewPkg).map((feat, idx) => (
-                    <div key={idx} className="flex items-start gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                        <CheckIcon className="w-3 h-3 stroke-[3]" />
-                      </div>
-                      <span className="text-xs text-neutral-200">{feat}</span>
+                  {quickViewPkg.specs?.map((spec, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 text-xs text-[#55464B]"
+                    >
+                      {renderSpecIcon(spec.icon)}
+                      <span>{spec.text}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="pt-4 border-t border-white/10 flex gap-3">
+                <div className="pt-4 flex items-center justify-between border-t border-[#F8EFEF]">
+                  <span className="text-xl font-bold text-[#B85064]">
+                    {quickViewPkg.priceDisplay}
+                  </span>
                   <button
-                    onClick={() => handleSelectAndScrollToBooking(quickViewPkg)}
-                    className="cursor-pointer flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-400 text-neutral-950 font-extrabold text-sm shadow-xl shadow-amber-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                    onClick={() => {
+                      setQuickViewPkg(null);
+                      openBookingModal(quickViewPkg);
+                    }}
+                    className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors"
                   >
-                    <span className="whitespace-nowrap">Đặt Lịch Ngay Gói Này</span>
-                    <ArrowRightIcon className="w-4 h-4 shrink-0" />
+                    <span>Đặt gói này ngay</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

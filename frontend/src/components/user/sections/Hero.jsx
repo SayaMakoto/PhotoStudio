@@ -61,11 +61,14 @@ export default function Hero({ onOpenBooking }) {
   }, []);
 
   return (
-    <section id="hero" className="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden bg-neutral-950">
+    <section id="hero" className="relative min-h-screen pt-32 pb-24 flex items-center justify-center overflow-hidden bg-[#141012]">
       {/* Background Studio Glow & Lights */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-rose-500/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-1/3 -left-32 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 right-0 w-96 h-96 bg-amber-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-10 right-0 w-96 h-96 bg-rose-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Chuyển sắc mượt mà xuống nền sáng bên dưới */}
+      <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#FAF5F5] via-[#141012]/60 to-transparent pointer-events-none z-10" />
 
       {/* Subtle Studio grid overlay */}
       <div 
@@ -76,33 +79,33 @@ export default function Hero({ onOpenBooking }) {
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           
           {/* Left Column: Text & CTA */}
           <div className="lg:col-span-7 text-center lg:text-left">
             <ScrollReveal direction="down" duration={0.6}>
               {/* Shiny Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-900/90 border border-amber-500/40 backdrop-blur-md mb-6 shadow-inner shadow-amber-500/10">
-                <SparklesIcon className="w-4 h-4 text-amber-400 animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1619] border border-rose-500/40 backdrop-blur-md mb-6 shadow-inner shadow-rose-500/10">
+                <SparklesIcon className="w-4 h-4 text-[#E899A8] animate-pulse" />
                 <ShinyText
                   text={heroData.badge}
-                  className="text-xs font-semibold tracking-wider text-amber-300"
+                  className="text-xs font-semibold tracking-wider text-rose-200"
                 />
               </div>
             </ScrollReveal>
 
-            {/* Main Headline with BlurText */}
+            {/* Main Headline */}
             <ScrollReveal direction="up" delay={0.1}>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.2] mb-6 font-serif-luxury">
                 Lưu Giữ Trọn Vẹn{' '}
-                <span className="block mt-2">
+                <span className="block mt-2 font-serif-luxury">
                   <BlurText
                     text={heroData.headline}
                     delay={120}
                     animateBy="words"
                     direction="top"
-                    className="bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 bg-clip-text text-transparent"
+                    className="bg-gradient-to-r from-rose-200 via-[#E899A8] to-rose-100 bg-clip-text text-transparent font-serif-luxury"
                   />
                 </span>
                 Bằng Nghệ Thuật Ánh Sáng
@@ -122,16 +125,16 @@ export default function Hero({ onOpenBooking }) {
                 <Magnet padding={40} magnetStrength={3}>
                   <button
                     onClick={onOpenBooking}
-                    className="cursor-pointer w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 font-bold text-base shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
+                    className="cursor-pointer w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white font-bold text-base shadow-xl shadow-rose-950/40 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
                   >
                     <span>Đặt Lịch Tư Vấn Ngay</span>
-                    <ArrowRightIcon className="w-5 h-5 text-neutral-950" />
+                    <ArrowRightIcon className="w-5 h-5 text-white" />
                   </button>
                 </Magnet>
 
                 <Link
                   to={ROUTES.USER.PACKAGES}
-                  className="w-full sm:w-auto px-7 py-4 rounded-full bg-neutral-900/90 hover:bg-neutral-800 text-neutral-200 border border-white/15 hover:border-amber-500/50 text-base font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-7 py-4 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-base font-medium transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <span>Xem Bảng Giá & Gói Chụp</span>
                 </Link>
@@ -142,8 +145,8 @@ export default function Hero({ onOpenBooking }) {
             <ScrollReveal direction="up" delay={0.4}>
               <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10 text-left">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-md">
-                    <StarIcon className="w-5 h-5 text-amber-400" />
+                  <div className="p-2.5 rounded-xl bg-rose-500/15 text-[#E899A8] border border-rose-500/30 shadow-md">
+                    <StarIcon className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white">{heroData.ratingText}</h4>
@@ -152,8 +155,8 @@ export default function Hero({ onOpenBooking }) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-md">
-                    <CameraIcon className="w-5 h-5 text-amber-400" />
+                  <div className="p-2.5 rounded-xl bg-rose-500/15 text-[#E899A8] border border-rose-500/30 shadow-md">
+                    <CameraIcon className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white">Full-Frame Gear</h4>
@@ -162,8 +165,8 @@ export default function Hero({ onOpenBooking }) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-md">
-                    <ShieldCheckIcon className="w-5 h-5 text-amber-400" />
+                  <div className="p-2.5 rounded-xl bg-rose-500/15 text-[#E899A8] border border-rose-500/30 shadow-md">
+                    <ShieldCheckIcon className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white">Cam Kết Chất Lượng</h4>
@@ -181,9 +184,9 @@ export default function Hero({ onOpenBooking }) {
               
               {/* Standalone Award Badge */}
               <div className="w-full max-w-[500px] lg:max-w-[520px] mb-4">
-                <div className="flex items-center justify-center gap-2.5 px-4 sm:px-6 py-3 rounded-2xl bg-neutral-900/95 border-2 border-amber-400/70 shadow-xl shadow-amber-500/20 backdrop-blur-md">
-                  <TrophyIcon className="w-5 h-5 text-amber-400 shrink-0 animate-bounce" />
-                  <span className="text-amber-300 font-extrabold text-xs sm:text-sm tracking-wide text-center">
+                <div className="flex items-center justify-center gap-2.5 px-4 sm:px-6 py-3 rounded-2xl bg-[#1C1619] border-2 border-rose-500/40 shadow-xl shadow-rose-950/20 backdrop-blur-md">
+                  <TrophyIcon className="w-5 h-5 text-[#E899A8] shrink-0 animate-bounce" />
+                  <span className="text-rose-200 font-extrabold text-xs sm:text-sm tracking-wide text-center">
                     {heroData.awardBadge}
                   </span>
                 </div>
@@ -191,7 +194,7 @@ export default function Hero({ onOpenBooking }) {
 
               {/* Interactive 3D Tilted Card */}
               <div className="relative w-full flex justify-center">
-                <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/20 via-transparent to-purple-500/20 rounded-[40px] blur-2xl opacity-70 pointer-events-none" />
+                <div className="absolute -inset-4 bg-gradient-to-r from-rose-500/20 via-transparent to-purple-500/20 rounded-[40px] blur-2xl opacity-70 pointer-events-none" />
 
                 <TiltedCard
                   imageSrc={heroData.imageSrc}
@@ -207,17 +210,17 @@ export default function Hero({ onOpenBooking }) {
                   showTooltip={true}
                   displayOverlayContent={true}
                   overlayContent={
-                    <div className="p-6 rounded-3xl bg-neutral-950/85 backdrop-blur-xl border border-amber-500/30 shadow-2xl flex flex-col gap-2 max-w-[90%]">
+                    <div className="p-6 rounded-3xl bg-[#141012]/90 backdrop-blur-xl border border-rose-500/30 shadow-2xl flex flex-col gap-2 max-w-[90%]">
                       <div className="flex items-center justify-between">
-                        <span className="text-amber-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="text-[#E899A8] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                           <SparklesIcon className="w-3.5 h-3.5" />
                           <span>Studio Cao Cấp</span>
                         </span>
-                        <span className="text-[11px] text-white bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-500/40 font-bold">
+                        <span className="text-[11px] text-white bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/40 font-bold">
                           2026
                         </span>
                       </div>
-                      <h3 className="text-lg font-bold text-white leading-snug">
+                      <h3 className="text-lg font-bold text-white leading-snug font-serif-luxury">
                         {heroData.imageTitle}
                       </h3>
                       <p className="text-xs text-neutral-300 font-light leading-relaxed">
