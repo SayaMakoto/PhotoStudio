@@ -79,6 +79,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void validateRoom(Room room) {
+        if (room.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Phòng chụp có id: " + room.getId() + " đang nằm trong thùng rác");
+        }
         if (room.getStatus() != RoomStatus.active) {
             throw new IllegalArgumentException("Phòng chụp có id: " + room.getId() + " hiện không hoạt động");
         }

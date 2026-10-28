@@ -22,6 +22,8 @@ import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
 import AdminUsersPage from '../pages/admin/users';
 import AdminEmployeesPage from '../pages/admin/employees';
 import AdminEquipmentsPage from '../pages/admin/equipments';
+import AdminBackgroundsPage from '../pages/admin/backgrounds';
+import AdminRoomsPage from '../pages/admin/rooms';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -73,23 +75,11 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.BACKGROUNDS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Bối Cảnh (Backgrounds)"
-              category="Quản lý tài nguyên"
-              description="Quản lý các concept bối cảnh chụp studio và ngoại cảnh."
-            />
-          }
+          element={<AdminBackgroundsPage />}
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.ROOMS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Phòng Chụp (Rooms)"
-              category="Quản lý tài nguyên"
-              description="Quản lý danh sách phòng chụp, tình trạng sẵn sàng và đặt phòng."
-            />
-          }
+          element={<AdminRoomsPage />}
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.CLOTHES.replace('/admin/', '')}

@@ -24,6 +24,22 @@ public class BackgroundController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @GetMapping("/trash")
+    public ResponseEntity<List<BackgroundResponse>> findTrash() {
+        return ResponseEntity.ok(service.findTrash());
+    }
+
+    @PutMapping("/trash/{id}/restore")
+    public ResponseEntity<BackgroundResponse> restore(@PathVariable Long id) {
+        return ResponseEntity.ok(service.restore(id));
+    }
+
+    @DeleteMapping("/trash/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDelete(@PathVariable Long id) {
+        service.permanentlyDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<BackgroundResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));

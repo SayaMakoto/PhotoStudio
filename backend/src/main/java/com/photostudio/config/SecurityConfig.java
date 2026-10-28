@@ -111,10 +111,20 @@ public class SecurityConfig {
 
                         // Thùng rác thiết bị chỉ dành cho ADMIN.
                         .requestMatchers("/api/equipments/trash", "/api/equipments/trash/**", "/api/products/trash", "/api/products/trash/**").hasRole("ADMIN")
+                        .requestMatchers("/api/backgrounds/trash", "/api/backgrounds/trash/**").hasRole("ADMIN")
+                        .requestMatchers("/api/rooms/trash", "/api/rooms/trash/**").hasRole("ADMIN")
 
                         // Cho phép xem thiết bị và phụ kiện công khai không cần token (GET /api/equipments và GET /api/products)
                         .requestMatchers(HttpMethod.GET, "/api/equipments/**", "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/accessories/**", "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/backgrounds/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/rooms/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/rooms/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/rooms/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/backgrounds/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/backgrounds/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/backgrounds/**").hasRole("ADMIN")
 
                         // Khóa/mở khóa tài khoản chỉ dành cho ADMIN; cấm xóa tài khoản qua API.
                         .requestMatchers(HttpMethod.PATCH, "/api/users/**").hasRole("ADMIN")

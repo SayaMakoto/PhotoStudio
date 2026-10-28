@@ -1,5 +1,7 @@
 package com.photostudio.dto.rooms;
 
+import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -14,5 +16,6 @@ public class RoomResponse {
     private String name;
     private String description;
     private Integer capacity;
-    private String status; 
+    private String status;
+    private LocalDateTime deletedAt;
 }

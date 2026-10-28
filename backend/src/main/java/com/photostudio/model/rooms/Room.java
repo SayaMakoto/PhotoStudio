@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "rooms")
 @Getter
@@ -28,4 +30,7 @@ public class Room {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private RoomStatus status = RoomStatus.active;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

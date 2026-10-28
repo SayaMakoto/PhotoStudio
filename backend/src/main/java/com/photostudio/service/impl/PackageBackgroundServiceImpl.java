@@ -109,6 +109,9 @@ public class PackageBackgroundServiceImpl implements PackageBackgroundService {
     private Background findActiveBackground(Long id) {
         Background background = backgroundRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bối cảnh với ID: " + id));
+        if (background.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Bối cảnh '" + background.getName() + "' đang nằm trong thùng rác");
+        }
         if (background.getStatus() != BackgroundStatus.active) {
             throw new IllegalArgumentException("Bối cảnh '" + background.getName() + "' hiện không hoạt động");
         }
