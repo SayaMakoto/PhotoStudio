@@ -89,7 +89,9 @@ public class ReviewMapper {
                 review.getComment(),
                 employeeReviews,
                 review.getCreatedAt(),
-                review.getUpdatedAt()
+                review.getUpdatedAt(),
+                review.getAdminReply(),
+                review.getAdminRepliedAt()
         );
     }
 }

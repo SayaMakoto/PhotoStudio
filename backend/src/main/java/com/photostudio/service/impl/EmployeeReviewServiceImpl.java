@@ -67,6 +67,25 @@ public class EmployeeReviewServiceImpl implements EmployeeReviewService {
     }
 
     @Override
+    public EmployeeReviewResponse reply(Long id, String reply) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Mã đánh giá nhân viên không hợp lệ");
+        }
+        if (reply == null || reply.isBlank()) {
+            throw new IllegalArgumentException("Nội dung phản hồi không được để trống");
+        }
+        String normalizedReply = reply.trim();
+        if (normalizedReply.length() > 2000) {
+            throw new IllegalArgumentException("Nội dung phản hồi tối đa 2000 ký tự");
+        }
+
+        EmployeeReview employeeReview = findEntity(id);
+        employeeReview.setAdminReply(normalizedReply);
+        employeeReview.setAdminRepliedAt(java.time.LocalDateTime.now());
+        return EmployeeReviewMapper.toResponse(repository.save(employeeReview));
+    }
+
+    @Override
     public EmployeeReviewResponse create(EmployeeReviewRequest request) {
         request.validate();
 

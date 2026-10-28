@@ -34,7 +34,9 @@ public class EmployeeReviewMapper {
                 employee != null && employee.getUser() != null ? employee.getUser().getFullname() : null,
                 employee != null && employee.getPosition() != null ? employee.getPosition().name() : null,
                 review.getRating(),
-                review.getComment()
+                review.getComment(),
+                review.getAdminReply(),
+                review.getAdminRepliedAt()
         );
     }
 }

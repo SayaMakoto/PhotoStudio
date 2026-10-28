@@ -38,6 +38,9 @@ import AdminServicesPage from '../pages/admin/services';
 import AdminPackagesPage from '../pages/admin/packages';
 import AdminBookingsPage from '../pages/admin/bookings';
 import AdminPaymentsPage from '../pages/admin/payments';
+import AdminReviewsPage from '../pages/admin/reviews';
+import AdminEmployeeReviewsPage from '../pages/admin/employee-reviews';
+import AdminBannersPage from '../pages/admin/banners';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -136,35 +139,17 @@ export default function AppRoutes() {
         {/* Quản lý đánh giá */}
         <Route
           path={ROUTES.ADMIN.REVIEWS.REVIEWS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Đánh Giá Buổi Chụp (Reviews)"
-              category="Quản lý đánh giá"
-              description="Phản hồi và đánh giá chất lượng bộ ảnh từ khách hàng."
-            />
-          }
+          element={<AdminReviewsPage />}
         />
         <Route
           path={ROUTES.ADMIN.REVIEWS.EMPLOYEE_REVIEWS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Đánh Giá Nhân Viên (Employee Reviews)"
-              category="Quản lý đánh giá"
-              description="Đánh giá thái độ phục vụ và tay nghề của từng nhân viên studio."
-            />
-          }
+          element={<AdminEmployeeReviewsPage />}
         />
 
         {/* Quản lý hệ thống */}
         <Route
           path={ROUTES.ADMIN.SYSTEM.BANNERS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Banner (Banners)"
-              category="Quản lý hệ thống"
-              description="Quản lý banner quảng cáo và hình ảnh trình chiếu trang chủ."
-            />
-          }
+          element={<AdminBannersPage />}
         />
         <Route
           path={ROUTES.ADMIN.SYSTEM.NOTIFICATIONS.replace('/admin/', '')}

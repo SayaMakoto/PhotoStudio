@@ -19,6 +19,7 @@ export default function Hero({ onOpenBooking }) {
     description: 'Không gian phòng chụp chuẩn điện ảnh, máy ảnh Full-Frame sắc nét cùng đội ngũ Makeup & Stylist chuyên nghiệp. Hãy để chúng tôi kể lại câu chuyện của bạn bằng ngôn ngữ ánh sáng.',
     imageSrc: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85',
     imageTitle: 'Khoảnh Khắc Hạnh Phúc',
+    link: '',
     imageSubtitle: 'Trang thiết bị chuyên nghiệp & Không gian sáng tạo',
     ratingText: '5.0 / 5.0',
     totalReviewsText: 'Chất lượng hàng đầu',
@@ -30,12 +31,14 @@ export default function Hero({ onOpenBooking }) {
       .getAllBanners()
       .then((banners) => {
         if (Array.isArray(banners) && banners.length > 0) {
-          const activeBanner = banners.find((b) => b.status === 'active') || banners[0];
+          const activeBanner = banners.find((b) => b.status === 'active');
+          if (!activeBanner) return;
           setHeroData((prev) => ({
             ...prev,
             badge: activeBanner.title || prev.badge,
             imageSrc: activeBanner.imageUrl || prev.imageSrc,
             imageTitle: activeBanner.title || prev.imageTitle,
+            link: activeBanner.link || '',
           }));
         }
       })
@@ -60,6 +63,45 @@ export default function Hero({ onOpenBooking }) {
         console.warn('[Hero] Lỗi tải reviews:', err);
       });
   }, []);
+
+  const bannerLink = heroData.link?.trim() || '';
+  const isExternalBannerLink = /^https?:\/\//i.test(bannerLink);
+  const isInternalBannerLink = bannerLink.startsWith('/') && !bannerLink.startsWith('//');
+  const tiltedBannerCard = (
+    <TiltedCard
+      imageSrc={heroData.imageSrc}
+      altText="Photo Studio Hero Showcase"
+      captionText="PHOTOSTUDIO • ÁNH SÁNG & CẢM XÚC"
+      containerHeight="520px"
+      containerWidth="100%"
+      imageHeight="520px"
+      imageWidth="100%"
+      rotateAmplitude={12}
+      scaleOnHover={1.03}
+      showMobileWarning={false}
+      showTooltip={true}
+      displayOverlayContent={true}
+      overlayContent={
+        <div className="p-6 rounded-3xl bg-[#141012]/90 backdrop-blur-xl border border-rose-500/30 shadow-2xl flex flex-col gap-2 max-w-[90%]">
+          <div className="flex items-center justify-between">
+            <span className="text-[#E899A8] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <SparklesIcon className="w-3.5 h-3.5" />
+              <span>Studio Cao Cấp</span>
+            </span>
+            <span className="text-[11px] text-white bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/40 font-bold">
+              2026
+            </span>
+          </div>
+          <h3 className="text-lg font-bold text-white leading-snug font-serif-luxury">
+            {heroData.imageTitle}
+          </h3>
+          <p className="text-xs text-neutral-300 font-light leading-relaxed">
+            {heroData.imageSubtitle}
+          </p>
+        </div>
+      }
+    />
+  );
 
   return (
     <section id="hero" className="relative min-h-screen pt-32 pb-24 flex items-center justify-center overflow-hidden bg-[#141012]">
@@ -212,39 +254,15 @@ export default function Hero({ onOpenBooking }) {
               <div className="relative w-full flex justify-center">
                 <div className="absolute -inset-4 bg-gradient-to-r from-rose-500/20 via-transparent to-purple-500/20 rounded-[40px] blur-2xl opacity-70 pointer-events-none" />
 
-                <TiltedCard
-                  imageSrc={heroData.imageSrc}
-                  altText="Photo Studio Hero Showcase"
-                  captionText="PHOTOSTUDIO • ÁNH SÁNG & CẢM XÚC"
-                  containerHeight="520px"
-                  containerWidth="100%"
-                  imageHeight="520px"
-                  imageWidth="100%"
-                  rotateAmplitude={12}
-                  scaleOnHover={1.03}
-                  showMobileWarning={false}
-                  showTooltip={true}
-                  displayOverlayContent={true}
-                  overlayContent={
-                    <div className="p-6 rounded-3xl bg-[#141012]/90 backdrop-blur-xl border border-rose-500/30 shadow-2xl flex flex-col gap-2 max-w-[90%]">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#E899A8] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <SparklesIcon className="w-3.5 h-3.5" />
-                          <span>Studio Cao Cấp</span>
-                        </span>
-                        <span className="text-[11px] text-white bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/40 font-bold">
-                          2026
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-white leading-snug font-serif-luxury">
-                        {heroData.imageTitle}
-                      </h3>
-                      <p className="text-xs text-neutral-300 font-light leading-relaxed">
-                        {heroData.imageSubtitle}
-                      </p>
-                    </div>
-                  }
-                />
+                {isExternalBannerLink ? (
+                  <a href={bannerLink} target="_blank" rel="noreferrer" aria-label={`Mở liên kết banner ${heroData.imageTitle}`}>
+                    {tiltedBannerCard}
+                  </a>
+                ) : isInternalBannerLink ? (
+                  <Link to={bannerLink} aria-label={`Mở liên kết banner ${heroData.imageTitle}`}>
+                    {tiltedBannerCard}
+                  </Link>
+                ) : tiltedBannerCard}
               </div>
 
             </ScrollReveal>
