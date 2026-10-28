@@ -24,6 +24,7 @@ public class AccessoryMapper {
         if (accessory.getStatus() != null) {
             dto.setStatus(accessory.getStatus().name());
         }
+        dto.setDeletedAt(accessory.getDeletedAt());
         return dto;
     }
 

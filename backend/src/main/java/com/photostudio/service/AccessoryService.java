@@ -16,4 +16,7 @@ public interface AccessoryService {
     List<Accessory> searchAccessoriesByName(String name);
     List<Accessory> getAccessoriesByType(AccessoryType type);
     List<Accessory> getAccessoriesByStatus(AccessoryStatus status);
+    List<Accessory> getTrash();
+    Accessory restoreAccessory(Long id);
+    void permanentlyDeleteAccessory(Long id);
 }

@@ -145,7 +145,8 @@ CREATE TABLE `accessories` (
     `description` VARCHAR(255) NULL COMMENT 'Mô tả phụ kiện',
     `quantity` INT NOT NULL DEFAULT 0 COMMENT 'Số lượng trong kho',
     `price` DOUBLE NOT NULL DEFAULT 0.0 COMMENT 'Giá thuê phụ kiện',
-    `status` ENUM('available', 'rented', 'maintenance', 'damaged', 'retired') NOT NULL DEFAULT 'available' COMMENT 'Trạng thái phụ kiện'
+    `status` ENUM('available', 'rented', 'maintenance', 'damaged', 'retired') NOT NULL DEFAULT 'available' COMMENT 'Trạng thái phụ kiện',
+    `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa phụ kiện vào thùng rác'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý phụ kiện chụp ảnh';
 
 

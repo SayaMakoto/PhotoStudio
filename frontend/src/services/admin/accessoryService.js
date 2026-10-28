@@ -1,23 +1,14 @@
 import axiosAdmin from '../../lib/axiosAdmin';
 
-/**
- * Service quản lý Phụ kiện & Trang phục (Admin)
- */
-export const adminAccessoryService = {
-  // Lấy toàn bộ danh sách phụ kiện
+const adminAccessoryService = {
   getAll: () => axiosAdmin.get('/api/accessories'),
-
-  // Lấy chi tiết phụ kiện
+  getTrash: () => axiosAdmin.get('/api/accessories/trash'),
   getById: (id) => axiosAdmin.get(`/api/accessories/${id}`),
-
-  // Thêm phụ kiện mới
   create: (data) => axiosAdmin.post('/api/accessories', data),
-
-  // Cập nhật phụ kiện
   update: (id, data) => axiosAdmin.put(`/api/accessories/${id}`, data),
-
-  // Xóa phụ kiện
   delete: (id) => axiosAdmin.delete(`/api/accessories/${id}`),
+  restore: (id) => axiosAdmin.put(`/api/accessories/trash/${id}/restore`),
+  permanentlyDelete: (id) => axiosAdmin.delete(`/api/accessories/trash/${id}/permanent`),
 };
 
 export default adminAccessoryService;

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,12 +22,12 @@ public class AccessoryServiceImpl implements AccessoryService {
 
     @Override
     public List<Accessory> getAllAccessories() {
-        return accessoryRepository.findAll();
+        return accessoryRepository.findByDeletedAtIsNullOrderByIdDesc();
     }
 
     @Override
     public Optional<Accessory> getAccessoryById(Long id) {
-        return accessoryRepository.findById(id);
+        return accessoryRepository.findByIdAndDeletedAtIsNull(id);
     }
 
     @Override
@@ -46,7 +48,7 @@ public class AccessoryServiceImpl implements AccessoryService {
     @Override
     @Transactional
     public Accessory updateAccessory(Long id, Accessory accessoryDetails) {
-        Accessory accessory = accessoryRepository.findById(id)
+        Accessory accessory = accessoryRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phụ kiện với ID: " + id));
 
         accessory.setType(accessoryDetails.getType());
@@ -64,24 +66,50 @@ public class AccessoryServiceImpl implements AccessoryService {
     @Override
     @Transactional
     public void deleteAccessory(Long id) {
-        if (!accessoryRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy phụ kiện với ID: " + id);
-        }
-        accessoryRepository.deleteById(id);
+        Accessory accessory = accessoryRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phụ kiện với ID: " + id));
+        accessory.setDeletedAt(LocalDateTime.now());
+        accessoryRepository.save(accessory);
     }
 
     @Override
     public List<Accessory> searchAccessoriesByName(String name) {
-        return accessoryRepository.findByNameContainingIgnoreCase(name);
+        return accessoryRepository.findByDeletedAtIsNullAndNameContainingIgnoreCase(name);
     }
 
     @Override
     public List<Accessory> getAccessoriesByType(AccessoryType type) {
-        return accessoryRepository.findByType(type);
+        return accessoryRepository.findByDeletedAtIsNullAndType(type);
     }
 
     @Override
     public List<Accessory> getAccessoriesByStatus(AccessoryStatus status) {
-        return accessoryRepository.findByStatus(status);
+        return accessoryRepository.findByDeletedAtIsNullAndStatus(status);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Accessory> getTrash() {
+        return accessoryRepository.findByDeletedAtIsNotNullOrderByDeletedAtDesc();
+    }
+
+    @Override
+    @Transactional
+    public Accessory restoreAccessory(Long id) {
+        Accessory accessory = accessoryRepository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phụ kiện trong thùng rác với ID: " + id));
+        accessory.setDeletedAt(null);
+        return accessoryRepository.save(accessory);
+    }
+
+    @Override
+    @Transactional
+    public void permanentlyDeleteAccessory(Long id) {
+        Accessory accessory = accessoryRepository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phụ kiện trong thùng rác với ID: " + id));
+        if (accessoryRepository.existsBookingReference(id)) {
+            throw new IllegalArgumentException("Không thể xóa vĩnh viễn phụ kiện đã được sử dụng trong đơn đặt lịch.");
+        }
+        accessoryRepository.delete(accessory);
     }
 }
