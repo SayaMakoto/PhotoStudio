@@ -83,7 +83,8 @@ public class PackageMapper {
                 pkg.getStatus() != null ? pkg.getStatus().name() : null,
                 pkg.getCreatedAt(),
                 pkg.getUpdatedAt(),
-                eqList
+                eqList,
+                pkg.getDeletedAt()
         );
     }
 }

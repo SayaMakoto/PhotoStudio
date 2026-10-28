@@ -42,6 +42,9 @@ public class Package {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @OneToMany(mappedBy = "packageEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PackageEquipment> packageEquipments = new ArrayList<>();
 

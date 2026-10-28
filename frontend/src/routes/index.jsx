@@ -27,6 +27,7 @@ import AdminRoomsPage from '../pages/admin/rooms';
 import AdminClothesPage from '../pages/admin/clothes';
 import AdminAccessoriesPage from '../pages/admin/accessories';
 import AdminServicesPage from '../pages/admin/services';
+import AdminPackagesPage from '../pages/admin/packages';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -100,13 +101,7 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.ADMIN.SERVICES_PACKAGES.PACKAGES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Gói Chụp (Packages)"
-              category="Quản lý dịch vụ & gói chụp"
-              description="Bảng giá và chi tiết các gói chụp Standard, Premium, VIP Studio."
-            />
-          }
+          element={<AdminPackagesPage />}
         />
 
         {/* Vận hành & Thanh toán */}

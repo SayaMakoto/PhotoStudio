@@ -6,25 +6,29 @@ import com.photostudio.mapper.PackageMapper;
 import com.photostudio.model.packages.Package;
 import com.photostudio.model.packages.PackageStatus;
 import com.photostudio.repository.PackageRepository;
+import com.photostudio.repository.BookingPackageRepository;
 import com.photostudio.service.PackageService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
 public class PackageServiceImpl implements PackageService {
 
     private final PackageRepository packageRepository;
+    private final BookingPackageRepository bookingPackageRepository;
 
-    public PackageServiceImpl(PackageRepository packageRepository) {
+    public PackageServiceImpl(PackageRepository packageRepository, BookingPackageRepository bookingPackageRepository) {
         this.packageRepository = packageRepository;
+        this.bookingPackageRepository = bookingPackageRepository;
     }
 
     private Package findEntity(Long id) {
         validateId(id);
-        return packageRepository.findById(id)
+        return packageRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy gói chụp có id: " + id));
     }
@@ -38,7 +42,7 @@ public class PackageServiceImpl implements PackageService {
     @Override
     @Transactional(readOnly = true)
     public List<PackageResponse> findAll() {
-        return packageRepository.findAll()
+        return packageRepository.findByDeletedAtIsNullOrderByIdDesc()
                 .stream()
                 .map(PackageMapper::toResponse)
                 .toList();
@@ -80,7 +84,11 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public void delete(Long id) {
         Package pkg = findEntity(id);
-        packageRepository.delete(pkg);
+        if (bookingPackageRepository.existsBookingReference(id)) {
+            throw new IllegalArgumentException("Không thể chuyển gói chụp vào thùng rác vì gói đã được sử dụng trong đơn đặt lịch.");
+        }
+        pkg.setDeletedAt(LocalDateTime.now());
+        packageRepository.save(pkg);
     }
 
     @Override
@@ -89,7 +97,7 @@ public class PackageServiceImpl implements PackageService {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Tên tìm kiếm không được để trống");
         }
-        return packageRepository.findByNameContainingIgnoreCase(name.trim())
+        return packageRepository.findByDeletedAtIsNullAndNameContainingIgnoreCase(name.trim())
                 .stream()
                 .map(PackageMapper::toResponse)
                 .toList();
@@ -107,6 +115,33 @@ public class PackageServiceImpl implements PackageService {
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("Trạng thái gói chụp không hợp lệ. Hợp lệ: active, inactive");
         }
-        return packageRepository.findByStatus(packageStatus).stream().map(PackageMapper::toResponse).toList();
+        return packageRepository.findByDeletedAtIsNullAndStatus(packageStatus).stream().map(PackageMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PackageResponse> findTrash() {
+        return packageRepository.findByDeletedAtIsNotNullOrderByDeletedAtDesc().stream()
+                .map(PackageMapper::toResponse).toList();
+    }
+
+    @Override
+    public PackageResponse restore(Long id) {
+        validateId(id);
+        Package pkg = packageRepository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói chụp trong thùng rác có id: " + id));
+        pkg.setDeletedAt(null);
+        return PackageMapper.toResponse(packageRepository.save(pkg));
+    }
+
+    @Override
+    public void permanentlyDelete(Long id) {
+        validateId(id);
+        Package pkg = packageRepository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói chụp trong thùng rác có id: " + id));
+        if (bookingPackageRepository.existsBookingReference(id)) {
+            throw new IllegalArgumentException("Không thể xóa vĩnh viễn gói chụp đã được sử dụng trong đơn đặt lịch.");
+        }
+        packageRepository.delete(pkg);
     }
 }

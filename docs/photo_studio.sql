@@ -177,7 +177,8 @@ CREATE TABLE `packages` (
     `price` DOUBLE NOT NULL DEFAULT 0.0 COMMENT 'Giá gói chụp',
     `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active' COMMENT 'Trạng thái gói chụp',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày tạo gói chụp',
-    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ngày cập nhật gói chụp'
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ngày cập nhật gói chụp',
+    `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa gói chụp vào thùng rác'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý danh mục gói chụp ảnh';
 
 -- Bảng 10: package_services (Dịch vụ bao gồm trong gói chụp - Quan hệ N-N giữa packages và services)
