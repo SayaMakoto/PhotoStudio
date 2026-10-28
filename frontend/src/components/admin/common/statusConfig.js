@@ -33,6 +33,13 @@ export const STATUS_CONFIG = {
 };
 
 export const STATUS_DOMAIN_CONFIG = {
+  booking: {
+    pending: { label: "Chờ xác nhận", className: amber },
+    confirmed: { label: "Đã xác nhận", className: blue },
+    in_progress: { label: "Đang thực hiện", className: blue },
+    completed: { label: "Hoàn tất", className: green },
+    cancelled: { label: "Đã hủy", className: red },
+  },
   visibility: {
     active: { label: "Đang hiện", className: green },
     inactive: { label: "Đang ẩn", className: neutral },

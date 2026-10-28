@@ -117,7 +117,7 @@ export const ADMIN_MENU_CONFIG = [
     title: "Quản lý đơn đặt lịch",
     icon: CalendarCheck2,
     path: ROUTES.ADMIN.BOOKINGS,
-    badge: "12 Mới",
+    badgeType: "pendingBookings",
   },
   {
     id: "payments",
