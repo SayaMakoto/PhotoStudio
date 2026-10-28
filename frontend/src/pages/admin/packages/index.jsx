@@ -15,6 +15,7 @@ import AdminFilterBar from "../../../components/admin/common/AdminFilterBar";
 import AdminTable from "../../../components/admin/common/AdminTable";
 import useAdminNotification from "../../../components/admin/common/useAdminNotification";
 import adminPackageService from "../../../services/admin/packageService";
+import adminImageService from "../../../services/admin/imageService";
 import PackageDialog from "./PackageDialog";
 import {
   PACKAGE_STATUS_OPTIONS,
@@ -158,23 +159,29 @@ export default function AdminPackagesPage() {
 
   const savePackage = async (payload) => {
     try {
+      const { imageUrl, ...packagePayload } = payload;
+      let savedPackage;
+      const creating = dialog.mode === "create";
       if (dialog.mode === "create") {
-        const saved = await adminPackageService.create(payload);
+        savedPackage = await adminPackageService.create(packagePayload);
+        setDialog({ mode: "edit", packageEntity: { ...savedPackage, imageUrl } });
         notify({
           type: "success",
           title: "Tạo gói chụp thành công",
           message: `Đã thêm “${payload.name}” vào danh mục. Có thể cấu hình dịch vụ và bối cảnh trong phần tiếp theo.`,
         });
-        setDialog({ mode: "edit", packageEntity: saved });
       } else {
-        await adminPackageService.update(dialog.packageEntity.id, payload);
+        savedPackage = await adminPackageService.update(dialog.packageEntity.id, packagePayload);
         notify({
           type: "success",
           title: "Cập nhật gói chụp thành công",
           message: `Thông tin “${payload.name}” đã được lưu.`,
         });
-        setDialog(null);
       }
+      if (imageUrl !== undefined && savedPackage?.id) {
+        await adminImageService.savePrimaryImage("package", savedPackage.id, imageUrl, payload.name || payload.description);
+      }
+      if (!creating) setDialog(null);
       await loadRows();
     } catch (error) {
       setPageError(getPackageErrorMessage(error));

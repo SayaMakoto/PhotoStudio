@@ -8,17 +8,11 @@ export const IMAGEABLE_TYPES = [
   { value: 'service', label: 'Dịch vụ' },
 ];
 
-export const IMAGE_PRIMARY_OPTIONS = [
-  { value: 'true', label: 'Ảnh đại diện' },
-  { value: 'false', label: 'Ảnh bổ sung' },
-];
-
-export const IMAGE_PRIMARY_FILTER_OPTIONS = [
-  { value: 'primary', label: 'Ảnh đại diện' },
-  { value: 'additional', label: 'Ảnh bổ sung' },
-];
-
-export const IMAGE_TYPE_LABELS = Object.fromEntries(IMAGEABLE_TYPES.map(({ value, label }) => [value, label]));
+export const IMAGE_TYPE_LABELS = Object.fromEntries([
+  ...IMAGEABLE_TYPES,
+  { value: 'banner', label: 'Banner' },
+  { value: 'content', label: 'Nội dung' },
+].map(({ value, label }) => [value, label]));
 
 export function getImageErrorMessage(error) {
   return error?.response?.data?.message

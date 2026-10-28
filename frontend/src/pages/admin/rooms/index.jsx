@@ -5,6 +5,7 @@ import AdminTable from '../../../components/admin/common/AdminTable';
 import StatusBadge from '../../../components/admin/common/StatusBadge';
 import useAdminNotification from '../../../components/admin/common/useAdminNotification';
 import adminRoomService from '../../../services/admin/roomService';
+import adminImageService from '../../../services/admin/imageService';
 import RoomDialog from './RoomDialog';
 import { ROOM_STATUS_OPTIONS, formatRoomDate, getRoomErrorMessage } from './roomConfig';
 
@@ -60,8 +61,11 @@ export default function AdminRoomsPage() {
   const resetFilters = () => { setSearch(''); setStatus(''); setSortOrder('newest'); };
   const saveRoom = async (payload) => {
     try {
-      if (dialog.mode === 'create') { await adminRoomService.create(payload); notify({ type: 'success', title: 'Thêm phòng thành công', message: `Đã thêm “${payload.name}” vào danh sách phòng chụp.` }); }
-      else { await adminRoomService.update(dialog.room.id, payload); notify({ type: 'success', title: 'Cập nhật phòng thành công', message: `Thông tin “${payload.name}” đã được lưu.` }); }
+      const { imageUrl, ...roomPayload } = payload;
+      let savedRoom;
+      if (dialog.mode === 'create') { savedRoom = await adminRoomService.create(roomPayload); setDialog({ mode: 'edit', room: { ...savedRoom, imageUrl } }); notify({ type: 'success', title: 'Thêm phòng thành công', message: `Đã thêm “${payload.name}” vào danh sách phòng chụp.` }); }
+      else { savedRoom = await adminRoomService.update(dialog.room.id, roomPayload); notify({ type: 'success', title: 'Cập nhật phòng thành công', message: `Thông tin “${payload.name}” đã được lưu.` }); }
+      if (imageUrl !== undefined && savedRoom?.id) await adminImageService.savePrimaryImage('room', savedRoom.id, imageUrl, payload.name || payload.description);
       setDialog(null); await loadRows();
     } catch (error) { setPageError(getRoomErrorMessage(error)); throw error; }
   };

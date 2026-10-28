@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Image, X } from 'lucide-react';
 import GlideSelect from '../../../components/admin/common/GlideSelect';
 import StatusBadge from '../../../components/admin/common/StatusBadge';
+import ImageUploadField from '../../../components/admin/common/ImageUploadField';
+import ImageDetailPreview from '../../../components/admin/common/ImageDetailPreview';
 import { BACKGROUND_STATUS_OPTIONS, formatBackgroundDate, getBackgroundErrorMessage } from './backgroundConfig';
 
 const EMPTY = { name: '', description: '', status: 'active' };
@@ -35,8 +37,9 @@ export default function BackgroundDialog({ background, mode, onClose, onSave }) 
         <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-amber-400/10 text-amber-300"><Image className="h-5 w-5" /></span><div><h2 id="background-dialog-title" className="font-semibold text-white">{title}</h2><p className="mt-0.5 text-xs text-neutral-500">{background?.id ? `Mã bối cảnh #${background.id}` : 'Danh mục bối cảnh studio'}</p></div></div>
         <button type="button" onClick={onClose} aria-label="Đóng" className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white"><X className="h-4 w-4" /></button>
       </header>
-      {detail ? <dl className="px-5 py-2"><Detail label="Tên bối cảnh">{background?.name}</Detail><Detail label="Trạng thái"><StatusBadge status={background?.status} domain="room" /></Detail><Detail label="Mô tả">{background?.description}</Detail>{background?.deletedAt && <Detail label="Ngày chuyển vào thùng rác">{formatBackgroundDate(background.deletedAt)}</Detail>}</dl> : <form onSubmit={submit} className="space-y-4 px-5 py-5">
+      {detail ? <><div className="px-5 pt-4"><ImageDetailPreview imageableType="background" imageableId={background?.id} alt={`Ảnh bối cảnh ${background?.name || ''}`} /></div><dl className="px-5 py-2"><Detail label="Tên bối cảnh">{background?.name}</Detail><Detail label="Trạng thái"><StatusBadge status={background?.status} domain="room" /></Detail><Detail label="Mô tả">{background?.description}</Detail>{background?.deletedAt && <Detail label="Ngày chuyển vào thùng rác">{formatBackgroundDate(background.deletedAt)}</Detail>}</dl></> : <form onSubmit={submit} className="space-y-4 px-5 py-5">
         {error && <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-xs text-rose-200">{error}</div>}
+        <ImageUploadField label="Ảnh bối cảnh" imageableType="background" imageableId={background?.id} value={form.imageUrl || ''} onChange={(imageUrl) => setForm((current) => ({ ...current, imageUrl }))} />
         <label className="block text-xs font-medium text-neutral-300">Tên bối cảnh <span className="text-rose-300">*</span><input autoFocus required maxLength={255} value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className={inputClass} placeholder="Ví dụ: Phông nền tối giản" /></label>
         <div className="text-xs font-medium text-neutral-300">Trạng thái<GlideSelect options={BACKGROUND_STATUS_OPTIONS} value={form.status} onChange={(status) => setForm((current) => ({ ...current, status }))} ariaLabel="Trạng thái bối cảnh" showTags={false} size="md" accentColor="#fbbf24" surfaceColor="#0a0a0a" highlightColor="#262626" textColor="#e5e5e5" menuWidth={240} className="mt-1.5 w-full [&>button]:min-h-10 [&>button]:w-full [&>button]:justify-between [&>button]:border [&>button]:border-neutral-800" /></div>
         <label className="block text-xs font-medium text-neutral-300">Mô tả<textarea rows={4} maxLength={255} value={form.description || ''} onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))} className={`${inputClass} resize-y`} placeholder="Mô tả concept, cách bố trí hoặc lưu ý sử dụng" /></label>

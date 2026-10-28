@@ -5,6 +5,7 @@ import AdminTable from '../../../components/admin/common/AdminTable';
 import StatusBadge from '../../../components/admin/common/StatusBadge';
 import useAdminNotification from '../../../components/admin/common/useAdminNotification';
 import adminBackgroundService from '../../../services/admin/backgroundService';
+import adminImageService from '../../../services/admin/imageService';
 import BackgroundDialog from './BackgroundDialog';
 import { BACKGROUND_STATUS_OPTIONS, formatBackgroundDate, getBackgroundErrorMessage } from './backgroundConfig';
 
@@ -64,13 +65,17 @@ export default function AdminBackgroundsPage() {
   const resetFilters = () => { setSearch(''); setStatus(''); setSortOrder('newest'); };
   const saveBackground = async (payload) => {
     try {
+      const { imageUrl, ...backgroundPayload } = payload;
+      let savedBackground;
       if (dialog.mode === 'create') {
-        await adminBackgroundService.create(payload);
+        savedBackground = await adminBackgroundService.create(backgroundPayload);
+        setDialog({ mode: 'edit', background: { ...savedBackground, imageUrl } });
         notify({ type: 'success', title: 'Thêm bối cảnh thành công', message: `Đã thêm “${payload.name}” vào danh mục bối cảnh.` });
       } else {
-        await adminBackgroundService.update(dialog.background.id, payload);
+        savedBackground = await adminBackgroundService.update(dialog.background.id, backgroundPayload);
         notify({ type: 'success', title: 'Cập nhật bối cảnh thành công', message: `Thông tin “${payload.name}” đã được lưu.` });
       }
+      if (imageUrl !== undefined && savedBackground?.id) await adminImageService.savePrimaryImage('background', savedBackground.id, imageUrl, payload.name || payload.description);
       setDialog(null); await loadRows();
     } catch (error) { setPageError(getBackgroundErrorMessage(error)); throw error; }
   };

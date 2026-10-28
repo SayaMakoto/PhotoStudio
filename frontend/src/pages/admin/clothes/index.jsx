@@ -5,6 +5,7 @@ import AdminTable from '../../../components/admin/common/AdminTable';
 import StatusBadge from '../../../components/admin/common/StatusBadge';
 import useAdminNotification from '../../../components/admin/common/useAdminNotification';
 import adminClothService from '../../../services/admin/clothService';
+import adminImageService from '../../../services/admin/imageService';
 import ClothDialog from './ClothDialog';
 import { CLOTH_GENDER_OPTIONS, CLOTH_STATUS_OPTIONS, CLOTH_TYPE_LABELS, CLOTH_TYPE_OPTIONS, formatClothDate, formatClothPrice, getClothErrorMessage } from './clothConfig';
 
@@ -65,8 +66,11 @@ export default function AdminClothesPage() {
   const resetFilters = () => { setSearch(''); setType(''); setGender(''); setStatus(''); setSortOrder('newest'); };
   const saveCloth = async (payload) => {
     try {
-      if (dialog.mode === 'create') { await adminClothService.create(payload); notify({ type: 'success', title: 'Thêm trang phục thành công', message: `Đã thêm “${payload.name}” vào kho trang phục.` }); }
-      else { await adminClothService.update(dialog.cloth.id, payload); notify({ type: 'success', title: 'Cập nhật trang phục thành công', message: `Thông tin “${payload.name}” đã được lưu.` }); }
+      const { imageUrl, ...clothPayload } = payload;
+      let savedCloth;
+      if (dialog.mode === 'create') { savedCloth = await adminClothService.create(clothPayload); setDialog({ mode: 'edit', cloth: { ...savedCloth, imageUrl } }); notify({ type: 'success', title: 'Thêm trang phục thành công', message: `Đã thêm “${payload.name}” vào kho trang phục.` }); }
+      else { savedCloth = await adminClothService.update(dialog.cloth.id, clothPayload); notify({ type: 'success', title: 'Cập nhật trang phục thành công', message: `Thông tin “${payload.name}” đã được lưu.` }); }
+      if (imageUrl !== undefined && savedCloth?.id) await adminImageService.savePrimaryImage('clothing', savedCloth.id, imageUrl, payload.name || payload.description);
       setDialog(null); await loadRows();
     } catch (error) { setPageError(getClothErrorMessage(error)); throw error; }
   };

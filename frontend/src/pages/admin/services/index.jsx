@@ -4,6 +4,7 @@ import AdminFilterBar from '../../../components/admin/common/AdminFilterBar';
 import AdminTable from '../../../components/admin/common/AdminTable';
 import useAdminNotification from '../../../components/admin/common/useAdminNotification';
 import adminStudioService from '../../../services/admin/studioService';
+import adminImageService from '../../../services/admin/imageService';
 import StudioServiceDialog from './StudioServiceDialog';
 import { STUDIO_SERVICE_STATUS_OPTIONS, STUDIO_SERVICE_TYPE_LABELS, STUDIO_SERVICE_TYPE_OPTIONS, formatServiceDate, formatServicePrice, getServiceErrorMessage } from './serviceConfig';
 
@@ -67,8 +68,11 @@ export default function AdminServicesPage() {
 
   const saveService = async (payload) => {
     try {
-      if (dialog.mode === 'create') { await adminStudioService.create(payload); notify({ type: 'success', title: 'Thêm dịch vụ thành công', message: `Đã thêm “${payload.name}” vào danh mục dịch vụ.` }); }
-      else { await adminStudioService.update(dialog.service.id, payload); notify({ type: 'success', title: 'Cập nhật dịch vụ thành công', message: `Thông tin “${payload.name}” đã được lưu.` }); }
+      const { imageUrl, ...servicePayload } = payload;
+      let savedService;
+      if (dialog.mode === 'create') { savedService = await adminStudioService.create(servicePayload); setDialog({ mode: 'edit', service: { ...savedService, imageUrl } }); notify({ type: 'success', title: 'Thêm dịch vụ thành công', message: `Đã thêm “${payload.name}” vào danh mục dịch vụ.` }); }
+      else { savedService = await adminStudioService.update(dialog.service.id, servicePayload); notify({ type: 'success', title: 'Cập nhật dịch vụ thành công', message: `Thông tin “${payload.name}” đã được lưu.` }); }
+      if (imageUrl !== undefined && savedService?.id) await adminImageService.savePrimaryImage('service', savedService.id, imageUrl, payload.name || payload.description);
       setDialog(null); await loadRows();
     } catch (error) { setPageError(getServiceErrorMessage(error)); throw error; }
   };
