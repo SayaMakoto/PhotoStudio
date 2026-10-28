@@ -30,6 +30,22 @@ public class RoomController {
         return ResponseEntity.ok(rooms);
     }
 
+    @GetMapping("/trash")
+    public ResponseEntity<List<RoomResponse>> getTrash() {
+        return ResponseEntity.ok(roomService.getTrash());
+    }
+
+    @PutMapping("/trash/{id}/restore")
+    public ResponseEntity<RoomResponse> restoreRoom(@PathVariable Long id) {
+        return ResponseEntity.ok(roomService.restoreRoom(id));
+    }
+
+    @DeleteMapping("/trash/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDeleteRoom(@PathVariable Long id) {
+        roomService.permanentlyDeleteRoom(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<RoomResponse> getRoomById(@PathVariable Long id) {
         return roomService.getRoomById(id)

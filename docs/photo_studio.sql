@@ -96,7 +96,8 @@ CREATE TABLE `rooms` (
     `name` VARCHAR(255) NOT NULL COMMENT 'Tên phòng chụp',
     `description` VARCHAR(255) NULL COMMENT 'Mô tả phòng',
     `capacity` INT NOT NULL DEFAULT 1 COMMENT 'Sức chứa tối đa của 1 phòng',
-    `status` ENUM('active', 'inactive', 'maintenance') NOT NULL DEFAULT 'active' COMMENT 'Trạng thái hoạt động'
+    `status` ENUM('active', 'inactive', 'maintenance') NOT NULL DEFAULT 'active' COMMENT 'Trạng thái hoạt động',
+    `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa phòng chụp vào thùng rác'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý phòng chụp';
 
 -- Bảng 4: backgrounds (Bối cảnh chụp)
@@ -104,7 +105,8 @@ CREATE TABLE `backgrounds` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
     `name` VARCHAR(255) NOT NULL COMMENT 'Tên bối cảnh',
     `description` VARCHAR(255) NULL COMMENT 'Mô tả bối cảnh',
-    `status` ENUM('active', 'inactive', 'maintenance') NOT NULL DEFAULT 'active' COMMENT 'Trạng thái bối cảnh'
+    `status` ENUM('active', 'inactive', 'maintenance') NOT NULL DEFAULT 'active' COMMENT 'Trạng thái bối cảnh',
+    `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa bối cảnh vào thùng rác'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý bối cảnh chụp';
 
 -- Bảng 5: equipments (Thiết bị)

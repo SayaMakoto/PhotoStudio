@@ -137,7 +137,7 @@ public class EquipmentServiceImpl implements EquipmentService {
     @Transactional
     public void delete(Long id) {
         Equipment equipment = findEntity(id);
-        if (bookingEquipmentRepository.existsByEquipment_IdAndStatus(
+        if (bookingEquipmentRepository.existsByEquipmentIdAndStatus(
                 id, BookingEquipmentStatus.assigned)) {
             throw new IllegalArgumentException(
                     "Không thể đưa thiết bị đang được cấp phát vào thùng rác");
