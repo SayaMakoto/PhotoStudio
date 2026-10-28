@@ -68,6 +68,10 @@ export const STATUS_DOMAIN_CONFIG = {
     unread: { label: "Chưa đọc", className: amber },
     read: { label: "Đã đọc", className: green },
   },
+  imagePrimary: {
+    primary: { label: "Ảnh đại diện", className: amber },
+    additional: { label: "Ảnh bổ sung", className: neutral },
+  },
 };
 
 export function getStatusDefinition(status, domain) {

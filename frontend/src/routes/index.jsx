@@ -42,6 +42,8 @@ import AdminReviewsPage from '../pages/admin/reviews';
 import AdminEmployeeReviewsPage from '../pages/admin/employee-reviews';
 import AdminBannersPage from '../pages/admin/banners';
 import AdminNotificationsPage from '../pages/admin/notifications';
+import AdminImagesPage from '../pages/admin/images';
+import AdminContentsPage from '../pages/admin/contents';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -158,23 +160,11 @@ export default function AppRoutes() {
         />
         <Route
           path={ROUTES.ADMIN.SYSTEM.IMAGES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Hình Ảnh (Images)"
-              category="Quản lý hệ thống"
-              description="Thư viện Media lưu trữ ảnh tải lên hệ thống."
-            />
-          }
+          element={<AdminImagesPage />}
         />
         <Route
           path={ROUTES.ADMIN.SYSTEM.CONTENTS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Nội Dung (Contents)"
-              category="Quản lý hệ thống"
-              description="Quản lý bài viết blog, giới thiệu studio và chính sách điều khoản."
-            />
-          }
+          element={<AdminContentsPage />}
         />
 
         {/* Quản lý liên hệ */}
