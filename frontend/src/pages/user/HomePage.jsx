@@ -7,7 +7,7 @@ import BeforeAfter from '../../components/user/sections/BeforeAfter';
 import AboutStudio from '../../components/user/sections/AboutStudio';
 import Reviews from '../../components/user/sections/Reviews';
 import Booking from '../../components/user/sections/Booking';
-import { FloralBranchCorner, FloatingPetals, ScatteredPetals } from '../../components/common/FloralDecorations';
+import { FloralBranchCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
 
 export default function HomePage() {
   const [selectedPackage, setSelectedPackage] = useState(null);

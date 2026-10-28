@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, CheckCheck, User, Calendar, ShieldCheck, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Menu, Bell, CheckCheck } from 'lucide-react';
 import { EMPLOYEE_PROFILE, ADMIN_NOTIFICATIONS } from '../employeeData';
 
 export default function EmployeeHeader({

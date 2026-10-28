@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Layers,
   Camera,
-  CheckCircle2,
   AlertTriangle,
 } from 'lucide-react';
 import { EQUIPMENT_ITEMS } from '../employeeData';

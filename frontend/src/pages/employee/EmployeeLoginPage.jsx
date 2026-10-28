@@ -75,15 +75,6 @@ export default function EmployeeLoginPage() {
     }
   };
 
-  const handleQuickFill = () => {
-    setFormData({
-      usernameOrEmail: 'photographer1',
-      password: 'password123',
-      rememberMe: true,
-    });
-    setErrorMessage('');
-  };
-
   return (
     <div className="min-h-screen bg-[#090b10] text-white selection:bg-amber-400 selection:text-neutral-950 font-sans p-4 sm:p-6 flex flex-col justify-between relative overflow-hidden">
       {/* Background Studio Glows */}

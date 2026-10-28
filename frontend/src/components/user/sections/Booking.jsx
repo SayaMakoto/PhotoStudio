@@ -22,7 +22,7 @@ import customerRoomService from '../../../services/user/roomService';
 import customerBookingService from '../../../services/user/bookingService';
 import { customerAuth } from '../../../lib/axiosCustomer';
 import axiosCustomer from '../../../lib/axiosCustomer';
-import { FloralBranchCorner, FloatingPetals, FloralCardCorner } from '../../common/FloralDecorations';
+import { FloralBranchCorner, FloralCardCorner } from '../../common/FloralDecorations';
 
 const MONTH_NAMES = [
   'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',

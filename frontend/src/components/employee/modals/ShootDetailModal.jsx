@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   X,
   Camera,
@@ -7,7 +7,6 @@ import {
   Users,
   CheckSquare,
   Square,
-  Clock,
   Save,
   AlertTriangle,
   Image,
@@ -30,14 +29,14 @@ function InfoItem({ label, value, highlight = false }) {
 }
 
 export default function ShootDetailModal({ booking, onClose, onOpenIncidentReport }) {
-  if (!booking) return null;
-
-  const [checklist, setChecklist] = useState(booking.checklist || []);
-  const [deliveryInput, setDeliveryInput] = useState(booking.deliveryLink || '');
+  const [checklist, setChecklist] = useState(booking?.checklist || []);
+  const [deliveryInput, setDeliveryInput] = useState(booking?.deliveryLink || '');
   const [retouchedCount, setRetouchedCount] = useState(
-    booking.photoSelection?.retouchedCount || 0
+    booking?.photoSelection?.retouchedCount || 0
   );
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  if (!booking) return null;
 
   const selectedCount = booking.photoSelection?.selectedCount || 30;
   const rawCount = booking.photoSelection?.rawCount || 350;

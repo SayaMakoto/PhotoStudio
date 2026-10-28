@@ -328,11 +328,6 @@ export default function PackagesPage() {
     return counts;
   }, [packages]);
 
-  // Reset trang về 1 khi người dùng đổi bộ lọc hoặc tìm kiếm
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory, searchTerm, maxPrice, sortBy]);
-
   // Lọc và sắp xếp
   const filteredPackages = useMemo(() => {
     return packages
@@ -568,7 +563,10 @@ export default function PackagesPage() {
                   return (
                     <button
                       key={cat.id}
-                      onClick={() => setSelectedCategory(cat.id)}
+                      onClick={() => {
+                        setSelectedCategory(cat.id);
+                        setCurrentPage(1);
+                      }}
                       className={`cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs sm:text-[13px] font-medium transition-all duration-200 ${
                         isSelected
                           ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/25'
@@ -612,7 +610,10 @@ export default function PackagesPage() {
                   max="10000000"
                   step="200000"
                   value={maxPrice}
-                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  onChange={(e) => {
+                    setMaxPrice(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
                   className="w-full h-1.5 bg-[#F2DFE2] rounded-lg appearance-none cursor-pointer accent-[#B85064]"
                 />
 
@@ -672,6 +673,7 @@ export default function PackagesPage() {
                             key={opt.id}
                             onClick={() => {
                               setSortBy(opt.id);
+                              setCurrentPage(1);
                               setIsSortOpen(false);
                             }}
                             className={`cursor-pointer w-full p-2.5 rounded-xl flex items-center justify-between text-left transition-all ${
@@ -796,13 +798,19 @@ export default function PackagesPage() {
                   type="text"
                   placeholder="Tìm gói chụp theo tên hoặc mô tả phong cách..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full pl-13 pr-10 py-3 rounded-2xl bg-white border border-[#EADCE0] text-xs sm:text-[13px] text-[#2A1D22] placeholder-[#A09095] shadow-xs hover:border-[#D9BDC4] focus:outline-none focus:border-[#B85064] focus:ring-4 focus:ring-[#B85064]/10 transition-all duration-200"
                 />
                 {searchTerm && (
                   <button
                     type="button"
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => {
+                      setSearchTerm('');
+                      setCurrentPage(1);
+                    }}
                     className="cursor-pointer absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-[#7A6C71] flex items-center justify-center transition-colors"
                     title="Xóa tìm kiếm"
                   >
@@ -877,6 +885,7 @@ export default function PackagesPage() {
                     setSearchTerm('');
                     setMaxPrice(10000000);
                     setSortBy('popular');
+                    setCurrentPage(1);
                   }}
                   className="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors shadow-sm"
                 >

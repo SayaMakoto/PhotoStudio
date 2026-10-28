@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import adminAuthService from '../../../services/admin/authService';
-import { ROUTES } from '../../../routes/web';
+import adminAuthService from '../services/admin/authService';
+import { ROUTES } from '../routes/web';
 
 export default function AdminRoute() {
   const location = useLocation();

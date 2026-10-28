@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
-import AdminSidebar from "./AdminSidebar";
-import { ADMIN_MENU_CONFIG } from "./adminMenuConfig";
+import AdminSidebar from "../components/admin/layout/AdminSidebar";
+import { ADMIN_MENU_CONFIG } from "../components/admin/layout/adminMenuConfig";
 import { useState } from "react";
 
 export default function AdminLayout() {
@@ -49,10 +49,11 @@ export default function AdminLayout() {
           {/* Renders subpages or Dashboard */}
           <Outlet
             context={{
-              selectedMonth,
               selectedYear,
-              setSelectedMonth,
               setSelectedYear,
+              selectedMonth,
+              setSelectedMonth,
+              setIsMobileOpen,
             }}
           />
         </main>

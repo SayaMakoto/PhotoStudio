@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import employeeAuthService from '../../../services/employee/authService';
-import { ROUTES } from '../../../routes/web';
+import employeeAuthService from '../services/employee/authService';
+import { ROUTES } from '../routes/web';
 
 export default function EmployeeRoute() {
   const location = useLocation();

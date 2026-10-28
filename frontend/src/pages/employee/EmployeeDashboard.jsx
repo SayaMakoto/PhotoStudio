@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import EmployeeSidebar, { EMPLOYEE_NAV_ITEMS } from '../../components/employee/layout/EmployeeSidebar';
+import { useState, useEffect } from 'react';
+import EmployeeSidebar from '../../components/employee/layout/EmployeeSidebar';
 import EmployeeHeader from '../../components/employee/layout/EmployeeHeader';
 import EmployeeKPICards from '../../components/employee/dashboard/EmployeeKPICards';
 import EmployeeDashboardOverview from '../../components/employee/dashboard/EmployeeDashboardOverview';

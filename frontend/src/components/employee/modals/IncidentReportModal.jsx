@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AlertTriangle, Send, CheckCircle2, X } from 'lucide-react';
 import { EQUIPMENT_ITEMS } from '../employeeData';
 

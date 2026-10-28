@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -14,7 +13,7 @@ import { EMPLOYEE_PROFILE } from '../employeeData';
 import employeeAuthService from '../../../services/employee/authService';
 import { ROUTES } from '../../../routes/web';
 
-export const EMPLOYEE_NAV_ITEMS = [
+const EMPLOYEE_NAV_ITEMS = [
   { id: 'dashboard', label: 'Tổng Quan & KPI', icon: LayoutDashboard },
   { id: 'schedule', label: 'Lịch Chụp & Ca Trực', icon: CalendarDays },
   { id: 'equipment', label: 'Thiết Bị & Sự Cố', icon: Layers },
