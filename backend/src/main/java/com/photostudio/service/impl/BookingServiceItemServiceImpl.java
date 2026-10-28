@@ -88,7 +88,9 @@ public class BookingServiceItemServiceImpl implements BookingServiceItemService 
 
     @Override @Transactional(readOnly = true)
     public Double calculateTotalServicePrice(Long bookingId) {
-        return getServicesByBookingId(bookingId).stream().mapToDouble(BookingServiceResponse::getSubtotal).sum();
+        return getServicesByBookingId(bookingId).stream()
+                .mapToDouble(item -> item.getSubtotal())
+                .sum();
     }
 
     private Booking findBooking(Long id) {

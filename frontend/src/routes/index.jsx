@@ -21,6 +21,7 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
 import AdminUsersPage from '../pages/admin/users';
 import AdminEmployeesPage from '../pages/admin/employees';
+import AdminEquipmentsPage from '../pages/admin/equipments';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -68,13 +69,7 @@ export default function AppRoutes() {
         {/* Quản lý tài nguyên */}
         <Route
           path={ROUTES.ADMIN.RESOURCES.EQUIPMENTS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Thiết Bị (Equipments)"
-              category="Quản lý tài nguyên"
-              description="Quản lý máy ảnh, ống kính, đèn flash, phụ kiện ánh sáng và lịch bảo trì."
-            />
-          }
+          element={<AdminEquipmentsPage />}
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.BACKGROUNDS.replace('/admin/', '')}

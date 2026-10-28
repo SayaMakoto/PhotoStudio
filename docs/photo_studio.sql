@@ -117,7 +117,8 @@ CREATE TABLE `equipments` (
     `serial_number` VARCHAR(255) NULL UNIQUE COMMENT 'Mã sê-ri thiết bị',
     `purchase_date` DATETIME NULL COMMENT 'Ngày mua thiết bị',
     `description` VARCHAR(255) NULL COMMENT 'Mô tả thiết bị',
-    `status` ENUM('available', 'in_use', 'maintenance', 'broken', 'retired') NOT NULL DEFAULT 'available' COMMENT 'Trạng thái thiết bị'
+    `status` ENUM('available', 'in_use', 'maintenance', 'broken', 'retired') NOT NULL DEFAULT 'available' COMMENT 'Trạng thái thiết bị',
+    `deleted_at` DATETIME NULL COMMENT 'Thời điểm đưa thiết bị vào thùng rác'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý thiết bị studio';
 
 -- Bảng 6: clothes (Trang phục)

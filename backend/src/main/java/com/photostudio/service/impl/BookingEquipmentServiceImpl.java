@@ -34,7 +34,7 @@ public class BookingEquipmentServiceImpl implements BookingEquipmentService {
         if (!bookingRepository.existsById(bookingId)) {
             throw new IllegalArgumentException("Không tìm thấy đơn đặt lịch với ID: " + bookingId);
         }
-        return bookingEquipmentRepository.findByBookingId(bookingId).stream()
+        return bookingEquipmentRepository.findByBooking_Id(bookingId).stream()
                 .map(bookingEquipmentMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -60,6 +60,10 @@ public class BookingEquipmentServiceImpl implements BookingEquipmentService {
         Equipment equipment = equipmentRepository.findById(request.getEquipmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thiết bị với ID: " + request.getEquipmentId()));
 
+        if (equipment.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Thiết bị đã nằm trong thùng rác, không thể cấp phát");
+        }
+
         if (equipment.getStatus() == EquipmentStatus.broken || equipment.getStatus() == EquipmentStatus.retired) {
             throw new IllegalArgumentException("Thiết bị \"" + equipment.getName() + "\" đang bị hỏng hoặc ngừng sử dụng, không thể cấp phát");
         }
@@ -69,7 +73,7 @@ public class BookingEquipmentServiceImpl implements BookingEquipmentService {
         }
 
     
-        boolean isAlreadyAssigned = bookingEquipmentRepository.existsByEquipmentIdAndStatus(
+        boolean isAlreadyAssigned = bookingEquipmentRepository.existsByEquipment_IdAndStatus(
                 equipment.getId(), BookingEquipmentStatus.assigned);
         if (isAlreadyAssigned) {
             throw new IllegalArgumentException("Thiết bị \"" + equipment.getName() + "\" hiện đang được cấp phát cho một buổi chụp khác và chưa được hoàn trả");

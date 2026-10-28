@@ -26,6 +26,22 @@ public class EquipmentController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @GetMapping("/trash")
+    public ResponseEntity<List<EquipmentResponse>> findTrash() {
+        return ResponseEntity.ok(service.findTrash());
+    }
+
+    @PutMapping("/trash/{id}/restore")
+    public ResponseEntity<EquipmentResponse> restore(@PathVariable Long id) {
+        return ResponseEntity.ok(service.restore(id));
+    }
+
+    @DeleteMapping("/trash/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDelete(@PathVariable Long id) {
+        service.permanentlyDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<EquipmentResponse> findById(
             @PathVariable Long id) {
