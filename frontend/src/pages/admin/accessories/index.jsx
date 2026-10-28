@@ -5,6 +5,7 @@ import AdminTable from '../../../components/admin/common/AdminTable';
 import StatusBadge from '../../../components/admin/common/StatusBadge';
 import useAdminNotification from '../../../components/admin/common/useAdminNotification';
 import adminAccessoryService from '../../../services/admin/accessoryService';
+import adminImageService from '../../../services/admin/imageService';
 import AccessoryDialog from './AccessoryDialog';
 import { ACCESSORY_STATUS_OPTIONS, ACCESSORY_TYPE_LABELS, ACCESSORY_TYPE_OPTIONS, formatAccessoryDate, formatAccessoryPrice, getAccessoryErrorMessage } from './accessoryConfig';
 
@@ -63,8 +64,11 @@ export default function AdminAccessoriesPage() {
   const resetFilters = () => { setSearch(''); setType(''); setStatus(''); setSortOrder('newest'); };
   const saveAccessory = async (payload) => {
     try {
-      if (dialog.mode === 'create') { await adminAccessoryService.create(payload); notify({ type: 'success', title: 'Thêm phụ kiện thành công', message: `Đã thêm “${payload.name}” vào kho phụ kiện.` }); }
-      else { await adminAccessoryService.update(dialog.accessory.id, payload); notify({ type: 'success', title: 'Cập nhật phụ kiện thành công', message: `Thông tin “${payload.name}” đã được lưu.` }); }
+      const { imageUrl, ...accessoryPayload } = payload;
+      let savedAccessory;
+      if (dialog.mode === 'create') { savedAccessory = await adminAccessoryService.create(accessoryPayload); setDialog({ mode: 'edit', accessory: { ...savedAccessory, imageUrl } }); notify({ type: 'success', title: 'Thêm phụ kiện thành công', message: `Đã thêm “${payload.name}” vào kho phụ kiện.` }); }
+      else { savedAccessory = await adminAccessoryService.update(dialog.accessory.id, accessoryPayload); notify({ type: 'success', title: 'Cập nhật phụ kiện thành công', message: `Thông tin “${payload.name}” đã được lưu.` }); }
+      if (imageUrl !== undefined && savedAccessory?.id) await adminImageService.savePrimaryImage('accessory', savedAccessory.id, imageUrl, payload.name || payload.description);
       setDialog(null); await loadRows();
     } catch (error) { setPageError(getAccessoryErrorMessage(error)); throw error; }
   };

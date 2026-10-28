@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, Camera, X } from "lucide-react";
 import StatusBadge from "../../../components/admin/common/StatusBadge";
+import ImageUploadField from "../../../components/admin/common/ImageUploadField";
+import ImageDetailPreview from "../../../components/admin/common/ImageDetailPreview";
 import GlideSelect from "../../../components/admin/common/GlideSelect";
 import {
   EQUIPMENT_STATUS_OPTIONS,
@@ -87,7 +89,7 @@ export default function EquipmentDialog({ equipment, mode, onClose, onSave }) {
       ? `${form.purchaseDate}${form.purchaseDate.length === 16 ? ":00" : ""}`
       : null;
     try {
-      await onSave({ ...form, purchaseDate });
+      await onSave({ ...form, purchaseDate, imageUrl: form.imageUrl });
     } catch (error) {
       setSaveError(getEquipmentErrorMessage(error));
     } finally {
@@ -141,6 +143,8 @@ export default function EquipmentDialog({ equipment, mode, onClose, onSave }) {
         </header>
 
         {isDetail ? (
+          <>
+          <div className="px-5 pt-4"><ImageDetailPreview imageableType="equipment" imageableId={equipment?.id} alt={`Ảnh thiết bị ${equipment?.name || ''}`} /></div>
           <dl className="grid gap-x-8 px-5 py-2 sm:grid-cols-2">
             <DetailRow label="Tên thiết bị">{equipment?.name}</DetailRow>
             <DetailRow label="Loại thiết bị">
@@ -159,6 +163,7 @@ export default function EquipmentDialog({ equipment, mode, onClose, onSave }) {
               <DetailRow label="Mô tả">{equipment?.description}</DetailRow>
             </div>
           </dl>
+          </>
         ) : (
           <form onSubmit={submit} className="space-y-4 px-5 py-5">
             {saveError && (
@@ -169,6 +174,7 @@ export default function EquipmentDialog({ equipment, mode, onClose, onSave }) {
                 {saveError}
               </div>
             )}
+            <ImageUploadField label="Ảnh thiết bị" imageableType="equipment" imageableId={equipment?.id} value={form.imageUrl || ""} onChange={(imageUrl) => setForm((current) => ({ ...current, imageUrl }))} />
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="text-xs font-medium text-neutral-300 sm:col-span-2">
                 Tên thiết bị <span className="text-rose-300">*</span>

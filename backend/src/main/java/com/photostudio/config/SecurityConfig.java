@@ -121,6 +121,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/reviews/*/reply").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.PATCH, "/api/employee-reviews/*/reply").hasAnyRole("ADMIN", "EMPLOYEE")
 
+                        // Chỉ admin được tải ảnh lên và thay đổi bản ghi ảnh; ảnh đã lưu được đọc công khai.
+                        .requestMatchers(HttpMethod.POST, "/api/uploads/images", "/api/images/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/images/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/images/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/images/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/uploads/**", "/api/images/**").permitAll()
+
                         // Cho phép xem thiết bị và phụ kiện công khai không cần token (GET /api/equipments và GET /api/products)
                         .requestMatchers(HttpMethod.GET, "/api/equipments/**", "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/accessories/**", "/api/categories/**").permitAll()

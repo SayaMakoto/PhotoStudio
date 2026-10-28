@@ -16,6 +16,7 @@ import AdminTable from "../../../components/admin/common/AdminTable";
 import StatusBadge from "../../../components/admin/common/StatusBadge";
 import useAdminNotification from "../../../components/admin/common/useAdminNotification";
 import adminEquipmentService from "../../../services/admin/equipmentService";
+import adminImageService from "../../../services/admin/imageService";
 import EquipmentDialog from "./EquipmentDialog";
 import {
   EQUIPMENT_STATUS_OPTIONS,
@@ -152,20 +153,26 @@ export default function AdminEquipmentsPage() {
 
   const saveEquipment = async (payload) => {
     try {
+      const { imageUrl, ...equipmentPayload } = payload;
+      let savedEquipment;
       if (dialog.mode === "create") {
-        await adminEquipmentService.create(payload);
+        savedEquipment = await adminEquipmentService.create(equipmentPayload);
+        setDialog({ mode: "edit", equipment: { ...savedEquipment, imageUrl } });
         notify({
           type: "success",
           title: "Thêm thiết bị thành công",
           message: `Đã thêm “${payload.name}” vào kho thiết bị.`,
         });
       } else {
-        await adminEquipmentService.update(dialog.equipment.id, payload);
+        savedEquipment = await adminEquipmentService.update(dialog.equipment.id, equipmentPayload);
         notify({
           type: "success",
           title: "Cập nhật thiết bị thành công",
           message: `Thông tin “${payload.name}” đã được lưu.`,
         });
+      }
+      if (imageUrl !== undefined && savedEquipment?.id) {
+        await adminImageService.savePrimaryImage("equipment", savedEquipment.id, imageUrl, payload.name || payload.description);
       }
       setDialog(null);
       await loadRows();
