@@ -33,6 +33,12 @@ export const STATUS_CONFIG = {
 };
 
 export const STATUS_DOMAIN_CONFIG = {
+  payment: {
+    pending: { label: "Chờ thanh toán", className: amber },
+    paid: { label: "Đã thanh toán", className: green },
+    failed: { label: "Thất bại", className: red },
+    refunded: { label: "Đã hoàn tiền", className: purple },
+  },
   booking: {
     pending: { label: "Chờ xác nhận", className: amber },
     confirmed: { label: "Đã xác nhận", className: blue },
