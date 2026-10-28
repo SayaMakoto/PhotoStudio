@@ -13,6 +13,7 @@ public class EquipmentResponse {
     private LocalDateTime purchaseDate;
     private String description;
     private String status;
+    private LocalDateTime deletedAt;
 
     public EquipmentResponse(
             Long id,
@@ -23,7 +24,8 @@ public class EquipmentResponse {
             String serialNumber,
             LocalDateTime purchaseDate,
             String description,
-            String status) {
+            String status,
+            LocalDateTime deletedAt) {
 
         this.id = id;
         this.type = type;
@@ -34,6 +36,7 @@ public class EquipmentResponse {
         this.purchaseDate = purchaseDate;
         this.description = description;
         this.status = status;
+        this.deletedAt = deletedAt;
     }
 
     public Long getId() {
@@ -70,5 +73,9 @@ public class EquipmentResponse {
 
     public String getStatus() {
         return status;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
     }
 }

@@ -60,6 +60,10 @@ public class BookingEquipmentServiceImpl implements BookingEquipmentService {
         Equipment equipment = equipmentRepository.findById(request.getEquipmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thiết bị với ID: " + request.getEquipmentId()));
 
+        if (equipment.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Thiết bị đã nằm trong thùng rác, không thể cấp phát");
+        }
+
         if (equipment.getStatus() == EquipmentStatus.broken || equipment.getStatus() == EquipmentStatus.retired) {
             throw new IllegalArgumentException("Thiết bị \"" + equipment.getName() + "\" đang bị hỏng hoặc ngừng sử dụng, không thể cấp phát");
         }

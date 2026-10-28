@@ -13,11 +13,22 @@ import java.util.Optional;
 
 public interface BookingBackgroundRepository extends JpaRepository<BookingBackground, Long> {
 
+    @Query("SELECT CASE WHEN COUNT(bb) > 0 THEN true ELSE false END FROM BookingBackground bb WHERE bb.background.id = :backgroundId")
+    boolean existsByBackgroundId(@Param("backgroundId") Long backgroundId);
+
     List<BookingBackground> findByBookingId(Long bookingId);
 
-    Optional<BookingBackground> findByBookingIdAndBackgroundId(Long bookingId, Long backgroundId);
+    @Query("SELECT bb FROM BookingBackground bb WHERE bb.booking.id = :bookingId AND bb.background.id = :backgroundId")
+    Optional<BookingBackground> findByBookingIdAndBackgroundId(
+            @Param("bookingId") Long bookingId,
+            @Param("backgroundId") Long backgroundId);
 
-    boolean existsByBookingIdAndBackgroundIdAndIdNot(Long bookingId, Long backgroundId, Long id);
+    @Query("SELECT CASE WHEN COUNT(bb) > 0 THEN true ELSE false END FROM BookingBackground bb " +
+            "WHERE bb.booking.id = :bookingId AND bb.background.id = :backgroundId AND bb.id <> :id")
+    boolean existsByBookingIdAndBackgroundIdAndIdNot(
+            @Param("bookingId") Long bookingId,
+            @Param("backgroundId") Long backgroundId,
+            @Param("id") Long id);
 
     @Query("SELECT COUNT(bb) > 0 FROM BookingBackground bb " +
             "WHERE bb.background.id = :backgroundId " +

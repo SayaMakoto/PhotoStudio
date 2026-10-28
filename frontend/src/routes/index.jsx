@@ -29,6 +29,15 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
 import AdminUsersPage from '../pages/admin/users';
 import AdminEmployeesPage from '../pages/admin/employees';
+import AdminEquipmentsPage from '../pages/admin/equipments';
+import AdminBackgroundsPage from '../pages/admin/backgrounds';
+import AdminRoomsPage from '../pages/admin/rooms';
+import AdminClothesPage from '../pages/admin/clothes';
+import AdminAccessoriesPage from '../pages/admin/accessories';
+import AdminServicesPage from '../pages/admin/services';
+import AdminPackagesPage from '../pages/admin/packages';
+import AdminBookingsPage from '../pages/admin/bookings';
+import AdminPaymentsPage from '../pages/admin/payments';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -85,97 +94,43 @@ export default function AppRoutes() {
         {/* Quản lý tài nguyên */}
         <Route
           path={ROUTES.ADMIN.RESOURCES.EQUIPMENTS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Thiết Bị (Equipments)"
-              category="Quản lý tài nguyên"
-              description="Quản lý máy ảnh, ống kính, đèn flash, phụ kiện ánh sáng và lịch bảo trì."
-            />
-          }
+          element={<AdminEquipmentsPage />}
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.BACKGROUNDS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Bối Cảnh (Backgrounds)"
-              category="Quản lý tài nguyên"
-              description="Quản lý các concept bối cảnh chụp studio và ngoại cảnh."
-            />
-          }
+          element={<AdminBackgroundsPage />}
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.ROOMS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Phòng Chụp (Rooms)"
-              category="Quản lý tài nguyên"
-              description="Quản lý danh sách phòng chụp, tình trạng sẵn sàng và đặt phòng."
-            />
-          }
+          element={<AdminRoomsPage />}
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.CLOTHES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Trang Phục (Clothes)"
-              category="Quản lý tài nguyên"
-              description="Quản lý kho trang phục cưới, vest, concept chụp, tình trạng giặt sấy."
-            />
-          }
+          element={<AdminClothesPage />}
         />
         <Route
           path={ROUTES.ADMIN.RESOURCES.ACCESSORIES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Phụ Kiện (Accessories)"
-              category="Quản lý tài nguyên"
-              description="Quản lý đạo cụ, trang sức, hoa cầm tay và phụ kiện chụp ảnh."
-            />
-          }
+          element={<AdminAccessoriesPage />}
         />
 
         {/* Quản lý dịch vụ & gói chụp */}
         <Route
           path={ROUTES.ADMIN.SERVICES_PACKAGES.SERVICES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Dịch Vụ (Services)"
-              category="Quản lý dịch vụ & gói chụp"
-              description="Các dịch vụ chụp ảnh chân dung, tiệc cưới, sự kiện, makeup và in ấn."
-            />
-          }
+          element={<AdminServicesPage />}
         />
         <Route
           path={ROUTES.ADMIN.SERVICES_PACKAGES.PACKAGES.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Gói Chụp (Packages)"
-              category="Quản lý dịch vụ & gói chụp"
-              description="Bảng giá và chi tiết các gói chụp Standard, Premium, VIP Studio."
-            />
-          }
+          element={<AdminPackagesPage />}
         />
 
         {/* Vận hành & Thanh toán */}
         <Route
           path={ROUTES.ADMIN.BOOKINGS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Đơn Đặt Lịch (Bookings)"
-              category="Vận hành"
-              description="Tiếp nhận, xác nhận, điều phối lịch chụp của khách hàng."
-            />
-          }
+          element={<AdminBookingsPage />}
         />
         <Route
           path={ROUTES.ADMIN.PAYMENTS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Thanh Toán (Payments)"
-              category="Tài chính"
-              description="Quản lý hóa đơn, đặt cọc, thanh toán chuyển khoản và đối soát doanh thu."
-            />
-          }
+          element={<AdminPaymentsPage />}
         />
 
         {/* Quản lý đánh giá */}

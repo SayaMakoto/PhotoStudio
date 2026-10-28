@@ -61,7 +61,8 @@ public class EquipmentMapper {
             equipment.getSerialNumber(),
             equipment.getPurchaseDate(),
             equipment.getDescription(),
-            equipment.getStatus().name()
+            equipment.getStatus().name(),
+            equipment.getDeletedAt()
         );
     }
 }

@@ -64,6 +64,9 @@ public class BookingBackgroundServiceImpl implements BookingBackgroundService {
         Background background = backgroundRepository.findById(request.getBackgroundId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy bối cảnh với ID: " + request.getBackgroundId()));
+        if (background.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Bối cảnh '" + background.getName() + "' đang nằm trong thùng rác");
+        }
         if (background.getStatus() != BackgroundStatus.active) {
             throw new IllegalArgumentException("Bối cảnh '" + background.getName() + "' hiện không khả dụng");
         }
@@ -105,6 +108,9 @@ public class BookingBackgroundServiceImpl implements BookingBackgroundService {
         Background background = backgroundRepository.findById(request.getBackgroundId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy bối cảnh với ID: " + request.getBackgroundId()));
+        if (background.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Bối cảnh '" + background.getName() + "' đang nằm trong thùng rác");
+        }
         if (background.getStatus() != BackgroundStatus.active) {
             throw new IllegalArgumentException("Bối cảnh '" + background.getName() + "' hiện không khả dụng");
         }

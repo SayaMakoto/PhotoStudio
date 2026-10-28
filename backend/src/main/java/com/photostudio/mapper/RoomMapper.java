@@ -19,6 +19,7 @@ public class RoomMapper {
         if (room.getStatus() != null) {
             dto.setStatus(room.getStatus().name());
         }
+        dto.setDeletedAt(room.getDeletedAt());
         return dto;
     }
 

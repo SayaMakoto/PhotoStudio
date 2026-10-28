@@ -103,12 +103,18 @@ public class PackageBackgroundServiceImpl implements PackageBackgroundService {
         if (pkg.getStatus() != PackageStatus.active) {
             throw new IllegalArgumentException("Gói chụp '" + pkg.getName() + "' hiện không hoạt động");
         }
+        if (pkg.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Gói chụp '" + pkg.getName() + "' đang nằm trong thùng rác");
+        }
         return pkg;
     }
 
     private Background findActiveBackground(Long id) {
         Background background = backgroundRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bối cảnh với ID: " + id));
+        if (background.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Bối cảnh '" + background.getName() + "' đang nằm trong thùng rác");
+        }
         if (background.getStatus() != BackgroundStatus.active) {
             throw new IllegalArgumentException("Bối cảnh '" + background.getName() + "' hiện không hoạt động");
         }

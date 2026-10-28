@@ -59,6 +59,10 @@ public class BookingPackageServiceImpl implements BookingPackageService {
         Package packageEntity = packageRepository.findById(request.getPackageId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói chụp với ID: " + request.getPackageId()));
 
+        if (packageEntity.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Gói chụp '" + packageEntity.getName() + "' đang nằm trong thùng rác");
+        }
+
         if (packageEntity.getStatus() == PackageStatus.inactive) {
             throw new IllegalArgumentException("Gói chụp \"" + packageEntity.getName() + "\" hiện đang ngưng hoạt động");
         }

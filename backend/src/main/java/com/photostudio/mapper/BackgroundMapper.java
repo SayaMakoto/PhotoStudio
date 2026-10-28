@@ -35,7 +35,8 @@ public class BackgroundMapper {
                 background.getId(),
                 background.getName(),
                 background.getDescription(),
-                background.getStatus() != null ? background.getStatus().name() : null
+                background.getStatus() != null ? background.getStatus().name() : null,
+                background.getDeletedAt()
         );
     }
 }

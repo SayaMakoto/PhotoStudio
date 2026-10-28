@@ -22,4 +22,10 @@ public interface ServiceService {
     List<ServiceResponse> findByType(String type);
 
     List<ServiceResponse> findByStatus(String status);
+
+    List<ServiceResponse> findTrash();
+
+    ServiceResponse restore(Long id);
+
+    void permanentlyDelete(Long id);
 }

@@ -43,4 +43,7 @@ public class Equipment {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private EquipmentStatus status = EquipmentStatus.available;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

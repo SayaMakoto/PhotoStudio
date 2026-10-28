@@ -35,6 +35,23 @@ public class AccessoryController {
         return ResponseEntity.ok(accessories);
     }
 
+    @GetMapping("/trash")
+    public ResponseEntity<List<AccessoryResponse>> getTrash() {
+        return ResponseEntity.ok(accessoryService.getTrash().stream()
+                .map(accessoryMapper::toResponseDTO).toList());
+    }
+
+    @PutMapping("/trash/{id}/restore")
+    public ResponseEntity<AccessoryResponse> restoreAccessory(@PathVariable Long id) {
+        return ResponseEntity.ok(accessoryMapper.toResponseDTO(accessoryService.restoreAccessory(id)));
+    }
+
+    @DeleteMapping("/trash/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDeleteAccessory(@PathVariable Long id) {
+        accessoryService.permanentlyDeleteAccessory(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AccessoryResponse> getAccessoryById(@PathVariable Long id) {
         return accessoryService.getAccessoryById(id)

@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import AdminSidebar from "../components/admin/layout/AdminSidebar";
+import AdminNotificationProvider from "../components/admin/common/AdminNotificationProvider";
 import { ADMIN_MENU_CONFIG } from "../components/admin/layout/adminMenuConfig";
 import { useState } from "react";
 
@@ -34,6 +35,7 @@ export default function AdminLayout() {
   };
 
   return (
+    <AdminNotificationProvider>
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex font-sans selection:bg-amber-400 selection:text-neutral-950">
       {/* 1. Sidebar with routing links & Single-Open Accordion */}
       <AdminSidebar
@@ -59,5 +61,6 @@ export default function AdminLayout() {
         </main>
       </div>
     </div>
+    </AdminNotificationProvider>
   );
 }

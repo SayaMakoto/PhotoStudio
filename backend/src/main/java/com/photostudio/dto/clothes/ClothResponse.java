@@ -1,5 +1,7 @@
 package com.photostudio.dto.clothes;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +22,5 @@ public class ClothResponse {
     private String description;
     private Double price;
     private String status;
+    private LocalDateTime deletedAt;
 }
