@@ -1,4 +1,5 @@
 import axiosAdmin from '../../lib/axiosAdmin';
+import adminEmployeeService from './employeeService';
 
 /**
  * Chức năng đọc booking và cập nhật trạng thái dành cho giao diện admin.
@@ -25,6 +26,9 @@ export const adminBookingService = {
     axiosAdmin.get(`/api/booking-accessories/booking/${bookingId}`),
   getBookingClothes: (bookingId) => axiosAdmin.get(`/api/booking-clothing/booking/${bookingId}`),
   getEmployeeAssignments: (bookingId) => axiosAdmin.get(`/api/booking-employee-assignments/booking/${bookingId}`),
+  getEmployees: () => adminEmployeeService.getAll(),
+  assignEmployee: (bookingId, employeeId) => axiosAdmin.post('/api/booking-employee-assignments', { bookingId, employeeId }),
+  updateAssignmentStatus: (assignmentId, status) => axiosAdmin.put(`/api/booking-employee-assignments/${assignmentId}/status`, { status }),
   getPayments: (bookingId) => axiosAdmin.get(`/api/payments/booking/${bookingId}`),
   getReview: (bookingId) => axiosAdmin.get(`/api/reviews/booking/${bookingId}`),
 };

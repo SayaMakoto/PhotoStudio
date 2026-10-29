@@ -11,6 +11,8 @@ import com.photostudio.model.users.User;
 import com.photostudio.model.users.UserRole;
 import com.photostudio.model.users.UserStatus;
 import com.photostudio.repository.BookingRepository;
+import com.photostudio.repository.BookingEmployeeAssignmentRepository;
+import com.photostudio.model.bookings.BookingEmployeeAssignmentStatus;
 import com.photostudio.repository.RoomRepository;
 import com.photostudio.repository.UserRepository;
 import com.photostudio.service.BookingService;
@@ -30,14 +32,17 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
 
     private final RoomRepository roomRepository;
+    private final BookingEmployeeAssignmentRepository assignmentRepository;
 
     public BookingServiceImpl(
             BookingRepository repository,
             UserRepository userRepository,
-            RoomRepository roomRepository) {
+            RoomRepository roomRepository,
+            BookingEmployeeAssignmentRepository assignmentRepository) {
         this.repository = repository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     private Booking findEntity(Long id) {
@@ -193,6 +198,12 @@ public class BookingServiceImpl implements BookingService {
         }
 
         booking.setStatus(bookingStatus);
+        if (bookingStatus == BookingStatus.completed || bookingStatus == BookingStatus.cancelled) {
+            BookingEmployeeAssignmentStatus assignmentStatus = bookingStatus == BookingStatus.completed
+                    ? BookingEmployeeAssignmentStatus.completed : BookingEmployeeAssignmentStatus.cancelled;
+            assignmentRepository.releaseAssignedEmployees(booking.getId(),
+                    BookingEmployeeAssignmentStatus.assigned, assignmentStatus);
+        }
         Booking saved = repository.save(booking);
         return BookingMapper.toResponse(saved);
     }
