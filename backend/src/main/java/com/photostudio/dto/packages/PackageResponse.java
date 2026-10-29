@@ -23,5 +23,7 @@ public class PackageResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<PackageEquipmentItemResponse> equipments;
+    private List<PackageClothItemResponse> clothes;
+    private List<PackageAccessoryItemResponse> accessories;
     private LocalDateTime deletedAt;
 }

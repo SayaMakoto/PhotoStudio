@@ -38,6 +38,8 @@ DROP TABLE IF EXISTS `booking_packages`;
 DROP TABLE IF EXISTS `bookings`;
 DROP TABLE IF EXISTS `images`;
 DROP TABLE IF EXISTS `package_equipments`;
+DROP TABLE IF EXISTS `package_accessories`;
+DROP TABLE IF EXISTS `package_clothes`;
 DROP TABLE IF EXISTS `package_backgrounds`;
 DROP TABLE IF EXISTS `package_services`;
 DROP TABLE IF EXISTS `packages`;
@@ -208,6 +210,28 @@ CREATE TABLE `package_equipments` (
     `quantity` INT NOT NULL DEFAULT 1 COMMENT 'Số lượng thiết bị trong gói chụp',
     CONSTRAINT `fk_pe_package` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Yêu cầu thiết bị tối thiểu cho gói chụp';
+
+-- Bảng 13: package_clothes (Trang phục cố định đi kèm gói chụp)
+CREATE TABLE `package_clothes` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
+    `package_id` BIGINT NOT NULL COMMENT 'FK - packages',
+    `cloth_id` BIGINT NOT NULL COMMENT 'FK - clothes',
+    `quantity` INT NOT NULL DEFAULT 1 COMMENT 'Số lượng trang phục trong gói',
+    CONSTRAINT `fk_pc_package` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_pc_cloth` FOREIGN KEY (`cloth_id`) REFERENCES `clothes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    UNIQUE KEY `uk_package_cloth` (`package_id`, `cloth_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Trang phục được bao gồm trong từng gói chụp';
+
+-- Bảng 14: package_accessories (Phụ kiện cố định đi kèm gói chụp)
+CREATE TABLE `package_accessories` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
+    `package_id` BIGINT NOT NULL COMMENT 'FK - packages',
+    `accessory_id` BIGINT NOT NULL COMMENT 'FK - accessories',
+    `quantity` INT NOT NULL DEFAULT 1 COMMENT 'Số lượng phụ kiện trong gói',
+    CONSTRAINT `fk_pa_package` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_pa_accessory` FOREIGN KEY (`accessory_id`) REFERENCES `accessories` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    UNIQUE KEY `uk_package_accessory` (`package_id`, `accessory_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Phụ kiện được bao gồm trong từng gói chụp';
 
 
 -- =====================================================================
@@ -483,54 +507,60 @@ INSERT INTO `rooms` (`id`, `name`, `description`, `capacity`, `status`) VALUES
 -- 4. BỐI CẢNH CHỤP STUDIO (BACKGROUNDS TABLE)
 -- ---------------------------------------------------------------------
 INSERT INTO `backgrounds` (`id`, `name`, `description`, `status`) VALUES
-(1, 'Phông Hàn Quốc Pastel Tối Giản', 'Phông nền màu pastel tự động, ánh sáng dịu mắt phù hợp chụp chân dung nàng thơ và profile cá nhân', 'active'),
-(2, 'Góc Phố Cổ Hội An & Sen Hồ Á Đông', 'Bối cảnh tường vàng rêu phong, đèn lồng và hoa sen chụp áo dài truyền thống, cổ trang', 'active'),
-(3, 'Cung Điện Cổ Điển Châu Âu Luxury', 'Thiết kế vòm đá cẩm thạch phong cách Pháp, rèm nhung và đèn chùm pha lê sang trọng cho ảnh cưới', 'active'),
-(4, 'Ban Công Hoàng Hôn & Vườn Hoa Studio', 'Không gian mở đón trọn ánh sáng tự nhiên hoàng hôn lãng mạn cho cặp đôi và cô dâu', 'active'),
-(5, 'Phòng Đọc Sách & Sofa Da Vintage', 'Nội thất gỗ trầm ấm cổ điển, kệ sách gỗ sồi và sofa Chesterfield dành cho gia đình và doanh nhân', 'active'),
-(6, 'Phông Trắng / Đen Studio High-End', 'Phông nền vô cực tiêu chuẩn quốc tế cho lookbook thời trang và ảnh thương mại', 'active');
+(1, 'Studio Pastel Cá Nhân', 'Phông pastel Hàn Quốc và ánh sáng mềm, đi cùng gói chụp cá nhân.', 'active'),
+(2, 'Studio Cưới Cổ Điển', 'Vòm hoa, rèm và ánh sáng ấm dành cho ảnh cưới studio.', 'active'),
+(3, 'Studio Cưới Hoàng Gia', 'Bối cảnh cung điện và đèn chùm dành cho gói cưới cao cấp.', 'active'),
+(4, 'Phòng Khách Gia Đình', 'Sofa và nội thất ấm cúng cho ảnh gia đình hoặc nhóm bạn.', 'active'),
+(5, 'Phông Kỷ Yếu Tươi Sáng', 'Phông màu trẻ trung và khu vực chụp ảnh tốt nghiệp.', 'active'),
+(6, 'Studio Profile Doanh Nhân', 'Phông trung tính cùng ánh sáng chân dung chuyên nghiệp.', 'active'),
+(7, 'Phố Cổ & Hồ Sen', 'Bối cảnh Á Đông với tường vàng, đèn lồng và hồ sen cho áo dài, cổ phục.', 'active'),
+(8, 'Cyclorama Lookbook', 'Phông nền trắng vô cực cho lookbook thời trang và ảnh sản phẩm.', 'active');
 
 -- ---------------------------------------------------------------------
 -- 5. THIẾT BỊ STUDIO (EQUIPMENTS TABLE)
 -- ---------------------------------------------------------------------
 INSERT INTO `equipments` (`id`, `type`, `name`, `brand`, `model`, `serial_number`, `purchase_date`, `description`, `status`) VALUES
-(1, 'camera', 'Sony Alpha 7 IV Full-Frame', 'Sony', 'ILCE-7M4', 'SN-SONY-7M4-01', '2023-05-10', 'Máy ảnh độ phân giải 33MP chuyên chụp studio & chân dung màu chuẩn', 'available'),
-(2, 'camera', 'Canon EOS R5 Độ Phân Giải 45MP', 'Canon', 'EOS R5', 'SN-CANON-R5-02', '2023-06-12', 'Máy ảnh cao cấp chụp chi tiết da cực cao cho bộ ảnh cưới và beauty', 'available'),
-(3, 'camera', 'Sony Alpha 7R V (61 Megapixels)', 'Sony', 'ILCE-7RM5', 'SN-SONY-7R5-03', '2023-11-20', 'Siêu máy ảnh studio 61MP cho ảnh in ấn khổ lớn và biển quảng cáo', 'available'),
-(4, 'camera', 'Fujifilm GFX 100S Medium Format', 'Fujifilm', 'GFX-100S', 'SN-FUJI-100S-04', '2024-01-15', 'Cảm biến Medium Format 102MP chụp lookbook thời trang thương hiệu cao cấp', 'available'),
-(5, 'lens', 'Sony FE 24-70mm F2.8 GM II', 'Sony', 'SEL2470GM2', 'SN-LENS-2470GM-05', '2023-05-15', 'Ống kính đa dụng cao cấp bậc nhất của dòng G Master', 'available'),
-(6, 'lens', 'Sony FE 85mm F1.4 GM Chân Dung', 'Sony', 'SEL85F14GM', 'SN-LENS-85GM-06', '2023-07-01', 'Ống kính chuyên trị chân dung, bokeh mịn như nhung', 'available'),
-(7, 'lens', 'Canon RF 50mm F1.2L USM', 'Canon', 'RF-50-F12', 'SN-LENS-RF50-07', '2023-08-10', 'Ống kính tiêu cự chuẩn mắt người, độ nét tối đa ở khẩu f/1.2', 'available'),
-(8, 'lens', 'Canon RF 70-200mm F2.8L IS USM', 'Canon', 'RF-70200-F28', 'SN-LENS-RF70200-08', '2023-09-05', 'Ống kính tele bắt góc cận cảnh từ xa cho cô dâu chú rể tự nhiên', 'available'),
-(9, 'lighting', 'Đèn Studio Godox AD600 Pro TTL', 'Godox', 'AD600Pro', 'SN-LIGHT-AD600-09', '2023-04-01', 'Đèn công suất mạnh 600W cho ánh sáng studio chuẩn quốc tế', 'available'),
-(10, 'lighting', 'Đèn Studio Godox AD400 Pro', 'Godox', 'AD400Pro', 'SN-LIGHT-AD400-10', '2023-04-10', 'Đèn flash studio cơ động đánh sáng viền và tóc cho mẫu', 'available'),
-(11, 'lighting', 'Đèn Nanlite Forza 500B II Bi-Color', 'Nanlite', 'Forza-500B', 'SN-LIGHT-NANLITE-11', '2023-10-18', 'Đèn liên tục nhiệt độ màu 2700K - 6500K quay video & chụp ảnh điện ảnh', 'available'),
-(12, 'tripod', 'Chân Máy Ảnh Manfrotto 055 Pro', 'Manfrotto', 'MK055XPRO3', 'SN-TRIPOD-055-12', '2023-02-18', 'Chân máy ảnh carbon chịu tải 15kg, vô cùng đầm chắc', 'available'),
-(13, 'other', 'Softbox Bát Giác Aputure Light Dome 150cm', 'Aputure', 'Dome-150', 'SN-SOFTBOX-150-13', '2023-03-25', 'Chao tản sáng tổ ong cực lớn tạo ánh sáng mềm mịn cho da mặt', 'available');
+(1, 'camera', 'Sony Alpha 7 IV - Bộ cá nhân', 'Sony', 'ILCE-7M4', 'SN-SONY-7M4-01', '2023-05-10', 'Máy ảnh full-frame dùng cho gói cá nhân, profile và lookbook.', 'available'),
+(2, 'camera', 'Canon EOS R5 - Bộ cưới', 'Canon', 'EOS R5', 'SN-CANON-R5-02', '2023-06-12', 'Máy ảnh độ phân giải cao phục vụ bộ ảnh cưới.', 'available'),
+(3, 'camera', 'Sony Alpha 7R V - Bộ nhóm', 'Sony', 'ILCE-7RM5', 'SN-SONY-7R5-03', '2023-11-20', 'Máy ảnh độ phân giải cao cho ảnh gia đình và nhóm.', 'available'),
+(4, 'camera', 'Fujifilm GFX 100S - Bộ lookbook', 'Fujifilm', 'GFX-100S', 'SN-FUJI-100S-04', '2024-01-15', 'Máy ảnh medium format cho thời trang và sản phẩm.', 'available'),
+(5, 'lens', 'Sony FE 24-70mm F2.8 GM II', 'Sony', 'SEL2470GM2', 'SN-LENS-2470GM-05', '2023-05-15', 'Ống kính zoom tiêu chuẩn cho studio và nhóm.', 'available'),
+(6, 'lens', 'Sony FE 85mm F1.4 GM', 'Sony', 'SEL85F14GM', 'SN-LENS-85GM-06', '2023-07-01', 'Ống kính chân dung cho cá nhân và profile.', 'available'),
+(7, 'lens', 'Canon RF 50mm F1.2L USM', 'Canon', 'RF-50-F12', 'SN-LENS-RF50-07', '2023-08-10', 'Ống kính khẩu lớn cho chân dung và lookbook.', 'available'),
+(8, 'lens', 'Canon RF 70-200mm F2.8L IS USM', 'Canon', 'RF-70200-F28', 'SN-LENS-RF70200-08', '2023-09-05', 'Ống kính tele ghi lại khoảnh khắc cưới tự nhiên.', 'available'),
+(9, 'lighting', 'Godox AD600 Pro - Key light', 'Godox', 'AD600Pro', 'SN-LIGHT-AD600-09', '2023-04-01', 'Đèn flash chính cho chân dung, cưới và lookbook.', 'available'),
+(10, 'lighting', 'Godox AD400 Pro - Fill light', 'Godox', 'AD400Pro', 'SN-LIGHT-AD400-10', '2023-04-10', 'Đèn phụ trợ tạo sáng viền và tóc.', 'available'),
+(11, 'lighting', 'Nanlite Forza 500B II', 'Nanlite', 'Forza-500B', 'SN-LIGHT-NANLITE-11', '2023-10-18', 'Đèn liên tục cho profile, video và sản phẩm.', 'available'),
+(12, 'tripod', 'Manfrotto 055 Pro', 'Manfrotto', 'MK055XPRO3', 'SN-TRIPOD-055-12', '2023-02-18', 'Chân máy ổn định cho ảnh nhóm và sản phẩm.', 'available'),
+(13, 'other', 'Aputure Light Dome 150cm', 'Aputure', 'Dome-150', 'SN-SOFTBOX-150-13', '2023-03-25', 'Softbox tản sáng mềm cho chân dung.', 'available');
 
 -- ---------------------------------------------------------------------
 -- 6. TRANG PHỤC STUDIO (CLOTHES TABLE)
 -- ---------------------------------------------------------------------
 INSERT INTO `clothes` (`id`, `type`, `name`, `size`, `gender`, `color`, `description`, `price`, `status`) VALUES
-(1, 'wedding', 'Váy Cưới Xòe Công Chúa Ren Pháp', 'M', 'Female', 'Trắng tinh khôi', 'Váy cưới đính kết 2000 viên đá Swarovski lấp lánh', 600000.0, 'available'),
-(2, 'wedding', 'Váy Cưới Đuôi Cá Satin Hoàng Gia', 'S', 'Female', 'Trắng ngà', 'Váy cưới lụa satin Ý tôn dáng đường cong kiêu sa', 550000.0, 'available'),
-(3, 'suit', 'Bộ Vest Nam Tuxedo Cổ Điển Kèm Nơ', 'L', 'Male', 'Đen huyền bí', 'Vest cưới chú rể dáng slim-fit chuẩn quý ông Châu Âu', 350000.0, 'available'),
-(4, 'suit', 'Bộ Vest Nam Caro Màu Be Vintage', 'XL', 'Male', 'Be nhạt', 'Vest phong cách Hàn Quốc trẻ trung lãng mạn', 300000.0, 'available'),
-(5, 'traditional', 'Áo Dài Lụa Tơ Tằm Hà Đông Thêu Sen', 'M', 'Female', 'Hồng phấn', 'Áo dài truyền thống thủ công mềm mại, bay bổng', 300000.0, 'available'),
-(6, 'traditional', 'Cổ Phục Việt Nhật Bình Triều Nguyễn', 'Free size', 'Female', 'Đỏ thắm', 'Cổ phục ngũ thân hoàng gia thêu rồng phượng tinh xảo', 400000.0, 'available'),
-(7, 'casual', 'Set Váy Nàng Thơ Trễ Vai Voan Tơ', 'Free size', 'Female', 'Trắng kem', 'Váy tiểu thư nhẹ nhàng cho concept chụp cá nhân trong nắng', 200000.0, 'available'),
-(8, 'casual', 'Set Đồ Gia Đình Đồng Điệu 4 Người', 'Free size', 'Female', 'Tone Pastel', 'Trang phục đồng điệu cho bố, mẹ và 2 bé chụp kỷ niệm gia đình', 450000.0, 'available');
+(1, 'casual', 'Váy Nàng Thơ Voan Pastel', 'Free size', 'Female', 'Trắng kem', 'Trang phục nhẹ nhàng đi kèm gói chụp ảnh cá nhân.', 0.0, 'available'),
+(2, 'wedding', 'Váy Cưới Ren Pháp', 'M', 'Female', 'Trắng', 'Váy cô dâu cho gói chụp ảnh cưới.', 0.0, 'available'),
+(3, 'suit', 'Tuxedo Chú Rể', 'L', 'Male', 'Đen', 'Bộ tuxedo chú rể đồng bộ với váy cưới.', 0.0, 'available'),
+(4, 'casual', 'Set Trang Phục Gia Đình Pastel', 'Free size', 'Male', 'Pastel', 'Trang phục phối màu cho gia đình hoặc nhóm bạn.', 0.0, 'available'),
+(5, 'other', 'Áo Tốt Nghiệp Và Mũ Cử Nhân', 'M', NULL, 'Đen', 'Trang phục và áo choàng cho ảnh tốt nghiệp.', 0.0, 'available'),
+(6, 'suit', 'Vest Doanh Nhân', 'L', 'Male', 'Xanh navy', 'Vest lịch sự cho ảnh doanh nhân và profile thương hiệu.', 0.0, 'available'),
+(7, 'traditional', 'Áo Dài Lụa Thêu Sen', 'M', 'Female', 'Hồng phấn', 'Áo dài tơ tằm dành cho concept truyền thống.', 0.0, 'available'),
+(8, 'traditional', 'Cổ Phục Nhật Bình', 'Free size', 'Female', 'Đỏ', 'Cổ phục Việt cho gói nghệ thuật cổ trang.', 0.0, 'available'),
+(9, 'casual', 'Set Lookbook Thời Trang Nữ', 'S', 'Female', 'Trung tính', 'Trang phục mẫu để dựng lookbook thời trang.', 0.0, 'available'),
+(10, 'other', 'Trang Phục Chụp Sản Phẩm', 'M', NULL, 'Theo mẫu', 'Trang phục mẫu phục vụ chụp sản phẩm thời trang.', 0.0, 'available');
 
 -- ---------------------------------------------------------------------
 -- 7. PHỤ KIỆN CHỤP ẢNH (ACCESSORIES TABLE)
 -- ---------------------------------------------------------------------
 INSERT INTO `accessories` (`id`, `type`, `name`, `description`, `quantity`, `price`, `status`) VALUES
-(1, 'wedding', 'Vương Miện Cô Dâu Pha Lê Ánh Bạc', 'Vương miện đính đá quý thủ công tinh xảo', 6, 120000.0, 'available'),
-(2, 'wedding', 'Bó Hoa Cưới Cầm Tay Lụa Cao Cấp Tone Trắng Kem', 'Hoa cưới cầm tay nghệ thuật bền đẹp lên hình sang trọng', 12, 100000.0, 'available'),
-(3, 'vintage', 'Mũ Beret Len Cổ Điển Phong Cách Paris', 'Mũ dạ beret chụp concept hoài niệm phố cổ', 10, 60000.0, 'available'),
-(4, 'vintage', 'Bộ Trâm Cài Tóc Cổ Trang Mạ Vàng Đính Ngọc', 'Phụ kiện cổ phục trâm hoa cài tóc cô dâu truyền thống', 8, 80000.0, 'available'),
-(5, 'concept', 'Kính Mắt Gọng Tròn Tri Thức & Sách Cổ Điển', 'Đạo cụ chụp ảnh chân dung concept thư sinh tri thức', 15, 50000.0, 'available'),
-(6, 'fashion', 'Bóng Bay Helium Nghệ Thuật Đủ Màu', 'Phụ kiện chụp ảnh sinh nhật, kỷ yếu và gia đình rực rỡ', 30, 70000.0, 'available');
+(1, 'fashion', 'Hoa Cầm Tay Pastel', 'Hoa cầm tay tạo điểm nhấn cho ảnh cá nhân.', 12, 0.0, 'available'),
+(2, 'wedding', 'Vương Miện Cô Dâu', 'Vương miện đính đá dùng trong gói ảnh cưới.', 6, 0.0, 'available'),
+(3, 'wedding', 'Bó Hoa Cưới Trắng Kem', 'Bó hoa cưới cầm tay.', 12, 0.0, 'available'),
+(4, 'concept', 'Bóng Bay Trang Trí', 'Đạo cụ cho ảnh gia đình, nhóm bạn và kỷ yếu.', 30, 0.0, 'available'),
+(5, 'concept', 'Bảng Tốt Nghiệp', 'Đạo cụ cầm tay cho bộ ảnh tốt nghiệp.', 15, 0.0, 'available'),
+(6, 'fashion', 'Kính Gọng Doanh Nhân', 'Phụ kiện tạo phong cách cho ảnh profile.', 10, 0.0, 'available'),
+(7, 'vintage', 'Trâm Cài Cổ Trang', 'Trâm cài tóc truyền thống cho áo dài và cổ phục.', 8, 0.0, 'available'),
+(8, 'fashion', 'Móc Treo Và Kẹp Trưng Bày', 'Phụ kiện tạo dáng và trưng bày sản phẩm lookbook.', 20, 0.0, 'available');
 
 -- ---------------------------------------------------------------------
 -- 8. DỊCH VỤ GIA TĂNG (SERVICES TABLE)
@@ -551,7 +581,7 @@ INSERT INTO `services` (`id`, `name`, `type`, `description`, `duration`, `price`
 INSERT INTO `packages` (`id`, `name`, `description`, `duration`, `price`, `status`, `created_at`, `updated_at`) VALUES
 (
     1,
-    'Gói Chụp Ảnh Cá Nhân / Nàng Thơ',
+    'Gói Chụp Ảnh Cá Nhân',
     'Chụp studio 60 phút tone Pastel Hàn Quốc, hỗ trợ 1 set trang phục Vintage, makeup cơ bản và retouch 15 ảnh chuyên sâu',
     60,
     990000.0,
@@ -561,7 +591,7 @@ INSERT INTO `packages` (`id`, `name`, `description`, `duration`, `price`, `statu
 ),
 (
     2,
-    'Gói Chụp Ảnh Cưới Studio Cơ Bản',
+    'Gói Chụp Ảnh Cưới',
     'Chụp 120 phút với 2 bối cảnh Cung Điện & Cổ Điển, 1 váy cưới ren Pháp, 1 tuxedo nam cao cấp, makeup cô dâu và tặng album mini 15x21',
     120,
     2990000.0,
@@ -591,7 +621,7 @@ INSERT INTO `packages` (`id`, `name`, `description`, `duration`, `price`, `statu
 ),
 (
     5,
-    'Gói Chụp Kỷ Yếu & Tốt Nghiệp Sáng Tạo',
+    'Gói Chụp Kỷ Yếu & Tốt Nghiệp',
     'Dành cho học sinh sinh viên cá nhân hoặc nhóm 2-5 bạn, chụp 90 phút với phông màu tự động, phụ kiện bằng tốt nghiệp và hoa tươi',
     90,
     1490000.0,
@@ -662,12 +692,35 @@ INSERT INTO `package_services` (`package_id`, `service_id`, `quantity`) VALUES
 INSERT INTO `package_backgrounds` (`package_id`, `background_id`) VALUES
 (1, 1),
 (2, 2), (2, 3),
-(3, 5),
-(4, 3), (4, 4),
-(5, 1),
-(6, 5), (6, 6),
-(7, 2),
-(8, 1), (8, 6);
+(3, 4),
+(4, 2), (4, 3), (4, 4),
+(5, 5),
+(6, 6),
+(7, 7),
+(8, 8);
+
+-- ---------------------------------------------------------------------
+-- 13. TRANG PHỤC VÀ PHỤ KIỆN ĐƯỢC BAO GỒM TRONG TỪNG GÓI
+-- ---------------------------------------------------------------------
+INSERT INTO `package_clothes` (`package_id`, `cloth_id`, `quantity`) VALUES
+(1, 1, 1),
+(2, 2, 1), (2, 3, 1),
+(3, 4, 1),
+(4, 2, 1), (4, 3, 1),
+(5, 5, 1),
+(6, 6, 1),
+(7, 7, 1), (7, 8, 1),
+(8, 9, 1), (8, 10, 1);
+
+INSERT INTO `package_accessories` (`package_id`, `accessory_id`, `quantity`) VALUES
+(1, 1, 1),
+(2, 2, 1), (2, 3, 1),
+(3, 4, 2),
+(4, 2, 1), (4, 3, 1),
+(5, 5, 1), (5, 4, 1),
+(6, 6, 1),
+(7, 7, 1),
+(8, 8, 2);
 
 -- ---------------------------------------------------------------------
 -- 13. BỘ SƯU TẬP ẢNH GÓI CHỤP CHI TIẾT (IMAGES TABLE - 48 ẢNH CHẤT LƯỢNG CAO)
@@ -958,3 +1011,355 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =====================================================================
 -- KẾT THÚC TOÀN BỘ FILE PHOTO_STUDIO.SQL (SCHEMA + DATA)
 -- =====================================================================
+
+
+-- =====================================================================
+-- PHẦN MIGRATION TÍCH HỢP: nâng cấp dữ liệu cũ theo cấu hình package resources
+-- Lưu ý: đầu file photo_studio.sql vẫn là script khởi tạo có DROP TABLE.
+-- =====================================================================
+-- Migration cho database photo_studio đang có dữ liệu.
+-- Cập nhật tài nguyên theo gói chụp nhưng giữ nguyên ID để các booking cũ còn tham chiếu được.
+USE `photo_studio`;
+
+CREATE TABLE IF NOT EXISTS `package_clothes` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `package_id` BIGINT NOT NULL,
+    `cloth_id` BIGINT NOT NULL,
+    `quantity` INT NOT NULL DEFAULT 1,
+    CONSTRAINT `fk_pc_package` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_pc_cloth` FOREIGN KEY (`cloth_id`) REFERENCES `clothes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    UNIQUE KEY `uk_package_cloth` (`package_id`, `cloth_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `package_accessories` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `package_id` BIGINT NOT NULL,
+    `accessory_id` BIGINT NOT NULL,
+    `quantity` INT NOT NULL DEFAULT 1,
+    CONSTRAINT `fk_pa_package` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_pa_accessory` FOREIGN KEY (`accessory_id`) REFERENCES `accessories` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    UNIQUE KEY `uk_package_accessory` (`package_id`, `accessory_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+UPDATE `packages` SET `name` = CASE `id`
+    WHEN 1 THEN 'Gói Chụp Ảnh Cá Nhân'
+    WHEN 2 THEN 'Gói Chụp Ảnh Cưới'
+    WHEN 3 THEN 'Gói Chụp Ảnh Gia Đình / Nhóm Bạn'
+    WHEN 5 THEN 'Gói Chụp Kỷ Yếu & Tốt Nghiệp'
+    WHEN 6 THEN 'Gói Chụp Doanh Nhân & Profile Thương Hiệu'
+    WHEN 7 THEN 'Gói Chụp Nghệ Thuật Cổ Trang & Áo Dài'
+    WHEN 8 THEN 'Gói Chụp Lookbook Thời Trang & Sản Phẩm'
+    ELSE `name` END
+WHERE `id` IN (1, 2, 3, 5, 6, 7, 8);
+
+UPDATE `backgrounds` SET
+    `name` = CASE `id`
+        WHEN 1 THEN 'Studio Pastel Cá Nhân' WHEN 2 THEN 'Studio Cưới Cổ Điển'
+        WHEN 3 THEN 'Studio Cưới Hoàng Gia' WHEN 4 THEN 'Phòng Khách Gia Đình'
+        WHEN 5 THEN 'Phông Kỷ Yếu Tươi Sáng' WHEN 6 THEN 'Studio Profile Doanh Nhân'
+        ELSE `name` END,
+    `description` = CASE `id`
+        WHEN 1 THEN 'Phông pastel Hàn Quốc và ánh sáng mềm cho gói chụp cá nhân.'
+        WHEN 2 THEN 'Vòm hoa và ánh sáng ấm dành cho ảnh cưới studio.'
+        WHEN 3 THEN 'Bối cảnh cung điện và đèn chùm cho ảnh cưới hoàng gia.'
+        WHEN 4 THEN 'Sofa và nội thất ấm cúng cho ảnh gia đình hoặc nhóm bạn.'
+        WHEN 5 THEN 'Phông màu trẻ trung cho ảnh kỷ yếu, tốt nghiệp.'
+        WHEN 6 THEN 'Phông trung tính và ánh sáng chân dung doanh nhân.'
+        ELSE `description` END,
+    `status` = 'active', `deleted_at` = NULL
+WHERE `id` BETWEEN 1 AND 6;
+INSERT INTO `backgrounds` (`id`, `name`, `description`, `status`) VALUES
+(7, 'Phố Cổ & Hồ Sen', 'Bối cảnh Á Đông với tường vàng, đèn lồng và hồ sen cho áo dài, cổ phục.', 'active'),
+(8, 'Cyclorama Lookbook', 'Phông nền trắng vô cực cho lookbook thời trang và ảnh sản phẩm.', 'active')
+ON DUPLICATE KEY UPDATE `name`=VALUES(`name`), `description`=VALUES(`description`), `status`='active', `deleted_at`=NULL;
+
+UPDATE `equipments` SET
+    `name` = CASE `id`
+        WHEN 1 THEN 'Sony Alpha 7 IV - Bộ cá nhân' WHEN 2 THEN 'Canon EOS R5 - Bộ cưới'
+        WHEN 3 THEN 'Sony Alpha 7R V - Bộ nhóm' WHEN 4 THEN 'Fujifilm GFX 100S - Bộ lookbook'
+        WHEN 5 THEN 'Sony FE 24-70mm F2.8 GM II' WHEN 6 THEN 'Sony FE 85mm F1.4 GM'
+        WHEN 7 THEN 'Canon RF 50mm F1.2L USM' WHEN 8 THEN 'Canon RF 70-200mm F2.8L IS USM'
+        WHEN 9 THEN 'Godox AD600 Pro - Key light' WHEN 10 THEN 'Godox AD400 Pro - Fill light'
+        WHEN 11 THEN 'Nanlite Forza 500B II' WHEN 12 THEN 'Manfrotto 055 Pro'
+        WHEN 13 THEN 'Aputure Light Dome 150cm' ELSE `name` END,
+    `status` = 'available', `deleted_at` = NULL
+WHERE `id` BETWEEN 1 AND 13;
+
+UPDATE `clothes` SET
+    `type` = CASE `id` WHEN 1 THEN 'casual' WHEN 2 THEN 'wedding' WHEN 3 THEN 'suit'
+        WHEN 4 THEN 'casual' WHEN 5 THEN 'other' WHEN 6 THEN 'suit'
+        WHEN 7 THEN 'traditional' WHEN 8 THEN 'traditional' ELSE `type` END,
+    `name` = CASE `id`
+        WHEN 1 THEN 'Váy Nàng Thơ Voan Pastel' WHEN 2 THEN 'Váy Cưới Ren Pháp'
+        WHEN 3 THEN 'Tuxedo Chú Rể' WHEN 4 THEN 'Set Trang Phục Gia Đình Pastel'
+        WHEN 5 THEN 'Áo Tốt Nghiệp Và Mũ Cử Nhân' WHEN 6 THEN 'Vest Doanh Nhân'
+        WHEN 7 THEN 'Áo Dài Lụa Thêu Sen' WHEN 8 THEN 'Cổ Phục Nhật Bình' ELSE `name` END,
+    `price` = 0, `status` = 'available', `deleted_at` = NULL
+WHERE `id` BETWEEN 1 AND 8;
+INSERT INTO `clothes` (`id`, `type`, `name`, `size`, `gender`, `color`, `description`, `price`, `status`) VALUES
+(9, 'casual', 'Set Lookbook Thời Trang Nữ', 'S', 'Female', 'Trung tính', 'Trang phục mẫu để dựng lookbook thời trang.', 0, 'available'),
+(10, 'other', 'Trang Phục Chụp Sản Phẩm', 'M', NULL, 'Theo mẫu', 'Trang phục mẫu phục vụ chụp sản phẩm thời trang.', 0, 'available')
+ON DUPLICATE KEY UPDATE `name`=VALUES(`name`), `type`=VALUES(`type`), `description`=VALUES(`description`), `status`='available', `deleted_at`=NULL;
+
+UPDATE `accessories` SET
+    `type` = CASE `id` WHEN 1 THEN 'fashion' WHEN 2 THEN 'wedding' WHEN 3 THEN 'wedding'
+        WHEN 4 THEN 'concept' WHEN 5 THEN 'concept' WHEN 6 THEN 'fashion' ELSE `type` END,
+    `name` = CASE `id`
+        WHEN 1 THEN 'Hoa Cầm Tay Pastel' WHEN 2 THEN 'Vương Miện Cô Dâu'
+        WHEN 3 THEN 'Bó Hoa Cưới Trắng Kem' WHEN 4 THEN 'Bóng Bay Trang Trí'
+        WHEN 5 THEN 'Bảng Tốt Nghiệp' WHEN 6 THEN 'Kính Gọng Doanh Nhân' ELSE `name` END,
+    `quantity` = CASE `id` WHEN 1 THEN 12 WHEN 2 THEN 6 WHEN 3 THEN 12
+        WHEN 4 THEN 30 WHEN 5 THEN 15 WHEN 6 THEN 10 ELSE `quantity` END,
+    `price` = 0, `status` = 'available', `deleted_at` = NULL
+WHERE `id` BETWEEN 1 AND 6;
+INSERT INTO `accessories` (`id`, `type`, `name`, `description`, `quantity`, `price`, `status`) VALUES
+(7, 'vintage', 'Trâm Cài Cổ Trang', 'Trâm cài tóc truyền thống cho áo dài và cổ phục.', 8, 0, 'available'),
+(8, 'fashion', 'Móc Treo Và Kẹp Trưng Bày', 'Phụ kiện trưng bày sản phẩm lookbook.', 20, 0, 'available')
+ON DUPLICATE KEY UPDATE `name`=VALUES(`name`), `type`=VALUES(`type`), `description`=VALUES(`description`), `quantity`=VALUES(`quantity`), `status`='available', `deleted_at`=NULL;
+
+DELETE FROM `package_backgrounds`;
+INSERT INTO `package_backgrounds` (`package_id`, `background_id`) VALUES
+(1,1),(2,2),(2,3),(3,4),(4,2),(4,3),(4,4),(5,5),(6,6),(7,7),(8,8);
+
+DELETE FROM `package_clothes`;
+INSERT INTO `package_clothes` (`package_id`, `cloth_id`, `quantity`) VALUES
+(1,1,1),(2,2,1),(2,3,1),(3,4,1),(4,2,1),(4,3,1),(5,5,1),(6,6,1),(7,7,1),(7,8,1),(8,9,1),(8,10,1);
+
+DELETE FROM `package_accessories`;
+INSERT INTO `package_accessories` (`package_id`, `accessory_id`, `quantity`) VALUES
+(1,1,1),(2,2,1),(2,3,1),(3,4,2),(4,2,1),(4,3,1),(5,5,1),(5,4,1),(6,6,1),(7,7,1),(8,8,2);
+
+
+
+-- =====================================================================
+-- SEED TÙY CHỌN ĐÃ GỘP TỪ seed_employee_ecosystem.sql
+-- Các dòng được chú thích; bỏ tiền tố -- nếu muốn chạy riêng seed này.
+-- =====================================================================
+-- -- =====================================================================
+-- -- SEED DỮ LIỆU ĐỒNG BỘ TOÀN DIỆN CHO NHÂN VIÊN PHẠM HOÀI MAI (ID = 8)
+-- -- File: docs/seed_employee_ecosystem.sql
+-- -- Database: photo_studio
+-- -- =====================================================================
+--
+-- USE `photo_studio`;
+--
+-- SET NAMES utf8mb4;
+-- SET FOREIGN_KEY_CHECKS = 0;
+--
+-- -- ---------------------------------------------------------------------
+-- -- 1. BẢO ĐẢM PHÒNG CHỤP (ROOMS)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `rooms` (`id`, `name`, `description`, `capacity`, `status`) VALUES
+-- (1, 'Phòng Studio A - Phong Cách Hàn Quốc', 'Tone màu pastel sáng, rèm voan, hoa khô nghệ thuật', 5, 'active'),
+-- (2, 'Phòng Studio B - Concept Cổ Điển & Cung Điện', 'Nội thất gỗ sồi sang trọng, đèn chùm hoàng gia', 10, 'active'),
+-- (3, 'Phòng Studio VIP - Cinema & Đa Năng', 'Hệ thống đèn Arri/Godox kịch tính, phông điện tử', 8, 'active')
+-- ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `status` = VALUES(`status`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 2. BẢO ĐẢM TÀI KHOẢN KHÁCH HÀNG & NHÂN VIÊN (USERS)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `users` (`id`, `username`, `email`, `password`, `fullname`, `date_of_birth`, `gender`, `address`, `phone`, `avatar`, `role`, `status`) VALUES
+-- (4, 'customer1', 'minhtuan@gmail.com', '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.', 'Lê Minh Tuấn', '2000-03-10', 'Male', 'Cầu Giấy, Hà Nội', '0934567890', '/avatars/cust1.jpg', 'Customer', 'active'),
+-- (5, 'customer2', 'phuonglinh@gmail.com', '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.', 'Phạm Phương Linh', '2001-11-25', 'Female', 'Đống Đa, Hà Nội', '0945678901', '/avatars/cust2.jpg', 'Customer', 'active'),
+-- (8, 'hoaimai', 'phamhoaimai@photostudio.com', '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.', 'Phạm Hoài Mai', '1997-09-18', 'Female', 'Số 45 Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội', '0968123456', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', 'Employee', 'active')
+-- ON DUPLICATE KEY UPDATE `fullname` = VALUES(`fullname`), `phone` = VALUES(`phone`), `role` = VALUES(`role`), `status` = VALUES(`status`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 3. BẢO ĐẢM HỒ SƠ NHÂN VIÊN (EMPLOYEES)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `employees` (`id`, `user_id`, `position`, `hire_date`, `status`) VALUES
+-- (8, 8, 'makeup', '2023-04-01', 'active')
+-- ON DUPLICATE KEY UPDATE `position` = VALUES(`position`), `status` = VALUES(`status`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 4. BẢO ĐẢM DANH MỤC THIẾT BỊ STUDIO (EQUIPMENTS)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `equipments` (`id`, `type`, `name`, `brand`, `model`, `serial_number`, `purchase_date`, `description`, `status`) VALUES
+-- (1, 'camera', 'Sony Alpha 7 IV Full-Frame', 'Sony', 'ILCE-7M4', 'SN-SONY-7M4-01', '2023-05-10', 'Máy ảnh chuyên chụp chân dung & studio', 'available'),
+-- (2, 'camera', 'Canon EOS R5 Độ Phân Giải 45MP', 'Canon', 'EOS R5', 'SN-CANON-R5-02', '2023-06-12', 'Chi tiết da cực cao cho bộ ảnh cưới', 'available'),
+-- (3, 'lighting', 'Đèn Studio Godox AD600 Pro TTL', 'Godox', 'AD600Pro', 'SN-LIGHT-AD600-09', '2023-04-01', 'Đèn công suất 600W chuẩn quốc tế', 'available'),
+-- (4, 'lighting', 'Đèn Nanlite Forza 500B II Bi-Color', 'Nanlite', 'Forza-500B', 'SN-LIGHT-NANLITE-11', '2023-10-18', 'Đèn liên tục nhiệt độ màu 2700K - 6500K', 'available'),
+-- (5, 'tripod', 'Chân Máy Ảnh Manfrotto 055 Pro', 'Manfrotto', 'MK055XPRO3', 'SN-TRIPOD-055-12', '2023-02-18', 'Chân máy carbon chịu tải lớn', 'available')
+-- ON DUPLICATE KEY UPDATE `status` = VALUES(`status`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 5. NẠP ĐƠN ĐẶT LỊCH / CA CHỤP THẬT (BOOKINGS TABLE)
+-- -- Khớp hoàn toàn với các ca phân công của nhân viên ID 8
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `bookings` (`id`, `customer_id`, `room_id`, `booking_date`, `start_time`, `end_time`, `status`, `customer_note`, `created_at`, `updated_at`) VALUES
+-- (1, 4, 2, '2026-10-10 09:00:00', '09:00:00', '11:00:00', 'completed', 'Khách: Nguyễn Thu Trang & Hoàng Nam - Gói Chụp Cưới Cổ Điển', '2026-10-05 08:30:00', NOW()),
+-- (2, 4, 1, '2026-10-12 14:00:00', '14:00:00', '15:30:00', 'completed', 'Khách: Lê Minh Tuấn - Gói Nàng Thơ Tone Trong Trẻo', '2026-10-08 10:00:00', NOW()),
+-- (5, 5, 2, '2026-10-20 15:00:00', '15:00:00', '16:30:00', 'completed', 'Khách: Trần Khánh Huyền - Gói Nghệ Thuật Cổ Trang & Áo Dài', '2026-10-16 11:45:00', NOW()),
+-- (7, 4, 1, '2026-10-28 09:00:00', '09:00:00', '10:30:00', 'confirmed', 'Khách: Vũ Hoàng Mai - Đặt lịch chụp cá nhân mùa thu', NOW(), NOW()),
+-- (8, 5, 3, '2026-10-29 14:00:00', '14:00:00', '16:30:00', 'in_progress', 'Khách: Trịnh Đình Quang - Đặt lịch chụp Profile Doanh Nhân', NOW(), NOW())
+-- ON DUPLICATE KEY UPDATE `status` = VALUES(`status`), `customer_note` = VALUES(`customer_note`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 6. PHÂN CÔNG NHÂN VIÊN CHO CA CHỤP (BOOKING_EMPLOYEE_ASSIGNMENTS)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `booking_employee_assignments` (`id`, `booking_id`, `employee_id`, `assigned_at`, `status`, `note`) VALUES
+-- (1, 1, 8, '2026-10-09 10:00:00', 'completed', 'Phụ trách layout cô dâu Hàn Quốc tone cam đào'),
+-- (2, 2, 8, '2026-10-11 15:00:00', 'completed', 'Makeup nhẹ nhàng, làm tóc xoăn lơi nàng thơ'),
+-- (3, 5, 8, '2026-10-19 14:00:00', 'completed', 'Búi tóc cổ trang, cài trâm ngọc cung đình'),
+-- (4, 7, 8, NOW(), 'assigned', 'Lịch chụp cá nhân mùa thu - chuẩn bị layout tone ấm'),
+-- (5, 8, 8, NOW(), 'assigned', 'Hỗ trợ dặm phấn và chỉnh trang phục doanh nhân')
+-- ON DUPLICATE KEY UPDATE `status` = VALUES(`status`), `note` = VALUES(`note`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 7. CẤP PHÁT THIẾT BỊ / ĐẠO CỤ CHO BUỔI CHỤP (BOOKING_EQUIPMENT)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `booking_equipment` (`id`, `booking_id`, `equipment_id`, `assigned_at`, `returned_at`, `status`, `note`) VALUES
+-- (1, 1, 3, '2026-10-10 08:30:00', '2026-10-10 11:30:00', 'returned', 'Đèn Godox AD600 hoạt động tốt, đã hoàn trả kho'),
+-- (2, 2, 4, '2026-10-12 13:30:00', '2026-10-12 16:00:00', 'returned', 'Đèn Nanlite Forza 500B đã hoàn trả đủ chóa đèn'),
+-- (3, 7, 3, NOW(), NULL, 'assigned', 'Cấp đèn Godox cho ca chụp cá nhân mùa thu phòng A'),
+-- (4, 8, 4, NOW(), NULL, 'assigned', 'Cấp đèn Nanlite cho ca chụp Profile phòng VIP')
+-- ON DUPLICATE KEY UPDATE `status` = VALUES(`status`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 8. NẠP ĐÁNH GIÁ TỪ KHÁCH HÀNG (REVIEWS TABLE)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `reviews` (`id`, `booking_id`, `customer_id`, `rating`, `comment`, `created_at`, `updated_at`) VALUES
+-- (1, 1, 4, 5.0, 'Ekip chụp ảnh cưới có tâm nhất mình từng trải nghiệm! Makeup bạn Mai làm nhẹ nhàng trong trẻo đúng style mình thích. Ảnh nhận về đẹp lung linh!', '2026-10-11 16:45:00', NOW()),
+-- (2, 2, 4, 5.0, 'Mình chụp gói Nàng Thơ kỷ niệm sinh nhật cho bạn gái. Layout trang điểm rất dịu mắt, bạn bè ai cũng khen nức nở!', '2026-10-13 11:20:00', NOW()),
+-- (5, 5, 5, 5.0, 'Bộ ảnh áo dài sen hồ xuất sắc! Búi tóc cổ phục của bạn Mai rất khéo léo, phụ kiện cài tóc phối hài hòa chuẩn phong cách hoàng gia.', '2026-10-21 18:00:00', NOW())
+-- ON DUPLICATE KEY UPDATE `rating` = VALUES(`rating`), `comment` = VALUES(`comment`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 9. NẠP ĐÁNH GIÁ TAY NGHỀ NHÂN VIÊN (EMPLOYEE_REVIEWS TABLE)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `employee_reviews` (`id`, `review_id`, `employee_id`, `rating`, `comment`) VALUES
+-- (1, 1, 8, 5.0, 'Bạn Mai makeup rất tỉ mỉ, lớp nền mỏng nhẹ tự nhiên suốt buổi chụp 4 tiếng không hề bị mốc hay bóng dầu. Thái độ rất ân cần, đáng yêu!'),
+-- (2, 2, 8, 5.0, 'Chị Mai làm tóc xinh xỉu, tư vấn tone son cực kỳ hợp với chiếc váy hoa nhí. Rất ưng ý với phong cách làm việc của chị!'),
+-- (3, 5, 8, 4.9, 'Tay nghề búi tóc cổ phục của bạn Mai rất khéo léo và chắc chắn, phụ kiện cài tóc phối hài hòa đúng phong cách cung đình.')
+-- ON DUPLICATE KEY UPDATE `rating` = VALUES(`rating`), `comment` = VALUES(`comment`);
+--
+-- -- ---------------------------------------------------------------------
+-- -- 10. NẠP THÔNG BÁO HỆ THỐNG GỬI ĐẾN NHÂN VIÊN PHẠM HOÀI MAI (NOTIFICATIONS)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `read_at`, `created_at`) VALUES
+-- (1, 8, 'Phân công ca chụp mới #7', 'Bạn được phân công phụ trách trang điểm cho Booking #7 vào ngày 28/10/2026.', 'employee_assignment', NULL, NOW()),
+-- (2, 8, 'Đánh giá 5 sao mới từ khách hàng', 'Khách hàng vừa để lại đánh giá 5 sao khen ngợi tay nghề makeup tại ca chụp cưới #1.', 'system', NOW(), '2026-10-11 17:00:00'),
+-- (3, 8, 'Phân công ca chụp mới #8', 'Bạn được phân công phụ trách trang điểm cho Booking #8 (Doanh nhân Profile) vào ngày 29/10/2026.', 'employee_assignment', NULL, NOW()),
+-- (4, 8, 'Khen thưởng nhân viên xuất sắc tuần', 'Chúc mừng Phạm Hoài Mai đạt điểm hài lòng khách hàng 5.0/5.0 cao nhất tuần qua.', 'system', NULL, NOW())
+-- ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `message` = VALUES(`message`);
+--
+-- SET FOREIGN_KEY_CHECKS = 1;
+--
+-- -- ---------------------------------------------------------------------
+-- -- KIỂM TRA ĐỒNG BỘ
+-- -- ---------------------------------------------------------------------
+-- SELECT 'bookings' AS bang, COUNT(*) AS so_luong FROM `bookings`
+-- UNION ALL
+-- SELECT 'booking_employee_assignments', COUNT(*) FROM `booking_employee_assignments` WHERE `employee_id` = 8
+-- UNION ALL
+-- SELECT 'reviews', COUNT(*) FROM `reviews`
+-- UNION ALL
+-- SELECT 'employee_reviews', COUNT(*) FROM `employee_reviews` WHERE `employee_id` = 8
+-- UNION ALL
+-- SELECT 'notifications', COUNT(*) FROM `notifications` WHERE `user_id` = 8;
+--
+
+
+-- =====================================================================
+-- SEED TÙY CHỌN ĐÃ GỘP TỪ seed_employee_pham_hoai_mai.sql
+-- Các dòng được chú thích; bỏ tiền tố -- nếu muốn chạy riêng seed này.
+-- =====================================================================
+-- -- =====================================================================
+-- -- DỮ LIỆU MẪU DÀNH CHO NHÂN VIÊN: PHẠM HOÀI MAI (ID = 8)
+-- -- Hệ thống: PhotoStudio Management System
+-- -- File: docs/seed_employee_pham_hoai_mai.sql
+-- -- =====================================================================
+--
+-- USE `photo_studio`;
+--
+-- SET NAMES utf8mb4;
+-- SET FOREIGN_KEY_CHECKS = 0;
+--
+-- -- ---------------------------------------------------------------------
+-- -- 0. DỌN DẸP DỮ LIỆU CŨ TRÁNH XUNG ĐỘT KHÓA NGOẠI
+-- -- ---------------------------------------------------------------------
+-- DELETE FROM `notifications` WHERE `user_id` = 8;
+-- DELETE FROM `employee_reviews` WHERE `employee_id` = 8;
+-- DELETE FROM `booking_employee_assignments` WHERE `employee_id` = 8;
+-- DELETE FROM `employees` WHERE `id` = 8 OR `user_id` = 8;
+-- DELETE FROM `users` WHERE `id` = 8 OR `username` = 'hoaimai';
+--
+-- -- ---------------------------------------------------------------------
+-- -- 1. TẠO TÀI KHOẢN NGƯỜI DÙNG (USERS) VỚI ID = 8
+-- -- Mật khẩu mặc định mã hóa BCrypt: 123456
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `users` (
+--     `id`,
+--     `username`,
+--     `email`,
+--     `password`,
+--     `fullname`,
+--     `date_of_birth`,
+--     `gender`,
+--     `address`,
+--     `phone`,
+--     `avatar`,
+--     `role`,
+--     `status`,
+--     `created_at`,
+--     `updated_at`
+-- ) VALUES (
+--     8,
+--     'hoaimai',
+--     'phamhoaimai@photostudio.com',
+--     '$2a$10$jQOE/xLYm4zyAYXC1dWl6uoMac/TgyA9QvHNe1zHyjDAHf9FpOWz.',
+--     'Phạm Hoài Mai',
+--     '1997-09-18',
+--     'Female',
+--     'Số 45 Cầu Giấy, Quan Hoa, Cầu Giấy, Hà Nội',
+--     '0968123456',
+--     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+--     'Employee',
+--     'active',
+--     NOW(),
+--     NOW()
+-- );
+--
+-- -- ---------------------------------------------------------------------
+-- -- 2. TẠO HỒ SƠ NHÂN VIÊN (EMPLOYEES) VỚI ID = 8 & USER_ID = 8
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `employees` (`id`, `user_id`, `position`, `hire_date`, `status`)
+-- VALUES (8, 8, 'makeup', '2023-04-01', 'active');
+--
+-- -- ---------------------------------------------------------------------
+-- -- 3. PHÂN CÔNG BUỔI CHỤP CHO NHÂN VIÊN ID = 8 (BOOKING_EMPLOYEE_ASSIGNMENTS)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `booking_employee_assignments` (`booking_id`, `employee_id`, `assigned_at`, `status`, `note`)
+-- VALUES
+-- (1, 8, '2026-10-09 10:00:00', 'completed', 'Phụ trách layout cô dâu Hàn Quốc tone cam đào'),
+-- (2, 8, '2026-10-11 15:00:00', 'completed', 'Makeup nhẹ nhàng, làm tóc xoăn lơi nàng thơ'),
+-- (5, 8, '2026-10-19 14:00:00', 'completed', 'Búi tóc cổ trang, cài trâm ngọc cung đình'),
+-- (7, 8, NOW(), 'assigned', 'Lịch chụp cá nhân mùa thu - chuẩn bị layout tone ấm');
+--
+-- -- ---------------------------------------------------------------------
+-- -- 4. ĐÁNH GIÁ CHẤT LƯỢNG CHO NHÂN VIÊN ID = 8 (EMPLOYEE_REVIEWS)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `employee_reviews` (`review_id`, `employee_id`, `rating`, `comment`)
+-- VALUES
+-- (1, 8, 5.0, 'Bạn Mai makeup rất tỉ mỉ, lớp nền mỏng nhẹ tự nhiên suốt buổi chụp. Thái độ rất ân cần, đáng yêu!'),
+-- (2, 8, 5.0, 'Chị Mai làm tóc xinh xỉu, tư vấn tone son cực kỳ hợp với chiếc váy hoa nhí. Rất ưng ý!'),
+-- (5, 8, 4.9, 'Tay nghề búi tóc cổ phục của bạn Mai rất khéo léo, phụ kiện phối hài hòa đúng phong cách.');
+--
+-- -- ---------------------------------------------------------------------
+-- -- 5. THÔNG BÁO HỆ THỐNG GỬI CHO USER_ID = 8 (NOTIFICATIONS)
+-- -- ---------------------------------------------------------------------
+-- INSERT INTO `notifications` (`user_id`, `title`, `message`, `type`, `read_at`, `created_at`)
+-- VALUES
+-- (8, 'Phân công lịch làm việc mới', 'Bạn được phân công phụ trách trang điểm cho Booking #7 vào ngày 28/10/2026.', 'employee_assignment', NULL, NOW()),
+-- (8, 'Đánh giá 5 sao mới từ khách hàng', 'Khách hàng vừa để lại đánh giá 5 sao cho bạn tại đơn chụp ảnh cưới #1.', 'system', NOW(), '2026-10-11 17:00:00');
+--
+-- SET FOREIGN_KEY_CHECKS = 1;
+--
+-- -- ---------------------------------------------------------------------
+-- -- KIỂM TRA LẠI DỮ LIỆU
+-- -- ---------------------------------------------------------------------
+-- SELECT u.id AS user_id, u.username, u.fullname, u.email, e.id AS employee_id, e.position, e.status
+-- FROM users u
+-- JOIN employees e ON u.id = e.user_id
+-- WHERE u.id = 8;
+--

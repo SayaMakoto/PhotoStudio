@@ -50,6 +50,12 @@ export default function EmployeeDashboard() {
   // 3. Modal State
   const [selectedBookingForDetail, setSelectedBookingForDetail] = useState(null);
 
+  useEffect(() => {
+    if (selectedBookingForDetail && !bookings.some((booking) => booking.id === selectedBookingForDetail.id)) {
+      setSelectedBookingForDetail(null);
+    }
+  }, [bookings, selectedBookingForDetail]);
+
   // Fetch all real database data on mount
   useEffect(() => {
     let isMounted = true;
@@ -89,9 +95,31 @@ export default function EmployeeDashboard() {
           }
         }
 
-        // Bookings
+        // Chỉ hiển thị các buổi được phân công cho nhân viên hiện tại.
+        // Phân công đã bị admin hủy không còn là lịch tác nghiệp của nhân viên.
         if (bookingsRes.status === 'fulfilled' && Array.isArray(bookingsRes.value)) {
-          setBookings(bookingsRes.value);
+          const employeeId = currentEmployee?.id;
+          if (employeeId) {
+            const assignmentsByBooking = await Promise.all(bookingsRes.value.map(async (booking) => {
+              try {
+                const assignments = await employeeBookingService.getAssignments(booking.id);
+                return [booking.id, assignments];
+              } catch (assignmentError) {
+                console.warn(`Không tải được phân công của đơn #${booking.id}:`, assignmentError);
+                return [booking.id, []];
+              }
+            }));
+            if (!isMounted) return;
+            const assignmentMap = new Map(assignmentsByBooking);
+            const assignedBookings = bookingsRes.value
+              .filter((booking) => (assignmentMap.get(booking.id) || []).some(
+                (assignment) => String(assignment.employeeId) === String(employeeId)
+                  && assignment.status !== 'cancelled',
+              ));
+            setBookings(assignedBookings);
+          } else {
+            setBookings(bookingsRes.value);
+          }
         }
 
         // Equipments
@@ -154,6 +182,47 @@ export default function EmployeeDashboard() {
       isMounted = false;
     };
   }, []);
+
+  // Làm mới lịch định kỳ và khi quay lại tab để các phân công admin vừa hủy
+  // được ẩn khỏi trang nhân viên mà không cần tải lại trang thủ công.
+  useEffect(() => {
+    const employeeId = employeeDetails?.id;
+    if (!employeeId) return undefined;
+    let mounted = true;
+
+    const refreshAssignedBookings = async () => {
+      try {
+        const allBookings = await employeeBookingService.getAll();
+        if (!Array.isArray(allBookings)) return;
+        const pairs = await Promise.all(allBookings.map(async (booking) => {
+          try {
+            return [booking.id, await employeeBookingService.getAssignments(booking.id)];
+          } catch {
+            return [booking.id, []];
+          }
+        }));
+        if (!mounted) return;
+        const assignmentsByBooking = new Map(pairs);
+        setBookings(allBookings.filter((booking) =>
+          (assignmentsByBooking.get(booking.id) || []).some((assignment) =>
+            String(assignment.employeeId) === String(employeeId)
+              && assignment.status !== 'cancelled',
+          ),
+        ));
+      } catch (error) {
+        console.warn('Không thể làm mới lịch phân công:', error);
+      }
+    };
+
+    const onFocus = () => { refreshAssignedBookings(); };
+    const intervalId = window.setInterval(refreshAssignedBookings, 30000);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      mounted = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [employeeDetails?.id]);
 
   const handleProfileUpdated = (updated) => {
     setProfile(updated);

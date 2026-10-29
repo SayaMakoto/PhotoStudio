@@ -159,6 +159,9 @@ export const customerAuthService = {
 
   // Đăng ký tài khoản khách hàng mới
   register: async (userData) => {
+    if (!userData?.username?.trim()) {
+      throw new Error('Tên đăng nhập không được để trống.');
+    }
     try {
       return await axiosCustomer.post('/api/users/register', {
         ...userData,

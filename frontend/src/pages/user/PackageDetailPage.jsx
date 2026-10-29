@@ -78,6 +78,8 @@ export default function PackageDetailPage() {
   const [galleryImages, setGalleryImages] = useState(defaultPkg?.images || []);
   const [packageServices, setPackageServices] = useState(defaultPkg?.services || []);
   const [packageBackgrounds, setPackageBackgrounds] = useState(defaultPkg?.backgrounds || []);
+  const packageClothes = pkg?.clothes || [];
+  const packageAccessories = pkg?.accessories || [];
   const [addOnServices, setAddOnServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -634,6 +636,35 @@ export default function PackageDetailPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {(packageClothes.length > 0 || packageAccessories.length > 0) && (
+              <div className="grid gap-4 pt-2 sm:grid-cols-2">
+                {packageClothes.length > 0 && (
+                  <section className="space-y-3 rounded-3xl border border-[#F2E8E9] bg-white p-5 shadow-xs">
+                    <h2 className="text-lg font-bold font-serif-luxury text-[#261A1E]">Trang phục trong gói</h2>
+                    <ul className="space-y-2 text-sm text-[#55464B]">
+                      {packageClothes.map((item) => (
+                        <li key={item.id || item.clothId} className="flex justify-between gap-3">
+                          <span>{item.clothName}</span><span className="shrink-0">× {item.quantity}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+                {packageAccessories.length > 0 && (
+                  <section className="space-y-3 rounded-3xl border border-[#F2E8E9] bg-white p-5 shadow-xs">
+                    <h2 className="text-lg font-bold font-serif-luxury text-[#261A1E]">Phụ kiện trong gói</h2>
+                    <ul className="space-y-2 text-sm text-[#55464B]">
+                      {packageAccessories.map((item) => (
+                        <li key={item.id || item.accessoryId} className="flex justify-between gap-3">
+                          <span>{item.accessoryName}</span><span className="shrink-0">× {item.quantity}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
               </div>
             )}
 

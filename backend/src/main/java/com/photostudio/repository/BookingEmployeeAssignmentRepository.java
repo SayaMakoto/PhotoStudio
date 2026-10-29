@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface BookingEmployeeAssignmentRepository extends JpaRepository<BookingEmployeeAssignment, Long> {
 
@@ -24,8 +23,8 @@ public interface BookingEmployeeAssignmentRepository extends JpaRepository<Booki
     @Query("SELECT a FROM BookingEmployeeAssignment a WHERE a.booking.id = :bookingId")
     List<BookingEmployeeAssignment> findByBookingId(@Param("bookingId") Long bookingId);
 
-    @Query("SELECT a FROM BookingEmployeeAssignment a WHERE a.booking.id = :bookingId AND a.employee.id = :employeeId")
-    Optional<BookingEmployeeAssignment> findByBookingIdAndEmployeeId(
+    @Query("SELECT a FROM BookingEmployeeAssignment a WHERE a.booking.id = :bookingId AND a.employee.id = :employeeId ORDER BY a.assignedAt DESC, a.id DESC")
+    List<BookingEmployeeAssignment> findByBookingIdAndEmployeeId(
             @Param("bookingId") Long bookingId,
             @Param("employeeId") Long employeeId);
 

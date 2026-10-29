@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import Hero from '../../components/user/sections/Hero';
 import Stats from '../../components/user/sections/Stats';
 import Pricing from '../../components/user/sections/Pricing';
@@ -13,6 +14,12 @@ import { customerAuth } from '../../lib/axiosCustomer';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const bookingSuccess = location.state?.bookingSuccess;
+
+  const dismissBookingSuccess = () => {
+    navigate(location.pathname, { replace: true, state: null });
+  };
 
   const handleSelectPackage = (pkgId) => {
     const targetUrl = `${ROUTES.USER.BOOKING}?packageId=${pkgId}`;
@@ -59,6 +66,51 @@ export default function HomePage() {
 
       {/* Cánh hoa đào bay phất phơ trải đều khắp chiều cao Trang Chủ từ trên xuống dưới */}
       <ScatteredPetals className="z-20 pointer-events-none" />
+
+      {bookingSuccess && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) dismissBookingSuccess();
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="booking-success-title"
+            className="w-full max-w-md rounded-3xl border border-[#F2E8E9] bg-white p-7 text-center shadow-2xl"
+          >
+            <CheckCircleIcon className="mx-auto h-16 w-16 text-emerald-500" />
+            <h2 id="booking-success-title" className="mt-4 text-2xl font-bold text-[#261A1E]">
+              Đặt lịch thành công!
+            </h2>
+            {location.state?.bookingCode && (
+              <p className="mt-2 text-sm font-semibold text-[#B85064]">
+                Mã đơn: {location.state.bookingCode}
+              </p>
+            )}
+            <p className="mt-3 text-sm leading-relaxed text-[#7A6C71]">
+              {location.state?.message || 'Studio đã nhận được lịch đặt của bạn.'}
+            </p>
+            <div className="mt-6 grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => navigate(ROUTES.USER.MY_BOOKINGS, { replace: true })}
+                className="rounded-xl bg-[#B85064] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#A33D50]"
+              >
+                Xem lịch đã đặt
+              </button>
+              <button
+                type="button"
+                onClick={dismissBookingSuccess}
+                className="rounded-xl border border-[#E8DCDE] px-4 py-3 text-sm font-semibold text-[#55464B] transition hover:bg-[#FAF5F5]"
+              >
+                Tiếp tục xem trang chủ
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
