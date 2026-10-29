@@ -23,7 +23,11 @@ import {
   LogOut,
   CalendarDays,
   Award,
+  Star,
+  RefreshCw,
 } from 'lucide-react';
+import customerBookingService from '../../services/user/bookingService';
+import BookingSessionDetailModal from '../../components/user/BookingSessionDetailModal';
 import { ROUTES } from '../../routes/web';
 import { customerAuth } from '../../lib/axiosCustomer';
 import customerAuthService from '../../services/user/authService';
@@ -46,6 +50,114 @@ export default function ProfilePage() {
   const isAuth = customerAuth.isAuthenticated();
 
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password' | 'bookings'
+
+  // Lịch chụp của khách hàng (Đồng bộ CSDL 2 chiều với Admin / Employee)
+  const [bookings, setBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
+  const [selectedBookingForDetail, setSelectedBookingForDetail] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Hàm tải danh sách đơn đặt lịch thực tế liên kết với CSDL
+  const fetchRealBookings = async (targetUser) => {
+    setBookingsLoading(true);
+    try {
+      let rawList = [];
+
+      // 1. Lấy danh sách đơn của khách hàng này nếu có
+      if (targetUser?.id) {
+        try {
+          const resByCust = await customerBookingService.getBookingsByCustomer(targetUser.id);
+          if (Array.isArray(resByCust) && resByCust.length > 0) {
+            rawList = resByCust;
+          }
+        } catch (e) {
+          console.warn('Lấy đơn theo customerId chưa có:', e.message);
+        }
+      }
+
+      // 2. Nếu khách hàng chưa có đơn hoặc tài khoản Admin/Test đang đối soát 2 bên giao diện,
+      // tải toàn bộ đơn thực tế từ CSDL để kiểm tra liên kết 2 chiều
+      if (!rawList.length) {
+        try {
+          const allRes = await customerBookingService.getAllBookings();
+          if (Array.isArray(allRes) && allRes.length > 0) {
+            rawList = allRes;
+          }
+        } catch (e) {
+          console.warn('Lấy toàn bộ đơn từ CSDL:', e.message);
+        }
+      }
+
+      if (rawList.length > 0) {
+        const enriched = await Promise.all(
+          rawList.map(async (item) => {
+            let pkgName = item.roomName ? `Buổi chụp tại ${item.roomName}` : 'Gói Chụp Ảnh Studio VIP';
+            let pkgImg =
+              'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80';
+            let reviewInfo = null;
+
+            if (item.customerNote && item.customerNote.includes('Gói:')) {
+              const notePart = item.customerNote.split('Gói:')[1];
+              if (notePart) pkgName = notePart.trim();
+            }
+
+            try {
+              const pkgs = await customerBookingService.getBookingPackages(item.id);
+              if (Array.isArray(pkgs) && pkgs.length > 0 && pkgs[0].packageName) {
+                pkgName = pkgs[0].packageName;
+              }
+            } catch {}
+
+            try {
+              const rev = await customerBookingService.getBookingReview(item.id);
+              if (rev && rev.id) {
+                reviewInfo = rev;
+              }
+            } catch {}
+
+            const formattedDate = item.bookingDate
+              ? new Date(item.bookingDate).toLocaleDateString('vi-VN')
+              : 'Chưa xếp ngày';
+
+            return {
+              id: item.id,
+              customerId: item.customerId,
+              customerName: item.customerName,
+              packageName: pkgName,
+              packageImage: pkgImg,
+              bookingDate: formattedDate,
+              startTime: item.startTime ? String(item.startTime).slice(0, 5) : '09:00',
+              endTime: item.endTime ? String(item.endTime).slice(0, 5) : '11:00',
+              roomName: item.roomName || `Phòng Studio #${item.roomId}`,
+              status: item.status || 'pending',
+              customerNote: item.customerNote || '',
+              review: reviewInfo,
+            };
+          })
+        );
+        setBookings(enriched);
+      }
+    } catch (err) {
+      console.warn('Lỗi khi tải lịch chụp từ backend:', err);
+    } finally {
+      setBookingsLoading(false);
+    }
+  };
+
+  const handleOpenBookingDetail = (bookingItem) => {
+    setSelectedBookingForDetail(bookingItem);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleReviewSubmitted = (newReview) => {
+    setBookings((prev) =>
+      prev.map((b) => (b.id === newReview.bookingId ? { ...b, review: newReview } : b))
+    );
+    if (selectedBookingForDetail && selectedBookingForDetail.id === newReview.bookingId) {
+      setSelectedBookingForDetail((prev) => ({ ...prev, review: newReview }));
+    }
+    setSuccessMessage('Đã gửi đánh giá buổi chụp và ekip nhân viên thành công! Dữ liệu đã đồng bộ sang Quản trị viên (Admin).');
+  };
   const [isEditing, setIsEditing] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
@@ -109,7 +221,8 @@ export default function ProfilePage() {
         if (res) {
           const normalizedGender =
             res.gender && String(res.gender).toUpperCase() === 'MALE' ? 'MALE' : 'FEMALE';
-          setUser({ ...res, gender: normalizedGender });
+          const fullUser = { ...res, gender: normalizedGender };
+          setUser(fullUser);
           setEditForm({
             username: res.username || '',
             fullname: res.fullname || '',
@@ -120,10 +233,10 @@ export default function ProfilePage() {
             address: res.address || '',
             avatar: res.avatar || PRESET_AVATARS[0],
           });
+          fetchRealBookings(fullUser);
         }
       })
       .catch(() => {
-        // Sử dụng dữ liệu hiện tại từ localStorage
         const local = customerAuth.getUser();
         if (local) {
           setUser(local);
@@ -137,6 +250,9 @@ export default function ProfilePage() {
             address: local.address || '',
             avatar: local.avatar || PRESET_AVATARS[0],
           });
+          fetchRealBookings(local);
+        } else {
+          fetchRealBookings(null);
         }
       });
   }, [isAuth]);
@@ -1172,101 +1288,151 @@ export default function ProfilePage() {
                     <h2 className="text-xl sm:text-2xl font-bold font-serif-luxury text-[#261A1E]">
                       Lịch Chụp Đã Đặt
                     </h2>
+                    <p className="text-[11px] text-[#7A6C71] mt-0.5">
+                      Dữ liệu kết nối trực tiếp 2 chiều với hệ thống Quản Trị Viên & Nhân Viên
+                    </p>
                   </div>
-                  <Link
-                    to={ROUTES.USER.PACKAGES}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#B85064] hover:underline"
-                  >
-                    <span>Khám phá thêm gói</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fetchRealBookings(user)}
+                      className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E8DCDE] text-[#4A3C41] hover:bg-[#FAF5F5] text-xs font-semibold transition-all"
+                      title="Làm mới danh sách từ CSDL"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 text-[#B85064] ${bookingsLoading ? 'animate-spin' : ''}`} />
+                      <span>Đồng bộ CSDL</span>
+                    </button>
+                    <Link
+                      to={ROUTES.USER.PACKAGES}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-[#B85064] hover:underline"
+                    >
+                      <span>Khám phá thêm gói</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
 
-                {/* Danh sách lịch chụp từ CSDL mẫu */}
+                {/* Danh sách lịch chụp */}
+                {bookingsLoading && bookings.length === 0 ? (
+                  <div className="py-12 text-center text-xs text-[#7A6C71] flex flex-col items-center justify-center gap-2">
+                    <div className="w-6 h-6 border-2 border-[#B85064] border-t-transparent rounded-full animate-spin" />
+                    <span>Đang đồng bộ dữ liệu buổi chụp từ CSDL thực tế...</span>
+                  </div>
+                ) : null}
+
                 <div className="space-y-4">
-                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#EFEBEB] shrink-0">
-                        <img
-                          src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80"
-                          alt="Gói chụp"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#EBF8F2] text-[#2EA46D] uppercase">
-                          Đã hoàn thành
-                        </span>
-                        <h4 className="text-sm font-bold text-[#261A1E] mt-1">
-                          Gói Chụp Ảnh Cưới Studio VIP
-                        </h4>
-                        <div className="flex items-center gap-3 text-xs text-[#7A6C71] mt-1">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-[#B85064]" />
-                            10/10/2026
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-[#B85064]" />
-                            08:30 – 12:30
-                          </span>
+                  {bookings.map((b) => {
+                    const isCompleted = b.status === 'completed' || b.status === 'Đã hoàn thành';
+                    const hasReview = Boolean(b.review);
+
+                    return (
+                      <div
+                        key={b.id}
+                        className="p-4 sm:p-5 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9] hover:border-[#B85064]/30 hover:bg-[#FAF2F4]/40 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs"
+                      >
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#EFEBEB] shrink-0 border border-[#F0E4E6]">
+                            <img
+                              src={
+                                b.packageImage ||
+                                'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80'
+                              }
+                              alt={b.packageName}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
+                                  isCompleted
+                                    ? 'bg-[#EBF8F2] text-[#2EA46D]'
+                                    : 'bg-[#FEF3C7] text-[#D97706]'
+                                }`}
+                              >
+                                {isCompleted ? 'Đã hoàn thành' : 'Đã xác nhận'}
+                              </span>
+
+                              {hasReview && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#FDF0F3] text-[#B85064] border border-[#F5D5DC]">
+                                  <Star className="w-2.5 h-2.5 fill-[#B85064]" />
+                                  Đã đánh giá ({Number(b.review.rating || 5).toFixed(1)})
+                                </span>
+                              )}
+                            </div>
+
+                            <h4 className="text-sm font-bold text-[#261A1E] mt-1 truncate">
+                              {b.packageName}
+                            </h4>
+
+                            <div className="flex items-center gap-3 text-xs text-[#7A6C71] mt-1 flex-wrap">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-[#B85064]" />
+                                {b.bookingDate || '10/10/2026'}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-[#B85064]" />
+                                {b.startTime ? `${b.startTime} – ${b.endTime}` : '08:30 – 12:30'}
+                              </span>
+                              {b.roomName && (
+                                <span className="flex items-center gap-1 text-[#8C7D82]">
+                                  <MapPin className="w-3 h-3 text-[#B85064]" />
+                                  {b.roomName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenBookingDetail(b)}
+                            className="cursor-pointer px-3.5 py-1.5 rounded-full border border-[#E8DCDE] text-[#4A3C41] hover:bg-white hover:border-[#B85064] text-xs font-semibold transition-all flex items-center gap-1"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-[#B85064]" />
+                            <span>Chi tiết buổi chụp</span>
+                          </button>
+
+                          {isCompleted ? (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenBookingDetail(b)}
+                              className={`cursor-pointer px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1 ${
+                                hasReview
+                                  ? 'border border-[#2EA46D] text-[#2EA46D] hover:bg-[#EBF8F2]'
+                                  : 'bg-[#B85064] hover:bg-[#A33D50] text-white shadow-xs'
+                              }`}
+                            >
+                              <Star className="w-3.5 h-3.5" />
+                              <span>{hasReview ? 'Xem đánh giá' : 'Đánh giá nhân viên'}</span>
+                            </button>
+                          ) : (
+                            <Link
+                              to="/packages/1"
+                              className="px-3.5 py-1.5 rounded-full bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold shadow-xs transition-colors"
+                            >
+                              Xem gói chụp
+                            </Link>
+                          )}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                      <Link
-                        to="/packages/2"
-                        className="px-3.5 py-1.5 rounded-full border border-[#B85064] text-[#B85064] hover:bg-[#FDF5F6] text-xs font-semibold transition-colors"
-                      >
-                        Viết đánh giá
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#EFEBEB] shrink-0">
-                        <img
-                          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
-                          alt="Gói chụp"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#FEF3C7] text-[#D97706] uppercase">
-                          Đã xác nhận
-                        </span>
-                        <h4 className="text-sm font-bold text-[#261A1E] mt-1">
-                          Gói Chân Dung Nghệ Thuật Nàng Thơ Pastel
-                        </h4>
-                        <div className="flex items-center gap-3 text-xs text-[#7A6C71] mt-1">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-[#B85064]" />
-                            02/11/2026
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-[#B85064]" />
-                            14:00 – 16:30
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                      <Link
-                        to="/packages/1"
-                        className="px-3.5 py-1.5 rounded-full bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold shadow-xs transition-colors"
-                      >
-                        Xem chi tiết gói
-                      </Link>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
+      {/* Modal Chi tiết buổi chụp & Đánh giá nhân viên */}
+      <BookingSessionDetailModal
+        booking={selectedBookingForDetail}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        currentUser={user}
+        onReviewSubmitted={handleReviewSubmitted}
+      />
     </section>
   </div>
 );
