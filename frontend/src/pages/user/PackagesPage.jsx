@@ -1,33 +1,32 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Camera,
-  Shirt,
-  Image as ImageIcon,
-  Clock,
-  Heart,
-  LayoutGrid,
-  List,
-  Search,
-  Briefcase,
-  Users,
-  User,
-  Phone,
-  MessageCircle,
-  Check,
-  X,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  Star,
-  Tag,
-  Flame,
-  ArrowDownWideNarrow,
-  ArrowUpNarrowWide,
-  Sparkles,
-  Eye,
-} from 'lucide-react';
+  CameraIcon,
+  SparklesIcon,
+  PhotoIcon,
+  ClockIcon,
+  HeartIcon,
+  Squares2X2Icon,
+  Bars3BottomLeftIcon,
+  MagnifyingGlassIcon,
+  BriefcaseIcon,
+  UserGroupIcon,
+  UserIcon,
+  PhoneIcon,
+  ChatBubbleLeftRightIcon,
+  CheckIcon,
+  XMarkIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ArrowRightIcon,
+  StarIcon,
+  TagIcon,
+  FireIcon,
+  BarsArrowDownIcon,
+  BarsArrowUpIcon,
+  EyeIcon,
+} from '@heroicons/react/24/solid';
 import customerPackageService from '../../services/user/packageService';
 import customerBookingService from '../../services/user/bookingService';
 import userImageService from '../../services/user/imageService';
@@ -37,11 +36,11 @@ import { customerAuth } from '../../lib/axiosCustomer';
 import { FloralBranchCorner, FloatingPetals, FloralCardCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
 
 const CATEGORIES_CONFIG = [
-  { id: 'all', label: 'Tất cả', icon: LayoutGrid },
-  { id: 'wedding', label: 'Ảnh Cưới & Couple', icon: Heart },
-  { id: 'portrait', label: 'Nàng Thơ & Profile', icon: User },
-  { id: 'family', label: 'Gia Đình & Nhóm', icon: Users },
-  { id: 'commercial', label: 'Doanh Nhân & Thời Trang', icon: Briefcase },
+  { id: 'all', label: 'Tất cả', icon: Squares2X2Icon },
+  { id: 'wedding', label: 'Ảnh Cưới & Couple', icon: HeartIcon },
+  { id: 'portrait', label: 'Nàng Thơ & Profile', icon: UserIcon },
+  { id: 'family', label: 'Gia Đình & Nhóm', icon: UserGroupIcon },
+  { id: 'commercial', label: 'Doanh Nhân & Thời Trang', icon: BriefcaseIcon },
 ];
 
 const SORT_OPTIONS = [
@@ -49,37 +48,37 @@ const SORT_OPTIONS = [
     id: 'popular',
     label: 'Phổ biến nhất',
     subtext: 'Được nhiều khách chọn nhất',
-    icon: Flame,
+    icon: FireIcon,
   },
   {
     id: 'price-asc',
     label: 'Giá thấp đến cao',
     subtext: 'Tiết kiệm chi phí nhất',
-    icon: ArrowDownWideNarrow,
+    icon: BarsArrowDownIcon,
   },
   {
     id: 'price-desc',
     label: 'Giá cao đến thấp',
     subtext: 'Các gói cao cấp & VIP',
-    icon: ArrowUpNarrowWide,
+    icon: BarsArrowUpIcon,
   },
   {
     id: 'rating',
     label: 'Đánh giá cao nhất',
     subtext: 'Điểm 5.0 sao & nhiều review',
-    icon: Star,
+    icon: StarIcon,
   },
   {
     id: 'newest',
     label: 'Mới nhất',
     subtext: 'Concept ra mắt gần đây',
-    icon: Sparkles,
+    icon: SparklesIcon,
   },
   {
     id: 'best-deal',
     label: 'Ưu đãi tốt nhất',
     subtext: 'Mức chiết khấu cao nhất',
-    icon: Tag,
+    icon: TagIcon,
   },
 ];
 
@@ -95,12 +94,25 @@ const TIME_SLOTS = [
 
 export default function PackagesPage() {
   const navigate = useNavigate();
-  const [packages, setPackages] = useState([]);
+  const location = useLocation();
+    const [packages, setPackages] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Bộ lọc & Sắp xếp
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const categoryFromUrl = new URLSearchParams(location.search).get('category') || 'all';
+  const [selectedCategoryState, setSelectedCategoryState] = useState(null);
+  const [prevCategoryFromUrl, setPrevCategoryFromUrl] = useState(categoryFromUrl);
+
+  if (prevCategoryFromUrl !== categoryFromUrl) {
+    setPrevCategoryFromUrl(categoryFromUrl);
+    setSelectedCategoryState(null);
+  }
+
+  const selectedCategory = selectedCategoryState ?? categoryFromUrl;
+  const setSelectedCategory = (cat) => {
+    setSelectedCategoryState(cat);
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('popular');
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -425,15 +437,15 @@ export default function PackagesPage() {
   const renderSpecIcon = (type) => {
     switch (type) {
       case 'camera':
-        return <Camera className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+        return <CameraIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
       case 'outfit':
-        return <Shirt className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+        return <SparklesIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
       case 'photo':
-        return <ImageIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+        return <PhotoIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
       case 'clock':
-        return <Clock className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+        return <ClockIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
       default:
-        return <Camera className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+        return <CameraIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
     }
   };
 
@@ -472,6 +484,15 @@ export default function PackagesPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Content - Sửa triệt để lỗi tách dấu tiếng Việt */}
             <div className="lg:col-span-7 space-y-4 pt-4">
+              {/* Breadcrumb Navigation */}
+              <div className="flex items-center gap-2 text-xs text-neutral-300">
+                <Link to={ROUTES.USER.HOME} className="hover:text-[#E899A8] transition-colors">
+                  Trang Chủ
+                </Link>
+                <span>/</span>
+                <span className="text-[#E899A8] font-semibold">Gói Chụp & Báo Giá</span>
+              </div>
+
               <span className="inline-block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-[#E5A8B4]">
                 GÓI CHỤP & BÁO GIÁ
               </span>
@@ -646,7 +667,7 @@ export default function PackagesPage() {
                     <div className="flex items-center gap-2.5 overflow-hidden">
                       <div className="w-7 h-7 rounded-lg bg-[#FDF0F3] text-[#B85064] flex items-center justify-center shrink-0">
                         {(() => {
-                          const CurrentIcon = SORT_OPTIONS.find((s) => s.id === sortBy)?.icon || Flame;
+                          const CurrentIcon = SORT_OPTIONS.find((s) => s.id === sortBy)?.icon || FireIcon;
                           return <CurrentIcon className="w-3.5 h-3.5" />;
                         })()}
                       </div>
@@ -659,7 +680,7 @@ export default function PackagesPage() {
                         </span>
                       </div>
                     </div>
-                    <ChevronDown
+                    <ChevronDownIcon
                       className={`w-4 h-4 text-[#7A6C71] transition-transform duration-200 shrink-0 ${
                         isSortOpen ? 'rotate-180 text-[#B85064]' : ''
                       }`}
@@ -707,7 +728,7 @@ export default function PackagesPage() {
                               </div>
                             </div>
                             {isSelected && (
-                              <Check className="w-4 h-4 text-[#B85064] shrink-0" />
+                              <CheckIcon className="w-4 h-4 text-[#B85064] shrink-0" />
                             )}
                           </button>
                         );
@@ -750,7 +771,7 @@ export default function PackagesPage() {
                     href="tel:0987654321"
                     className="flex items-center gap-2.5 text-xs text-[#4A393E] hover:text-[#B85064] transition-colors"
                   >
-                    <Phone className="w-4 h-4 text-[#B85064]" />
+                    <PhoneIcon className="w-4 h-4 text-[#B85064]" />
                     <span className="font-semibold">0987 654 321</span>
                   </a>
                   <a
@@ -761,7 +782,7 @@ export default function PackagesPage() {
                     }}
                     className="flex items-center gap-2.5 text-xs text-[#4A393E] hover:text-[#B85064] transition-colors"
                   >
-                    <MessageCircle className="w-4 h-4 text-[#B85064]" />
+                    <ChatBubbleLeftRightIcon className="w-4 h-4 text-[#B85064]" />
                     <span>Chat với chúng tôi</span>
                   </a>
                 </div>
@@ -776,7 +797,7 @@ export default function PackagesPage() {
                   className="cursor-pointer w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap transition-all shadow-md shadow-[#B85064]/20 hover:scale-[1.01]"
                 >
                   <span>Đặt lịch ngay</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRightIcon className="w-3.5 h-3.5" />
                 </button>
 
                 <p className="text-center font-handwriting text-base text-[#A87B84] select-none">
@@ -797,7 +818,7 @@ export default function PackagesPage() {
               {/* Thanh tìm kiếm tràn rộng liền mạch, phong cách sang trọng */}
               <div className="relative flex-1 group">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#FAF5F6] group-focus-within:bg-[#FDF0F3] text-[#9E8E93] group-focus-within:text-[#B85064] flex items-center justify-center transition-colors">
-                  <Search className="w-4 h-4" />
+                  <MagnifyingGlassIcon className="w-4 h-4" />
                 </div>
                 <input
                   type="text"
@@ -819,12 +840,12 @@ export default function PackagesPage() {
                     className="cursor-pointer absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-[#7A6C71] flex items-center justify-center transition-colors"
                     title="Xóa tìm kiếm"
                   >
-                    <X className="w-3 h-3" />
+                    <XMarkIcon className="w-3 h-3" />
                   </button>
                 )}
               </div>
 
-              {/* 2 Nút Chế độ xem: Grid & List */}
+              {/* 2 Nút Chế độ xem: Grid & Bars3BottomLeftIcon */}
               <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-[#EADCE0] shadow-xs shrink-0">
                 <button
                   type="button"
@@ -836,7 +857,7 @@ export default function PackagesPage() {
                       : 'text-[#8C7D82] hover:text-[#B85064] hover:bg-[#FAF5F6]'
                   }`}
                 >
-                  <LayoutGrid className="w-4 h-4" />
+                  <Squares2X2Icon className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
@@ -848,7 +869,7 @@ export default function PackagesPage() {
                       : 'text-[#8C7D82] hover:text-[#B85064] hover:bg-[#FAF5F6]'
                   }`}
                 >
-                  <List className="w-4 h-4" />
+                  <Bars3BottomLeftIcon className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -877,7 +898,7 @@ export default function PackagesPage() {
             {/* Trạng thái nếu không có gói nào trong CSDL khớp bộ lọc */}
             {!isLoading && displayedPackages.length === 0 && (
               <div className="bg-white rounded-3xl p-12 text-center border border-[#F2E8E9] shadow-sm space-y-3">
-                <ImageIcon className="w-12 h-12 text-[#CBB9BD] mx-auto" />
+                <PhotoIcon className="w-12 h-12 text-[#CBB9BD] mx-auto" />
                 <h3 className="text-base font-bold text-[#2A1D22]">
                   Không tìm thấy gói chụp nào phù hợp
                 </h3>
@@ -909,7 +930,7 @@ export default function PackagesPage() {
                       onClick={() => navigate(`/packages/${pkg.id}`, { state: { pkg } })}
                       className="cursor-pointer bg-white rounded-2xl overflow-hidden border border-[#F0E4E6] shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group"
                     >
-                      {/* Top: Image + Tag + Hover Action */}
+                      {/* Top: Image + TagIcon + Hover Action */}
                       <div>
                         <div className="relative h-48 w-full overflow-hidden bg-[#EFEBEB] group/img">
                           <img
@@ -920,18 +941,18 @@ export default function PackagesPage() {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
 
-                          {/* Tag danh mục góc trên trái ảnh */}
+                          {/* TagIcon danh mục góc trên trái ảnh */}
                           <div className="absolute top-3 left-3 z-10">
                             <span className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white/95 backdrop-blur-sm text-[#B85064] border border-[#F5D5DC] shadow-sm">
                               {pkg.categoryLabel}
                             </span>
                           </div>
 
-                          {/* Tag ưu đãi góc dưới trái ảnh */}
+                          {/* TagIcon ưu đãi góc dưới trái ảnh */}
                           {pkg.discountPercent > 0 && (
                             <div className="absolute bottom-2.5 left-3 z-10">
                               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-[#E84360] text-white shadow-sm flex items-center gap-1">
-                                <Tag className="w-2.5 h-2.5" />
+                                <TagIcon className="w-2.5 h-2.5" />
                                 <span>-{pkg.discountPercent}% Ưu đãi</span>
                               </span>
                             </div>
@@ -940,7 +961,7 @@ export default function PackagesPage() {
                           {/* Nút Xem chi tiết hiện ra khi rê chuột vào hình ảnh */}
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[1.5px] z-10">
                             <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/95 text-[#B85064] text-xs font-bold shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                              <Eye className="w-3.5 h-3.5 text-[#B85064]" />
+                              <EyeIcon className="w-3.5 h-3.5 text-[#B85064]" />
                               <span>Xem chi tiết</span>
                             </span>
                           </div>
@@ -956,7 +977,7 @@ export default function PackagesPage() {
                             </div>
                             <div className="flex items-center justify-between text-xs mb-1.5">
                               <div className="flex items-center gap-1 font-semibold text-[#D97706]">
-                                <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
+                                <StarIcon className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
                                 <span>{pkg.rating?.toFixed(1) || '5.0'}</span>
                                 <span className="text-[#9E8E93] font-normal text-[11px]">
                                   ({pkg.ratingCount || 0})
@@ -1007,7 +1028,7 @@ export default function PackagesPage() {
                           className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap transition-all shadow-sm shadow-[#B85064]/20 hover:scale-[1.02] active:scale-[0.98]"
                         >
                           <span>Đặt gói này</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <ArrowRightIcon className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -1035,7 +1056,7 @@ export default function PackagesPage() {
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-[1px]">
                             <span className="p-1.5 rounded-full bg-white/95 text-[#B85064] shadow-md transform scale-90 group-hover:scale-100 transition-transform">
-                              <Eye className="w-4 h-4 text-[#B85064]" />
+                              <EyeIcon className="w-4 h-4 text-[#B85064]" />
                             </span>
                           </div>
                         </div>
@@ -1046,12 +1067,12 @@ export default function PackagesPage() {
                             </span>
                             {pkg.discountPercent > 0 && (
                               <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase bg-[#E84360] text-white flex items-center gap-0.5">
-                                <Tag className="w-2.5 h-2.5" />
+                                <TagIcon className="w-2.5 h-2.5" />
                                 <span>-{pkg.discountPercent}% Ưu đãi</span>
                               </span>
                             )}
                             <div className="flex items-center gap-1 text-[11px] font-semibold text-[#D97706]">
-                              <Star className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" />
+                              <StarIcon className="w-3 h-3 fill-[#F59E0B] text-[#F59E0B]" />
                               <span>{pkg.rating?.toFixed(1) || '5.0'}</span>
                               <span className="text-[#9E8E93] font-normal">({pkg.ratingCount || 0})</span>
                             </div>
@@ -1097,7 +1118,7 @@ export default function PackagesPage() {
                             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold whitespace-nowrap shadow-sm shadow-[#B85064]/20"
                           >
                             <span>Đặt gói này</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            <ArrowRightIcon className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
@@ -1134,7 +1155,7 @@ export default function PackagesPage() {
                     className="cursor-pointer px-3 py-2 rounded-xl border border-[#EFE5E7] bg-white text-xs font-semibold text-[#55464B] hover:border-[#B85064] hover:text-[#B85064] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 shadow-xs"
                     title="Trang trước"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeftIcon className="w-4 h-4" />
                     <span className="hidden sm:inline">Trước</span>
                   </button>
 
@@ -1164,7 +1185,7 @@ export default function PackagesPage() {
                     title="Trang sau"
                   >
                     <span className="hidden sm:inline">Sau</span>
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRightIcon className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -1196,13 +1217,13 @@ export default function PackagesPage() {
               onClick={() => setBookingModalPkg(null)}
               className="cursor-pointer absolute top-4 right-4 p-2 rounded-full text-[#8C7D82] hover:text-[#2A1D22] hover:bg-[#FCECEF] transition-colors"
             >
-              <X className="w-5 h-5" />
+              <XMarkIcon className="w-5 h-5" />
             </button>
 
             {isSubmitted ? (
               <div className="text-center py-8 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-[#EBF8F2] text-[#2EA46D] flex items-center justify-center mx-auto border border-[#B4E8D0]">
-                  <Check className="w-8 h-8 stroke-[3]" />
+                  <CheckIcon className="w-8 h-8 stroke-[3]" />
                 </div>
                 <h3 className="text-xl font-bold font-serif-luxury text-[#1F1418]">
                   Đăng Ký Đặt Lịch Thành Công!
@@ -1335,7 +1356,7 @@ export default function PackagesPage() {
                             ))}
                           </optgroup>
                         </select>
-                        <ChevronDown className="w-4 h-4 text-[#7A6C71] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <ChevronDownIcon className="w-4 h-4 text-[#7A6C71] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                       </div>
                     </div>
                   </div>
@@ -1366,7 +1387,7 @@ export default function PackagesPage() {
                       ? 'Đang gửi đăng ký...'
                       : 'Xác Nhận Giữ Lịch & Tư Vấn'}
                   </span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRightIcon className="w-4 h-4" />
                 </button>
               </form>
             )}
@@ -1390,7 +1411,7 @@ export default function PackagesPage() {
               onClick={() => setQuickViewPkg(null)}
               className="cursor-pointer absolute top-4 right-4 p-2 rounded-full text-[#8C7D82] hover:text-[#2A1D22] hover:bg-[#FCECEF]"
             >
-              <X className="w-5 h-5" />
+              <XMarkIcon className="w-5 h-5" />
             </button>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
@@ -1441,7 +1462,7 @@ export default function PackagesPage() {
                       className="cursor-pointer inline-flex items-center gap-1 px-3.5 py-2 rounded-xl border border-[#F2C0CA] text-[#B85064] hover:bg-[#FDF5F6] text-xs font-semibold transition-colors"
                     >
                       <span>Xem trang chi tiết</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRightIcon className="w-3.5 h-3.5" />
                     </Link>
                     <button
                       onClick={() => {
@@ -1451,7 +1472,7 @@ export default function PackagesPage() {
                       className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors shadow-xs"
                     >
                       <span>Đặt gói này ngay</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRightIcon className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

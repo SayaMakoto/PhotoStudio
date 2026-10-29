@@ -19,6 +19,7 @@ const DEFAULT_REVIEWS = [
     comment: 'Ekip chụp ảnh cưới có tâm nhất mình từng trải nghiệm! Bạn photographer hướng dẫn tạo dáng rất tự nhiên, cô dâu không bị gượng gạo. Makeup làm nhẹ nhàng trong trẻo đúng style Hàn Quốc mình thích. Ảnh nhận về đẹp lung linh!',
     createdAt: '2026-10-20T14:30:00',
     packageName: 'Gói Chụp Ảnh Cưới Studio Cổ Điển',
+    adminReply: 'PhotoStudio chân thành cảm ơn hai bạn Thu Trang & Hoàng Nam đã tin tưởng lựa chọn studio cho ngày trọng đại! Chúc hai bạn trăm năm hạnh phúc viên mãn!',
   },
   {
     id: 2,
@@ -27,6 +28,7 @@ const DEFAULT_REVIEWS = [
     comment: 'Mình chụp gói Nàng Thơ kỷ niệm sinh nhật cho bạn gái. Phòng studio ánh sáng dịu mắt, váy áo sạch sẽ thơm tho. Bộ ảnh nhận về bạn bè ai cũng khen nức nở. Chắc chắn sẽ quay lại ủng hộ studio nhiều lần nữa!',
     createdAt: '2026-10-18T10:15:00',
     packageName: 'Gói Chụp Ảnh Cá Nhân / Nàng Thơ',
+    adminReply: 'Cảm ơn bạn Tuấn đã tin chọn PhotoStudio! Ekip rất hân hạnh được đồng hành cùng bạn và bạn gái trong dịp sinh nhật ý nghĩa này.',
   },
   {
     id: 3,
@@ -35,6 +37,7 @@ const DEFAULT_REVIEWS = [
     comment: 'Gia đình mình có cả ông bà và 2 bé nhỏ, lúc đầu sợ các cháu quấy khóc nhưng ekip rất kiên nhẫn và vui tính, bắt trọn từng khoảnh khắc cười tươi tự nhiên của cả nhà. Ảnh in ép gỗ treo phòng khách tuyệt đẹp!',
     createdAt: '2026-10-15T16:45:00',
     packageName: 'Gói Chụp Gia Đình Đoàn Viên',
+    adminReply: 'PhotoStudio rất vinh dự khi được lưu giữ khoảnh khắc sum vầy của đại gia đình chị Linh. Kính chúc gia đình luôn dồi dào sức khỏe và ngập tràn niềm vui!',
   },
 ];
 
@@ -151,9 +154,22 @@ export default function Testimonials() {
                       </div>
 
                       {/* Comment from Customer */}
-                      <p className="text-xs sm:text-sm text-[#3E2F35] leading-relaxed font-light mb-6">
+                      <p className="text-xs sm:text-sm text-[#3E2F35] leading-relaxed font-light mb-4">
                         "{rev.comment}"
                       </p>
+
+                      {/* Admin Reply */}
+                      {rev.adminReply && (
+                        <div className="mb-4 p-3 rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] text-[11px] text-[#2A1D22]">
+                          <div className="flex items-center gap-1.5 text-[#B85064] font-bold mb-1">
+                            <ShieldCheckIcon className="w-3.5 h-3.5 text-[#B85064]" />
+                            <span>PhotoStudio phản hồi:</span>
+                          </div>
+                          <p className="text-[#3E2F35] font-light leading-relaxed">
+                            "{rev.adminReply}"
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Customer Profile Footer */}

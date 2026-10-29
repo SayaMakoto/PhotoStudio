@@ -76,6 +76,7 @@ export default function Hero({ onOpenBooking }) {
       containerWidth="100%"
       imageHeight="520px"
       imageWidth="100%"
+      className="w-full"
       rotateAmplitude={12}
       scaleOnHover={1.03}
       showMobileWarning={false}
@@ -85,7 +86,7 @@ export default function Hero({ onOpenBooking }) {
         <div className="p-6 rounded-3xl bg-[#141012]/90 backdrop-blur-xl border border-rose-500/30 shadow-2xl flex flex-col gap-2 max-w-[90%]">
           <div className="flex items-center justify-between">
             <span className="text-[#E899A8] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <SparklesIcon className="w-3.5 h-3.5" />
+              <CameraIcon className="w-3.5 h-3.5 text-white" />
               <span>Studio Cao Cấp</span>
             </span>
             <span className="text-[11px] text-white bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/40 font-bold">
@@ -145,7 +146,7 @@ export default function Hero({ onOpenBooking }) {
             <ScrollReveal direction="down" duration={0.6}>
               {/* Shiny Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C1619] border border-rose-500/40 backdrop-blur-md mb-6 shadow-inner shadow-rose-500/10">
-                <SparklesIcon className="w-4 h-4 text-[#E899A8] animate-pulse" />
+                <CameraIcon className="w-4 h-4 text-white" />
                 <ShinyText
                   text={heroData.badge}
                   className="text-xs font-semibold tracking-wider text-rose-200"
@@ -250,19 +251,21 @@ export default function Hero({ onOpenBooking }) {
                 </div>
               </div>
 
-              {/* Interactive 3D Tilted Card */}
-              <div className="relative w-full flex justify-center">
+              {/* Interactive 3D Tilted Card - Khung rộng ngang bằng với khung tiêu đề trên */}
+              <div className="relative w-full max-w-[500px] lg:max-w-[520px] flex justify-center">
                 <div className="absolute -inset-4 bg-gradient-to-r from-rose-500/20 via-transparent to-purple-500/20 rounded-[40px] blur-2xl opacity-70 pointer-events-none" />
 
                 {isExternalBannerLink ? (
-                  <a href={bannerLink} target="_blank" rel="noreferrer" aria-label={`Mở liên kết banner ${heroData.imageTitle}`}>
+                  <a href={bannerLink} target="_blank" rel="noreferrer" className="w-full block" aria-label={`Mở liên kết banner ${heroData.imageTitle}`}>
                     {tiltedBannerCard}
                   </a>
                 ) : isInternalBannerLink ? (
-                  <Link to={bannerLink} aria-label={`Mở liên kết banner ${heroData.imageTitle}`}>
+                  <Link to={bannerLink} className="w-full block" aria-label={`Mở liên kết banner ${heroData.imageTitle}`}>
                     {tiltedBannerCard}
                   </Link>
-                ) : tiltedBannerCard}
+                ) : (
+                  <div className="w-full">{tiltedBannerCard}</div>
+                )}
               </div>
 
             </ScrollReveal>

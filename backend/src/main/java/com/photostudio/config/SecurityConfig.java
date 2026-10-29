@@ -156,6 +156,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/backgrounds/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/backgrounds/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/backgrounds/**").hasRole("ADMIN")
+                        .requestMatchers("/api/contacts", "/api/contacts/**").permitAll()
 
                         // Khóa/mở khóa tài khoản chỉ dành cho ADMIN; cấm xóa tài khoản qua API.
                         .requestMatchers(HttpMethod.PATCH, "/api/users/**").hasRole("ADMIN")

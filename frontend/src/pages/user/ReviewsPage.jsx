@@ -5,7 +5,6 @@ import {
   StarIcon,
   CheckBadgeIcon,
   ShieldCheckIcon,
-  SparklesIcon,
   ChatBubbleLeftRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -19,441 +18,31 @@ import {
 } from '@heroicons/react/24/solid';
 
 import BlurText from '../../components/animations/BlurText';
+import ScrollReveal from '../../components/animations/ScrollReveal';
 import ShinyText from '../../components/animations/ShinyText';
 import CountUp from '../../components/animations/CountUp';
-import ScrollReveal from '../../components/animations/ScrollReveal';
 import { FloralBranchCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
 import { ROUTES } from '../../routes/web';
 import { customerAuth } from '../../lib/axiosCustomer';
 import customerReviewService from '../../services/user/reviewService';
 
-// =========================================================================
-// DỮ LIỆU ĐÁNH GIÁ ĐỒNG BỘ 100% VỚI CSDL (DOCS/PHOTO_STUDIO.SQL)
-// Gồm 30 đánh giá chi tiết đầy đủ của các khách hàng thực tế qua 8 gói chụp
-// =========================================================================
-const DEFAULT_REVIEWS = [
-  {
-    id: 1,
-    bookingId: 1,
-    customerId: 6,
-    customerName: 'Nguyễn Thu Trang & Hoàng Nam',
-    rating: 5.0,
-    comment: 'Ekip chụp ảnh cưới có tâm nhất mình từng trải nghiệm! Bạn photographer hướng dẫn tạo dáng rất tự nhiên, cô dâu không bị gượng gạo. Makeup bạn Tiên làm nhẹ nhàng trong trẻo đúng style Hàn Quốc mình thích. Ảnh nhận về đẹp lung linh!',
-    createdAt: '2026-10-11T16:45:00',
-    packageName: 'Gói Chụp Ảnh Cưới Studio Cổ Điển',
-    category: 'wedding',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 1, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Photographer nhiệt tình, bắt góc cô dâu rất xinh và khéo léo', rating: 5.0 },
-      { id: 2, employeeName: 'Trần Thủy Tiên (Makeup)', comment: 'Makeup tone Hàn Quốc cực kỳ tôn nét da và giữ phấn lâu trôi', rating: 5.0 },
-    ],
-  },
-  {
-    id: 10,
-    bookingId: 10,
-    customerId: 8,
-    customerName: 'Trần Khánh Huyền',
-    rating: 5.0,
-    comment: 'Studio decor rất sang, váy cưới ren Pháp mới tinh và thơm tho. Hai vợ chồng mình đều ngại trước ống kính mà thợ chụp pha trò cười suốt buổi. Album mini in sắc nét!',
-    createdAt: '2026-10-26T18:20:00',
-    packageName: 'Gói Chụp Ảnh Cưới Studio Cổ Điển',
-    category: 'wedding',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 2,
-    bookingId: 2,
-    customerId: 4,
-    customerName: 'Lê Minh Tuấn',
-    rating: 5.0,
-    comment: 'Mình chụp gói Nàng Thơ kỷ niệm sinh nhật cho bạn gái. Phòng studio ánh sáng dịu mắt, váy áo sạch sẽ thơm tho. Bộ ảnh nhận về bạn bè ai cũng khen nức nở. Chắc chắn sẽ quay lại ủng hộ studio nhiều lần nữa!',
-    createdAt: '2026-10-13T11:20:00',
-    packageName: 'Gói Chụp Ảnh Cá Nhân / Nàng Thơ',
-    category: 'portrait',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 3, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Bắt khoảnh khắc ánh sáng tự nhiên rất đẹp', rating: 5.0 },
-    ],
-  },
-  {
-    id: 9,
-    bookingId: 9,
-    customerId: 10,
-    customerName: 'Vũ Hoàng Mai',
-    rating: 5.0,
-    comment: 'Từng góc máy đều bắt trọn nét tự nhiên của mình. Makeup trong veo chuẩn nàng thơ Hàn Quốc. Thợ ảnh kiên nhẫn chụp đến khi mình ưng ý mới thôi. Rất recommend mọi người gói này!',
-    createdAt: '2026-10-26T12:15:00',
-    packageName: 'Gói Chụp Ảnh Cá Nhân / Nàng Thơ',
-    category: 'portrait',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 3,
-    bookingId: 3,
-    customerId: 5,
-    customerName: 'Phạm Phương Linh',
-    rating: 5.0,
-    comment: 'Gia đình mình có cả ông bà và 2 bé nhỏ, lúc đầu sợ các cháu quấy khóc nhưng ekip rất kiên nhẫn và vui tính, bắt trọn từng khoảnh khắc cười tươi tự nhiên của cả nhà. Ảnh in ép gỗ treo phòng khách tuyệt đẹp!',
-    createdAt: '2026-10-16T17:30:00',
-    packageName: 'Gói Chụp Gia Đình Đoàn Viên',
-    category: 'family',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 4, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Tương tác với trẻ nhỏ và ông bà rất thân thiện, kiên nhẫn', rating: 5.0 },
-    ],
-  },
-  {
-    id: 11,
-    bookingId: 11,
-    customerId: 4,
-    customerName: 'Lê Minh Tuấn',
-    rating: 5.0,
-    comment: 'Phòng chụp VIP rộng rãi cho cả gia đình 8 người. Sofa da vintage sang trọng tạo cảm giác ấm cúng như ở nhà. Khâu bàn giao toàn bộ file gốc cực kỳ nhanh chóng!',
-    createdAt: '2026-10-27T10:45:00',
-    packageName: 'Gói Chụp Gia Đình Đoàn Viên',
-    category: 'family',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 4,
-    bookingId: 4,
-    customerId: 9,
-    customerName: 'Đặng Quốc Bảo (CEO)',
-    rating: 4.9,
-    comment: 'Mình làm bộ profile doanh nhân để làm thương hiệu cá nhân và đăng báo. Ánh sáng setup chuẩn chỉ, phong thái chỉnh chu đẳng cấp. Ảnh trả nhanh đúng tiến độ công việc của mình!',
-    createdAt: '2026-10-19T14:10:00',
-    packageName: 'Gói Chụp Doanh Nhân / Profile',
-    category: 'business',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 5, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Phong cách chụp chuyên nghiệp, chuẩn style ảnh doanh nhân Forbes', rating: 5.0 },
-    ],
-  },
-  {
-    id: 14,
-    bookingId: 14,
-    customerId: 11,
-    customerName: 'Nguyễn Đức Thắng',
-    rating: 5.0,
-    comment: 'Set đèn kịch tính Rembrandt tạo thần thái rất quyền lực. Phông nền chuẩn quốc tế, da được retouch tự nhiên giữ nguyên lỗ chân lông không bị bệt. Rất chuyên nghiệp!',
-    createdAt: '2026-10-28T08:30:00',
-    packageName: 'Gói Chụp Doanh Nhân / Profile',
-    category: 'business',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 5,
-    bookingId: 5,
-    customerId: 8,
-    customerName: 'Trần Khánh Huyền',
-    rating: 5.0,
-    comment: 'Bộ ảnh áo dài sen hồ phố cổ xuất sắc! Đạo cụ trâm cài và nón quai thao được chuẩn bị rất kỹ lưỡng. Thợ ảnh nhiệt tình chụp không quản ngại thời gian. 10/10 điểm cho chất lượng phục vụ!',
-    createdAt: '2026-10-21T18:00:00',
-    packageName: 'Gói Cổ Trang & Áo Dài Nghệ Thuật',
-    category: 'concept',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 6, employeeName: 'Trần Thủy Tiên (Makeup)', comment: 'Búi tóc cổ trang cầu kỳ và phối phụ kiện rất có gu', rating: 5.0 },
-    ],
-  },
-  {
-    id: 15,
-    bookingId: 15,
-    customerId: 6,
-    customerName: 'Nguyễn Thu Trang',
-    rating: 5.0,
-    comment: 'Cổ phục Nhật Bình thêu rồng phượng đẹp xuất sắc, đội ngũ chuẩn bị cả trâm cài mạ vàng và guốc mộc truyền thống. Ảnh màu phim hoài niệm như lạc vào cung đình xưa!',
-    createdAt: '2026-10-28T16:10:00',
-    packageName: 'Gói Cổ Trang & Áo Dài Nghệ Thuật',
-    category: 'concept',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 6,
-    bookingId: 6,
-    customerId: 10,
-    customerName: 'Vũ Hoàng Mai & Nhóm Bạn',
-    rating: 5.0,
-    comment: 'Cả nhóm 5 đứa chụp kỷ yếu tốt nghiệp đại học ở đây cười tẹt ga. Studio hỗ trợ phụ kiện hoa tươi, bóng bay và bằng tốt nghiệp đầy đủ. Giá cả hợp lý mà chất lượng thì như chụp bìa tạp chí!',
-    createdAt: '2026-10-23T10:40:00',
-    packageName: 'Gói Chụp Kỷ Yếu & Tốt Nghiệp',
-    category: 'concept',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 13,
-    bookingId: 13,
-    customerId: 5,
-    customerName: 'Phạm Phương Linh',
-    rating: 5.0,
-    comment: 'Phông màu tự động đổi cực kỳ tiện, nhóm mình chụp được cả concept nghiêm túc nhận bằng và concept lầy lội quẩy tung studio. Mọi người ai cũng khen ảnh đẹp!',
-    createdAt: '2026-10-27T18:00:00',
-    packageName: 'Gói Chụp Kỷ Yếu & Tốt Nghiệp',
-    category: 'concept',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 7,
-    bookingId: 7,
-    customerId: 7,
-    customerName: 'Hoàng Nam & Kim Oanh',
-    rating: 5.0,
-    comment: 'Trải nghiệm đỉnh cao của gói Luxury! Xe đưa đón riêng, 2 bạn makeup đi theo dặm phấn suốt buổi chụp hoàng hôn ngoại cảnh. Khăn voan dài bay bổng lên hình tráng lệ như phim điện ảnh Hollywood!',
-    createdAt: '2026-10-24T19:30:00',
-    packageName: 'Gói Cưới Luxury & Ngoại Cảnh VIP',
-    category: 'wedding',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 7, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Kỹ thuật bắt góc hoàng hôn ngoại cảnh vô cùng đỉnh cao', rating: 5.0 },
-      { id: 8, employeeName: 'Trần Thủy Tiên (Makeup)', comment: 'Chăm sóc cô dâu chú rể tận tình suốt buổi chụp', rating: 5.0 },
-    ],
-  },
-  {
-    id: 12,
-    bookingId: 12,
-    customerId: 6,
-    customerName: 'Nguyễn Thu Trang',
-    rating: 5.0,
-    comment: 'Album photobook 30x30 mở phẳng bìa da sang trọng vô cùng. Ekip đông đảo phục vụ tận tâm chu đáo từng chút một từ nước uống đến chỉnh vạt váy. Hoàn toàn xứng đáng từng đồng bỏ ra!',
-    createdAt: '2026-10-27T15:20:00',
-    packageName: 'Gói Cưới Luxury & Ngoại Cảnh VIP',
-    category: 'wedding',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 8,
-    bookingId: 8,
-    customerId: 11,
-    customerName: 'Nguyễn Đức Thắng (Fashion Brand)',
-    rating: 5.0,
-    comment: 'Shop thời trang bên mình chụp lookbook mùa đông tại đây. Màn hình tethering xem ảnh trực tiếp từ máy ảnh lên màn lớn 4K giúp stylist chọn góc cực kỳ nhanh. Tiến độ trả file màu rất thần tốc!',
-    createdAt: '2026-10-25T11:50:00',
-    packageName: 'Gói Chụp Lookbook & Thương Mại',
-    category: 'business',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 9, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Tốc độ chụp lookbook và setup ánh sáng thương mại chuẩn xác', rating: 5.0 },
-    ],
-  },
-  {
-    id: 16,
-    bookingId: 16,
-    customerId: 9,
-    customerName: 'Đặng Quốc Bảo',
-    rating: 5.0,
-    comment: 'Hệ thống đèn Nanlite và chao tổ ong đánh sáng chuẩn xác từng sớ vải cao cấp. Kỹ thuật viên hỗ trợ căn chỉnh đèn liên tục rất nhiệt tình. Chắc chắn sẽ là đối tác chụp hình lâu dài của brand!',
-    createdAt: '2026-10-28T17:40:00',
-    packageName: 'Gói Chụp Lookbook & Thương Mại',
-    category: 'business',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 17,
-    bookingId: 17,
-    customerId: 4,
-    customerName: 'Lê Minh Tuấn',
-    rating: 5.0,
-    comment: 'Phòng Studio E ban công hoàng hôn đón nắng chiều đẹp xuất sắc! Ảnh ngược sáng lung linh mà không hề bị lóa. Stylist tư vấn váy trắng ren rất hợp concept. Sẽ giới thiệu cho bạn bè!',
-    createdAt: '2026-10-22T17:00:00',
-    packageName: 'Gói Chụp Ảnh Cá Nhân / Nàng Thơ',
-    category: 'portrait',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 10, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Bắt khoảnh khắc hoàng hôn ngược sáng vô cùng xuất sắc', rating: 5.0 },
-    ],
-  },
-  {
-    id: 18,
-    bookingId: 18,
-    customerId: 5,
-    customerName: 'Phạm Phương Linh',
-    rating: 5.0,
-    comment: 'Mê mẩn góc phố cổ và sen hồ tại Studio F. Đồ cổ trang được giặt ủi thơm phức, trâm cài tóc lấp lánh như phim truyền hình. Bạn photographer bắt góc nghiêng rất có hồn!',
-    createdAt: '2026-10-23T12:30:00',
-    packageName: 'Gói Cổ Trang & Áo Dài Nghệ Thuật',
-    category: 'concept',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 11, employeeName: 'Trần Thủy Tiên (Makeup)', comment: 'Tạo kiểu tóc cổ trang cầu kỳ và phối trâm cài rất sang', rating: 5.0 },
-    ],
-  },
-  {
-    id: 19,
-    bookingId: 19,
-    customerId: 6,
-    customerName: 'Nguyễn Thu Trang',
-    rating: 5.0,
-    comment: 'Chụp ảnh profile doanh nhân tại Studio G chuẩn phong cách Forbes. Ghế da Chesterfield cổ điển và kệ sách gỗ sồi tạo thần thái uy tín, đĩnh đạc. Giao file ngay trong ngày!',
-    createdAt: '2026-10-24T14:15:00',
-    packageName: 'Gói Chụp Doanh Nhân / Profile',
-    category: 'business',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 12, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Định hình thần thái doanh nhân chuyên nghiệp chuẩn Forbes', rating: 5.0 },
-    ],
-  },
-  {
-    id: 20,
-    bookingId: 20,
-    customerId: 7,
-    customerName: 'Hoàng Nam',
-    rating: 4.9,
-    comment: 'Studio H phong cách industrial loft trần cao thoáng đãng cực kỳ! Ekip đánh đèn sắc sảo, bắt trọn từng sớ vải lookbook thời trang cho brand bên mình. Rất hài lòng!',
-    createdAt: '2026-10-25T18:20:00',
-    packageName: 'Gói Chụp Lookbook & Thương Mại',
-    category: 'business',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 21,
-    bookingId: 21,
-    customerId: 8,
-    customerName: 'Trần Khánh Huyền',
-    rating: 5.0,
-    comment: 'Gói thôi nôi cho bé tại Studio I ấm áp và an toàn tuyệt đối. Sàn gỗ sạch bóng, đồ chơi Scandinavian xinh xắn. Bạn trợ lý dỗ bé cười giòn tan suốt buổi chụp!',
-    createdAt: '2026-10-25T11:45:00',
-    packageName: 'Gói Chụp Gia Đình Đoàn Viên',
-    category: 'family',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 13, employeeName: 'Trần Thủy Tiên (Makeup)', comment: 'Dỗ dành và chăm sóc các bé nhỏ cực kỳ khéo léo', rating: 5.0 },
-    ],
-  },
-  {
-    id: 22,
-    bookingId: 22,
-    customerId: 9,
-    customerName: 'Đặng Quốc Bảo',
-    rating: 5.0,
-    comment: 'Sảnh cưới Grand Ballroom Studio K tráng lệ như cung điện Châu Âu! Sàn gương phản chiếu voan cưới bồng bềnh, ảnh in photobook mở phẳng nhìn sang chảnh vô cùng!',
-    createdAt: '2026-10-26T17:50:00',
-    packageName: 'Gói Cưới Luxury & Ngoại Cảnh VIP',
-    category: 'wedding',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 14, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Bắt góc đại cảnh sảnh cưới cực kỳ hoành tráng', rating: 5.0 },
-    ],
-  },
-  {
-    id: 23,
-    bookingId: 23,
-    customerId: 10,
-    customerName: 'Vũ Hoàng Mai',
-    rating: 5.0,
-    comment: 'Nhóm bạn 8 đứa mình chụp kỷ yếu ở Studio L vách vô cực quẩy tưng bừng. Hệ thống đèn ray điện tử đổi phông nhanh chóng, màu ảnh trong veo chuẩn phim thanh xuân!',
-    createdAt: '2026-10-26T14:10:00',
-    packageName: 'Gói Chụp Kỷ Yếu & Tốt Nghiệp',
-    category: 'concept',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 24,
-    bookingId: 24,
-    customerId: 11,
-    customerName: 'Nguyễn Đức Thắng',
-    rating: 4.8,
-    comment: 'Gói chụp cá nhân layout Hàn Quốc tại Studio A nhẹ nhàng tinh tế. Bạn chuyên viên makeup bắt trend tone cam đào ngọt ngào. Trà bánh tiếp đón chu đáo như khách sạn 5 sao!',
-    createdAt: '2026-10-27T16:30:00',
-    packageName: 'Gói Chụp Ảnh Cá Nhân / Nàng Thơ',
-    category: 'portrait',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 25,
-    bookingId: 25,
-    customerId: 4,
-    customerName: 'Lê Minh Tuấn & Mai Lan',
-    rating: 5.0,
-    comment: 'Album ảnh cưới tại Studio B vượt xa kỳ vọng của vợ chồng mình. Vòm đá cẩm thạch và đèn chùm Swarovski lên hình lung linh không khác gì chụp tại trời Âu!',
-    createdAt: '2026-10-27T11:20:00',
-    packageName: 'Gói Chụp Ảnh Cưới Studio Cổ Điển',
-    category: 'wedding',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 15, employeeName: 'Nguyễn Hoàng Anh (Photo)', comment: 'Tận tâm hướng dẫn tạo dáng cho cô dâu chú rể', rating: 5.0 },
-    ],
-  },
-  {
-    id: 26,
-    bookingId: 26,
-    customerId: 5,
-    customerName: 'Phạm Phương Linh',
-    rating: 5.0,
-    comment: 'Phòng Studio VIP trang bị màn hình 4K preview ảnh trực tiếp rất tiện, chụp tấm nào xem được ngay tấm đó để chỉnh dáng. Da được retouch giữ nét tự nhiên, rất có gu!',
-    createdAt: '2026-10-27T15:40:00',
-    packageName: 'Gói Chụp Ảnh Cá Nhân / Nàng Thơ',
-    category: 'portrait',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 27,
-    bookingId: 27,
-    customerId: 6,
-    customerName: 'Nguyễn Thu Trang',
-    rating: 5.0,
-    comment: 'Chụp kỷ niệm 30 năm ngày cưới của bố mẹ tại Studio C. Không gian lò sưởi và đàn piano ấm cúng, cả nhà đều cảm thấy thư thái tự nhiên. Cảm ơn ekip rất nhiều!',
-    createdAt: '2026-10-28T11:15:00',
-    packageName: 'Gói Chụp Gia Đình Đoàn Viên',
-    category: 'family',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 28,
-    bookingId: 28,
-    customerId: 7,
-    customerName: 'Hoàng Nam',
-    rating: 4.9,
-    comment: 'Màu ảnh lookbook thời trang sắc nét, độ tương phản mượt mà tôn vinh form dáng sản phẩm. Kỹ thuật viên hỗ trợ căn chỉnh đèn liên tục rất nhiệt tình!',
-    createdAt: '2026-10-28T13:00:00',
-    packageName: 'Gói Chụp Lookbook & Thương Mại',
-    category: 'business',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 29,
-    bookingId: 29,
-    customerId: 8,
-    customerName: 'Trần Khánh Huyền & Minh Đức',
-    rating: 5.0,
-    comment: 'Trải nghiệm chụp ảnh cưới hoàng hôn tại ban công studio quá tuyệt vời! Gió chiều nhẹ làm tà váy bay tự nhiên, ekip chăm sóc cô dâu từng ngụm nước và dặm phấn kỹ càng!',
-    createdAt: '2026-10-28T18:10:00',
-    packageName: 'Gói Cưới Luxury & Ngoại Cảnh VIP',
-    category: 'wedding',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-    employeeReviews: [
-      { id: 16, employeeName: 'Trần Thủy Tiên (Makeup)', comment: 'Trang điểm cô dâu bền màu, dặm phấn chu đáo suốt buổi', rating: 5.0 },
-    ],
-  },
-  {
-    id: 30,
-    bookingId: 30,
-    customerId: 10,
-    customerName: 'Vũ Hoàng Mai',
-    rating: 5.0,
-    comment: 'Set cổ phục Nhật Bình và áo dài lụa tơ tằm quá lộng lẫy! Màu ảnh hoài niệm rực rỡ nét văn hóa truyền thống. Điểm 10 trọn vẹn cho tâm huyết và sự tận tụy của studio!',
-    createdAt: '2026-10-28T19:00:00',
-    packageName: 'Gói Cổ Trang & Áo Dài Nghệ Thuật',
-    category: 'concept',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-  },
-];
-
 const ITEMS_PER_PAGE = 6;
 
 export default function ReviewsPage() {
   const navigate = useNavigate();
-  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+  const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedRatingFilter, setSelectedRatingFilter] = useState('all');
   const [isRatingDropdownOpen, setIsRatingDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // Modal Viết Đánh Giá
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newReviewForm, setNewReviewForm] = useState({
     customerName: '',
     rating: 5,
+    packageName: '',
     comment: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -481,40 +70,30 @@ export default function ReviewsPage() {
       .getAllReviews()
       .then((data) => {
         if (!isMounted) return;
-        if (Array.isArray(data) && data.length > 0) {
-          const enriched = data.map((item) => {
-            const fallback = DEFAULT_REVIEWS.find((d) => d.id === item.id) || {};
-            return {
-              id: item.id,
-              bookingId: item.bookingId || fallback.bookingId || item.id,
-              customerId: item.customerId || fallback.customerId,
-              customerName: item.customerName || fallback.customerName || 'Khách hàng PhotoStudio',
-              rating: typeof item.rating === 'number' ? item.rating : 5.0,
-              comment: item.comment || fallback.comment || '',
-              createdAt: item.createdAt || fallback.createdAt || new Date().toISOString(),
-              packageName: fallback.packageName || 'Dịch Vụ Nhiếp Ảnh Chuyên Nghiệp',
-              category: fallback.category || 'portrait',
-              avatar: fallback.avatar || null,
-              employeeReviews: item.employeeReviews && item.employeeReviews.length > 0
-                ? item.employeeReviews
-                : fallback.employeeReviews || [],
-            };
-          });
-
-          if (enriched.length < DEFAULT_REVIEWS.length) {
-            const existingIds = new Set(enriched.map((r) => r.id));
-            const remaining = DEFAULT_REVIEWS.filter((d) => !existingIds.has(d.id));
-            setReviews([...enriched, ...remaining]);
-          } else {
-            setReviews(enriched);
-          }
+        if (Array.isArray(data)) {
+          const mapped = data.map((item) => ({
+            id: item.id,
+            bookingId: item.bookingId || item.id,
+            customerId: item.customerId,
+            customerName: item.customerName || 'Khách hàng PhotoStudio',
+            rating: typeof item.rating === 'number' ? item.rating : 5.0,
+            comment: item.comment || '',
+            createdAt: item.createdAt || new Date().toISOString(),
+            packageName: item.packageName || 'Dịch Vụ Nhiếp Ảnh Chuyên Nghiệp',
+            category: item.category || 'portrait',
+            avatar: item.avatar || null,
+            adminReply: item.adminReply || null,
+            adminRepliedAt: item.adminRepliedAt || null,
+            employeeReviews: Array.isArray(item.employeeReviews) ? item.employeeReviews : [],
+          }));
+          setReviews(mapped);
         } else {
-          setReviews(DEFAULT_REVIEWS);
+          setReviews([]);
         }
       })
       .catch((err) => {
-        console.warn('[ReviewsPage] Dùng dữ liệu đánh giá chuẩn từ photo_studio.sql:', err.message);
-        setReviews(DEFAULT_REVIEWS);
+        console.warn('[ReviewsPage] Lỗi khi tải đánh giá từ API:', err.message);
+        setReviews([]);
       })
       .finally(() => {
         if (isMounted) setIsLoading(false);

@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { SparklesIcon, AdjustmentsHorizontalIcon, PhotoIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
+import { CalendarDaysIcon, AdjustmentsHorizontalIcon, PhotoIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
 import ScrollReveal from '../../animations/ScrollReveal';
 import userImageService from '../../../services/user/imageService';
 
@@ -85,7 +85,7 @@ export default function BeforeAfterComparison() {
         <ScrollReveal direction="down">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
-              <SparklesIcon className="w-4 h-4 text-[#B85064]" />
+              <AdjustmentsHorizontalIcon className="w-4 h-4 text-neutral-800" />
               <span>Chất Lượng Hậu Kỳ Nghệ Thuật</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2A1D22] font-serif-luxury tracking-tight mb-4">
@@ -141,7 +141,7 @@ export default function BeforeAfterComparison() {
               {/* Nhãn Ảnh Retouch (Bên phải) */}
               <div className="absolute top-5 right-5 z-20 pointer-events-none">
                 <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#B85064] text-white font-bold text-xs tracking-wider uppercase shadow-xl">
-                  <SparklesIcon className="w-3.5 h-3.5 text-white" />
+                  <CalendarDaysIcon className="w-3.5 h-3.5 text-white" />
                   <span>Ảnh Retouch Nghệ Thuật</span>
                 </span>
               </div>

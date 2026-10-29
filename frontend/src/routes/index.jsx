@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ROUTES } from './web';
 
 // User Layout & Pages
@@ -13,6 +13,8 @@ import ReviewsPage from '../pages/user/ReviewsPage';
 import BookingPage from '../pages/user/BookingPage';
 import PaymentPage from '../pages/user/PaymentPage';
 import VNPayReturnPage from '../pages/user/VNPayReturnPage';
+import MyBookingsPage from '../pages/user/MyBookingsPage';
+import ContactPage from '../pages/user/ContactPage';
 
 // Auth Pages (Đã phân loại vào từng vai trò user, admin, employee)
 import LoginPage from '../pages/user/LoginPage';
@@ -47,8 +49,9 @@ import AdminContentsPage from '../pages/admin/contents';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
+  const location = useLocation();
   return (
-    <Routes>
+    <Routes location={location}>
       {/* 1. Tuyến đường Khách hàng (User) - Bọc bởi UserLayout (Header & Footer chung) */}
       <Route element={<UserLayout />}>
         <Route path={ROUTES.USER.HOME} element={<HomePage />} />
@@ -62,6 +65,8 @@ export default function AppRoutes() {
         <Route path={ROUTES.USER.CHECKOUT} element={<PaymentPage />} />
         <Route path={ROUTES.USER.VNPAY_RETURN} element={<VNPayReturnPage />} />
         <Route path={ROUTES.USER.PROFILE} element={<ProfilePage />} />
+        <Route path={ROUTES.USER.MY_BOOKINGS} element={<MyBookingsPage />} />
+        <Route path={ROUTES.USER.CONTACT} element={<ContactPage />} />
       </Route>
 
       {/* Tuyến đường Xác thực (Auth) - Khách hàng */}

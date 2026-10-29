@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  SparklesIcon,
   ArrowsPointingOutIcon,
   XMarkIcon,
   ChevronLeftIcon,
@@ -306,7 +305,7 @@ export default function GalleryPage() {
           <div className="max-w-3xl">
             {/* Shimmering Badge với React Bits ShinyText */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/15 border border-rose-500/30 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-5 shadow-lg backdrop-blur-md">
-              <SparklesIcon className="w-4 h-4 text-[#E899A8] animate-pulse" />
+              <PhotoIcon className="w-4 h-4 text-white" />
               <ShinyText text="DỮ LIỆU TÁC PHẨM TRỰC TIẾP TỪ HỆ THỐNG" speed={3.5} className="text-white" />
             </div>
 
@@ -368,7 +367,7 @@ export default function GalleryPage() {
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-3">
-                    <SparklesIcon className="w-3.5 h-3.5 text-[#E899A8]" />
+                    <CameraIcon className="w-3.5 h-3.5 text-white" />
                     <span>TIÊU ĐIỂM NGHỆ THUẬT 3D TỪ CSDL</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif-luxury tracking-tight text-white">
@@ -777,7 +776,7 @@ export default function GalleryPage() {
             <div className="mt-20 p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#1C1619] via-[#2A1D22] to-[#141012] text-white border border-rose-500/25 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-3 text-center md:text-left max-w-xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-[#E899A8] text-xs font-semibold uppercase">
-                  <SparklesIcon className="w-3.5 h-3.5" />
+                  <CameraIcon className="w-3.5 h-3.5 text-white" />
                   <span>SẴN SÀNG LƯU GIỮ THANH XUÂN?</span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold font-serif-luxury leading-tight">

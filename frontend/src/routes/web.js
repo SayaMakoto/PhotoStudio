@@ -21,6 +21,8 @@ export const ROUTES = {
     CHECKOUT: '/checkout',
     VNPAY_RETURN: '/payment/vnpay-return',
     PROFILE: '/profile',
+    MY_BOOKINGS: '/my-bookings',
+    CONTACT: '/contact',
   },
 
   // Tuyến đường Xác thực (Authentication)

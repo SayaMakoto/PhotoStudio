@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CheckIcon,
-  SparklesIcon,
   ClockIcon,
   ArrowRightIcon,
   WrenchScrewdriverIcon,
   StarIcon,
+  TagIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/solid';
 import ScrollReveal from '../../animations/ScrollReveal';
 import customerPackageService from '../../../services/user/packageService';
@@ -131,7 +132,7 @@ export default function Services({ onSelectPackage }) {
         <ScrollReveal direction="down">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
-              <SparklesIcon className="w-4 h-4 text-[#B85064]" />
+              <TagIcon className="w-4 h-4 text-neutral-800" />
               <span>TRƯNG BÀY BỘ SƯU TẬP GÓI CHỤP</span>
             </div>
 
@@ -316,7 +317,7 @@ export default function Services({ onSelectPackage }) {
                     className="group relative p-6 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] hover:border-[#B85064]/60 hover:bg-white hover:shadow-xl hover:shadow-[#B85064]/10 transition-all duration-300 hover:-translate-y-1.5"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white border border-[#F5D5DC] flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 shadow-sm text-[#B85064]">
-                      <SparklesIcon className="w-5 h-5 text-[#B85064]" />
+                      <CheckCircleIcon className="w-5 h-5 text-neutral-800" />
                     </div>
                     <span className="text-[10px] uppercase font-bold tracking-wider text-[#B85064] mb-1 block">
                       Loại: {service.type || 'Dịch vụ'}
