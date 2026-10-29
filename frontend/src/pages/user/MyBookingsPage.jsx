@@ -46,177 +46,126 @@ export default function MyBookingsPage() {
   }, [isAuthenticated, navigate]);
 
   // Load danh sách đơn đã thanh toán
-  const fetchPaidBookings = async () => {
-    try {
-      // 1. Đọc danh sách đã lưu cục bộ sau khi thanh toán thành công (VNPay / Studio)
-      let localPaidOrders = [];
-      try {
-        const stored = localStorage.getItem('photostudio_paid_orders');
-        if (stored) {
-          localPaidOrders = JSON.parse(stored);
-        }
-      } catch (e) {
-        console.warn('Lỗi đọc photostudio_paid_orders:', e);
-      }
-
-      // 2. Gọi API backend để lấy danh sách booking và payment
-      const [bookingsRes, paymentsRes, roomsRes] = await Promise.allSettled([
-        customerBookingService.getAllBookings(),
-        customerPaymentService.getAllPayments ? customerPaymentService.getAllPayments() : Promise.resolve([]),
-        customerRoomService.getAllRooms(),
-      ]);
-
-      const getList = (res) => {
-        if (res.status !== 'fulfilled') return [];
-        const v = res.value;
-        if (Array.isArray(v)) return v;
-        if (Array.isArray(v?.data)) return v.data;
-        return [];
-      };
-
-      const allBookings = getList(bookingsRes);
-      const allPayments = getList(paymentsRes);
-      const allRooms = getList(roomsRes);
-      // pkgsRes reserved
-
-      const userId = Number(currentUser?.id) || 0;
-
-      // Danh sách các bookingId ĐÃ THANH TOÁN (có payment status = 'paid' hoặc booking status = 'confirmed'/'completed')
-      const paidBookingIds = new Set();
-      allPayments.forEach((p) => {
-        const pStatus = (p.status || '').toLowerCase();
-        if (pStatus === 'paid' || pStatus === 'success' || pStatus === 'completed') {
-          paidBookingIds.add(Number(p.bookingId));
-        }
-      });
-
-      // Lọc các booking thuộc user này VÀ ĐÃ THANH TOÁN
-      const matchedPaidFromApi = allBookings
-        .filter((b) => {
-          // Điều kiện 1: Thuộc về khách hàng hiện tại
-          const bCustId = Number(b.customerId || b.customer?.id);
-          const isMine = userId > 0 ? bCustId === userId : true;
-          if (!isMine) return false;
-
-          // Điều kiện 2: BẮT BUỘC ĐÃ THANH TOÁN
-          const bStatus = (b.status || '').toLowerCase();
-          const isPaidStatus = bStatus === 'confirmed' || bStatus === 'completed' || bStatus === 'paid';
-          const hasPaidPayment = paidBookingIds.has(Number(b.id));
-
-          return isPaidStatus || hasPaidPayment;
-        })
-        .map((b) => {
-          const room = allRooms.find((r) => Number(r.id) === Number(b.roomId)) || {};
-          const payment = allPayments.find((p) => Number(p.bookingId) === Number(b.id)) || {};
-
-          // Thử ghép với chi tiết local nếu có
-          const localMatch = localPaidOrders.find((loc) => Number(loc.bookingId) === Number(b.id));
-
-          return {
-            id: b.id,
-            bookingId: b.id,
-            createdAt: b.createdAt || localMatch?.createdAt || new Date().toISOString(),
-            paidAt: payment.createdAt || localMatch?.paidAt || b.createdAt,
-            customerName: b.customerName || localMatch?.customerName || currentUser?.fullname || 'Khách Hàng',
-            customerPhone: b.customerPhone || localMatch?.customerPhone || currentUser?.phone || '',
-            customerEmail: localMatch?.customerEmail || currentUser?.email || '',
-            attendees: localMatch?.attendees || 1,
-            customerNote: b.customerNote || localMatch?.customerNote || '',
-            // Room
-            roomId: b.roomId,
-            roomName: b.roomName || room.name || localMatch?.roomName || 'Phòng Studio Tiêu Chuẩn',
-            roomImage: room.imageUrl || room.image || localMatch?.roomImage || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85',
-            roomCapacity: room.capacity || localMatch?.roomCapacity || 4,
-            // Package
-            packageId: localMatch?.packageId || 1,
-            packageName: localMatch?.packageName || 'Gói Chụp Ảnh Nghệ Thuật Studio',
-            packagePrice: localMatch?.packagePrice || (payment.amount ? Number(payment.amount) : 1500000),
-            packageOriginalPrice: localMatch?.packageOriginalPrice || localMatch?.packagePrice || 1500000,
-            packageDiscountPercent: localMatch?.packageDiscountPercent || 0,
-            packageImage: localMatch?.packageImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85',
-            packageDuration: localMatch?.packageDuration || '60 - 90 phút',
-            // Services
-            selectedServices: localMatch?.selectedServices || [],
-            servicesTotal: localMatch?.servicesTotal || 0,
-            // Date & Time
-            bookingDate: (b.bookingDate || localMatch?.bookingDate || '').split('T')[0],
-            startTime: b.startTime || localMatch?.startTime || '08:30:00',
-            endTime: b.endTime || localMatch?.endTime || '10:30:00',
-            time: localMatch?.time || `${b.startTime || '08:30'} – ${b.endTime || '10:30'}`,
-            // Bill & Payment Info
-            paymentMethod: payment.paymentMethod || localMatch?.paymentMethod || 'vnpay',
-            paymentType: localMatch?.paymentType || (payment.note?.includes('Cọc') ? 'deposit' : 'full'),
-            depositPercent: localMatch?.depositPercent || 30,
-            promoCode: localMatch?.promoCode || '',
-            discountAmount: localMatch?.discountAmount || 0,
-            totalOrderPrice: localMatch?.totalOrderPrice || (payment.amount ? Number(payment.amount) : 1500000),
-            amountPaid: payment.amount ? Number(payment.amount) : (localMatch?.amountPaid || 1500000),
-            remainingAmount: localMatch?.remainingAmount || 0,
-            transactionNo: localMatch?.transactionNo || `TXN${b.id}${Date.now().toString().slice(-4)}`,
-            bankCode: localMatch?.bankCode || 'NCB / VNPay',
-            status: 'PAID',
-          };
-        });
-
-      // Hợp nhất dữ liệu API với local orders để đảm bảo không bị sót đơn vừa thanh toán
-      const mergedMap = new Map();
-      matchedPaidFromApi.forEach((item) => mergedMap.set(Number(item.bookingId), item));
-      localPaidOrders.forEach((item) => {
-        // Chỉ nhận các đơn của user hiện tại và có trạng thái PAID
-        const itemCustId = Number(item.customerId);
-        const belongsToUser = userId > 0 ? itemCustId === userId || !itemCustId : true;
-        if (belongsToUser && (item.status === 'PAID' || item.paymentStatus === 'PAID')) {
-          if (!mergedMap.has(Number(item.bookingId))) {
-            mergedMap.set(Number(item.bookingId), item);
-          } else {
-            // Cập nhật các thông tin chi tiết dịch vụ/gói từ local
-            mergedMap.set(Number(item.bookingId), { ...mergedMap.get(Number(item.bookingId)), ...item });
-          }
-        }
-      });
-
-      const finalList = Array.from(mergedMap.values()).sort((a, b) => {
-        return new Date(b.createdAt || b.paidAt || 0) - new Date(a.createdAt || a.paidAt || 0);
-      });
-
-      // Lọc trùng lặp tuyệt đối (Deduplicate)
-      // Loại bỏ trường hợp cùng một giao dịch (trùng transactionNo) hoặc cùng phòng + ngày + giờ chụp + khách hàng
-      const dedupMap = new Map();
-      finalList.forEach((item) => {
-        const txn = (item.transactionNo || '').trim();
-        const hasValidTxn = txn && txn.length > 4 && !txn.startsWith('TXN');
-        const dedupKey = hasValidTxn
-          ? `txn_${txn}`
-          : `slot_${item.roomId}_${item.bookingDate}_${item.startTime}_${item.customerPhone || item.customerName}`;
-
-        if (!dedupMap.has(dedupKey)) {
-          dedupMap.set(dedupKey, item);
-        } else {
-          // Nếu trùng, ưu tiên giữ bản ghi có ID lớn hơn (mới nhất)
-          const existing = dedupMap.get(dedupKey);
-          if (Number(item.bookingId || item.id) > Number(existing.bookingId || existing.id)) {
-            dedupMap.set(dedupKey, item);
-          }
-        }
-      });
-
-      const uniqueBookings = Array.from(dedupMap.values()).sort((a, b) => {
-        return new Date(b.createdAt || b.paidAt || 0) - new Date(a.createdAt || a.paidAt || 0);
-      });
-
-      setPaidBookings(uniqueBookings);
-    } catch (err) {
-      console.error('Lỗi khi tải lịch đã thanh toán:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      void fetchPaidBookings();
+    if (!isAuthenticated) return;
+    let isMounted = true;
+
+    async function loadPaidBookings() {
+      try {
+        let localPaidOrders = [];
+        try {
+          const stored = localStorage.getItem('photostudio_paid_orders');
+          if (stored) {
+            localPaidOrders = JSON.parse(stored);
+          }
+        } catch {
+          // Bỏ qua lỗi đọc localStorage
+        }
+
+        const [bookingsRes, paymentsRes, roomsRes] = await Promise.allSettled([
+          customerBookingService.getAllBookings(),
+          customerPaymentService.getAllPayments ? customerPaymentService.getAllPayments() : Promise.resolve([]),
+          customerRoomService.getAllRooms(),
+        ]);
+
+        const getList = (res) => {
+          if (res.status !== 'fulfilled') return [];
+          const v = res.value;
+          if (Array.isArray(v)) return v;
+          if (Array.isArray(v?.data)) return v.data;
+          return [];
+        };
+
+        const allBookings = getList(bookingsRes);
+        const allPayments = getList(paymentsRes);
+        const allRooms = getList(roomsRes);
+
+        const userId = Number(currentUser?.id) || 0;
+
+        const paidBookingIds = new Set();
+        allPayments.forEach((p) => {
+          const pStatus = (p.status || '').toLowerCase();
+          if (pStatus === 'paid' || pStatus === 'success' || pStatus === 'completed') {
+            paidBookingIds.add(Number(p.bookingId));
+          }
+        });
+
+        const matchedPaidFromApi = allBookings
+          .filter((b) => {
+            const bCustId = Number(b.customerId || b.customer_id);
+            const matchesUser = userId > 0 && bCustId === userId;
+            const bStatus = (b.status || '').toLowerCase();
+            const isConfirmedOrPaid = bStatus === 'confirmed' || bStatus === 'completed' || paidBookingIds.has(Number(b.id));
+            return matchesUser && isConfirmedOrPaid;
+          })
+          .map((b) => {
+            const bPay = allPayments.find((p) => Number(p.bookingId) === Number(b.id)) || {};
+            const bRoom = allRooms.find((r) => Number(r.id) === Number(b.roomId)) || {};
+
+            const total = Number(bPay.amount || b.totalPrice || b.price || 0);
+            const isDeposit = total < 1000000 && total > 0;
+            const depPercent = isDeposit ? 30 : 100;
+            const fullEst = isDeposit ? Math.round(total / 0.3) : total;
+            const remaining = isDeposit ? Math.max(0, fullEst - total) : 0;
+
+            return {
+              id: b.id,
+              bookingCode: `BK-${b.id}`,
+              packageName: b.packageName || 'Gói Chụp Ảnh Studio Chuyên Nghiệp',
+              roomName: b.roomName || bRoom.name || 'Phòng Studio',
+              bookingDate: b.bookingDate || b.booking_date || '',
+              bookingTime: b.bookingTime || b.booking_time || '08:30 – 10:30 (Sáng)',
+              paymentType: isDeposit ? 'deposit' : 'full',
+              depositPercent: depPercent,
+              paidAmount: total,
+              remainingAmount: remaining,
+              totalAmount: fullEst,
+              paymentMethod: bPay.paymentMethod || 'vnpay',
+              paymentStatus: 'Đã thanh toán',
+              paidAt: bPay.paymentDate || b.createdAt || new Date().toISOString(),
+              selectedServices: [],
+              servicesTotal: 0,
+              customerName: b.customerName || currentUser?.fullname || 'Khách hàng',
+              customerPhone: b.customerPhone || currentUser?.phone || '',
+            };
+          });
+
+        const combined = [...matchedPaidFromApi, ...localPaidOrders];
+        const uniqueBookings = [];
+        const seenIds = new Set();
+        for (const item of combined) {
+          const key = item.id || item.bookingCode;
+          if (key && !seenIds.has(key)) {
+            seenIds.add(key);
+            uniqueBookings.push(item);
+          }
+        }
+
+        if (isMounted) {
+          setPaidBookings(uniqueBookings);
+        }
+      } catch (err) {
+        console.error('Lỗi khi tải lịch đã thanh toán:', err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     }
-  }, [isAuthenticated]);
+
+    void loadPaidBookings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, currentUser?.id, currentUser?.fullname, currentUser?.phone, refreshTrigger]);
+
+  const handleRefresh = () => {
+    setLoading(true);
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   // Bộ lọc
   const filteredBookings = useMemo(() => {
@@ -297,7 +246,7 @@ export default function MyBookingsPage() {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={fetchPaidBookings}
+                onClick={handleRefresh}
                 className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-xs font-semibold text-white hover:bg-white/20 shadow-xs transition-all"
               >
                 <ArrowPathIcon className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />

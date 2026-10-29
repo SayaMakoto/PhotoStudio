@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  SparklesIcon,
   ArrowsPointingOutIcon,
   XMarkIcon,
   ChevronLeftIcon,
