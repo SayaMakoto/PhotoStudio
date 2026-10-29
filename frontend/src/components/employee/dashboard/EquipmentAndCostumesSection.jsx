@@ -118,13 +118,10 @@ export default function EquipmentAndCostumesSection({
               <Layers className="h-4.5 w-4.5 text-[#B85064]" />
               <span>Thiết Bị Tác Nghiệp Studio ({equipments.length} thiết bị)</span>
             </h3>
-            <p className="text-xs text-[#7A6C71] mt-0.5">
-              Dữ liệu máy ảnh, ống kính, thiết bị ánh sáng thực tế từ bảng equipments trong CSDL.
-            </p>
           </div>
         ) : (
           <div className="text-xs text-[#7A6C71]">
-            Tổng số: <strong className="text-[#261A1E] font-bold">{equipments.length}</strong> thiết bị trong CSDL
+            Tổng số: <strong className="text-[#261A1E] font-bold">{equipments.length}</strong> thiết bị
           </div>
         )}
 
@@ -173,7 +170,7 @@ export default function EquipmentAndCostumesSection({
       {filteredEquipments.length === 0 ? (
         <div className="py-12 text-center text-xs text-[#9E8E93] bg-[#FAF5F5] rounded-2xl border border-[#F0E4E6]">
           {equipments.length === 0
-            ? 'Hiện tại chưa có thiết bị nào trong CSDL (Bảng equipments đang trống).'
+            ? 'Hiện tại chưa có thiết bị nào (Bảng equipments đang trống).'
             : 'Không tìm thấy thiết bị nào khớp với bộ lọc tìm kiếm.'}
         </div>
       ) : (

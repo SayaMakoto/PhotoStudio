@@ -5,6 +5,7 @@ import com.photostudio.model.bookings.BookingEmployeeAssignmentStatus;
 import com.photostudio.model.bookings.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingEmployeeAssignmentRepository extends JpaRepository<BookingEmployeeAssignment, Long> {
+
+    @Modifying
+    @Query("UPDATE BookingEmployeeAssignment a SET a.status = :newStatus WHERE a.booking.id = :bookingId AND a.status = :currentStatus")
+    int releaseAssignedEmployees(@Param("bookingId") Long bookingId,
+            @Param("currentStatus") BookingEmployeeAssignmentStatus currentStatus,
+            @Param("newStatus") BookingEmployeeAssignmentStatus newStatus);
 
     @Query("SELECT a FROM BookingEmployeeAssignment a WHERE a.booking.id = :bookingId")
     List<BookingEmployeeAssignment> findByBookingId(@Param("bookingId") Long bookingId);

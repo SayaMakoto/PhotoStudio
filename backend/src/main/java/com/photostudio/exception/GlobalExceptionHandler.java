@@ -39,6 +39,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> handleDatabaseError(DataIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body(Map.of("message", "Dữ liệu bị trùng (username/email/sđt) hoặc vi phạm ràng buộc CSDL."));
+            .body(Map.of("message", "Dữ liệu bị trùng (username/email/sđt) hoặc vi phạm ràng buộc."));
     }
 }

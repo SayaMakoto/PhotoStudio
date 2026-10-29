@@ -97,7 +97,7 @@ export default function StudioExperience() {
         }
       })
       .catch((err) => {
-        console.warn('[AboutStudio] Lỗi tải phòng từ CSDL:', err.message);
+        console.warn('[AboutStudio] Lỗi tải phòng:', err.message);
         setRooms([]);
       })
       .finally(() => {
@@ -136,7 +136,7 @@ export default function StudioExperience() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
               <CubeIcon className="w-4 h-4 text-[#B85064]" />
-              <span>HỆ THỐNG PHÒNG CHỤP TỪ CSDL</span>
+              <span>HỆ THỐNG PHÒNG CHỤP</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2A1D22] font-serif-luxury tracking-tight mb-4">
               Không Gian Studio & Phòng Chụp

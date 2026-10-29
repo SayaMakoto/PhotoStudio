@@ -267,9 +267,10 @@ export default function StudiosPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-3">
+
                   <CameraIcon className="w-3.5 h-3.5 text-white" />
-                  <span>SET DESIGN NGHỆ THUẬT 3D TỪ CSDL</span>
-                </div>
+                  <span>SET DESIGN NGHỆ THUẬT 3D TỪ CSDL<
+                 
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif-luxury tracking-tight text-white">
                   6 Bối Cảnh Studio Độc Bản
                 </h2>

@@ -37,7 +37,7 @@ export default function CustomerReviewsSection({
 }) {
   // 1. Phân loại xem: Đánh giá cá nhân của nhân viên vs Đánh giá chung studio
   const [scopeTab, setScopeTab] = useState('personal'); // 'personal' | 'all'
-  const [replyFilter, setReplyFilter] = useState('all'); // 'all' | 'unreplied' | 'replied'
+  const [replyFilter, setReplyFilter] = useState('unreplied'); // 'all' | 'unreplied' | 'replied'
   const [ratingFilter, setRatingFilter] = useState('all'); // 'all' | '5' | '4' | '3'
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -372,7 +372,7 @@ export default function CustomerReviewsSection({
           <p className="font-bold text-sm text-[#261A1E]">
             {searchTerm || replyFilter !== 'all' || ratingFilter !== 'all'
               ? 'Không tìm thấy đánh giá nào phù hợp với bộ lọc hiện tại.'
-              : 'Hiện tại chưa có đánh giá nào từ khách hàng trong CSDL.'}
+              : 'Hiện tại chưa có đánh giá nào từ khách hàng.'}
           </p>
           {(searchTerm || replyFilter !== 'all' || ratingFilter !== 'all') && (
             <button
