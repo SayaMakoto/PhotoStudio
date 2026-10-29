@@ -82,7 +82,7 @@ export default function PaymentPage() {
   }, [stateData]);
 
   // 4. STATE GÓI CHỤP STUDIO
-  const [packagesList] = useState([]);
+  const [packagesList, setPackagesList] = useState([]);
   const selectedPackageId = initialPackageId;
 
   // 5. STATE HÌNH THỨC & PHƯƠNG THỨC THANH TOÁN (PHẦN MỞ RỘNG CỦA PAYMENT)
