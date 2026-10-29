@@ -10,8 +10,15 @@ export const customerReviewService = {
   // Xem đánh giá theo ID đơn đặt lịch
   getReviewByBookingId: (bookingId) => axiosCustomer.get(`/api/reviews/booking/${bookingId}`),
 
-  // Gửi đánh giá mới
+  // Xem chi tiết đánh giá nhân viên theo reviewId (bao gồm cả adminReply và thời gian trả lời)
+  getEmployeeReviewsByReviewId: (reviewId) =>
+    axiosCustomer.get(`/api/employee-reviews/review/${reviewId}`),
+
+  // Gửi đánh giá mới (bao gồm đánh giá buổi chụp + đánh giá nhân viên)
   createReview: (data) => axiosCustomer.post('/api/reviews', data),
+
+  // Gửi đánh giá trực tiếp cho nhân viên
+  createEmployeeReview: (data) => axiosCustomer.post('/api/employee-reviews', data),
 };
 
 export default customerReviewService;
