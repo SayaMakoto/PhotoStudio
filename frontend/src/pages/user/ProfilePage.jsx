@@ -1,6 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
+
+  UserIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  MapPinIcon,
+  CalendarIcon,
+  LockClosedIcon,
+  PencilSquareIcon,
+  CheckIcon,
+  XMarkIcon,
+  ExclamationCircleIcon,
+  CheckCircleIcon,
+  CameraIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  KeyIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ClockIcon,
+  ArrowRightIcon,
+  ArrowRightOnRectangleIcon,
+  CalendarDaysIcon,
+  TrophyIcon,
+} from '@heroicons/react/24/solid';
   User,
   Mail,
   Phone,
@@ -28,6 +52,7 @@ import {
 } from 'lucide-react';
 import customerBookingService from '../../services/user/bookingService';
 import BookingSessionDetailModal from '../../components/user/BookingSessionDetailModal';
+
 import { ROUTES } from '../../routes/web';
 import { customerAuth } from '../../lib/axiosCustomer';
 import customerAuthService from '../../services/user/authService';
@@ -428,7 +453,7 @@ export default function ProfilePage() {
         <div className="relative w-full max-w-md bg-white rounded-3xl border border-[#F0E4E6] p-8 text-center shadow-xl shadow-[#B85064]/5">
           <FloralCardCorner position="top-right" opacity="opacity-50" />
           <div className="w-16 h-16 rounded-2xl bg-[#FDF5F6] border border-[#F5D5DC] flex items-center justify-center mx-auto mb-4 text-[#B85064]">
-            <Lock className="w-8 h-8" />
+            <LockClosedIcon className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-bold font-serif-luxury text-[#261A1E] mb-2">
             Yêu Cầu Đăng Nhập
@@ -442,7 +467,7 @@ export default function ProfilePage() {
               className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-full bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold shadow-md shadow-[#B85064]/20 transition-all"
             >
               <span>Đăng nhập ngay</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRightIcon className="w-4 h-4" />
             </Link>
             <Link
               to={ROUTES.AUTH.REGISTER}
@@ -531,26 +556,26 @@ export default function ProfilePage() {
           {/* Global Alert Banners */}
           {errorMessage && (
             <div className="mb-6 p-4 rounded-2xl bg-[#FFF2F4] border border-[#FCD5DC] text-[#C53030] text-xs flex items-start gap-3 animate-in fade-in duration-200 shadow-xs">
-              <AlertCircle className="w-4 h-4 text-[#E53E3E] shrink-0 mt-0.5" />
+              <ExclamationCircleIcon className="w-4 h-4 text-[#E53E3E] shrink-0 mt-0.5" />
               <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
               <button
                 onClick={() => setErrorMessage('')}
                 className="text-[#E53E3E] hover:text-[#9B2C2C] cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <XMarkIcon className="w-4 h-4" />
               </button>
             </div>
           )}
 
           {successMessage && (
             <div className="mb-6 p-4 rounded-2xl bg-[#EBF8F2] border border-[#B4E8D0] text-[#1E7E34] text-xs flex items-center gap-3 animate-in fade-in duration-200 shadow-xs">
-              <CheckCircle2 className="w-4 h-4 text-[#2EA46D] shrink-0" />
+              <CheckCircleIcon className="w-4 h-4 text-[#2EA46D] shrink-0" />
               <span className="flex-1 font-medium">{successMessage}</span>
               <button
                 onClick={() => setSuccessMessage('')}
                 className="text-[#2EA46D] hover:text-[#1E7E34] cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <XMarkIcon className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -579,7 +604,7 @@ export default function ProfilePage() {
                     className="cursor-pointer absolute bottom-0 right-0 p-2 rounded-full bg-[#B85064] text-white shadow-md hover:scale-110 transition-transform"
                     title="Đổi ảnh đại diện"
                   >
-                    <Camera className="w-3.5 h-3.5" />
+                    <CameraIcon className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
@@ -619,7 +644,7 @@ export default function ProfilePage() {
 
               {/* Membership Badge */}
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FDF5F6] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold mt-3">
-                <Award className="w-3.5 h-3.5" />
+                <TrophyIcon className="w-3.5 h-3.5" />
                 <span>Thành Viên Thân Thiết</span>
               </div>
 
@@ -628,7 +653,7 @@ export default function ProfilePage() {
                 <div className="p-2.5 rounded-xl bg-[#FAF5F5]">
                   <span className="text-[10px] text-[#8C7D82] block">Trạng thái</span>
                   <span className="text-xs font-bold text-[#2EA46D] flex items-center gap-1 mt-0.5">
-                    <CheckCircle2 className="w-3 h-3" />
+                    <CheckCircleIcon className="w-3 h-3" />
                     Đang hoạt động
                   </span>
                 </div>
@@ -656,10 +681,10 @@ export default function ProfilePage() {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <User className="w-4 h-4" />
+                  <UserIcon className="w-4 h-4" />
                   <span>Thông Tin Cá Nhân</span>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 opacity-70" />
+                <ArrowRightIcon className="w-3.5 h-3.5 opacity-70" />
               </button>
 
               <button
@@ -675,30 +700,23 @@ export default function ProfilePage() {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <KeyRound className="w-4 h-4" />
+                  <KeyIcon className="w-4 h-4" />
                   <span>Đổi Mật Khẩu</span>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 opacity-70" />
+                <ArrowRightIcon className="w-3.5 h-3.5 opacity-70" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('bookings');
-                  setIsEditing(false);
-                }}
-                className={`cursor-pointer w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold transition-all ${
-                  activeTab === 'bookings'
-                    ? 'bg-[#B85064] text-white shadow-sm'
-                    : 'text-[#4A3C41] hover:bg-[#FAF5F5]'
-                }`}
+              <Link
+                to={ROUTES.USER.MY_BOOKINGS}
+                className="w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold text-[#4A3C41] hover:bg-[#FAF5F5] transition-all"
+                title="Xem các lịch hẹn và hóa đơn đã thanh toán"
               >
                 <div className="flex items-center gap-3">
-                  <CalendarDays className="w-4 h-4" />
-                  <span>Lịch Chụp Của Tôi</span>
+                  <CalendarDaysIcon className="w-4 h-4 text-[#8C7D82]" />
+                  <span>Lịch Đã Đặt & Hóa Đơn</span>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 opacity-70" />
-              </button>
+                <ArrowRightIcon className="w-3.5 h-3.5 opacity-70" />
+              </Link>
 
               {/* Đường phân cách & Nút Đăng Xuất bên dưới Lịch chụp của tôi */}
               <div className="pt-2 mt-2 border-t border-[#F0E4E6]">
@@ -709,10 +727,10 @@ export default function ProfilePage() {
                   title="Đăng xuất tài khoản"
                 >
                   <div className="flex items-center gap-3">
-                    <LogOut className="w-4 h-4 text-[#E53E3E] group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRightOnRectangleIcon className="w-4 h-4 text-[#E53E3E] group-hover:translate-x-0.5 transition-transform" />
                     <span>Đăng Xuất</span>
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 opacity-60 text-[#E53E3E]" />
+                  <ArrowRightIcon className="w-3.5 h-3.5 opacity-60 text-[#E53E3E]" />
                 </button>
               </div>
             </div>
@@ -736,14 +754,25 @@ export default function ProfilePage() {
                   </div>
 
                   {!isEditing ? (
-                    <button
-                      type="button"
-                      onClick={handleStartEdit}
-                      className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#B85064] text-[#B85064] hover:bg-[#FDF5F6] text-xs font-semibold transition-all shadow-2xs"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>Chỉnh sửa</span>
-                    </button>
+                    <div className="flex items-center gap-2.5">
+                      <Link
+                        to={ROUTES.USER.MY_BOOKINGS}
+                        className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold shadow-md shadow-[#B85064]/20 hover:scale-105 transition-all"
+                        title="Xem toàn bộ hóa đơn và lịch đã thanh toán"
+                      >
+                        <CalendarDaysIcon className="w-3.5 h-3.5 text-white" />
+                        <span>Lịch Đã Đặt</span>
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={handleStartEdit}
+                        className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#B85064] text-[#B85064] hover:bg-[#FDF5F6] text-xs font-semibold transition-all shadow-2xs"
+                      >
+                        <PencilSquareIcon className="w-3.5 h-3.5" />
+                        <span>Chỉnh sửa</span>
+                      </button>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-2">
                       <button
@@ -765,7 +794,7 @@ export default function ProfilePage() {
                       <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9]">
                         <label className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-[#B85064]" />
+                            <UserIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Họ và tên <span className="text-[#B85064]">*</span>
                           </span>
                         </label>
@@ -793,7 +822,7 @@ export default function ProfilePage() {
                       <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9]">
                         <label className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <Lock className="w-3.5 h-3.5 text-[#B85064]" />
+                            <LockClosedIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Tên đăng nhập <span className="text-[#B85064]">*</span>
                           </span>
                         </label>
@@ -821,7 +850,7 @@ export default function ProfilePage() {
                       <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9]">
                         <label className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <Mail className="w-3.5 h-3.5 text-[#B85064]" />
+                            <EnvelopeIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Địa chỉ Email <span className="text-[#B85064]">*</span>
                           </span>
                         </label>
@@ -848,7 +877,7 @@ export default function ProfilePage() {
                       <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9]">
                         <label className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-[#B85064]" />
+                            <PhoneIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Số điện thoại <span className="text-[#B85064]">*</span>
                           </span>
                         </label>
@@ -874,7 +903,7 @@ export default function ProfilePage() {
                       {/* 5. Giới tính */}
                       <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9]">
                         <span className="text-[11px] text-[#8C7D82] font-medium flex items-center gap-1.5 mb-2">
-                          <Sparkles className="w-3.5 h-3.5 text-[#B85064]" />
+                          <SparklesIcon className="w-3.5 h-3.5 text-[#B85064]" />
                           Giới tính
                         </span>
                         <div className="grid grid-cols-3 gap-2">
@@ -902,7 +931,7 @@ export default function ProfilePage() {
                       {/* 6. Ngày sinh */}
                       <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9]">
                         <label className="text-[11px] text-[#8C7D82] font-medium flex items-center gap-1.5 mb-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-[#B85064]" />
+                          <CalendarIcon className="w-3.5 h-3.5 text-[#B85064]" />
                           Ngày sinh
                         </label>
                         <input
@@ -919,7 +948,7 @@ export default function ProfilePage() {
                     {/* 7. Địa chỉ nhận ảnh / hóa đơn */}
                     <div className="p-4 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9]">
                       <label className="text-[11px] text-[#8C7D82] font-medium flex items-center gap-1.5 mb-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-[#B85064]" />
+                        <MapPinIcon className="w-3.5 h-3.5 text-[#B85064]" />
                         Địa chỉ nhận ảnh / hóa đơn
                       </label>
                       <input
@@ -949,7 +978,7 @@ export default function ProfilePage() {
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <>
-                            <Check className="w-4 h-4" />
+                            <CheckIcon className="w-4 h-4" />
                             <span>Lưu thay đổi</span>
                           </>
                         )}
@@ -970,7 +999,7 @@ export default function ProfilePage() {
                       >
                         <span className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-[#B85064]" />
+                            <UserIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Họ và tên
                           </span>
                           <span className="text-[10px] text-[#B85064] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -990,7 +1019,7 @@ export default function ProfilePage() {
                       >
                         <span className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <Lock className="w-3.5 h-3.5 text-[#B85064]" />
+                            <LockClosedIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Tên đăng nhập
                           </span>
                           <span className="text-[10px] text-[#B85064] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1010,7 +1039,7 @@ export default function ProfilePage() {
                       >
                         <span className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <Mail className="w-3.5 h-3.5 text-[#B85064]" />
+                            <EnvelopeIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Địa chỉ Email
                           </span>
                           <span className="text-[10px] text-[#B85064] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1030,7 +1059,7 @@ export default function ProfilePage() {
                       >
                         <span className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-[#B85064]" />
+                            <PhoneIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Số điện thoại
                           </span>
                           <span className="text-[10px] text-[#B85064] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1050,7 +1079,7 @@ export default function ProfilePage() {
                       >
                         <span className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-[#B85064]" />
+                            <SparklesIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Giới tính
                           </span>
                           <span className="text-[10px] text-[#B85064] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1074,7 +1103,7 @@ export default function ProfilePage() {
                       >
                         <span className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                           <span className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-[#B85064]" />
+                            <CalendarIcon className="w-3.5 h-3.5 text-[#B85064]" />
                             Ngày sinh
                           </span>
                           <span className="text-[10px] text-[#B85064] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1095,7 +1124,7 @@ export default function ProfilePage() {
                     >
                       <span className="text-[11px] text-[#8C7D82] font-medium flex items-center justify-between mb-1.5">
                         <span className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-[#B85064]" />
+                          <MapPinIcon className="w-3.5 h-3.5 text-[#B85064]" />
                           Địa chỉ nhận ảnh / hóa đơn
                         </span>
                         <span className="text-[10px] text-[#B85064] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1111,7 +1140,7 @@ export default function ProfilePage() {
                     <div className="p-4 rounded-2xl bg-[#FDF5F6] border border-[#F5D5DC] flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-white border border-[#F5D5DC] flex items-center justify-center text-[#B85064]">
-                          <ShieldCheck className="w-5 h-5" />
+                          <ShieldCheckIcon className="w-5 h-5" />
                         </div>
                         <div>
                           <span className="text-xs font-bold text-[#261A1E] block">
@@ -1172,7 +1201,7 @@ export default function ProfilePage() {
                           className="cursor-pointer absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9E8E93] hover:text-[#B85064] transition-colors p-1"
                           title={showOldPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                         >
-                          {showOldPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          {showOldPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                         </button>
                       </div>
                       {passwordErrors.oldPassword && (
@@ -1206,7 +1235,7 @@ export default function ProfilePage() {
                           className="cursor-pointer absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9E8E93] hover:text-[#B85064] transition-colors p-1"
                           title={showNewPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                         >
-                          {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          {showNewPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                         </button>
                       </div>
                       {passwordErrors.newPassword && (
@@ -1241,9 +1270,9 @@ export default function ProfilePage() {
                           title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                         >
                           {showConfirmPassword ? (
-                            <EyeOff className="w-4 h-4" />
+                            <EyeSlashIcon className="w-4 h-4" />
                           ) : (
-                            <Eye className="w-4 h-4" />
+                            <EyeIcon className="w-4 h-4" />
                           )}
                         </button>
                       </div>
@@ -1264,7 +1293,7 @@ export default function ProfilePage() {
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <>
-                            <KeyRound className="w-4 h-4" />
+                            <KeyIcon className="w-4 h-4" />
                             <span>Cập nhật mật khẩu mới</span>
                           </>
                         )}
@@ -1310,6 +1339,15 @@ export default function ProfilePage() {
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
+
+                  <Link
+                    to={ROUTES.USER.MY_BOOKINGS}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#B85064] text-white text-xs font-bold hover:bg-[#A8394C] shadow-xs transition-all"
+                  >
+                    <span>Xem Hóa Đơn & Lịch Đã Thanh Toán</span>
+                    <ArrowRightIcon className="w-3.5 h-3.5" />
+                  </Link>
+
                 </div>
 
                 {/* Danh sách lịch chụp */}
@@ -1321,6 +1359,35 @@ export default function ProfilePage() {
                 ) : null}
 
                 <div className="space-y-4">
+
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#EFEBEB] shrink-0">
+                        <img
+                          src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80"
+                          alt="Gói chụp"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#EBF8F2] text-[#2EA46D] uppercase">
+                          Đã hoàn thành
+                        </span>
+                        <h4 className="text-sm font-bold text-[#261A1E] mt-1">
+                          Gói Chụp Ảnh Cưới Studio VIP
+                        </h4>
+                        <div className="flex items-center gap-3 text-xs text-[#7A6C71] mt-1">
+                          <span className="flex items-center gap-1">
+                            <CalendarIcon className="w-3 h-3 text-[#B85064]" />
+                            10/10/2026
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <ClockIcon className="w-3 h-3 text-[#B85064]" />
+                            08:30 – 12:30
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   {bookings.map((b) => {
                     const isCompleted = b.status === 'completed' || b.status === 'Đã hoàn thành';
                     const hasReview = Boolean(b.review);
@@ -1384,6 +1451,33 @@ export default function ProfilePage() {
                           </div>
                         </div>
 
+
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF5F5] border border-[#F2E8E9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#EFEBEB] shrink-0">
+                        <img
+                          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+                          alt="Gói chụp"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#FEF3C7] text-[#D97706] uppercase">
+                          Đã xác nhận
+                        </span>
+                        <h4 className="text-sm font-bold text-[#261A1E] mt-1">
+                          Gói Chân Dung Nghệ Thuật Nàng Thơ Pastel
+                        </h4>
+                        <div className="flex items-center gap-3 text-xs text-[#7A6C71] mt-1">
+                          <span className="flex items-center gap-1">
+                            <CalendarIcon className="w-3 h-3 text-[#B85064]" />
+                            02/11/2026
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <ClockIcon className="w-3 h-3 text-[#B85064]" />
+                            14:00 – 16:30
+                          </span>
+
                         <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
                           <button
                             type="button"
@@ -1415,6 +1509,7 @@ export default function ProfilePage() {
                               Xem gói chụp
                             </Link>
                           )}
+
                         </div>
                       </div>
                     );

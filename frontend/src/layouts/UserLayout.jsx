@@ -1,12 +1,18 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/user/layout/Navbar';
 import Footer from '../components/user/layout/Footer';
-import QuickContact from '../components/user/layout/QuickContact';
 import { ROUTES } from '../routes/web';
 import { customerAuth } from '../lib/axiosCustomer';
 
 export default function UserLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Tự động cuộn lên đầu trang mỗi khi chuyển tuyến đường
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
 
   const handleOpenBooking = () => {
     if (!customerAuth.isAuthenticated()) {
@@ -24,10 +30,9 @@ export default function UserLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-[#141012] text-white selection:bg-[#BE4B5E] selection:text-white font-sans">
       <Navbar onOpenBooking={handleOpenBooking} />
-      <main className="flex-1">
+      <main key={location.pathname} className="flex-1">
         <Outlet />
       </main>
-      <QuickContact onOpenBooking={handleOpenBooking} />
       <Footer />
     </div>
   );

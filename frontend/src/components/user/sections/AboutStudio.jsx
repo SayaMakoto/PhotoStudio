@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  SparklesIcon,
   CheckIcon,
   CubeIcon,
   ChevronRightIcon,
   EyeIcon,
   UserGroupIcon,
   CalendarDaysIcon,
+  PhotoIcon,
 } from '@heroicons/react/24/solid';
 import ScrollReveal from '../../animations/ScrollReveal';
 import { ROUTES } from '../../../routes/web';
@@ -179,7 +179,7 @@ export default function StudioExperience() {
                         : 'bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/40 shadow-sm'
                     }`}
                   >
-                    <SparklesIcon className={`w-3.5 h-3.5 ${activeRoomIndex === idx ? 'text-white' : 'text-[#B85064]'}`} />
+                    <PhotoIcon className={`w-3.5 h-3.5 ${activeRoomIndex === idx ? 'text-white' : 'text-neutral-700'}`} />
                     <span>{room.name.split(' - ')[0]}</span>
                   </button>
                 ))}
@@ -304,7 +304,7 @@ export default function StudioExperience() {
                 to={ROUTES.USER.STUDIOS}
                 className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs sm:text-sm font-bold shadow-lg shadow-rose-950/20 hover:scale-105 transition-all"
               >
-                <SparklesIcon className="w-4 h-4 text-white" />
+                <CalendarDaysIcon className="w-4 h-4 text-white" />
                 <span>Khám Phá Toàn Diện 12 Phòng Chụp & Bối Cảnh Studio</span>
                 <ChevronRightIcon className="w-4 h-4 text-white" />
               </Link>

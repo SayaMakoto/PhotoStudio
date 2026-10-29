@@ -5,8 +5,8 @@
  */
 
 export const VNPAY_CONFIG = {
-  vnp_TmnCode: 'CGXZLS0Z', // Mã Terminal Sandbox mặc định của VNPay
-  vnp_HashSecret: 'XNBCJFAKAZQSGZSSTGUBVOZTPOXZHHOP', // Khóa bí mật Sandbox
+  vnp_TmnCode: '2Q8OTT67', // Mã Terminal Sandbox mặc định của VNPay
+  vnp_HashSecret: 'NBJVCVIHRQZPDEABEOGLOKZSJGXTTLLW', // Khóa bí mật Sandbox
   vnp_Url: 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html', // Cổng thanh toán Sandbox
   vnp_Version: '2.1.0',
   vnp_Command: 'pay',

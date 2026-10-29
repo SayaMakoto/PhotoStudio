@@ -35,4 +35,33 @@ public class ReviewResponse {
     private String adminReply;
 
     private LocalDateTime adminRepliedAt;
+
+    private String packageName;
+
+    private String roomName;
+
+    public ReviewResponse(
+            Long id,
+            Long bookingId,
+            Long customerId,
+            String customerName,
+            Double rating,
+            String comment,
+            List<EmployeeReviewResponse> employeeReviews,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            String adminReply,
+            LocalDateTime adminRepliedAt) {
+        this.id = id;
+        this.bookingId = bookingId;
+        this.customerId = customerId;
+        this.customerName = customerName;
+        this.rating = rating;
+        this.comment = comment;
+        this.employeeReviews = employeeReviews;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.adminReply = adminReply;
+        this.adminRepliedAt = adminRepliedAt;
+    }
 }

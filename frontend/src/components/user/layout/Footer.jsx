@@ -5,8 +5,9 @@ import {
   PhoneIcon,
   MapPinIcon,
   ArrowUpIcon,
-  SparklesIcon,
-  HeartIcon
+  HeartIcon,
+  ChatBubbleLeftRightIcon,
+  PaperAirplaneIcon,
 } from '@heroicons/react/24/solid';
 import Magnet from '../../animations/Magnet';
 import ScrollReveal from '../../animations/ScrollReveal';
@@ -28,8 +29,8 @@ export default function Footer() {
         <ScrollReveal direction="down">
           <div className="mb-16 p-8 rounded-3xl bg-[#1C1619]/80 border border-rose-500/30 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl shadow-rose-950/20">
             <div className="flex items-center gap-4 text-center md:text-left">
-              <div className="w-13 h-13 rounded-2xl bg-rose-500/20 text-[#E899A8] flex items-center justify-center shrink-0 border border-rose-500/40 shadow-md">
-                <SparklesIcon className="w-7 h-7 text-[#E899A8] animate-pulse" />
+              <div className="w-12 h-12 rounded-2xl bg-white/10 text-white flex items-center justify-center shrink-0 border border-white/20 shadow-md">
+                <ChatBubbleLeftRightIcon className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h4 className="text-lg font-bold text-white font-serif-luxury">Bạn Cần Tư Vấn Concept Độc Bản Riêng?</h4>
@@ -42,16 +43,16 @@ export default function Footer() {
                 href="tel:0901234567"
                 className="px-6 py-3 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition-all border border-rose-500/30 flex items-center gap-2 shadow-sm"
               >
-                <PhoneIcon className="w-4 h-4 text-[#E899A8]" />
+                <PhoneIcon className="w-4 h-4 text-white" />
                 <span>Gọi 0901 234 567</span>
               </a>
               <Link
-                to={ROUTES.USER.PACKAGES}
+                to={ROUTES.USER.CONTACT}
                 onClick={scrollToTop}
                 className="px-6 py-3 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-extrabold shadow-lg shadow-rose-950/40 hover:scale-105 transition-all flex items-center gap-1.5"
               >
-                <SparklesIcon className="w-4 h-4 text-white" />
-                <span>Xem Báo Giá Trực Tuyến</span>
+                <PaperAirplaneIcon className="w-4 h-4 text-white" />
+                <span>Gửi Yêu Cầu Tư Vấn</span>
               </Link>
             </div>
           </div>
@@ -133,22 +134,22 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.PACKAGES}?category=portrait`} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Concept Nàng Thơ / Cá Nhân
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.PACKAGES}?category=wedding`} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Chụp Ảnh Cưới Studio & Ngoại Cảnh
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.PACKAGES}?category=family`} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Chụp Ảnh Gia Đình VIP
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.PACKAGES} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.PACKAGES}?category=commercial`} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Dịch Vụ Phụ Trợ & Cho Thuê
                 </Link>
               </li>
@@ -172,12 +173,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.USER.STUDIOS} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={`${ROUTES.USER.STUDIOS}#equipment`} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Dàn Thiết Bị Full-Frame
                 </Link>
               </li>
               <li>
-                <Link to={`${ROUTES.USER.HOME}#booking`} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
+                <Link to={ROUTES.USER.BOOKING} onClick={scrollToTop} className="text-neutral-300 hover:text-[#E899A8] hover:translate-x-1.5 inline-block transition-all duration-200">
                   Đặt Lịch Trực Tuyến
                 </Link>
               </li>

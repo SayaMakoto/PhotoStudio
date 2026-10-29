@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Camera,
-  Lock,
-  Mail,
-  User,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  CheckCircle2,
-  ArrowRight,
-  ArrowLeft,
-} from 'lucide-react';
+  CameraIcon,
+  LockClosedIcon,
+  EnvelopeIcon,
+  UserIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ExclamationCircleIcon,
+  CheckCircleIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+} from '@heroicons/react/24/solid';
 import { ROUTES } from '../../routes/web';
 import customerAuthService from '../../services/user/authService';
 import { FloralCardCorner } from '../../components/common/FloralDecorations';
@@ -134,7 +134,7 @@ export default function RegisterPage() {
         className="fixed top-5 left-5 z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 hover:bg-white text-[#261A1E] hover:text-[#B85064] text-xs font-semibold shadow-lg shadow-black/25 backdrop-blur-md border border-white/50 transition-all hover:scale-105 group"
         title="Quay lại trang chủ PhotoStudio"
       >
-        <ArrowLeft className="w-4 h-4 text-[#B85064] group-hover:-translate-x-1 transition-transform" />
+        <ArrowLeftIcon className="w-4 h-4 text-[#B85064] group-hover:-translate-x-1 transition-transform" />
         <span>Quay lại trang chủ</span>
       </Link>
 
@@ -180,7 +180,7 @@ export default function RegisterPage() {
           <div className="relative z-10">
             <Link to={ROUTES.USER.HOME} className="inline-flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-xl bg-[#BE4B5E] flex items-center justify-center shadow-lg shadow-[#BE4B5E]/30 group-hover:scale-105 transition-transform">
-                <Camera className="w-5 h-5 text-white stroke-[2.2]" />
+                <CameraIcon className="w-5 h-5 text-white stroke-[2.2]" />
               </div>
               <div>
                 <span className="text-base font-bold tracking-wider text-white font-sans flex items-center gap-1">
@@ -244,7 +244,7 @@ export default function RegisterPage() {
             {/* Alert thông báo lỗi */}
             {errorMessage && (
               <div className="mb-4 p-3 rounded-xl bg-[#FFF2F4] border border-[#FCD5DC] text-[#C53030] text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
-                <AlertCircle className="w-4 h-4 text-[#E53E3E] shrink-0 mt-0.5" />
+                <ExclamationCircleIcon className="w-4 h-4 text-[#E53E3E] shrink-0 mt-0.5" />
                 <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
               </div>
             )}
@@ -252,7 +252,7 @@ export default function RegisterPage() {
             {/* Alert thông báo thành công */}
             {successMessage && (
               <div className="mb-4 p-3 rounded-xl bg-[#EBF8F2] border border-[#B4E8D0] text-[#1E7E34] text-xs flex items-center gap-2 animate-in fade-in duration-200">
-                <CheckCircle2 className="w-4 h-4 text-[#2EA46D] shrink-0" />
+                <CheckCircleIcon className="w-4 h-4 text-[#2EA46D] shrink-0" />
                 <span className="font-medium">{successMessage}</span>
               </div>
             )}
@@ -266,7 +266,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9E8E93]">
-                    <User className="w-4 h-4" />
+                    <UserIcon className="w-4 h-4" />
                   </div>
                   <input
                     type="text"
@@ -283,7 +283,7 @@ export default function RegisterPage() {
                 </div>
                 {fieldErrors.fullname && (
                   <p className="mt-1 text-[11px] text-[#E53E3E] font-medium flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
+                    <ExclamationCircleIcon className="w-3 h-3" />
                     <span>{fieldErrors.fullname}</span>
                   </p>
                 )}
@@ -296,7 +296,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9E8E93]">
-                    <Mail className="w-4 h-4" />
+                    <EnvelopeIcon className="w-4 h-4" />
                   </div>
                   <input
                     type="email"
@@ -313,7 +313,7 @@ export default function RegisterPage() {
                 </div>
                 {fieldErrors.email && (
                   <p className="mt-1 text-[11px] text-[#E53E3E] font-medium flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
+                    <ExclamationCircleIcon className="w-3 h-3" />
                     <span>{fieldErrors.email}</span>
                   </p>
                 )}
@@ -326,7 +326,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9E8E93]">
-                    <Lock className="w-4 h-4" />
+                    <LockClosedIcon className="w-4 h-4" />
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -345,12 +345,12 @@ export default function RegisterPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#9E8E93] hover:text-[#261A1E] transition-colors cursor-pointer"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                   </button>
                 </div>
                 {fieldErrors.password && (
                   <p className="mt-1 text-[11px] text-[#E53E3E] font-medium flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
+                    <ExclamationCircleIcon className="w-3 h-3" />
                     <span>{fieldErrors.password}</span>
                   </p>
                 )}
@@ -363,7 +363,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9E8E93]">
-                    <Lock className="w-4 h-4" />
+                    <LockClosedIcon className="w-4 h-4" />
                   </div>
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
@@ -382,12 +382,12 @@ export default function RegisterPage() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#9E8E93] hover:text-[#261A1E] transition-colors cursor-pointer"
                   >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirmPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                   </button>
                 </div>
                 {fieldErrors.confirmPassword && (
                   <p className="mt-1 text-[11px] text-[#E53E3E] font-medium flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
+                    <ExclamationCircleIcon className="w-3 h-3" />
                     <span>{fieldErrors.confirmPassword}</span>
                   </p>
                 )}
@@ -441,7 +441,7 @@ export default function RegisterPage() {
                 ) : (
                   <>
                     <span>Đăng Ký</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRightIcon className="w-4 h-4" />
                   </>
                 )}
               </button>
@@ -456,7 +456,7 @@ export default function RegisterPage() {
               className="text-[#B85064] hover:underline font-bold inline-flex items-center gap-1 ml-1"
             >
               <span>Đăng nhập ngay</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRightIcon className="w-3 h-3" />
             </Link>
           </div>
         </div>

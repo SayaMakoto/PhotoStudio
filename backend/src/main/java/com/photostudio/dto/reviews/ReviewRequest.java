@@ -20,6 +20,10 @@ public class ReviewRequest {
 
     private Long customerId;
 
+    private Long packageId;
+
+    private Long roomId;
+
     private Double rating;
 
     private String comment;

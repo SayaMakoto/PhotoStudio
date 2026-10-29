@@ -340,7 +340,7 @@ export default function Gallery() {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm">
-                <SparklesIcon className="w-4 h-4 text-[#B85064]" />
+                <PhotoIcon className="w-4 h-4 text-neutral-800" />
                 <ShinyText text="KHO ẢNH TỪ HỆ THỐNG" speed={3} className="text-[#B85064]" />
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2A1D22] font-serif-luxury tracking-tight">

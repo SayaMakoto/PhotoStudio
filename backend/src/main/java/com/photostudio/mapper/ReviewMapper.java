@@ -64,11 +64,25 @@ public class ReviewMapper {
     }
 
     public static EmployeeReviewResponse toEmployeeReviewResponse(EmployeeReview employeeReview) {
+        String employeeName = null;
+        String employeePosition = null;
+        if (employeeReview.getEmployee() != null) {
+            if (employeeReview.getEmployee().getUser() != null) {
+                employeeName = employeeReview.getEmployee().getUser().getFullname();
+            }
+            if (employeeReview.getEmployee().getPosition() != null) {
+                employeePosition = employeeReview.getEmployee().getPosition().name();
+            }
+        }
         return new EmployeeReviewResponse(
                 employeeReview.getId(),
                 employeeReview.getEmployeeId(),
+                employeeName,
+                employeePosition,
                 employeeReview.getRating(),
-                employeeReview.getComment()
+                employeeReview.getComment(),
+                employeeReview.getAdminReply(),
+                employeeReview.getAdminRepliedAt()
         );
     }
 
@@ -80,7 +94,12 @@ public class ReviewMapper {
             }
         }
 
-        return new ReviewResponse(
+        String roomName = null;
+        if (review.getBooking() != null && review.getBooking().getRoom() != null) {
+            roomName = review.getBooking().getRoom().getName();
+        }
+
+        ReviewResponse response = new ReviewResponse(
                 review.getId(),
                 review.getBookingId(),
                 review.getCustomerId(),
@@ -93,5 +112,7 @@ public class ReviewMapper {
                 review.getAdminReply(),
                 review.getAdminRepliedAt()
         );
+        response.setRoomName(roomName);
+        return response;
     }
 }

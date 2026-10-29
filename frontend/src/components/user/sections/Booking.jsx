@@ -1,6 +1,5 @@
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  SparklesIcon,
   CalendarDaysIcon,
   ArrowRightIcon,
   TicketIcon,
@@ -57,7 +56,7 @@ export default function BookingSection() {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <ScrollReveal direction="up">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#B85064]/20 border border-[#B85064]/40 text-[#F3ACB8] text-xs font-bold uppercase tracking-wider mb-4 shadow-inner">
-              <SparklesIcon className="w-4 h-4 text-[#EAA5B2]" />
+              <CalendarDaysIcon className="w-4 h-4 text-white" />
               <span>HỆ THỐNG ĐẶT LỊCH CHỤP TRỰC TUYẾN 2026</span>
             </span>
           </ScrollReveal>
@@ -239,7 +238,7 @@ export default function BookingSection() {
                   to={ROUTES.USER.PACKAGES}
                   className="cursor-pointer w-full sm:w-auto px-7 py-4 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-sm font-semibold transition-all flex items-center justify-center"
                 >
-                  <span>Xem Báo Giá Tất Cả Gói Chụp</span>
+                  <span>Xem Tất Cả Gói Chụp</span>
                 </Link>
               </div>
 

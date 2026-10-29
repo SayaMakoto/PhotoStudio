@@ -9,7 +9,6 @@ import {
   CalendarDaysIcon,
   ShieldCheckIcon,
   TvIcon,
-  SparklesIcon as SparklesOutline,
   ArrowRightIcon,
   PhoneIcon,
   XMarkIcon,
@@ -17,6 +16,8 @@ import {
   ArrowsPointingOutIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  BuildingOffice2Icon,
+  CameraIcon,
 } from '@heroicons/react/24/solid';
 
 // React Bits Components
@@ -38,264 +39,6 @@ import userImageService from '../../services/user/imageService';
 // DỮ LIỆU DỰ PHÒNG CHUẨN ĐỒNG BỘ 100% VỚI SEED DATA TRONG CSDL (DOCS/PHOTO_STUDIO.SQL)
 // Toàn bộ hình ảnh là ảnh chụp không gian kiến trúc nội thất studio thực tế (KHÔNG dùng ảnh chụp người)
 // =========================================================================
-
-const DEFAULT_BACKGROUNDS = [
-  {
-    id: 1,
-    name: 'Phông Hàn Quốc Pastel Tối Giản',
-    description: 'Phông nền màu pastel tự động, ánh sáng dịu mắt phù hợp chụp chân dung nàng thơ và profile cá nhân',
-    tag: 'Concept Nàng Thơ',
-    primaryImage: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=85',
-    ],
-    highlights: ['Vòm cong kiến trúc phong cách Seoul', 'Tone màu beige kem và pastel ngọt ngào', 'Hệ thống phông cuốn tự động 6 màu'],
-  },
-  {
-    id: 2,
-    name: 'Góc Phố Cổ Hội An & Sen Hồ Á Đông',
-    description: 'Bối cảnh tường vàng rêu phong, đèn lồng và hoa sen chụp áo dài truyền thống, cổ trang',
-    tag: 'Áo Dài & Cổ Phục',
-    primaryImage: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=85',
-    ],
-    highlights: ['Tường vàng rêu phong hoài niệm', 'Dàn lồng đèn lụa thủ công Hội An', 'Hồ sen nhân tạo lát gạch hoa cổ'],
-  },
-  {
-    id: 3,
-    name: 'Cung Điện Cổ Điển Châu Âu Luxury',
-    description: 'Thiết kế vòm đá cẩm thạch phong cách Pháp, rèm nhung và đèn chùm pha lê sang trọng cho ảnh cưới',
-    tag: 'Ảnh Cưới Hoàng Gia',
-    primaryImage: 'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85',
-    ],
-    highlights: ['Đèn chùm pha lê Swarovski nhập khẩu', 'Cột đá cẩm thạch hoa văn hoàng gia Pháp', 'Rèm nhung đỏ đô dệt tay cổ điển'],
-  },
-  {
-    id: 4,
-    name: 'Ban Công Hoàng Hôn & Vườn Hoa Studio',
-    description: 'Không gian mở đón trọn ánh sáng tự nhiên hoàng hôn lãng mạn cho cặp đôi và cô dâu',
-    tag: 'Hoàng Hôn & Lãng Mạn',
-    primaryImage: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1200&q=85',
-    ],
-    highlights: ['Cửa kính panorama đón nắng hoàng hôn', 'Vườn hoa hồng leo và tường hoa tươi nghệ thuật', 'Rèm voan trắng bay bổng trong gió'],
-  },
-  {
-    id: 5,
-    name: 'Phòng Đọc Sách & Sofa Da Vintage',
-    description: 'Nội thất gỗ trầm ấm cổ điển, kệ sách gỗ sồi và sofa Chesterfield dành cho gia đình và doanh nhân',
-    tag: 'Gia Đình & Doanh Nhân',
-    primaryImage: 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=85',
-    ],
-    highlights: ['Kệ sách gỗ sồi kịch trần ấm áp', 'Sofa da bò Chesterfield cổ điển', 'Đèn bàn đồng brass phong cách châu Âu'],
-  },
-  {
-    id: 6,
-    name: 'Phông Trắng / Đen Studio High-End',
-    description: 'Phông nền vô cực tiêu chuẩn quốc tế cho lookbook thời trang và ảnh thương mại',
-    tag: 'Lookbook & High-Fashion',
-    primaryImage: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=85',
-    ],
-    highlights: ['Vách vô cực cong 3 cạnh liền mạch', 'Trần cao 4.2m lắp hệ thống thanh treo ray điện', 'Mảng tường bê tông mài thô hiện đại'],
-  },
-];
-
-const DEFAULT_ROOMS = [
-  {
-    id: 1,
-    name: 'Phòng Studio A - Phong Cách Hàn Quốc',
-    description: 'Tone màu sáng pastel, rèm voan trắng, hoa khô nghệ thuật, chuyên chụp chân dung, nàng thơ và beauty layout nhẹ nhàng',
-    capacity: 5,
-    status: 'active',
-    area: '45m²',
-    ceiling: '3.8m',
-    primaryImage: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Cửa kính lớn đón trọn ánh sáng tự nhiên', 'Rèm voan kép 2 lớp mềm mại', 'Bục bối cảnh vòm cong tối giản', 'Phù hợp nhóm 1 - 5 người'],
-  },
-  {
-    id: 2,
-    name: 'Phòng Studio B - Concept Cổ Điển & Hoàng Gia',
-    description: 'Diện tích 75m2, trần cao 4.2m, nội thất gỗ sồi cao cấp, đèn chùm pha lê, chuyên ảnh cưới VIP và dạ tiệc sang trọng',
-    capacity: 10,
-    status: 'active',
-    area: '75m²',
-    ceiling: '4.2m',
-    primaryImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Đại sảnh vòm đá cẩm thạch phong cách Pháp', 'Đèn chùm pha lê lung linh trần cao 4.2m', 'Sofa nhung hoàng gia sang trọng', 'Phù hợp nhóm 5 - 10 người'],
-  },
-  {
-    id: 3,
-    name: 'Phòng Studio VIP - Cinema & Đa Năng',
-    description: 'Trang bị hệ thống chiếu sáng kịch tính Arri/Aputure, dàn phông màu điện tử 8 màu tự động, phù hợp chụp profile doanh nhân & lookbook',
-    capacity: 8,
-    status: 'active',
-    area: '65m²',
-    ceiling: '4.0m',
-    primaryImage: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Hệ thống phông màu điện tử 8 màu', 'Khung giàn treo ray đèn kịch trần 360 độ', 'Màn hình tethering 4K xem ảnh tức thì', 'Cách âm tiêu chuẩn phòng quay chuyên nghiệp'],
-  },
-  {
-    id: 4,
-    name: 'Phòng Studio C - Không Gian Gia Đình Vintage',
-    description: 'Bối cảnh phòng khách ấm cúng với sofa nhung cổ, lò sưởi, đàn piano, chuyên chụp ảnh gia đình đa thế hệ và thôi nôi cho bé',
-    capacity: 12,
-    status: 'active',
-    area: '80m²',
-    ceiling: '3.6m',
-    primaryImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Góc lò sưởi decor và đàn piano gỗ cổ', 'Sofa nhung lớn chứa cả đại gia đình', 'Khu vực an toàn thân thiện với trẻ nhỏ', 'Phù hợp đại gia đình tối đa 12 người'],
-  },
-  {
-    id: 5,
-    name: 'Phòng Studio D - Concept Monochromatic',
-    description: 'Tường xi măng công nghiệp tối giản, hệ thống tản sáng khổ lớn, chuyên chụp lookbook thời trang thương hiệu và nghệ thuật đen trắng',
-    capacity: 6,
-    status: 'active',
-    area: '55m²',
-    ceiling: '4.0m',
-    primaryImage: 'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Vách vô cực cong đa hướng trắng & đen', 'Tường bê tông mộc nghệ thuật high-fashion', 'Gương soi toàn thân viền đèn chuẩn màu', 'Phù hợp chụp lookbook thương hiệu'],
-  },
-  {
-    id: 6,
-    name: 'Phòng Studio E - Ban Công Hoàng Hôn & Vườn Kính',
-    description: 'Không gian đón trọn ánh sáng tự nhiên hoàng hôn với cửa kính panorama và giàn hoa nghệ thuật cho cặp đôi',
-    capacity: 6,
-    status: 'active',
-    area: '50m²',
-    ceiling: '3.8m',
-    primaryImage: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Cửa kính panorama đón trọn ánh hoàng hôn', 'Vườn hoa nghệ thuật phối cảnh tự nhiên', 'Rèm voan đón gió mềm mại', 'Phù hợp cặp đôi & lookbook thời trang'],
-  },
-  {
-    id: 7,
-    name: 'Phòng Studio F - Phong Cách Á Đông & Cổ Phục',
-    description: 'Tường vàng rêu phong hoài niệm, hồ sen tiểu cảnh và đèn lồng lụa chuyên chụp áo dài truyền thống và cổ phục',
-    capacity: 8,
-    status: 'active',
-    area: '60m²',
-    ceiling: '4.0m',
-    primaryImage: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Bối cảnh tường vàng rêu phong Hội An', 'Hồ sen nhân tạo cùng sỏi trắng phong thủy', 'Đèn lồng Hội An thủ công tinh xảo', 'Chuyên trang phục Á Đông & áo dài'],
-  },
-  {
-    id: 8,
-    name: 'Phòng Studio G - Thư Viện Quý Tộc & Gỗ Trầm',
-    description: 'Kệ sách gỗ sồi kịch trần, sofa da bò Chesterfield cổ điển chuyên chụp profile chuyên gia và gia đình cao cấp',
-    capacity: 6,
-    status: 'active',
-    area: '55m²',
-    ceiling: '3.8m',
-    primaryImage: 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Kệ sách gỗ sồi hơn 1000 đầu sách cổ', 'Sofa da thật nhập khẩu từ Ý', 'Bàn trà phong cách quý tộc châu Âu', 'Phong thái doanh nhân & học thức'],
-  },
-  {
-    id: 9,
-    name: 'Phòng Studio H - Industrial Loft Sáng Tạo',
-    description: 'Trần cao bê tông mộc nghệ thuật, khung thép phong cách New York loft chuyên chụp lookbook street-style và nghệ thuật',
-    capacity: 8,
-    status: 'active',
-    area: '70m²',
-    ceiling: '4.5m',
-    primaryImage: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Tường gạch thô & bê tông phong cách New York', 'Khung cửa kính lớn đón nắng tự nhiên', 'Thang leo nghệ thuật và đạo cụ kim loại', 'Trần cao 4.5m cực kỳ thoáng đãng'],
-  },
-  {
-    id: 10,
-    name: 'Phòng Studio I - Không Gian Em Bé & Thôi Nôi',
-    description: 'Không gian an toàn decor tone màu pastel ngọt ngào, đồ chơi gỗ phong cách Scandinavian chuyên chụp cho bé và mẹ bầu',
-    capacity: 5,
-    status: 'active',
-    area: '40m²',
-    ceiling: '3.5m',
-    primaryImage: 'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Sàn gỗ sưởi ấm an toàn cho làn da bé', 'Đồ chơi gỗ tự nhiên không góc nhọn', 'Bóng bay pastel và lều công chúa', 'Nhiệt độ phòng luôn giữ 25-26°C'],
-  },
-  {
-    id: 11,
-    name: 'Phòng Studio K - Sảnh Cưới Grand Ballroom',
-    description: 'Sàn gương bóng bẩy, vòm hoa cưới khổng lồ và đèn chùm pha lê lộng lẫy chuyên chụp ảnh cưới dạ hội sang trọng',
-    capacity: 12,
-    status: 'active',
-    area: '90m²',
-    ceiling: '4.5m',
-    primaryImage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Đại sảnh diện tích lớn nhất studio (90m²)', 'Sàn gương phản chiếu hiệu ứng vô cực', 'Vòm hoa cưới nghệ thuật hoành tráng', 'Hệ thống đèn theo dõi follow spotlight'],
-  },
-  {
-    id: 12,
-    name: 'Phòng Studio L - High-End Cyclorama Vô Cực',
-    description: 'Vách cong vô cực 3D 180 độ tiêu chuẩn quốc tế, hệ thống thanh treo ray điện chuyên nghiệp cho thương mại điện tử',
-    capacity: 10,
-    status: 'active',
-    area: '80m²',
-    ceiling: '4.2m',
-    primaryImage: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=85',
-    gallery: [
-      'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=85',
-      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85',
-    ],
-    features: ['Vách vô cực cong 180 độ không góc cạnh', 'Hệ thống ray treo đèn điện tử tự động', 'Mặt sàn phủ sơn trắng bóng chuyên dụng', 'Tiêu chuẩn quay TVC & chụp thương mại'],
-  },
-];
 
 const ROOMS_PER_PAGE = 6;
 
@@ -342,55 +85,57 @@ export default function StudiosPage() {
           : [];
 
         if (rawBgs.length > 0) {
-          const mappedBgs = rawBgs.map((b, idx) => {
-            const fallback = DEFAULT_BACKGROUNDS[idx % DEFAULT_BACKGROUNDS.length];
+          const mappedBgs = rawBgs.map((b) => {
             const matchingImages = rawImages.filter(
               (img) => (img.imageableType === 'background' || img.imageableType === 'BACKGROUND') && Number(img.imageableId) === Number(b.id)
             );
-            const primary = matchingImages.find((img) => img.isPrimary)?.imageUrl || matchingImages[0]?.imageUrl || fallback.primaryImage;
-            const gallery = matchingImages.length > 0 ? matchingImages.map((m) => m.imageUrl) : fallback.gallery;
+            const primary = matchingImages.find((img) => img.isPrimary)?.imageUrl || matchingImages[0]?.imageUrl || b.imageUrl || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85';
+            const gallery = matchingImages.length > 0 ? matchingImages.map((m) => m.imageUrl) : [primary];
 
             return {
-              ...fallback,
-              ...b,
-              tag: fallback.tag || 'Bối Cảnh Nghệ Thuật',
+              id: b.id,
+              name: b.name || `Bối cảnh #${b.id}`,
+              description: b.description || 'Bối cảnh chụp ảnh nghệ thuật tại studio',
+              tag: b.tag || b.backgroundType || 'Bối Cảnh Nghệ Thuật',
               primaryImage: primary,
               gallery: gallery,
-              highlights: fallback.highlights,
+              highlights: b.highlights || ['Không gian ánh sáng tối ưu', 'Đạo cụ decor tương thích'],
             };
           });
           setBackgrounds(mappedBgs);
         } else {
-          setBackgrounds(DEFAULT_BACKGROUNDS);
+          setBackgrounds([]);
         }
 
-        // 2. Đồng bộ 12 PHÒNG CHỤP từ CSDL
+        // 2. Đồng bộ danh sách PHÒNG CHỤP từ CSDL
         const rawRooms = roomsRes.status === 'fulfilled' && Array.isArray(roomsRes.value?.data || roomsRes.value)
           ? (roomsRes.value?.data || roomsRes.value)
           : [];
 
         if (rawRooms.length > 0) {
-          const mappedRooms = rawRooms.map((r, idx) => {
-            const fallback = DEFAULT_ROOMS[idx % DEFAULT_ROOMS.length];
+          const mappedRooms = rawRooms.map((r) => {
             const matchingImages = rawImages.filter(
               (img) => (img.imageableType === 'room' || img.imageableType === 'ROOM') && Number(img.imageableId) === Number(r.id)
             );
-            const primary = matchingImages.find((img) => img.isPrimary)?.imageUrl || matchingImages[0]?.imageUrl || fallback.primaryImage;
-            const gallery = matchingImages.length > 0 ? matchingImages.map((m) => m.imageUrl) : fallback.gallery;
+            const primary = matchingImages.find((img) => img.isPrimary)?.imageUrl || matchingImages[0]?.imageUrl || r.imageUrl || 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85';
+            const gallery = matchingImages.length > 0 ? matchingImages.map((m) => m.imageUrl) : [primary];
 
             return {
-              ...fallback,
-              ...r,
+              id: r.id,
+              name: r.name || `Phòng Studio #${r.id}`,
+              description: r.description || 'Không gian studio ánh sáng tự nhiên cao cấp',
+              capacity: r.capacity || 4,
+              status: r.status || 'active',
               primaryImage: primary,
               gallery: gallery,
-              area: fallback.area || '60m²',
-              ceiling: fallback.ceiling || '4.0m',
-              features: fallback.features,
+              area: r.area || '60m²',
+              ceiling: r.ceiling || '4.0m',
+              features: r.features || ['Hệ thống ánh sáng studio chuyên nghiệp', 'Phù hợp nhiều concept'],
             };
           });
           setRooms(mappedRooms);
         } else {
-          setRooms(DEFAULT_ROOMS);
+          setRooms([]);
         }
       })
       .finally(() => {
@@ -461,7 +206,7 @@ export default function StudiosPage() {
           <div className="max-w-3xl">
             {/* Shimmering Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/15 border border-rose-500/30 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-5 shadow-lg backdrop-blur-md">
-              <SparklesIcon className="w-4 h-4 text-[#E899A8] animate-pulse" />
+              <BuildingOffice2Icon className="w-4 h-4 text-white" />
               <ShinyText text="HỆ THỐNG 12 PHÒNG CHỤP & BỐI CẢNH 500M²" speed={3.5} className="text-white" />
             </div>
 
@@ -522,9 +267,10 @@ export default function StudiosPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-3">
-                  <SparklesIcon className="w-3.5 h-3.5 text-[#E899A8]" />
-                  <span>SET DESIGN NGHỆ THUẬT 3D</span>
-                </div>
+
+                  <CameraIcon className="w-3.5 h-3.5 text-white" />
+                  <span>SET DESIGN NGHỆ THUẬT 3D TỪ CSDL<
+                 
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif-luxury tracking-tight text-white">
                   6 Bối Cảnh Studio Độc Bản
                 </h2>
@@ -844,7 +590,7 @@ export default function StudiosPage() {
                 desc: 'Kết nối Tethering trực tiếp từ máy ảnh lên màn hình lớn giúp bạn và stylist kiểm tra ảnh ngay trong buổi chụp.',
               },
               {
-                icon: SparklesOutline,
+                icon: SparklesIcon,
                 title: 'Trà Hoa & Quầy Coffee Bar',
                 desc: 'Thưởng thức trà thảo mộc thơm mát, cà phê và bánh ngọt miễn phí trong suốt thời gian trang điểm và nghỉ ngơi.',
               },
@@ -878,7 +624,7 @@ export default function StudiosPage() {
             <div className="mt-20 p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#1C1619] via-[#2A1D22] to-[#141012] text-white border border-rose-500/25 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-3 text-center md:text-left max-w-xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-[#E899A8] text-xs font-semibold uppercase">
-                  <SparklesIcon className="w-3.5 h-3.5" />
+                  <CalendarDaysIcon className="w-3.5 h-3.5 text-white" />
                   <span>TRẢI NGHIỆM KHÔNG GIAN THỰC TẾ</span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold font-serif-luxury leading-tight">
