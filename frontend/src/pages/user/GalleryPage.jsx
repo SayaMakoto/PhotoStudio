@@ -148,8 +148,8 @@ export default function GalleryPage() {
         }
       })
       .catch((err) => {
-        console.error('[GalleryPage] Lỗi lấy dữ liệu ảnh từ CSDL:', err.message);
-        setErrorMessage('Không thể kết nối với máy chủ để lấy ảnh từ CSDL. Vui lòng kiểm tra lại dịch vụ backend.');
+        console.error('[GalleryPage] Lỗi lấy dữ liệu ảnh:', err.message);
+        setErrorMessage('Không thể kết nối với máy chủ để lấy ảnh. Vui lòng kiểm tra lại dịch vụ backend.');
         setPhotos([]);
       })
       .finally(() => {
@@ -170,8 +170,8 @@ export default function GalleryPage() {
         }
       })
       .catch((err) => {
-        console.error('[GalleryPage] Lỗi lấy dữ liệu ảnh từ CSDL:', err.message);
-        setErrorMessage('Không thể kết nối với máy chủ để lấy ảnh từ CSDL. Vui lòng kiểm tra lại dịch vụ backend.');
+        console.error('[GalleryPage] Lỗi lấy dữ liệu ảnh :', err.message);
+        setErrorMessage('Không thể kết nối với máy chủ để lấy ảnh. Vui lòng kiểm tra lại dịch vụ backend.');
         setPhotos([]);
       })
       .finally(() => {
@@ -327,7 +327,7 @@ export default function GalleryPage() {
                   <CountUp to={photos.length > 0 ? photos.length : 64} duration={2.0} />
                   <span className="text-[#E899A8]">+</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Bức ảnh trong CSDL</div>
+                <div className="text-xs text-neutral-400 mt-1">Bức ảnh trong kho</div>
               </div>
 
               <div>
@@ -369,7 +369,7 @@ export default function GalleryPage() {
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-3">
                     <SparklesIcon className="w-3.5 h-3.5 text-[#E899A8]" />
-                    <span>TIÊU ĐIỂM NGHỆ THUẬT 3D TỪ CSDL</span>
+                    <span>TIÊU ĐIỂM NGHỆ THUẬT 3D</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif-luxury tracking-tight text-white">
                     Tuyển Tập Kiệt Tác 3D Tương Tác
@@ -577,7 +577,7 @@ export default function GalleryPage() {
                   className="h-96 rounded-3xl bg-white border border-[#F0E4E6] animate-pulse flex flex-col items-center justify-center gap-3"
                 >
                   <PhotoIcon className="w-10 h-10 text-[#BE4B5E]/30 animate-pulse" />
-                  <span className="text-xs text-[#7A6C71] font-medium">Đang tải ảnh từ CSDL...</span>
+                  <span className="text-xs text-[#7A6C71] font-medium">Đang tải ảnh...</span>
                 </div>
               ))}
             </div>
@@ -726,7 +726,7 @@ export default function GalleryPage() {
                       {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
                       {Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredPhotos.length)}
                     </span>{' '}
-                    trên tổng số <span className="font-bold text-[#B85064]">{filteredPhotos.length}</span> tác phẩm CSDL
+                    trên tổng số <span className="font-bold text-[#B85064]">{filteredPhotos.length}</span> tác phẩm
                     (Trang {safeCurrentPage} / {totalPages})
                   </div>
 

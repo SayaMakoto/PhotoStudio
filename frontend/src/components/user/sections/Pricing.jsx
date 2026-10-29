@@ -140,7 +140,7 @@ export default function Services({ onSelectPackage }) {
             </h2>
 
             <p className="text-[#7A6C71] text-base font-light leading-relaxed">
-              Các gói chụp nổi bật được lấy trực tiếp từ CSDL kết hợp hình ảnh concept đặc sắc từ PhotoStudio.
+              Các gói chụp nổi bật kết hợp hình ảnh concept đặc sắc từ PhotoStudio.
             </p>
           </div>
         </ScrollReveal>

@@ -882,7 +882,7 @@ export default function PackagesPage() {
                   Không tìm thấy gói chụp nào phù hợp
                 </h3>
                 <p className="text-xs text-[#7A6C71] max-w-sm mx-auto">
-                  Hiện không có gói chụp nào trong CSDL khớp với tiêu chí bạn chọn. Hãy thử lại với từ khóa khác hoặc đặt lại bộ lọc.
+                  Hiện không có gói chụp nào khớp với tiêu chí bạn chọn. Hãy thử lại với từ khóa khác hoặc đặt lại bộ lọc.
                 </p>
                 <button
                   onClick={() => {
@@ -1228,7 +1228,7 @@ export default function PackagesPage() {
               <form onSubmit={handleSubmitBooking} className="space-y-4">
                 <div>
                   <span className="text-[10px] uppercase font-bold tracking-wider text-[#B85064] block">
-                    ĐẶT LỊCH GÓI CHỤP TỪ CSDL
+                    ĐẶT LỊCH GÓI CHỤP
                   </span>
                   <h3 className="text-xl font-bold font-serif-luxury text-[#1F1418] mt-0.5">
                     {bookingModalPkg.name}

@@ -346,7 +346,7 @@ export default function BookingSessionDetailModal({
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#EFE5E6] pb-3">
               <span className="text-xs font-bold text-[#4A3C41] flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-[#B85064]" />
-                Lịch trình ca chụp (Đồng bộ CSDL thực tế)
+                Lịch trình ca chụp
               </span>
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${statusInfo.badge}`}
@@ -458,7 +458,7 @@ export default function BookingSessionDetailModal({
                   <span className="text-[11px] font-semibold text-[#2EA46D]">
                     {existingReview.createdAt
                       ? new Date(existingReview.createdAt).toLocaleDateString('vi-VN')
-                      : 'Đã lưu CSDL'}
+                      : 'Đã lưu'}
                   </span>
                 </div>
 
@@ -577,7 +577,7 @@ export default function BookingSessionDetailModal({
                     Đánh Giá Buổi Chụp & Chấm Điểm Nhân Viên
                   </h4>
                   <p className="text-xs text-[#7A6C71] mt-0.5">
-                    Đánh giá của bạn sẽ được lưu trực tiếp vào CSDL và gửi tới Ban quản lý PhotoStudio.
+                    Đánh giá của bạn đã được gửi.
                   </p>
                 </div>
 
