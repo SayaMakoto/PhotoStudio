@@ -84,7 +84,7 @@ export default function ProfilePage() {
             rawList = allRes;
           }
         } catch (e) {
-          console.warn('Lấy toàn bộ đơn từ CSDL:', e.message);
+          console.warn('Lấy toàn bộ đơn:', e.message);
         }
       }
 
@@ -1297,10 +1297,10 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => fetchRealBookings(user)}
                       className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E8DCDE] text-[#4A3C41] hover:bg-[#FAF5F5] text-xs font-semibold transition-all"
-                      title="Làm mới danh sách từ CSDL"
+                      title="Làm mới danh sách"
                     >
                       <RefreshCw className={`w-3.5 h-3.5 text-[#B85064] ${bookingsLoading ? 'animate-spin' : ''}`} />
-                      <span>Đồng bộ CSDL</span>
+                      <span>Đồng bộ</span>
                     </button>
                     <Link
                       to={ROUTES.USER.PACKAGES}
@@ -1316,7 +1316,7 @@ export default function ProfilePage() {
                 {bookingsLoading && bookings.length === 0 ? (
                   <div className="py-12 text-center text-xs text-[#7A6C71] flex flex-col items-center justify-center gap-2">
                     <div className="w-6 h-6 border-2 border-[#B85064] border-t-transparent rounded-full animate-spin" />
-                    <span>Đang đồng bộ dữ liệu buổi chụp từ CSDL thực tế...</span>
+                    <span>Đang đồng bộ dữ liệu buổi chụp...</span>
                   </div>
                 ) : null}
 

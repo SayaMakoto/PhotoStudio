@@ -103,7 +103,7 @@ export default function BookingSection() {
                     Không Gian Bối Cảnh Độc Bản
                   </h3>
                   <p className="text-xs text-neutral-300 leading-relaxed font-light">
-                    Phòng Pastel Hàn Quốc, Cung Điện Hoàng Gia, Ban Công Hoàng Hôn, Cổ Điển Vintage lấy 100% hình ảnh thực tế từ CSDL.
+                    Phòng Pastel Hàn Quốc, Cung Điện Hoàng Gia, Ban Công Hoàng Hôn, Cổ Điển Vintage lấy 100% hình ảnh thực tế.
                   </p>
                 </div>
 

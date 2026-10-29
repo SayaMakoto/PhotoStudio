@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Camera, CalendarDays, Layers, Star } from 'lucide-react';
 import CountUp from '../../animations/CountUp';
 
@@ -8,6 +8,16 @@ const POSITION_LABELS = {
   logistics: 'Hậu cần & Ánh sáng',
 };
 
+// Lấy Thứ 2 đầu tuần hiện tại
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 export default function EmployeeKPICards({
   onOpenTab,
   bookings = [],
@@ -15,10 +25,25 @@ export default function EmployeeKPICards({
   reviews = [],
   employeeDetails = null,
 }) {
-  // 1. Thống kê ca chụp thật từ CSDL
-  const totalBookings = bookings.length;
-  const inProgressBookings = bookings.filter((b) => b.status === 'in_progress').length;
-  const completedBookings = bookings.filter((b) => b.status === 'completed').length;
+  // 1. Thống kê ca chụp trong tuần này từ CSDL
+  const weekStats = useMemo(() => {
+    const monday = getMonday(new Date());
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    const thisWeek = bookings.filter((b) => {
+      if (!b.bookingDate || b.status === 'cancelled') return false;
+      const bDate = new Date(b.bookingDate);
+      return bDate >= monday && bDate <= sunday;
+    });
+
+    const total = thisWeek.length;
+    const inProgress = thisWeek.filter((b) => b.status === 'in_progress').length;
+    const completed = thisWeek.filter((b) => b.status === 'completed').length;
+
+    return { total, inProgress, completed };
+  }, [bookings]);
 
   // 2. Thống kê thiết bị thật từ CSDL
   const totalEquipments = equipments.length;
@@ -40,12 +65,12 @@ export default function EmployeeKPICards({
 
   const cards = [
     {
-      title: 'Ca Chụp Trong CSDL',
-      value: totalBookings,
+      title: 'Số Ca Chụp Trong Tuần',
+      value: weekStats.total,
       targetText: 'ca chụp',
-      subtext: totalBookings > 0
-        ? `${inProgressBookings} đang chụp • ${completedBookings} hoàn thành`
-        : 'Chưa có ca chụp',
+      subtext: weekStats.total > 0
+        ? `${weekStats.inProgress} đang chụp • ${weekStats.completed} hoàn thành`
+        : 'Tuần này chưa có ca chụp',
       icon: CalendarDays,
       tab: 'schedule',
     },
@@ -67,7 +92,7 @@ export default function EmployeeKPICards({
     {
       title: 'Đánh Giá Khách Hàng',
       customValue: totalReviews > 0 ? `★ ${avgRating} / 5.0` : 'Chưa có',
-      subtext: totalReviews > 0 ? `Từ ${totalReviews} lượt đánh giá thực tế` : 'CSDL chưa có đánh giá',
+      subtext: totalReviews > 0 ? `Từ ${totalReviews} lượt đánh giá thực tế` : 'Chưa có đánh giá',
       icon: Star,
       tab: 'reviews',
     },
@@ -100,25 +125,19 @@ export default function EmployeeKPICards({
                   </div>
                 ) : (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl lg:text-4xl font-extrabold text-[#261A1E] tracking-tight font-sans">
+                    <span className="text-3xl lg:text-4xl font-extrabold text-[#261A1E] font-sans">
                       <CountUp to={card.value} duration={1.2} />
                     </span>
-                    <span className="text-xs font-semibold text-[#B85064]">
+                    <span className="text-sm font-bold text-[#B85064]">
                       {card.targetText}
                     </span>
                   </div>
                 )}
+                <p className="mt-1 text-xs text-[#7A6C71] font-medium">
+                  {card.subtext}
+                </p>
               </div>
             </div>
-
-            <div className="mt-3">
-              <p className="text-[11px] text-[#7A6C71] font-medium truncate">
-                {card.subtext}
-              </p>
-            </div>
-
-            {/* Subtle bottom indicator on hover */}
-            <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-gradient-to-r from-transparent via-[#B85064]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
         );
       })}

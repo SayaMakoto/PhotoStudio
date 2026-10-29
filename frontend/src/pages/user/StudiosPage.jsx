@@ -523,7 +523,7 @@ export default function StudiosPage() {
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-3">
                   <SparklesIcon className="w-3.5 h-3.5 text-[#E899A8]" />
-                  <span>SET DESIGN NGHỆ THUẬT 3D TỪ CSDL</span>
+                  <span>SET DESIGN NGHỆ THUẬT 3D</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif-luxury tracking-tight text-white">
                   6 Bối Cảnh Studio Độc Bản

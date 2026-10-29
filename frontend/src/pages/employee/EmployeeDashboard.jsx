@@ -17,7 +17,7 @@ import employeeReviewService from '../../services/employee/reviewService';
 
 const TAB_TITLES = {
   dashboard: 'Tổng Quan & KPI Tác Nghiệp',
-  schedule: 'Lịch Chụp & Ca Phân Công',
+  schedule: 'Lịch Chụp',
   equipment: 'Thiết Bị Tác Nghiệp Studio',
   reviews: 'Đánh Giá Khách Hàng',
   profile: 'Hồ Sơ Cá Nhân & Trạng Thái',
@@ -140,7 +140,7 @@ export default function EmployeeDashboard() {
           setReviews(employeeReviewsList);
         }
       } catch (err) {
-        console.error('Lỗi khi tải dữ liệu từ CSDL:', err);
+        console.error('Lỗi khi tải dữ liệu:', err);
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -214,9 +214,6 @@ export default function EmployeeDashboard() {
                       className="inline-block"
                     />
                   </h1>
-                  <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
-                    Chào mừng trở lại, <strong className="text-[#B85064] font-semibold">{profile.fullname || profile.username}</strong>! Theo dõi ca chụp và quản lý tác nghiệp thực tế từ CSDL.
-                  </p>
                 </div>
               </div>
 
@@ -229,7 +226,7 @@ export default function EmployeeDashboard() {
                 employeeDetails={employeeDetails}
               />
 
-              {/* Khối tổng quan công việc thực tế từ CSDL */}
+              {/* Khối tổng quan công việc thực tế từ CSDL - Chỉ hiện Ngày/Giờ, Phòng, Tên khách, SĐT */}
               <EmployeeDashboardOverview
                 profile={profile}
                 onNavigateTab={setActiveTab}
@@ -240,23 +237,19 @@ export default function EmployeeDashboard() {
             </div>
           )}
 
-          {/* TAB 2: LỊCH CHỤP & CA PHÂN CÔNG */}
+          {/* TAB 2: CA CHỤP TRONG TUẦN & THEO NGÀY */}
           {activeTab === 'schedule' && (
             <div className="space-y-6">
               <div>
                 <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
-                  Lịch Chụp & Ca Phân Công
+                  Lịch Chụp
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
-                  Danh sách đơn đặt lịch thực tế từ bảng bookings. Bấm vào ca chụp để xem chi tiết hoặc cập nhật trạng thái trực tiếp vào CSDL.
-                </p>
               </div>
 
               <BookingListAndSchedule
                 bookings={bookings}
                 onSelectBooking={setSelectedBookingForDetail}
                 onStatusChange={handleStatusChange}
-                showTitle={false}
               />
             </div>
           )}
@@ -268,9 +261,6 @@ export default function EmployeeDashboard() {
                 <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
                   Thiết Bị Tác Nghiệp Studio
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
-                  Dữ liệu thực tế từ bảng equipments. Tra cứu thông tin máy ảnh, ống kính, đèn flash và tình trạng sử dụng.
-                </p>
               </div>
 
               <EquipmentAndCostumesSection
@@ -287,9 +277,6 @@ export default function EmployeeDashboard() {
                 <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
                   Đánh Giá & Phản Hồi Từ Khách Hàng
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
-                  Dữ liệu đánh giá thực tế từ bảng reviews của khách hàng sau các buổi chụp hoàn thành.
-                </p>
               </div>
 
               <CustomerReviewsSection
@@ -315,9 +302,6 @@ export default function EmployeeDashboard() {
                 <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
                   Hồ Sơ Nhân Viên
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-[#7A6C71]">
-                  Dữ liệu tài khoản thực tế từ CSDL, cập nhật thông tin cá nhân và bảo mật tài khoản.
-                </p>
               </div>
 
               <EmployeeProfileSection
@@ -329,7 +313,7 @@ export default function EmployeeDashboard() {
         </main>
       </div>
 
-      {/* MODAL: Chi Tiết Buổi Chụp Thực Tế */}
+      {/* MODAL: Chi Tiết Buổi Chụp Thực Tế (Thiết bị, trang phục, phụ kiện...) */}
       {selectedBookingForDetail && (
         <ShootDetailModal
           booking={selectedBookingForDetail}
