@@ -126,7 +126,7 @@ export default function Navbar({ onOpenBooking }) {
                     {user.avatar ? (
                       <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span>{(user.fullname || user.username || 'U').charAt(0).toUpperCase()}</span>
+                      <span>{(user.fullname || '').trim().split(/\s+/).filter(Boolean).pop()?.charAt(0).toUpperCase() || user.username?.trim().charAt(0).toUpperCase() || 'U'}</span>
                     )}
                   </div>
                   <span className="font-medium text-[13px] max-w-[120px] truncate">

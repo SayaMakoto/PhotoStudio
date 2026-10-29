@@ -21,6 +21,7 @@ export default function RegisterPage() {
 
   const [formData, setFormData] = useState({
     fullname: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -52,6 +53,10 @@ export default function RegisterPage() {
 
     if (!formData.fullname.trim()) {
       errors.fullname = 'Vui lòng nhập họ và tên của bạn.';
+    }
+
+    if (!formData.username.trim()) {
+      errors.username = 'Vui lòng nhập tên đăng nhập.';
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -94,12 +99,9 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // Tự sinh username dựa trên phần đầu của email nếu chưa có
-      const generatedUsername = formData.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '');
-
       await customerAuthService.register({
         fullname: formData.fullname.trim(),
-        username: generatedUsername,
+        username: formData.username.trim(),
         email: formData.email.trim(),
         password: formData.password,
         role: 'CUSTOMER',
@@ -111,7 +113,7 @@ export default function RegisterPage() {
         navigate(ROUTES.AUTH.LOGIN, {
           state: {
             from: null,
-            registeredUsername: formData.email.trim(),
+            registeredUsername: formData.username.trim(),
           },
         });
       }, 1400);
@@ -285,6 +287,40 @@ export default function RegisterPage() {
                   <p className="mt-1 text-[11px] text-[#E53E3E] font-medium flex items-center gap-1">
                     <ExclamationCircleIcon className="w-3 h-3" />
                     <span>{fieldErrors.fullname}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Field Tên đăng nhập */}
+              <div>
+                <label className="block text-xs font-semibold text-[#3D2C31] mb-1" htmlFor="register-username">
+                  Tên đăng nhập <span className="text-[#B85064]">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9E8E93]">
+                    <UserIcon className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="register-username"
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="Nhập tên đăng nhập"
+                    autoComplete="username"
+                    required
+                    aria-invalid={Boolean(fieldErrors.username)}
+                    className={`w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm bg-[#FAF7F8] border transition-colors focus:outline-none text-[#261A1E] placeholder-[#B5A5A9] ${
+                      fieldErrors.username
+                        ? 'border-[#E53E3E] bg-[#FFF5F6]'
+                        : 'border-[#EFE8E9] focus:border-[#B85064]'
+                    }`}
+                  />
+                </div>
+                {fieldErrors.username && (
+                  <p className="mt-1 text-[11px] text-[#E53E3E] font-medium flex items-center gap-1">
+                    <ExclamationCircleIcon className="w-3 h-3" />
+                    <span>{fieldErrors.username}</span>
                   </p>
                 )}
               </div>

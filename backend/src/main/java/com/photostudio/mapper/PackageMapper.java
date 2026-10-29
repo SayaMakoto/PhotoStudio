@@ -2,11 +2,15 @@ package com.photostudio.mapper;
 
 import com.photostudio.dto.packages.PackageEquipmentItemRequest;
 import com.photostudio.dto.packages.PackageEquipmentItemResponse;
+import com.photostudio.dto.packages.PackageClothItemResponse;
+import com.photostudio.dto.packages.PackageAccessoryItemResponse;
 import com.photostudio.dto.packages.PackageRequest;
 import com.photostudio.dto.packages.PackageResponse;
 import com.photostudio.model.equipment.EquipmentType;
 import com.photostudio.model.packages.Package;
 import com.photostudio.model.packages.PackageEquipment;
+import com.photostudio.model.packages.PackageCloth;
+import com.photostudio.model.packages.PackageAccessory;
 import com.photostudio.model.packages.PackageStatus;
 
 import java.util.ArrayList;
@@ -74,6 +78,18 @@ public class PackageMapper {
             }
         }
 
+        List<PackageClothItemResponse> clothList = pkg.getPackageClothes().stream()
+                .map((PackageCloth item) -> new PackageClothItemResponse(
+                        item.getId(), item.getCloth().getId(), item.getCloth().getName(),
+                        item.getCloth().getType().name(), item.getCloth().getSize(),
+                        item.getCloth().getColor(), item.getQuantity()))
+                .toList();
+        List<PackageAccessoryItemResponse> accessoryList = pkg.getPackageAccessories().stream()
+                .map((PackageAccessory item) -> new PackageAccessoryItemResponse(
+                        item.getId(), item.getAccessory().getId(), item.getAccessory().getName(),
+                        item.getAccessory().getType().name(), item.getQuantity()))
+                .toList();
+
         return new PackageResponse(
                 pkg.getId(),
                 pkg.getName(),
@@ -84,6 +100,8 @@ public class PackageMapper {
                 pkg.getCreatedAt(),
                 pkg.getUpdatedAt(),
                 eqList,
+                clothList,
+                accessoryList,
                 pkg.getDeletedAt()
         );
     }

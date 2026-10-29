@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   CameraIcon,
   LockClosedIcon,
-  EnvelopeIcon,
+  UserIcon,
   EyeIcon,
   EyeSlashIcon,
   ExclamationCircleIcon,
@@ -253,21 +253,24 @@ export default function LoginPage() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Field Email / Tên đăng nhập */}
+              {/* Field Email hoặc Tên đăng nhập */}
               <div>
-                <label className="block text-xs font-semibold text-[#3D2C31] mb-1">
-                  Email <span className="text-[#B85064]">*</span>
+                <label htmlFor="login-username-or-email" className="block text-xs font-semibold text-[#3D2C31] mb-1">
+                  Email hoặc tên đăng nhập <span className="text-[#B85064]">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9E8E93]">
-                    <EnvelopeIcon className="w-4 h-4" />
+                    <UserIcon className="w-4 h-4" />
                   </div>
                   <input
+                    id="login-username-or-email"
                     type="text"
                     name="usernameOrEmail"
                     value={formData.usernameOrEmail}
                     onChange={handleChange}
-                    placeholder="Nhập email của bạn"
+                    placeholder="Nhập email hoặc tên đăng nhập"
+                    autoComplete="username"
+                    required
                     className={`w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm bg-[#FAF7F8] border transition-colors focus:outline-none text-[#261A1E] placeholder-[#B5A5A9] ${
                       fieldErrors.usernameOrEmail
                         ? 'border-[#E53E3E] bg-[#FFF5F6]'

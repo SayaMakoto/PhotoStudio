@@ -413,7 +413,6 @@ export default function BookingPage() {
   // Xử lý xác nhận đặt lịch: CHUYỂN NGAY SANG TRANG THANH TOÁN (Chưa tạo đơn vào CSDL)
   const handleConfirmBooking = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setSubmitError("");
 
     if (!selectedRoom || !selectedPackage) {
@@ -450,6 +449,7 @@ export default function BookingPage() {
     if (!bookingDate) errors.date = "Vui lòng chọn ngày chụp.";
 
     if (Object.keys(errors).length > 0) {
+      setIsSubmitting(false);
       setFormErrors(errors);
       setSubmitError("Vui lòng điền đầy đủ thông tin: " + Object.values(errors).join(" • "));
       const errorSection = document.getElementById("customer-info-section");
@@ -458,6 +458,8 @@ export default function BookingPage() {
       }
       return;
     }
+
+    setIsSubmitting(true);
 
     // Chuẩn bị dữ liệu lịch hẹn để chuyển sang trang thanh toán
     // Lưu ý: Đơn CHƯA được tạo vào CSDL ở bước này; chỉ được tạo sau khi thanh toán cọc hoặc thanh toán hết
@@ -655,6 +657,7 @@ export default function BookingPage() {
                             ...customerInfo,
                             name: e.target.value,
                           });
+                          setSubmitError("");
                           if (formErrors.name)
                             setFormErrors({ ...formErrors, name: "" });
                         }}
@@ -684,6 +687,7 @@ export default function BookingPage() {
                             ...customerInfo,
                             phone: e.target.value,
                           });
+                          setSubmitError("");
                           if (formErrors.phone)
                             setFormErrors({ ...formErrors, phone: "" });
                         }}
@@ -938,6 +942,7 @@ export default function BookingPage() {
                       value={bookingDate}
                       onChange={(e) => {
                         setBookingDate(e.target.value);
+                        setSubmitError("");
                         if (formErrors.date)
                           setFormErrors({ ...formErrors, date: "" });
                       }}

@@ -61,9 +61,12 @@ public class BookingEmployeeAssignmentServiceImpl implements BookingEmployeeAssi
         Booking booking = findBookableBooking(request.getBookingId());
         Employee employee = findActiveEmployee(request.getEmployeeId());
 
-        var existing = assignmentRepository.findByBookingIdAndEmployeeId(booking.getId(), employee.getId());
-        if (existing.isPresent() && existing.get().getStatus() != BookingEmployeeAssignmentStatus.cancelled) {
-            return assignmentMapper.toResponse(existing.get());
+        var existingAssignments = assignmentRepository.findByBookingIdAndEmployeeId(booking.getId(), employee.getId());
+        var activeAssignment = existingAssignments.stream()
+                .filter(assignment -> assignment.getStatus() != BookingEmployeeAssignmentStatus.cancelled)
+                .findFirst();
+        if (activeAssignment.isPresent()) {
+            return assignmentMapper.toResponse(activeAssignment.get());
         }
         ensureNoScheduleConflict(employee, booking);
 
