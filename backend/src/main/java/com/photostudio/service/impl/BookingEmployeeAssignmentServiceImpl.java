@@ -16,12 +16,16 @@ import com.photostudio.repository.BookingEmployeeAssignmentRepository;
 import com.photostudio.repository.BookingRepository;
 import com.photostudio.repository.EmployeeRepository;
 import com.photostudio.service.BookingEmployeeAssignmentService;
+import com.photostudio.dto.notifications.NotificationRequest;
+import com.photostudio.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -31,6 +35,7 @@ public class BookingEmployeeAssignmentServiceImpl implements BookingEmployeeAssi
     private final BookingRepository bookingRepository;
     private final EmployeeRepository employeeRepository;
     private final BookingEmployeeAssignmentMapper assignmentMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -71,7 +76,26 @@ public class BookingEmployeeAssignmentServiceImpl implements BookingEmployeeAssi
         ensureNoScheduleConflict(employee, booking);
 
         BookingEmployeeAssignment assignment = assignmentMapper.toEntity(request, booking, employee);
-        return assignmentMapper.toResponse(assignmentRepository.save(assignment));
+        BookingEmployeeAssignment saved = assignmentRepository.save(assignment);
+
+        try {
+            if (employee.getUser() != null && employee.getUser().getId() != null) {
+                NotificationRequest noti = new NotificationRequest();
+                noti.setUserId(employee.getUser().getId());
+                noti.setTitle("Nhiệm vụ ca chụp mới");
+                String roomName = booking.getRoom() != null ? booking.getRoom().getName() : "Studio Photo";
+                String timeStr = (booking.getStartTime() != null ? booking.getStartTime().toString().substring(0, 5) : "")
+                        + " - " + (booking.getEndTime() != null ? booking.getEndTime().toString().substring(0, 5) : "");
+                String dateStr = booking.getBookingDate() != null ? booking.getBookingDate().toLocalDate().toString() : "";
+                noti.setMessage("Admin đã phân công bạn vào đơn đặt lịch #" + booking.getId() + " (" + roomName + ") lúc " + timeStr + " ngày " + dateStr);
+                noti.setType("employee_assignment");
+                notificationService.create(noti);
+            }
+        } catch (Exception e) {
+            log.warn("Không thể tạo thông báo phân công cho nhân viên: {}", e.getMessage());
+        }
+
+        return assignmentMapper.toResponse(saved);
     }
 
     @Override

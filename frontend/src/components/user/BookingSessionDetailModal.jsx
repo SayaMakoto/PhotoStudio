@@ -675,6 +675,11 @@ export default function BookingSessionDetailModal({
     e.preventDefault();
     setSubmitError('');
 
+    if (!currentUser || !currentUser.role) {
+      setSubmitError('Tính năng đánh giá chỉ dành cho người dùng đã đăng ký và có vai trò (role) trong hệ thống.');
+      return;
+    }
+
     if (!overallComment.trim()) {
       setSubmitError('Vui lòng nhập lời nhận xét trải nghiệm chung về buổi chụp.');
       return;

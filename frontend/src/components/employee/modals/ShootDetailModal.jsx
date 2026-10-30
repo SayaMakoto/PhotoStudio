@@ -512,31 +512,103 @@ export default function ShootDetailModal({
             </div>
           )}
 
-          {/* Cập nhật trạng thái ca chụp */}
+          {/* Cập nhật tiến độ ca chụp 1 luồng duy nhất */}
           <div className="p-4 rounded-2xl border border-[#F0E4E6] bg-white space-y-3 mt-4">
-            <label className="font-bold text-xs text-[#261A1E] block">
-              Cập Nhật Trạng Thái Ca Chụp:
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {STATUS_OPTIONS.map((opt) => {
-                const isSelected = currentStatus === opt.value;
-                return (
+            <div className="flex items-center justify-between">
+              <label className="font-bold text-xs text-[#261A1E] block">
+                Tiến Độ & Trạng Thái Tác Nghiệp:
+              </label>
+              <span className="text-[11px] text-[#7A6C71]">
+                Cập nhật 1 chiều tránh nhảy trạng thái
+              </span>
+            </div>
+
+            {/* 1. Khi đang ở 'pending' (Chờ xác nhận) */}
+            {currentStatus === 'pending' && (
+              <div className="space-y-2">
+                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 p-2.5 rounded-xl">
+                  Ca chụp mới được điều phối. Bạn cần xác nhận tiếp nhận hoặc từ chối ca:
+                </p>
+                <div className="flex items-center gap-2">
                   <button
-                    key={opt.value}
                     type="button"
                     disabled={isUpdating}
-                    onClick={() => handleUpdateStatus(opt.value)}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-center ${
-                      isSelected
-                        ? `${opt.color} ring-2 ring-[#B85064]/30 shadow-sm`
-                        : 'border-[#F0E4E6] bg-[#FAF5F5] text-[#7A6C71] hover:border-[#B85064] hover:bg-white hover:text-[#261A1E]'
-                    }`}
+                    onClick={() => handleUpdateStatus('confirmed')}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
-                    {opt.label}
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Xác nhận tiếp nhận ca</span>
                   </button>
-                );
-              })}
-            </div>
+                  <button
+                    type="button"
+                    disabled={isUpdating}
+                    onClick={() => handleUpdateStatus('cancelled')}
+                    className="py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <X className="w-4 h-4" />
+                    <span>Từ chối ca</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 2. Khi đang ở 'confirmed' (Đã xác nhận) */}
+            {currentStatus === 'confirmed' && (
+              <div className="space-y-2">
+                <p className="text-xs text-sky-800 bg-sky-50 border border-sky-200 p-2.5 rounded-xl">
+                  Ca chụp đã xác nhận sẵn sàng. Khi bắt đầu tác nghiệp tại phòng chụp:
+                </p>
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() => handleUpdateStatus('in_progress')}
+                  className="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Bắt đầu chụp (Chuyển sang "Đang chụp")</span>
+                </button>
+              </div>
+            )}
+
+            {/* 3. Khi đang ở 'in_progress' (Đang chụp) */}
+            {currentStatus === 'in_progress' && (
+              <div className="space-y-2">
+                <p className="text-xs text-purple-800 bg-purple-50 border border-purple-200 p-2.5 rounded-xl">
+                  Buổi chụp đang diễn ra. Khi chụp xong và bàn giao bối cảnh:
+                </p>
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() => handleUpdateStatus('completed')}
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Hoàn thành ca chụp (Chuyển sang "Hoàn thành")</span>
+                </button>
+              </div>
+            )}
+
+            {/* 4. Khi đã ở 'completed' (Hoàn thành) */}
+            {currentStatus === 'completed' && (
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <div className="text-xs">
+                  <p className="font-bold">Ca chụp đã hoàn thành xuất sắc!</p>
+                  <p className="text-emerald-700 text-[11px] mt-0.5">Trạng thái đã được chốt và không thể thay đổi để tránh nhảy tiến độ.</p>
+                </div>
+              </div>
+            )}
+
+            {/* 5. Khi đã ở 'cancelled' (Đã từ chối / Đã hủy) */}
+            {currentStatus === 'cancelled' && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                <div className="text-xs">
+                  <p className="font-bold">Ca chụp đã từ chối hoặc đã hủy.</p>
+                  <p className="text-rose-700 text-[11px] mt-0.5">Đơn không còn hiệu lực tác nghiệp.</p>
+                </div>
+              </div>
+            )}
 
             {successMsg && (
               <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl font-semibold flex items-center gap-1.5">

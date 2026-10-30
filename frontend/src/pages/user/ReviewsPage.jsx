@@ -42,6 +42,7 @@ export default function ReviewsPage() {
 
   // Modal Viết Đánh Giá
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [requireRoleModalOpen, setRequireRoleModalOpen] = useState(false);
   const [newReviewForm, setNewReviewForm] = useState({
     customerName: "",
     rating: 5,
@@ -154,11 +155,21 @@ export default function ReviewsPage() {
     };
   }, [reviews]);
 
-  // Bộ lọc dữ liệu (Chỉ lọc theo gói chụp & số sao, ĐÃ BỎ TÌM KIẾM)
+  // Bộ lọc dữ liệu (Lọc theo gói chụp, "Đánh giá của tôi" & số sao)
   const filteredReviews = useMemo(() => {
+    const isAuth = customerAuth.isAuthenticated();
+    const currentUser = customerAuth.getUser();
+
     return reviews.filter((r) => {
-      // 1. Lọc theo Category gói chụp
-      if (selectedCategory !== "all" && r.category !== selectedCategory) {
+      // 1. Lọc theo Category gói chụp hoặc "Đánh giá của tôi"
+      if (selectedCategory === "my_reviews") {
+        if (!isAuth || !currentUser) return false;
+        const matchId = currentUser.id && Number(r.customerId) === Number(currentUser.id);
+        const matchName =
+          (currentUser.fullname && r.customerName === currentUser.fullname) ||
+          (currentUser.username && r.customerName === currentUser.username);
+        if (!matchId && !matchName) return false;
+      } else if (selectedCategory !== "all" && r.category !== selectedCategory) {
         return false;
       }
       // 2. Lọc theo số sao xổ xuống (1, 2, 3, 4, 5 sao)
@@ -205,18 +216,18 @@ export default function ReviewsPage() {
     setCurrentPage(1);
   };
 
-  // Mở modal viết đánh giá (Bắt buộc đăng nhập)
+  // Mở modal viết đánh giá (Chỉ dành cho người dùng đã có role hợp lệ)
   const handleOpenReviewModal = () => {
     const isAuth = customerAuth.isAuthenticated();
     const user = customerAuth.getUser();
 
-    // Nếu chưa đăng nhập: chuyển hướng ngay sang trang đăng nhập
-    if (!isAuth || !user) {
-      navigate(ROUTES.AUTH.LOGIN, { state: { from: ROUTES.USER.REVIEWS } });
+    // Nếu chưa đăng nhập hoặc tài khoản chưa có vai trò (role): hiển thị popup thông báo
+    if (!isAuth || !user || !user.role) {
+      setRequireRoleModalOpen(true);
       return;
     }
 
-    // Nếu đã đăng nhập: lấy tên từ tài khoản và khóa lại
+    // Nếu đã đăng nhập và có role hợp lệ: lấy tên từ tài khoản và khóa lại
     setNewReviewForm({
       customerName: user.fullname || user.username || "Khách hàng PhotoStudio",
       rating: 5,
@@ -230,9 +241,16 @@ export default function ReviewsPage() {
     e.preventDefault();
     if (!newReviewForm.comment.trim()) return;
 
+    const isAuth = customerAuth.isAuthenticated();
+    const user = customerAuth.getUser();
+    if (!isAuth || !user || !user.role) {
+      setIsModalOpen(false);
+      setRequireRoleModalOpen(true);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const user = customerAuth.getUser();
       const payload = {
         customerName: newReviewForm.customerName,
         rating: Number(newReviewForm.rating) || 5.0,
@@ -374,14 +392,6 @@ export default function ReviewsPage() {
                   </p>
                 </div>
               </div>
-
-              <p className="text-xs text-[#7A6C71] leading-relaxed mb-5 font-light">
-                Dựa trên{" "}
-                <strong className="text-[#2A1D22] font-semibold">
-                  {stats.total} bài đánh giá
-                </strong>{" "}
-                hoàn chỉnh được ghi nhận từ hệ thống khách hàng thật.
-              </p>
             </div>
 
             {/* Star breakdown bar */}
@@ -523,6 +533,7 @@ export default function ReviewsPage() {
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               {[
                 { key: "all", label: `Tất Cả (${reviews.length})` },
+                { key: "my_reviews", label: "Đánh Giá Của Tôi" },
                 { key: "wedding", label: "Ảnh Cưới" },
                 { key: "portrait", label: "Nàng Thơ & Cá Nhân" },
                 { key: "family", label: "Gia Đình" },
@@ -667,24 +678,73 @@ export default function ReviewsPage() {
         {!isLoading && filteredReviews.length === 0 && (
           <div className="bg-white border border-[#F0E4E6] rounded-3xl p-12 text-center max-w-lg mx-auto shadow-sm my-8">
             <ChatBubbleLeftRightIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-[#2A1D22] mb-2 font-serif-luxury">
-              Không Tìm Thấy Đánh Giá Phù Hợp
-            </h3>
-            <p className="text-xs text-[#7A6C71] mb-6">
-              Chưa có bài đánh giá nào phù hợp với bộ lọc hiện tại. Vui lòng
-              chọn mức sao hoặc gói chụp khác.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCategory("all");
-                setSelectedRatingFilter("all");
-                setCurrentPage(1);
-              }}
-              className="px-5 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A8394C] transition-all cursor-pointer shadow-sm"
-            >
-              Hiển Thị Tất Cả Đánh Giá
-            </button>
+            {selectedCategory === "my_reviews" && !customerAuth.isAuthenticated() ? (
+              <>
+                <h3 className="text-lg font-bold text-[#2A1D22] mb-2 font-serif-luxury">
+                  Yêu Cầu Đăng Nhập
+                </h3>
+                <p className="text-xs text-[#7A6C71] mb-6 leading-relaxed">
+                  Vui lòng đăng nhập tài khoản để xem các bài đánh giá của riêng bạn.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate(ROUTES.AUTH.LOGIN, { state: { from: ROUTES.USER.REVIEWS } })}
+                  className="px-6 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-bold hover:bg-[#A8394C] transition-all cursor-pointer shadow-md shadow-[#B85064]/20"
+                >
+                  Đăng Nhập Ngay
+                </button>
+              </>
+            ) : selectedCategory === "my_reviews" ? (
+              <>
+                <h3 className="text-lg font-bold text-[#2A1D22] mb-2 font-serif-luxury">
+                  Bạn Chưa Có Bài Đánh Giá Nào
+                </h3>
+                <p className="text-xs text-[#7A6C71] mb-6 leading-relaxed">
+                  Sau khi hoàn thành buổi chụp tại Studio, hãy chia sẻ trải nghiệm của bạn để đóng góp ý kiến và nhận ưu đãi từ Studio nhé!
+                </p>
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleOpenReviewModal}
+                    className="px-5 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-bold hover:bg-[#A8394C] transition-all cursor-pointer shadow-md shadow-[#B85064]/20"
+                  >
+                    Viết Đánh Giá Ngay
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory("all");
+                      setSelectedRatingFilter("all");
+                      setCurrentPage(1);
+                    }}
+                    className="px-4 py-2.5 rounded-full border border-[#F0E4E6] text-xs font-semibold text-[#7A6C71] hover:bg-[#FAF5F5] transition-all cursor-pointer"
+                  >
+                    Xem Đánh Giá Khác
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-bold text-[#2A1D22] mb-2 font-serif-luxury">
+                  Không Tìm Thấy Đánh Giá Phù Hợp
+                </h3>
+                <p className="text-xs text-[#7A6C71] mb-6">
+                  Chưa có bài đánh giá nào phù hợp với bộ lọc hiện tại. Vui lòng
+                  chọn mức sao hoặc gói chụp khác.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory("all");
+                    setSelectedRatingFilter("all");
+                    setCurrentPage(1);
+                  }}
+                  className="px-5 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A8394C] transition-all cursor-pointer shadow-sm"
+                >
+                  Hiển Thị Tất Cả Đánh Giá
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -788,6 +848,72 @@ export default function ReviewsPage() {
                       </span>
                     </div>
                   )}
+
+                  {/* Phản hồi từ PhotoStudio / Ban quản lý */}
+                  {rev.adminReply && (
+                    <div className="mt-4 p-4 rounded-2xl bg-[#FDF0F3]/80 border border-[#F5D5DC] text-xs space-y-1.5 ml-1 sm:ml-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 font-bold text-[#B85064]">
+                          <ShieldCheckIcon className="w-4 h-4 text-[#B85064]" />
+                          <span>PhotoStudio phản hồi:</span>
+                        </div>
+                        {rev.adminRepliedAt && (
+                          <span className="text-[10px] text-[#9E8E93]">
+                            {new Date(rev.adminRepliedAt).toLocaleDateString("vi-VN", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            })}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[#3E2F35] font-normal leading-relaxed pl-5 italic">
+                        "{rev.adminReply}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Phản hồi từ nhân viên phụ trách nếu có */}
+                  {rev.employeeReviews &&
+                    rev.employeeReviews.some((er) => er.adminReply) && (
+                      <div className="mt-3 space-y-2 ml-1 sm:ml-2">
+                        {rev.employeeReviews
+                          .filter((er) => er.adminReply)
+                          .map((er, erIdx) => (
+                            <div
+                              key={er.id || erIdx}
+                              className="p-3.5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] text-xs space-y-1"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1.5 font-bold text-[#2A1D22]">
+                                  <ChatBubbleLeftRightIcon className="w-3.5 h-3.5 text-[#B85064]" />
+                                  <span>
+                                    {er.employeeName || "Nhân viên"}
+                                    {er.employeePosition && (
+                                      <span className="font-normal text-[#7A6C71] ml-1">
+                                        ({er.employeePosition})
+                                      </span>
+                                    )}{" "}
+                                    phản hồi:
+                                  </span>
+                                </div>
+                                {er.adminRepliedAt && (
+                                  <span className="text-[10px] text-[#9E8E93]">
+                                    {new Date(er.adminRepliedAt).toLocaleDateString("vi-VN", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[#3E2F35] font-normal leading-relaxed pl-5 italic">
+                                "{er.adminReply}"
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                    )}
                 </motion.div>
               );
             })}
@@ -1053,6 +1179,69 @@ export default function ReviewsPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* POPUP YÊU CẦU ĐĂNG NHẬP / CÓ ROLE ĐỂ ĐÁNH GIÁ */}
+      {requireRoleModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setRequireRoleModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-3xl bg-white border border-[#F2E8E9] shadow-2xl p-6 sm:p-7 text-center overflow-hidden text-[#2A1D22]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setRequireRoleModalOpen(false)}
+              className="cursor-pointer absolute top-4 right-4 p-2 rounded-full text-[#8C7D82] hover:text-[#2A1D22] hover:bg-[#FCECEF] transition-colors"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] flex items-center justify-center mx-auto mb-4 text-[#B85064] shadow-sm">
+              <ShieldCheckIcon className="w-7 h-7 text-[#B85064]" />
+            </div>
+
+            <h3 className="text-lg font-bold font-serif-luxury text-[#1F1418] mb-2">
+              Yêu Cầu Tài Khoản Hợp Lệ
+            </h3>
+            <p className="text-xs text-[#7A6C71] leading-relaxed mb-6">
+              Tính năng đánh giá chỉ dành cho người dùng đã đăng ký tài khoản và có vai trò (role) trong hệ thống Studio. Vui lòng đăng nhập để gửi đánh giá hoặc xem nhận xét của bạn.
+            </p>
+
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setRequireRoleModalOpen(false);
+                  navigate(ROUTES.AUTH.LOGIN, { state: { from: ROUTES.USER.REVIEWS } });
+                }}
+                className="cursor-pointer w-full py-2.5 rounded-full bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold transition-all shadow-md shadow-[#B85064]/25 flex items-center justify-center gap-1.5"
+              >
+                <span>Đăng nhập ngay</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRequireRoleModalOpen(false);
+                  navigate(ROUTES.AUTH.REGISTER);
+                }}
+                className="cursor-pointer w-full py-2.5 rounded-full border border-[#F0E4E6] text-[#4A3C41] hover:bg-[#FAF5F5] text-xs font-semibold transition-colors"
+              >
+                Chưa có tài khoản? Đăng ký
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRequireRoleModalOpen(false)}
+                className="cursor-pointer text-xs text-[#8C7D82] hover:text-[#2A1D22] pt-1"
+              >
+                Để sau
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

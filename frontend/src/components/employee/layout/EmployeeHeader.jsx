@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, CheckCheck, User, Calendar, ShieldCheck, X } from 'lucide-react';
+import { Menu, Bell, CheckCheck, User, Calendar, ShieldCheck, X, Briefcase } from 'lucide-react';
 import axiosEmployee from '../../../lib/axiosEmployee';
 
 const DEFAULT_PROFILE = {
