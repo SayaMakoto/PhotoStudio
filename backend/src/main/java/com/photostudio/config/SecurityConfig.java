@@ -121,6 +121,7 @@ public class SecurityConfig {
                         // Tinh nang danh gia: chi nguoi dung da dang nhap va co role moi duoc phep tao/sua danh gia
                         .requestMatchers(HttpMethod.PATCH, "/api/reviews/*/reply").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.PATCH, "/api/employee-reviews/*/reply").hasAnyRole("ADMIN", "EMPLOYEE")
+
                         .requestMatchers(HttpMethod.POST, "/api/reviews", "/api/reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
                         .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")

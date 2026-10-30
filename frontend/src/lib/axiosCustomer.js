@@ -19,15 +19,34 @@ export const customerAuth = {
     }
   },
   setUser: (user) => {
-    if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
+    if (user) {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+      try {
+        window.dispatchEvent(new CustomEvent('user_profile_updated', { detail: user }));
+      } catch {
+        // Bỏ qua lỗi
+      }
+    }
   },
-  removeUser: () => localStorage.removeItem(USER_KEY),
+  removeUser: () => {
+    localStorage.removeItem(USER_KEY);
+    try {
+      window.dispatchEvent(new CustomEvent('user_profile_updated', { detail: null }));
+    } catch {
+      // Bỏ qua lỗi
+    }
+  },
   clearAuth: () => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem('user');
     localStorage.removeItem('customer');
     localStorage.removeItem('token');
+    try {
+      window.dispatchEvent(new CustomEvent('user_profile_updated', { detail: null }));
+    } catch {
+      // Bỏ qua lỗi
+    }
     try {
       sessionStorage.clear();
     } catch {

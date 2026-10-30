@@ -17,6 +17,11 @@ export const adminBookingService = {
     if (typeof window !== 'undefined') window.dispatchEvent(new Event('admin:bookings-updated'));
     return updated;
   },
+  updateDecision: async (id, status) => {
+    const updated = await axiosAdmin.patch(`/api/bookings/${id}/admin-decision`, { status });
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('admin:bookings-updated'));
+    return updated;
+  },
   getPackages: (bookingId) => axiosAdmin.get(`/api/booking-packages/booking/${bookingId}`),
   getEmployeeAssignments: (bookingId) => axiosAdmin.get(`/api/booking-employee-assignments/booking/${bookingId}`),
   getEmployees: () => adminEmployeeService.getAll(),

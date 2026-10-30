@@ -51,8 +51,26 @@ export const customerBookingService = {
   // Gắn gói chụp vào đơn sau khi tạo booking
   addPackage: (data) => axiosCustomer.post('/api/booking-packages', data),
 
-  // Hủy đơn đặt lịch
-  cancelBooking: (id, reason) => axiosCustomer.patch(`/api/bookings/${id}/cancel`, { reason }),
+  // Hủy đơn đặt lịch (gọi endpoint /status?status=cancelled hoặc /cancel)
+  cancelBooking: async (id, reason) => {
+    try {
+      // 1. Thử gọi PATCH /api/bookings/{id}/status?status=cancelled (luôn có sẵn trong Spring Boot)
+      return await axiosCustomer.patch(`/api/bookings/${id}/status?status=cancelled`, {
+        status: 'cancelled',
+        reason: reason || 'Khách hàng hủy',
+      });
+    } catch (statusErr) {
+      // 2. Thử gọi PATCH /api/bookings/{id}/cancel
+      try {
+        return await axiosCustomer.patch(`/api/bookings/${id}/cancel`, {
+          status: 'cancelled',
+          reason: reason || 'Khách hàng hủy',
+        });
+      } catch {
+        throw statusErr;
+      }
+    }
+  },
 
   // Gửi đánh giá cho buổi chụp (gồm đánh giá buổi chụp + đánh giá nhân viên)
   submitReview: (reviewData) => axiosCustomer.post('/api/reviews', reviewData),

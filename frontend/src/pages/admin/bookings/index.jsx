@@ -6,7 +6,7 @@ import StatusBadge from '../../../components/admin/common/StatusBadge';
 import useAdminNotification from '../../../components/admin/common/useAdminNotification';
 import adminBookingService from '../../../services/admin/bookingService';
 import BookingDialog from './BookingDialog';
-import { BOOKING_STATUS_OPTIONS, formatBookingDate, formatBookingTime, getBookingErrorMessage, getNextBookingStatus } from './bookingConfig';
+import { BOOKING_STATUS_OPTIONS, canAdminUpdateBookingStatus, formatBookingDate, formatBookingTime, getBookingErrorMessage } from './bookingConfig';
 
 const asRows = (rows) => Array.isArray(rows) ? rows : [];
 const inputClass = 'min-h-11 rounded-xl border border-neutral-800 bg-neutral-950 px-3 text-xs text-neutral-100 outline-none focus:border-amber-400/60';
@@ -63,13 +63,12 @@ export default function AdminBookingsPage() {
   }), [bookings]);
 
   const updateBookingStatus = async (booking, nextStatus) => {
-    const allowedNextStatus = getNextBookingStatus(booking.status);
-    if (!allowedNextStatus || allowedNextStatus.value !== nextStatus || updatingId) return;
+    if (!canAdminUpdateBookingStatus(booking.status, nextStatus) || updatingId) return;
     const label = BOOKING_STATUS_OPTIONS.find((option) => option.value === nextStatus)?.label || nextStatus;
     if (!window.confirm(`Cập nhật đơn #${booking.id} (${booking.customerName || 'khách hàng'}) sang trạng thái “${label}”?`)) return;
     setUpdatingId(booking.id);
     try {
-      const updated = await adminBookingService.updateStatus(booking.id, nextStatus);
+      const updated = await adminBookingService.updateDecision(booking.id, nextStatus);
       setBookings((current) => current.map((item) => item.id === booking.id ? updated : item));
       setSelectedBooking((current) => current?.id === booking.id ? updated : current);
       notify({ type: 'success', title: 'Đã cập nhật trạng thái đơn', message: `Đơn #${booking.id} hiện ở trạng thái ${label.toLowerCase()}.` });

@@ -209,6 +209,18 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public BookingResponse updateAdminDecision(Long id, String status) {
+        Booking booking = findEntity(id);
+        if (booking.getStatus() != BookingStatus.pending) {
+            throw new IllegalArgumentException("Admin chỉ được quyết định đơn đang ở trạng thái chờ xác nhận.");
+        }
+        if (!"confirmed".equalsIgnoreCase(status) && !"cancelled".equalsIgnoreCase(status)) {
+            throw new IllegalArgumentException("Admin chỉ có thể xác nhận hoặc từ chối đơn đặt lịch.");
+        }
+        return updateStatus(id, status);
+    }
+
+    @Override
     public void delete(Long id) {
         Booking booking = findEntity(id);
         repository.delete(booking);

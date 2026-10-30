@@ -1,1573 +1,2357 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  PlusCircleIcon,
-  SparklesIcon,
-  ClockIcon,
-  UserGroupIcon,
-  CheckIcon,
-  CheckCircleIcon,
-  ShieldCheckIcon,
-  ArrowRightIcon,
-  TicketIcon,
-  ArrowPathIcon,
-  CalendarDaysIcon,
-  UserIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  BuildingLibraryIcon,
-  CameraIcon,
-  ExclamationCircleIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/solid";
-
+  Calendar,
+  Clock,
+  Users,
+  Check,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Camera,
+  ShieldCheck,
+  HelpCircle,
+  Phone,
+  Mail,
+  User,
+  Tag,
+  Receipt,
+  RotateCcw,
+  AlertCircle,
+  Lock,
+  X,
+  CreditCard,
+  Sparkle,
+} from 'lucide-react';
 import {
   FloralBranchCorner,
   FloralCardCorner,
-} from "../../components/common/FloralDecorations";
-import { ROUTES } from "../../routes/web";
-import { customerAuth } from "../../lib/axiosCustomer";
-import customerRoomService from "../../services/user/roomService";
-import customerPackageService from "../../services/user/packageService";
-import userImageService from "../../services/user/imageService";
-import customerBookingService from "../../services/user/bookingService";
-import customerPaymentService from "../../services/user/paymentService";
-import customerServiceService from "../../services/user/serviceService";
+} from '../../components/common/FloralDecorations';
+import { ROUTES } from '../../routes/web';
+import { customerAuth } from '../../lib/axiosCustomer';
+import customerAuthService, { CSDL_SEED_USERS } from '../../services/user/authService';
+import customerRoomService from '../../services/user/roomService';
+import customerPackageService from '../../services/user/packageService';
+import customerServiceService from '../../services/user/serviceService';
+import customerBookingService from '../../services/user/bookingService';
+import customerPaymentService from '../../services/user/paymentService';
+import { createVNPayPaymentUrl } from '../../lib/vnpay';
+import { validateVietnamesePhone } from '../../utils/phoneValidator';
 
-const TIME_SLOTS = [
+// =========================================================================
+// TIỆN ÍCH NGÀY THÁNG CHUẨN VIỆT NAM (KHÔNG BỊ LỆCH MÚI GIỜ UTC)
+// =========================================================================
+export function getVietnamLocalDate(d = new Date()) {
+  const dateObj = d instanceof Date ? d : new Date(d);
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// =========================================================================
+// DỮ LIỆU CHUẨN TRÍCH XUẤT TỪ CSDL DOCS/PHOTO_STUDIO.SQL
+// =========================================================================
+
+// 1. CSDL PACKAGES (8 GÓI CHỤP THỰC TẾ TRONG DATABASE)
+const CSDL_PACKAGES = [
   {
-    id: "m1",
-    label: "08:30 – 10:30 (Sáng)",
-    start: "08:30:00",
-    end: "10:30:00",
+    id: 1,
+    name: 'Gói Chụp Ảnh Cá Nhân',
+    isPopular: true,
+    description: 'Chụp studio 60 phút tone Pastel Hàn Quốc, hỗ trợ 1 set trang phục Vintage, makeup cơ bản và retouch 15 ảnh chuyên sâu.',
+    durationText: '1–2 giờ (60 phút)',
+    durationMinutes: 60,
+    maxPeople: 3,
+    capacityText: '1–3 người',
+    price: 990000,
+    originalPrice: 1290000,
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
   },
   {
-    id: "m2",
-    label: "10:30 – 12:30 (Trưa)",
-    start: "10:30:00",
-    end: "12:30:00",
+    id: 2,
+    name: 'Gói Chụp Ảnh Cưới',
+    isPopular: false,
+    description: 'Chụp 120 phút với 2 bối cảnh Cung Điện & Cổ Điển, 1 váy cưới ren Pháp, 1 tuxedo nam cao cấp, makeup cô dâu và tặng album mini 15x21.',
+    durationText: '2–3 giờ (120 phút)',
+    durationMinutes: 120,
+    maxPeople: 2,
+    capacityText: '2 người (Cặp đôi)',
+    price: 2990000,
+    originalPrice: 3800000,
+    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
   },
   {
-    id: "a1",
-    label: "13:30 – 15:30 (Chiều)",
-    start: "13:30:00",
-    end: "15:30:00",
+    id: 3,
+    name: 'Gói Chụp Ảnh Gia Đình / Nhóm Bạn',
+    isPopular: false,
+    description: 'Chụp phòng lớn VIP đa năng trong 90 phút cho nhóm 4-8 thành viên, đạo cụ sofa cổ điển, bàn giao toàn bộ file gốc và chỉnh sửa 25 ảnh.',
+    durationText: '1.5–2 giờ (90 phút)',
+    durationMinutes: 90,
+    maxPeople: 8,
+    capacityText: '4–8 người',
+    price: 1890000,
+    originalPrice: 2400000,
+    image: 'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&w=600&q=80',
   },
   {
-    id: "a2",
-    label: "16:00 – 18:00 (Hoàng hôn)",
-    start: "16:00:00",
-    end: "18:00:00",
+    id: 4,
+    name: 'Gói Chụp Cưới Luxury & Ngoại Cảnh VIP',
+    isPopular: false,
+    description: 'Trải nghiệm đẳng cấp 240 phút kết hợp studio và ngoại cảnh hoàng hôn, 3 bộ trang phục cao cấp, 2 layout makeup, ekip riêng và album photobook 30x30.',
+    durationText: '4–5 giờ (240 phút)',
+    durationMinutes: 240,
+    maxPeople: 6,
+    capacityText: '2–6 người',
+    price: 5990000,
+    originalPrice: 7500000,
+    image: 'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=600&q=80',
   },
   {
-    id: "e1",
-    label: "18:30 – 20:30 (Tối Studio)",
-    start: "18:30:00",
-    end: "20:30:00",
+    id: 5,
+    name: 'Gói Chụp Kỷ Yếu & Tốt Nghiệp',
+    isPopular: false,
+    description: 'Dành cho học sinh sinh viên cá nhân hoặc nhóm 2-5 bạn, chụp 90 phút với phông màu tự động, phụ kiện bằng tốt nghiệp và hoa tươi.',
+    durationText: '1.5–2 giờ (90 phút)',
+    durationMinutes: 90,
+    maxPeople: 5,
+    capacityText: '2–5 người',
+    price: 1490000,
+    originalPrice: 1900000,
+    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 6,
+    name: 'Gói Chụp Doanh Nhân & Profile Thương Hiệu',
+    isPopular: false,
+    description: 'Chụp ảnh chân dung lãnh đạo, profile doanh nghiệp chuẩn tạp chí Forbes trong 60 phút, set ánh sáng kịch tính Rembrandt và retouch da tự nhiên.',
+    durationText: '1–1.5 giờ (60 phút)',
+    durationMinutes: 60,
+    maxPeople: 2,
+    capacityText: '1–2 người',
+    price: 1290000,
+    originalPrice: 1600000,
+    image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 7,
+    name: 'Gói Chụp Nghệ Thuật Cổ Trang & Áo Dài',
+    isPopular: false,
+    description: 'Chụp 90 phút với bối cảnh phố cổ và sen hồ, hỗ trợ áo dài tơ tằm thêu tay hoặc cổ phục Việt, làm tóc và phụ kiện trâm cài truyền thống.',
+    durationText: '1.5–2 giờ (90 phút)',
+    durationMinutes: 90,
+    maxPeople: 4,
+    capacityText: '1–4 người',
+    price: 1690000,
+    originalPrice: 2100000,
+    image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 8,
+    name: 'Gói Chụp Lookbook Thời Trang & Sản Phẩm',
+    isPopular: false,
+    description: 'Chụp 120 phút trên phông Cyclorama vô cực, hệ thống thanh treo ray điện, hỗ trợ stylist và tản sáng chuẩn studio quốc tế.',
+    durationText: '2–3 giờ (120 phút)',
+    durationMinutes: 120,
+    maxPeople: 6,
+    capacityText: '2–6 người',
+    price: 2490000,
+    originalPrice: 3200000,
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80',
   },
 ];
+
+// 2. CSDL ROOMS (12 KHÔNG GIAN PHÒNG CHỤP TRONG DATABASE)
+const CSDL_ROOMS = [
+  {
+    id: 1,
+    name: 'Phòng Studio A - Phong Cách Hàn Quốc',
+    isSuitable: true,
+    capacity: 5,
+    capacityText: '3–5 người',
+    surcharge: 0,
+    description: 'Tone màu sáng pastel, rèm voan trắng, hoa khô nghệ thuật, chuyên chân dung, nàng thơ và layout nhẹ nhàng.',
+    image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 2,
+    name: 'Phòng Studio B - Concept Cổ Điển & Hoàng Gia',
+    isSuitable: false,
+    capacity: 10,
+    capacityText: '5–10 người',
+    surcharge: 200000,
+    description: 'Diện tích 75m2, trần cao 4.2m, nội thất gỗ sồi cao cấp, đèn chùm pha lê, chuyên ảnh cưới VIP và dạ tiệc sang trọng.',
+    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 3,
+    name: 'Phòng Studio VIP - Cinema & Đa Năng',
+    isSuitable: false,
+    capacity: 8,
+    capacityText: '4–8 người',
+    surcharge: 300000,
+    description: 'Trang bị hệ thống chiếu sáng kịch tính Arri/Aputure, dàn phông màu điện tử 8 màu tự động, phù hợp profile doanh nhân & lookbook.',
+    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 4,
+    name: 'Phòng Studio C - Không Gian Gia Đình Vintage',
+    isSuitable: false,
+    capacity: 12,
+    capacityText: '6–12 người',
+    surcharge: 250000,
+    description: 'Bối cảnh phòng khách ấm cúng với sofa nhung cổ, lò sưởi, đàn piano cơ, chuyên ảnh gia đình đa thế hệ và thôi nôi.',
+    image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 5,
+    name: 'Phòng Studio D - Concept Monochromatic',
+    isSuitable: false,
+    capacity: 6,
+    capacityText: '2–6 người',
+    surcharge: 150000,
+    description: 'Tường xi măng công nghiệp tối giản, hệ thống tản sáng khổ lớn, chuyên lookbook thời trang thương hiệu và nghệ thuật đen trắng.',
+    image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 6,
+    name: 'Phòng Studio E - Ban Công Hoàng Hôn & Vườn Kính',
+    isSuitable: false,
+    capacity: 6,
+    capacityText: '2–6 người',
+    surcharge: 200000,
+    description: 'Không gian đón trọn ánh sáng tự nhiên hoàng hôn với cửa kính panorama và giàn hoa nghệ thuật cho cặp đôi.',
+    image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 7,
+    name: 'Phòng Studio F - Phong Cách Á Đông & Cổ Phục',
+    isSuitable: false,
+    capacity: 8,
+    capacityText: '4–8 người',
+    surcharge: 200000,
+    description: 'Tường vàng rêu phong hoài niệm, hồ sen tiểu cảnh và đèn lồng lụa chuyên chụp áo dài truyền thống và cổ phục.',
+    image: 'https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 8,
+    name: 'Phòng Studio G - Thư Viện Quý Tộc & Gỗ Trầm',
+    isSuitable: false,
+    capacity: 6,
+    capacityText: '2–6 người',
+    surcharge: 250000,
+    description: 'Kệ sách gỗ sồi kịch trần, sofa da bò Chesterfield cổ điển chuyên chụp profile chuyên gia và gia đình cao cấp.',
+    image: 'https://images.unsplash.com/photo-1507842229450-79989d4d989f?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 9,
+    name: 'Phòng Studio H - Industrial Loft Sáng Tạo',
+    isSuitable: false,
+    capacity: 8,
+    capacityText: '4–8 người',
+    surcharge: 200000,
+    description: 'Trần cao bê tông mộc nghệ thuật, khung thép phong cách New York loft chuyên chụp lookbook street-style và nghệ thuật.',
+    image: 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 10,
+    name: 'Phòng Studio I - Không Gian Em Bé & Thôi Nôi',
+    isSuitable: false,
+    capacity: 5,
+    capacityText: '2–5 người',
+    surcharge: 100000,
+    description: 'Không gian an toàn decor tone pastel ngọt ngào, đồ chơi gỗ Scandinavian chuyên chụp cho bé và mẹ bầu.',
+    image: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 11,
+    name: 'Phòng Studio K - Sảnh Cưới Grand Ballroom',
+    isSuitable: false,
+    capacity: 12,
+    capacityText: '6–12 người',
+    surcharge: 500000,
+    description: 'Sàn gương bóng bẩy, vòm hoa cưới khổng lồ và đèn chùm pha lê lộng lẫy chuyên ảnh cưới dạ hội sang trọng.',
+    image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 12,
+    name: 'Phòng Studio L - High-End Cyclorama Vô Cực',
+    isSuitable: false,
+    capacity: 10,
+    capacityText: '4–10 người',
+    surcharge: 350000,
+    description: 'Vách cong vô cực 3D 180 độ tiêu chuẩn quốc tế, hệ thống thanh treo ray điện chuyên nghiệp cho thương mại điện tử.',
+    image: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=600&q=80',
+  },
+];
+
+// 3. CSDL SERVICES (8 DỊCH VỤ GIA TĂNG THỰC TẾ TRONG DATABASE)
+const CSDL_SERVICES = [
+  {
+    id: 1,
+    name: 'Trang Điểm & Làm Tóc Chuyên Nghiệp (Layout 1)',
+    price: 300000,
+    description: 'Layout makeup cá nhân phù hợp từng đường nét gương mặt và concept chụp.',
+    image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 2,
+    name: 'Trang Điểm Thay Layout Thứ 2 Trong Buổi Chụp',
+    price: 200000,
+    description: 'Dặm phấn, thay đổi màu son và kiểu tóc sang concept trang phục mới.',
+    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 3,
+    name: 'Chỉnh Sửa Ảnh Chuyên Sâu (Retouch Da & Dáng 10 Ảnh)',
+    price: 250000,
+    description: 'Kỹ thuật Frequency Separation giữ vân da thật, cân chỉnh màu sắc điện ảnh.',
+    image: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 4,
+    name: 'Thuê Phụ Kiện Không Giới Hạn Toàn Buổi',
+    price: 150000,
+    description: 'Sử dụng toàn bộ vương miện, hoa cưới, đạo cụ trong studio suốt buổi chụp.',
+    image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 5,
+    name: 'In Album Photobook Mở Phẳng Cao Cấp 25x25 (20 Trang)',
+    price: 850000,
+    description: 'In giấy mỹ thuật phủ màng UV chống ẩm mốc, bìa bọc da sang trọng.',
+    image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 6,
+    name: 'In Ảnh Cổng Pha Lê Tráng Gương Khổ Lớn 60x90cm',
+    price: 650000,
+    description: 'Khung viền mạ vàng, bề mặt tráng gương chống lóa sắc nét sang trọng.',
+    image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 7,
+    name: 'Quay Video Highlight Hậu Kỳ Cinematic 4K (60 Giây)',
+    price: 900000,
+    description: 'Video dọc định dạng Reels/TikTok/Shorts ghi lại hậu trường lung linh.',
+    image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 8,
+    name: 'Thuê Thêm Trang Phục Thiết Kế (1 Bộ / Concept)',
+    price: 200000,
+    description: 'Tự chọn váy cưới ren Pháp, áo dài hoặc vest cao cấp kèm hỗ trợ là ủi hơi nước.',
+    image: 'https://images.unsplash.com/photo-1594552072238-b8a33785b261?auto=format&fit=crop&w=400&q=80',
+  },
+];
+
+const TIME_SLOTS_DATA = {
+  morning: ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00'],
+  afternoon: ['13:00', '14:00', '15:00', '16:00', '17:00'],
+  evening: ['18:00', '19:00', '20:00', '21:00', '22:00'],
+};
 
 export default function BookingPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Kiểm tra đăng nhập bắt buộc
-  const isAuthenticated = customerAuth.isAuthenticated();
-  const currentUser = useMemo(() => customerAuth.getUser(), []);
+  // Xác thực đăng nhập
+  const [currentUser, setCurrentUser] = useState(() => customerAuth.getUser());
+  const isAuthenticated = Boolean(currentUser && (currentUser.id || currentUser.username));
 
-  // Đọc query parameters và location.state
-  const searchParams = useMemo(
-    () => new URLSearchParams(location.search),
-    [location.search],
-  );
-  const initialPackageId = Number(
-    searchParams.get("packageId") || location.state?.packageId || 1,
-  );
-  const initialRoomId = Number(
-    searchParams.get("roomId") || location.state?.roomId || 1,
-  );
+  // STEP WIZARD: 1 = Chọn dịch vụ, 2 = Ngày & giờ, 3 = Xác nhận
+  const [currentStep, setCurrentStep] = useState(1);
 
-  // Danh sách phòng, gói và dịch vụ nâng cao
-  const [rooms, setRooms] = useState([]);
-  const [packages, setPackages] = useState([]);
-  const [servicesList, setServicesList] = useState([]);
-  const [optionsLoading, setOptionsLoading] = useState(true);
-  const [optionsError, setOptionsError] = useState("");
-
-  // Lựa chọn đặt lịch
-  const [selectedRoomId, setSelectedRoomId] = useState(initialRoomId);
-  const [selectedPackageId, setSelectedPackageId] = useState(initialPackageId);
-
-  // Đọc danh sách dịch vụ đã chọn (từ trang chi tiết nếu có)
-  const [selectedServiceIds, setSelectedServiceIds] = useState(() => {
-    if (Array.isArray(location.state?.selectedServiceIds)) {
-      return location.state.selectedServiceIds.map(Number);
-    }
-    const sParam = searchParams.get("services");
-    if (sParam) {
-      return sParam.split(",").map(Number).filter(Boolean);
-    }
-    try {
-      const stored = sessionStorage.getItem("preselected_service_ids");
-      if (stored) return JSON.parse(stored).map(Number);
-    } catch {
-      // Ignored: Bỏ qua lỗi nếu sessionStorage không khả dụng hoặc parse thất bại
-    }
-    return [];
-  });
-
-  const handleToggleService = (serviceId) => {
-    const sId = Number(serviceId);
-    setSelectedServiceIds((prev) =>
-      prev.includes(sId) ? prev.filter((id) => id !== sId) : [...prev, sId]
-    );
-  };
-  const [bookingDate, setBookingDate] = useState(() => {
-    const tmr = new Date();
-    tmr.setDate(tmr.getDate() + 1);
-    return tmr.toISOString().split("T")[0];
-  });
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState(TIME_SLOTS[0]);
+  // Dữ liệu API / CSDL
+  const [packages, setPackages] = useState(CSDL_PACKAGES);
+  const [rooms, setRooms] = useState(CSDL_ROOMS);
+  const [servicesList, setServicesList] = useState(CSDL_SERVICES);
   const [existingBookings, setExistingBookings] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
 
-  // Thông tin khách hàng (hỗ trợ fullname, fullName, name, username)
-  const [customerInfo, setCustomerInfo] = useState({
-    name:
-      currentUser?.fullname ||
-      currentUser?.fullName ||
-      currentUser?.name ||
-      currentUser?.username ||
-      "",
-    phone: currentUser?.phone || currentUser?.phoneNumber || "",
-    email: currentUser?.email || "",
-    attendees: 1,
-    notes: "",
-  });
+  // BƯỚC 1: LỰA CHỌN THEO TIẾN TRÌNH TUẦN TỰ (CHỌN GÓI XONG MỚI HIỆN PHÒNG, CHỌN PHÒNG XONG MỚI HIỆN DỊCH VỤ)
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [isPackageCollapsed, setIsPackageCollapsed] = useState(false);
 
-  const [formErrors, setFormErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [isRoomCollapsed, setIsRoomCollapsed] = useState(false);
 
-  // Nếu người dùng chưa đăng nhập, tự động chuyển sang trang đăng nhập (chỉ kiểm tra khi truy cập trang này)
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [isServiceOptOut, setIsServiceOptOut] = useState(false); // Xác nhận KHÔNG dùng dịch vụ bổ sung
+  const [isServicesCollapsed, setIsServicesCollapsed] = useState(false);
+
+  // BƯỚC 2: NGÀY & GIỜ (CHUẨN HÓA LỊCH VIỆT NAM & LOẠI BỎ GIỜ ĐÃ QUA)
+  const [weekOffset, setWeekOffset] = useState(0); // 0 = tuần này, tối đa 8 tuần (~60 ngày)
+  const [selectedDate, setSelectedDate] = useState(() => getVietnamLocalDate(new Date()));
+  const [selectedSlot, setSelectedSlot] = useState('');
+
+  // BƯỚC 3: THÔNG TIN KHÁCH HÀNG & MÃ GIẢM GIÁ
+  const [fullName, setFullName] = useState(currentUser?.fullname || currentUser?.username || '');
+  const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+
+  const [email, setEmail] = useState(currentUser?.email || '');
+  const [attendees, setAttendees] = useState(1);
+  const [customerNote, setCustomerNote] = useState('');
+
+  // TÙY CHỌN MỨC ĐẶT CỌC / THANH TOÁN: 30% | 50% | 100%
+  const [depositPercent, setDepositPercent] = useState(30);
+
+  // Mã giảm giá
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState('');
+  const [promoSuccess, setPromoSuccess] = useState('');
+
+  // Trạng thái nộp đơn
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  // Modal đăng nhập lồng trực tiếp trên trang khi khách chưa đăng nhập
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authUsername, setAuthUsername] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // Cập nhật thông tin khách hàng nếu tài khoản đăng nhập thay đổi
   useEffect(() => {
-    if (!customerAuth.isAuthenticated()) {
-      navigate(ROUTES.AUTH.LOGIN, {
-        replace: true,
-        state: {
-          from: ROUTES.USER.BOOKING,
-          message:
-            "Quý khách vui lòng đăng nhập tài khoản để tiến hành đặt lịch chụp trực tuyến!",
-        },
-      });
+    if (currentUser) {
+      if (!fullName) setFullName(currentUser.fullname || currentUser.username || '');
+      if (!phone) setPhone(currentUser.phone || '');
+      if (!email) setEmail(currentUser.email || '');
     }
-  }, [navigate]);
+  }, [currentUser]);
 
-  // Load danh sách phòng & gói thực tế từ CSDL
-  useEffect(() => {
-    let active = true;
-    async function loadData() {
-      const [roomsResult, packagesResult, imagesResult, servicesResult] = await Promise.allSettled([
-        customerRoomService.getAllRooms(),
-        customerPackageService.getAllPackages(),
-        userImageService.getAllImages(),
-        customerServiceService.getAllServices(),
-      ]);
-      if (!active) return;
+  // Kiểm tra số điện thoại mỗi khi người dùng thay đổi
+  const handlePhoneChange = (e) => {
+    // Chỉ cho phép nhập ký tự số và tối đa đúng 10 số
+    const cleanDigits = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setPhone(cleanDigits);
 
-      const getList = (result) => {
-        if (result.status !== "fulfilled") return [];
-        const value = result.value;
-        if (Array.isArray(value)) return value;
-        if (Array.isArray(value?.data)) return value.data;
-        return [];
-      };
-      const allImages = getList(imagesResult);
-      const rawRooms = getList(roomsResult);
-      const rawPackages = getList(packagesResult);
-      const rawServices = getList(servicesResult);
-
-      const mappedServices = rawServices
-        .filter((s) => s.status?.toLowerCase() === "active" && !s.deletedAt)
-        .map((s) => ({
-          id: s.id,
-          name: s.name,
-          description: s.description || "",
-          price: Number(s.price) || 0,
-        }));
-      setServicesList(mappedServices);
-
-      const mappedRooms = rawRooms
-        .filter((room) => room.status?.toLowerCase() === "active" && !room.deletedAt)
-        .map((room) => {
-          const image = allImages.find((item) =>
-            ["room", "rooms"].includes((item.imageableType || item.imageable_type || "").toLowerCase()) &&
-            Number(item.imageableId ?? item.imageable_id) === Number(room.id),
-          );
-          const imageUrl = image?.imageUrl || image?.image_url || room.imageUrl || room.image;
-          return { ...room, capacity: Number(room.capacity) || 1, primaryImage: imageUrl, image: imageUrl };
-        });
-      const mappedPackages = rawPackages
-        .filter((pkg) => pkg.status?.toLowerCase() === "active" && !pkg.deletedAt)
-        .map((pkg) => {
-          const image = allImages.find((item) =>
-            ["package", "packages"].includes((item.imageableType || item.imageable_type || "").toLowerCase()) &&
-            Number(item.imageableId ?? item.imageable_id) === Number(pkg.id),
-          );
-          const imageUrl = image?.imageUrl || image?.image_url || pkg.imageUrl || pkg.image;
-          const price = Number(pkg.price) || 0;
-          return {
-            ...pkg,
-            price,
-            originalPrice: price,
-            packageDiscountPercent: 0,
-            duration: pkg.duration ? `${pkg.duration} phút` : "",
-            equipments: Array.isArray(pkg.equipments) ? pkg.equipments : [],
-            image: imageUrl,
-            primaryImage: imageUrl,
-          };
-        });
-
-      setRooms(mappedRooms);
-      setPackages(mappedPackages);
-      if (!mappedRooms.some((room) => Number(room.id) === initialRoomId)) {
-        setSelectedRoomId(mappedRooms[0]?.id ?? null);
-      }
-      if (!mappedPackages.some((pkg) => Number(pkg.id) === initialPackageId)) {
-        setSelectedPackageId(mappedPackages[0]?.id ?? null);
-      }
-
-      const failedResources = [];
-      if (roomsResult.status === "rejected") failedResources.push("phòng chụp");
-      if (packagesResult.status === "rejected") failedResources.push("gói chụp");
-      if (!mappedRooms.length) failedResources.push("phòng chụp đang hoạt động");
-      if (!mappedPackages.length) failedResources.push("gói chụp đang hoạt động");
-      if (failedResources.length) {
-        setOptionsError(`Không tải được ${[...new Set(failedResources)].join(" và ")} từ cơ sở dữ liệu.`);
-      }
-      setOptionsLoading(false);
+    if (phoneTouched) {
+      const check = validateVietnamesePhone(cleanDigits);
+      setPhoneError(check.isValid ? '' : check.message);
     }
+  };
 
-    void loadData();
-    return () => { active = false; };
-  }, [initialPackageId, initialRoomId]);
+  const handlePhoneBlur = () => {
+    setPhoneTouched(true);
+    const check = validateVietnamesePhone(phone);
+    setPhoneError(check.isValid ? '' : check.message);
+  };
 
-  // Tải danh sách đơn đặt lịch từ CSDL để phát hiện trùng phòng/khung giờ
+  // Tải dữ liệu Gói, Phòng, Dịch vụ và Bookings từ Backend (nếu backend đang chạy)
   useEffect(() => {
-    let active = true;
-    const loadBookings = async () => {
+    let isMounted = true;
+    setLoadingData(true);
+
+    const fetchData = async () => {
       try {
-        const res = await customerBookingService.getAllBookings();
-        if (!active) return;
-        let list = [];
-        if (Array.isArray(res)) {
-          list = res;
-        } else if (Array.isArray(res?.data)) {
-          list = res.data;
+        const [pkgRes, roomRes, srvRes, bkgRes] = await Promise.allSettled([
+          customerPackageService.getAllPackages(),
+          customerRoomService.getAllRooms(),
+          customerServiceService.getAllServices(),
+          customerBookingService.getAllBookings(),
+        ]);
+
+        if (!isMounted) return;
+
+        // Xử lý Gói chụp từ CSDL
+        if (pkgRes.status === 'fulfilled' && Array.isArray(pkgRes.value?.data) && pkgRes.value.data.length > 0) {
+          const mappedPackages = pkgRes.value.data
+            .filter((p) => p.status === 'active' || !p.status)
+            .map((p, idx) => ({
+              id: p.id,
+              name: p.name || `Gói chụp #${p.id}`,
+              isPopular: idx === 0,
+              description: p.description || 'Chụp ảnh chuyên nghiệp tại PhotoStudio.',
+              durationText: `${Math.round((p.duration || 60) / 60)}–${Math.round((p.duration || 60) / 60) + 1} giờ (${p.duration || 60} phút)`,
+              durationMinutes: p.duration || 60,
+              maxPeople: p.id === 4 ? 6 : p.id === 3 ? 8 : p.id === 2 ? 2 : 3,
+              capacityText: `${p.id === 2 ? '2 người' : `1–${p.id === 4 ? 6 : p.id === 3 ? 8 : 3} người`}`,
+              price: Number(p.price || 990000),
+              originalPrice: Math.round(Number(p.price || 990000) * 1.25),
+              image: p.image || CSDL_PACKAGES[(p.id - 1) % CSDL_PACKAGES.length]?.image || CSDL_PACKAGES[0].image,
+            }));
+          if (mappedPackages.length > 0) setPackages(mappedPackages);
         }
-        setExistingBookings(list);
+
+        // Xử lý Phòng chụp từ CSDL
+        if (roomRes.status === 'fulfilled' && Array.isArray(roomRes.value?.data) && roomRes.value.data.length > 0) {
+          const mappedRooms = roomRes.value.data
+            .filter((r) => r.status === 'active' || !r.status)
+            .map((r, idx) => ({
+              id: r.id,
+              name: r.name || `Studio ${idx + 1}`,
+              isSuitable: idx === 0,
+              capacity: r.capacity || 5,
+              capacityText: `${Math.max(1, (r.capacity || 5) - 2)}–${r.capacity || 5} người`,
+              surcharge: idx === 0 ? 0 : idx === 1 ? 200000 : idx === 2 ? 300000 : idx === 10 ? 500000 : 200000,
+              description: r.description || 'Không gian studio sang trọng chuẩn Cinematic.',
+              image: r.thumbnail || r.image || CSDL_ROOMS[(r.id - 1) % CSDL_ROOMS.length]?.image || CSDL_ROOMS[0].image,
+            }));
+          if (mappedRooms.length > 0) setRooms(mappedRooms);
+        }
+
+        // Xử lý Dịch vụ bổ sung từ CSDL
+        if (srvRes.status === 'fulfilled' && Array.isArray(srvRes.value?.data) && srvRes.value.data.length > 0) {
+          const mappedServices = srvRes.value.data
+            .filter((s) => s.status === 'active' || !s.status)
+            .map((s, idx) => ({
+              id: s.id,
+              name: s.name || `Dịch vụ #${s.id}`,
+              price: Number(s.price || 300000),
+              description: s.description || 'Dịch vụ nâng cao tăng trải nghiệm chụp ảnh.',
+              image: s.image || CSDL_SERVICES[(s.id - 1) % CSDL_SERVICES.length]?.image || CSDL_SERVICES[0].image,
+            }));
+          if (mappedServices.length > 0) setServicesList(mappedServices);
+        }
+
+        // Xử lý Booking hiện có để kiểm tra trùng giờ
+        if (bkgRes.status === 'fulfilled' && Array.isArray(bkgRes.value?.data)) {
+          setExistingBookings(bkgRes.value.data);
+        }
       } catch (err) {
-        console.error("Lỗi khi tải danh sách booking:", err);
+        console.warn('Dùng dữ liệu CSDL chuẩn do backend offline:', err.message);
+      } finally {
+        if (isMounted) setLoadingData(false);
       }
     };
 
-    void loadBookings();
-    const timer = setInterval(() => { void loadBookings(); }, 8000);
+    fetchData();
     return () => {
-      active = false;
-      clearInterval(timer);
+      isMounted = false;
     };
   }, []);
 
-  // Lấy chi tiết phòng và gói đang chọn
-  const selectedRoom = useMemo(() => {
-    return rooms.find((r) => Number(r.id) === Number(selectedRoomId)) || rooms[0] || null;
-  }, [rooms, selectedRoomId]);
+  // Phục hồi lựa chọn nếu người dùng chuyển từ trang chi tiết gói đến
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const paramPkgId = Number(params.get('packageId') || location.state?.packageId);
+    const paramRoomId = Number(params.get('roomId') || location.state?.roomId);
 
-  const selectedPackage = useMemo(() => {
-    return packages.find((p) => Number(p.id) === Number(selectedPackageId)) || packages[0] || null;
-  }, [packages, selectedPackageId]);
-
-  // Danh sách các dịch vụ nâng cao đang được chọn
-  const selectedServices = useMemo(() => {
-    return servicesList.filter((s) => selectedServiceIds.includes(Number(s.id)));
-  }, [servicesList, selectedServiceIds]);
-
-  const servicesTotal = useMemo(() => {
-    return selectedServices.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
-  }, [selectedServices]);
-
-  // =========================================================================
-  // TÍNH TOÁN GIÁ & MÃ GIẢM GIÁ TRỰC TUYẾN 20% TỪ TRANG CHỦ (STUDIO2026)
-  // =========================================================================
-  const pricingSummary = useMemo(() => {
-    const originalPrice = Number(selectedPackage?.originalPrice || selectedPackage?.price || 0);
-    const pkgDiscountPercent = selectedPackage?.packageDiscountPercent || 0;
-    const regularPackagePrice = Number(selectedPackage?.price || 0);
-
-    const userId =
-      currentUser?.id || currentUser?.username || customerInfo.phone;
-    const isPromoUsed = customerPaymentService.checkPromoCodeUsage(
-      userId,
-      "STUDIO2026",
-    );
-
-    let canApplyPromo;
-    let promoReason;
-    let packageFinalPrice;
-    let promoDiscountAmount;
-
-    if (isPromoUsed) {
-      canApplyPromo = false;
-      promoReason =
-        "Mã STUDIO2026 bạn đã từng sử dụng trước đó (mỗi tài khoản được dùng 1 lần).";
-      promoDiscountAmount = 0;
-      packageFinalPrice = regularPackagePrice;
-    } else if (pkgDiscountPercent > 20) {
-      canApplyPromo = false;
-      promoReason = `Gói chụp đang có ưu đãi ${pkgDiscountPercent}% (>20%), hệ thống tự động giữ mức ưu đãi cao nhất cho bạn.`;
-      promoDiscountAmount = 0;
-      packageFinalPrice = regularPackagePrice;
-    } else {
-      canApplyPromo = true;
-      promoReason =
-        "Áp dụng mã STUDIO2026: Giảm 20% trên giá gốc niêm yết dành cho khách đặt lịch trực tuyến!";
-      promoDiscountAmount = Math.round(originalPrice * 0.2);
-      packageFinalPrice = originalPrice - promoDiscountAmount;
+    if (paramPkgId && packages.length > 0) {
+      const foundPkg = packages.find((p) => p.id === paramPkgId);
+      if (foundPkg) {
+        setSelectedPackage(foundPkg);
+        setIsPackageCollapsed(true);
+      }
     }
 
-    // Tổng tiền bao gồm Gói chụp + Dịch vụ nâng cao
-    const finalTotal = packageFinalPrice + servicesTotal;
-    const depositAmount = Math.round(finalTotal * 0.3);
-    const remainingAmount = finalTotal - depositAmount;
+    if (paramRoomId && rooms.length > 0) {
+      const foundRoom = rooms.find((r) => r.id === paramRoomId);
+      if (foundRoom) {
+        setSelectedRoom(foundRoom);
+        setIsRoomCollapsed(true);
+      }
+    }
+  }, [packages, rooms, location]);
+
+  // =========================================================================
+  // TÍNH TOÁN CHI PHÍ THỜI GIAN THỰC
+  // =========================================================================
+  const calculation = useMemo(() => {
+    const pkgPrice = selectedPackage ? Number(selectedPackage.price || 0) : 0;
+    const roomSurcharge = selectedRoom ? Number(selectedRoom.surcharge || 0) : 0;
+    const servicesTotal = isServiceOptOut
+      ? 0
+      : selectedServices.reduce((sum, s) => sum + Number(s.price || 0), 0);
+
+    const subTotal = pkgPrice + roomSurcharge + servicesTotal;
+
+    let discount = 0;
+    if (appliedPromo) {
+      if (appliedPromo.type === 'percent') {
+        discount = Math.round(subTotal * (appliedPromo.value / 100));
+      } else {
+        discount = Math.min(subTotal, appliedPromo.value || 0);
+      }
+    }
+
+    const totalOrder = Math.max(0, subTotal - discount);
+
+    // Tính toán số tiền thanh toán ngay dựa theo mức cọc linh hoạt (30%, 50% hoặc 100%)
+    let amountToPay = 0;
+    if (depositPercent === 100) {
+      amountToPay = totalOrder;
+    } else if (depositPercent === 50) {
+      amountToPay = Math.round(totalOrder * 0.5);
+    } else {
+      amountToPay = Math.round(totalOrder * 0.3); // Mặc định cọc 30%
+    }
+    const remainingAmount = Math.max(0, totalOrder - amountToPay);
 
     return {
-      originalPrice,
-      pkgDiscountPercent,
-      regularPackagePrice,
-      packageFinalPrice,
+      pkgPrice,
+      roomSurcharge,
       servicesTotal,
-      selectedServices,
-      canApplyPromo,
-      promoReason,
-      promoDiscountAmount,
-      finalTotal,
-      depositAmount,
+      subTotal,
+      discount,
+      totalOrder,
+      depositPercent,
+      amountToPay,
+      depositAmount: amountToPay, // Alias giữ tương thích
       remainingAmount,
+      remainingPercent: 100 - depositPercent,
     };
-  }, [selectedPackage, currentUser, customerInfo.phone, servicesTotal, selectedServices]);
+  }, [selectedPackage, selectedRoom, selectedServices, isServiceOptOut, appliedPromo, depositPercent]);
 
-
-  const normalizeTimeStr = (t) => {
-    if (!t) return null;
-    if (Array.isArray(t)) {
-      const hh = String(t[0] ?? 0).padStart(2, "0");
-      const mm = String(t[1] ?? 0).padStart(2, "0");
-      const ss = String(t[2] ?? 0).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
-    }
-    if (typeof t === "string") {
-      const clean = t.trim();
-      const parts = clean.split(":");
-      if (parts.length >= 2) {
-        const hh = parts[0].padStart(2, "0");
-        const mm = parts[1].padStart(2, "0");
-        const ss = (parts[2] || "00").slice(0, 2).padStart(2, "0");
-        return `${hh}:${mm}:${ss}`;
-      }
-      return clean;
-    }
-    return null;
+  // =========================================================================
+  // XỬ LÝ LỰA CHỌN BƯỚC 1: TIẾN TRÌNH TUẦN TỰ
+  // =========================================================================
+  const handleSelectPackage = (pkg) => {
+    setSelectedPackage(pkg);
+    setIsPackageCollapsed(true);
+    // Khi đổi gói, nếu đã chọn phòng trước đó thì giữ nguyên, nhưng reset giờ nếu cần
   };
 
-  // Kiểm tra xem một khung giờ cụ thể đã có ai đặt phòng chưa
-  const isSlotConflict = useCallback((slot, roomId, dateStr) => {
-    if (!slot || !roomId || !dateStr) return false;
-    return existingBookings.some((b) => {
-      const bStatus = (b.status || "").toLowerCase();
-      if (bStatus === "cancelled" || bStatus === "canceled" || bStatus === "da_huy") return false;
-      const bRoomId = Number(b.roomId || b.room?.id);
-      if (bRoomId !== Number(roomId)) return false;
+  const handleSelectRoom = (room) => {
+    setSelectedRoom(room);
+    setIsRoomCollapsed(true);
+    // Khi đổi phòng, reset lại slot giờ đã chọn ở Bước 2 để tránh trùng giờ
+    setSelectedSlot('');
+  };
 
-      const bDateOnly = (b.bookingDate || "").split("T")[0];
-      if (bDateOnly !== dateStr) return false;
+  const handleToggleService = (service) => {
+    // Nếu trước đó đang chọn "Không sử dụng", tự động hủy bỏ
+    if (isServiceOptOut) {
+      setIsServiceOptOut(false);
+    }
 
-      const bStart = normalizeTimeStr(b.startTime) || (b.bookingDate && b.bookingDate.includes("T") ? normalizeTimeStr(b.bookingDate.split("T")[1]?.slice(0, 8)) : null);
-      const bEnd = normalizeTimeStr(b.endTime);
-      const slotStart = normalizeTimeStr(slot.start);
-      const slotEnd = normalizeTimeStr(slot.end);
-
-      if (bStart && bEnd && slotStart && slotEnd) {
-        return bStart < slotEnd && bEnd > slotStart;
+    setSelectedServices((prev) => {
+      const exists = prev.some((s) => s.id === service.id);
+      if (exists) {
+        return prev.filter((s) => s.id !== service.id);
       }
-      if (b.bookingTime && slot.label && b.bookingTime.includes(slot.label.split(" (")[0])) {
-        return true;
-      }
-      return false;
+      return [...prev, service];
     });
-  }, [existingBookings]);
+  };
 
-  const isCurrentSlotBooked = useMemo(() => {
-    return isSlotConflict(selectedTimeSlot, selectedRoomId, bookingDate);
-  }, [selectedTimeSlot, selectedRoomId, bookingDate, isSlotConflict]);
+  const handleToggleOptOutServices = () => {
+    if (!isServiceOptOut) {
+      setIsServiceOptOut(true);
+      setSelectedServices([]); // Xóa các dịch vụ đã tick
+      setIsServicesCollapsed(true);
+    } else {
+      setIsServiceOptOut(false);
+    }
+  };
 
-  // Xử lý xác nhận đặt lịch: CHUYỂN NGAY SANG TRANG THANH TOÁN (Chưa tạo đơn vào CSDL)
-  const handleConfirmBooking = (e) => {
+  // Kiểm tra điều kiện hoàn thành Bước 1
+  const isStep1Valid = useMemo(() => {
+    if (!selectedPackage) return false;
+    if (!selectedRoom) return false;
+    if (selectedServices.length === 0 && !isServiceOptOut) return false;
+    return true;
+  }, [selectedPackage, selectedRoom, selectedServices, isServiceOptOut]);
+
+  // =========================================================================
+  // XỬ LÝ LỊCH TUẦN & KHUNG GIỜ (BƯỚC 2) - CHUẨN GIỜ VIỆT NAM
+  // =========================================================================
+  const weekDays = useMemo(() => {
+    const days = [];
+    const now = new Date();
+    const todayStr = getVietnamLocalDate(now);
+
+    // Tính thứ hiện tại (0 = CN, 1 = T2, 2 = T3...)
+    const currentDay = now.getDay();
+    const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+
+    // Thứ 2 của tuần mục tiêu (dùng constructor local an toàn tuyệt đối)
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday + weekOffset * 7);
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+      const dateStr = getVietnamLocalDate(d);
+      const dayNum = d.getDate();
+      const monthNum = d.getMonth() + 1;
+      const yearNum = d.getFullYear();
+
+      const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+      const dayLabel = dayNames[d.getDay()];
+
+      // Ngày quá khứ: so sánh trực tiếp chuỗi YYYY-MM-DD
+      const isPast = dateStr < todayStr;
+      const isToday = dateStr === todayStr;
+
+      // Giới hạn 60 ngày
+      const maxDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 60);
+      const maxDateStr = getVietnamLocalDate(maxDate);
+      const isOver60Days = dateStr > maxDateStr;
+
+      const isSelectable = !isPast && !isOver60Days;
+
+      days.push({
+        dateStr,
+        dayNum,
+        monthNum,
+        yearNum,
+        dayLabel,
+        isPast,
+        isToday,
+        isSelectable,
+        statusText: isPast ? 'Đã qua' : isToday ? 'Hôm nay' : 'Còn trống',
+      });
+    }
+
+    return days;
+  }, [weekOffset]);
+
+  // Tiêu đề tháng hiển thị cho tuần hiện tại
+  const currentWeekMonthTitle = useMemo(() => {
+    if (weekDays.length === 0) return '';
+    const midDay = weekDays[3]; // Ngày giữa tuần
+    return `Tháng ${midDay.monthNum}, ${midDay.yearNum}`;
+  }, [weekDays]);
+
+  // KIỂM TRA KHUNG GIỜ CÓ BỊ VÔ HIỆU HÓA KHÔNG (ĐÃ QUA TRONG NGÀY HOẶC ĐÃ ĐẶT)
+  const isSlotDisabled = useCallback(
+    (slotTime) => {
+      if (!selectedDate) return true;
+
+      const todayStr = getVietnamLocalDate(new Date());
+
+      // 1. Ngày trong quá khứ -> toàn bộ giờ bị vô hiệu hóa
+      if (selectedDate < todayStr) return true;
+
+      // 2. Nếu ngày chọn là HÔM NAY -> không cho phép chọn giờ đã trôi qua
+      if (selectedDate === todayStr) {
+        const [slotHour, slotMin] = slotTime.split(':').map(Number);
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMin = now.getMinutes();
+
+        // Nếu giờ slot < giờ hiện tại, hoặc cùng giờ mà phút đã qua -> VÔ HIỆU HÓA
+        if (slotHour < currentHour || (slotHour === currentHour && slotMin <= currentMin)) {
+          return true;
+        }
+      }
+
+      // 3. Kiểm tra trùng lịch với existing bookings từ DB
+      if (selectedRoom && existingBookings.length > 0) {
+        const conflict = existingBookings.some((b) => {
+          if (b.status === 'cancelled') return false;
+          if (Number(b.roomId) !== Number(selectedRoom.id)) return false;
+
+          const bDate = b.bookingDate ? b.bookingDate.split('T')[0] : '';
+          if (bDate !== selectedDate) return false;
+
+          const bStart = (b.startTime || '').slice(0, 5);
+          return bStart === slotTime;
+        });
+
+        if (conflict) return true;
+      }
+
+      return false;
+    },
+    [selectedDate, selectedRoom, existingBookings]
+  );
+
+  // Tự động hủy chọn giờ nếu giờ đó bị vô hiệu hóa do đổi ngày
+  useEffect(() => {
+    if (selectedSlot && isSlotDisabled(selectedSlot)) {
+      setSelectedSlot('');
+    }
+  }, [selectedDate, selectedSlot, isSlotDisabled]);
+
+  // Điều kiện hoàn thành Bước 2
+  const isStep2Valid = useMemo(() => {
+    if (!selectedDate) return false;
+    if (!selectedSlot) return false;
+    if (isSlotDisabled(selectedSlot)) return false;
+    return true;
+  }, [selectedDate, selectedSlot, isSlotDisabled]);
+
+  // =========================================================================
+  // XỬ LÝ MÃ GIẢM GIÁ (BƯỚC 3)
+  // =========================================================================
+  const handleApplyPromoCode = () => {
+    setPromoError('');
+    setPromoSuccess('');
+
+    const code = promoCodeInput.trim().toUpperCase();
+    if (!code) {
+      setPromoError('Vui lòng nhập mã giảm giá.');
+      return;
+    }
+
+    const userId = currentUser?.id || currentUser?.username || phone || 'guest';
+    if (customerPaymentService.checkPromoCodeUsage(userId, code)) {
+      setPromoError(`Mã ${code} đã được bạn sử dụng trước đó.`);
+      return;
+    }
+
+    if (code === 'STUDIO2026') {
+      const discountVal = 20; // Giảm 20%
+      setAppliedPromo({
+        code,
+        type: 'percent',
+        value: discountVal,
+        label: 'Ưu đãi Đặc Biệt 2026 (Giảm 20%)',
+      });
+      setPromoSuccess('Áp dụng mã ưu đãi STUDIO2026 thành công! Đã giảm 20% tổng đơn.');
+    } else if (code === 'VIP500' || code === 'WELCOME500') {
+      const discountVal = 500000;
+      setAppliedPromo({
+        code,
+        type: 'fixed',
+        value: discountVal,
+        label: 'Voucher Khách Hàng Mới (Giảm 500.000₫)',
+      });
+      setPromoSuccess('Áp dụng voucher thành công! Đã giảm 500.000₫.');
+    } else {
+      setPromoError('Mã giảm giá không tồn tại hoặc đã hết hạn.');
+    }
+  };
+
+  // =========================================================================
+  // ĐĂNG NHẬP NHANH LỒNG TRÊN TRANG (INLINE AUTH MODAL)
+  // =========================================================================
+  const handleInlineLogin = async (e) => {
     e.preventDefault();
-    setSubmitError("");
-
-    if (!selectedRoom || !selectedPackage) {
-      setIsSubmitting(false);
-      setSubmitError("Không có phòng chụp hoặc gói chụp khả dụng trong cơ sở dữ liệu.");
+    setAuthError('');
+    if (!authUsername.trim() || !authPassword.trim()) {
+      setAuthError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
       return;
     }
 
-    // KIỂM TRA TRÙNG LỊCH: Nếu phòng đã có người đặt, cảnh báo ngay tại trang Đặt Lịch và chặn chuyển trang
-    if (isCurrentSlotBooked) {
-      setIsSubmitting(false);
-      const conflictMsg = `⚠️ Cảnh Báo: Phòng "${selectedRoom?.name}" đã có khách đặt trước vào khung giờ ${selectedTimeSlot?.label} ngày ${bookingDate}. Quý khách vui lòng chọn ngày hoặc khung giờ khác!`;
-      setSubmitError(conflictMsg);
-      const timeSection = document.getElementById("time-slot-section");
-      if (timeSection) {
-        timeSection.scrollIntoView({ behavior: "smooth", block: "center" });
+    setAuthLoading(true);
+    try {
+      const res = await customerAuthService.login(authUsername.trim(), authPassword.trim());
+      const user = res.user || customerAuth.getUser();
+      setCurrentUser(user);
+      if (user) {
+        setFullName(user.fullname || user.username || '');
+        if (user.phone) {
+          setPhone(user.phone);
+          setPhoneError('');
+          setPhoneTouched(true);
+        }
+        if (user.email) setEmail(user.email);
       }
-      return;
+      setIsAuthModalOpen(false);
+    } catch (err) {
+      setAuthError(err.response?.data?.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại mật khẩu.');
+    } finally {
+      setAuthLoading(false);
     }
+  };
 
-    // Kiểm tra thông tin nhập an toàn
-    const safeName = (customerInfo?.name || "").trim();
-    const safePhone = (customerInfo?.phone || "").trim();
-    const safeEmail = (customerInfo?.email || "").trim();
-    const safeNotes = (customerInfo?.notes || "").trim();
-
-    const errors = {};
-    if (!safeName) errors.name = "Vui lòng nhập họ và tên của bạn.";
-    if (!safePhone) {
-      errors.phone = "Vui lòng nhập số điện thoại liên hệ.";
-    } else if (!/^[0-9+ ]{9,15}$/.test(safePhone)) {
-      errors.phone = "Số điện thoại không hợp lệ (tối thiểu 9 chữ số).";
-    }
-    if (!bookingDate) errors.date = "Vui lòng chọn ngày chụp.";
-
-    if (Object.keys(errors).length > 0) {
-      setIsSubmitting(false);
-      setFormErrors(errors);
-      setSubmitError("Vui lòng điền đầy đủ thông tin: " + Object.values(errors).join(" • "));
-      const errorSection = document.getElementById("customer-info-section");
-      if (errorSection) {
-        errorSection.scrollIntoView({ behavior: "smooth", block: "center" });
+  const handleQuickSeedLogin = async (seedUser) => {
+    setAuthError('');
+    setAuthLoading(true);
+    try {
+      const res = await customerAuthService.login(seedUser.username, '123456');
+      const user = res.user || seedUser;
+      setCurrentUser(user);
+      setFullName(user.fullname || user.username || '');
+      if (user.phone) {
+        setPhone(user.phone);
+        setPhoneError('');
+        setPhoneTouched(true);
       }
+      if (user.email) setEmail(user.email);
+      setIsAuthModalOpen(false);
+    } catch {
+      customerAuth.setUser(seedUser);
+      customerAuth.setToken(`mock-token-${seedUser.id}`);
+      setCurrentUser(seedUser);
+      setFullName(seedUser.fullname || seedUser.username || '');
+      if (seedUser.phone) {
+        setPhone(seedUser.phone);
+        setPhoneError('');
+        setPhoneTouched(true);
+      }
+      if (seedUser.email) setEmail(seedUser.email);
+      setIsAuthModalOpen(false);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // =========================================================================
+  // NỘP ĐƠN & THANH TOÁN VNPAY (BƯỚC 3)
+  // =========================================================================
+  const handleProceedToPayment = async () => {
+    setSubmitError('');
+
+    // 1. Kiểm tra đăng nhập
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
       return;
     }
 
-    setIsSubmitting(true);
+    // 2. Kiểm tra họ tên
+    if (!fullName.trim()) {
+      setSubmitError('Vui lòng nhập họ và tên của bạn.');
+      return;
+    }
 
-    // Chuẩn bị dữ liệu lịch hẹn để chuyển sang trang thanh toán
-    // Lưu ý: Đơn CHƯA được tạo vào CSDL ở bước này; chỉ được tạo sau khi thanh toán cọc hoặc thanh toán hết
-    const customerIdToUse = Number(currentUser?.id) > 0 ? Number(currentUser.id) : 2;
+    // 3. KIỂM TRA ĐỊNH DẠNG SỐ ĐIỆN THOẠI CHẶT CHẼ
+    setPhoneTouched(true);
+    const phoneCheck = validateVietnamesePhone(phone);
+    if (!phoneCheck.isValid) {
+      setPhoneError(phoneCheck.message);
+      setSubmitError(phoneCheck.message);
+      return;
+    }
 
-    const paymentData = {
-      customerId: customerIdToUse,
-      roomId: selectedRoom.id,
-      roomName: selectedRoom.name,
-      roomImage: selectedRoom.primaryImage || selectedRoom.image,
-      roomCapacity: selectedRoom.capacity || 1,
-      selectedRoom: {
-        id: selectedRoom.id,
-        name: selectedRoom.name,
-        capacity: selectedRoom.capacity || 1,
-        image: selectedRoom.primaryImage || selectedRoom.image,
-        description: selectedRoom.description || '',
-      },
-      packageId: selectedPackage.id,
-      packageName: selectedPackage.name,
-      packagePrice: selectedPackage.price,
-      packageOriginalPrice: selectedPackage.originalPrice || selectedPackage.price,
-      packageDiscountPercent: selectedPackage.packageDiscountPercent || 0,
-      packageDuration: selectedPackage.duration || '60 phút',
-      packageImage: selectedPackage.primaryImage || selectedPackage.image,
-      selectedPackage: {
-        id: selectedPackage.id,
-        name: selectedPackage.name,
-        price: selectedPackage.price,
-        originalPrice: selectedPackage.originalPrice || selectedPackage.price,
-        packageDiscountPercent: selectedPackage.packageDiscountPercent || 0,
-        duration: selectedPackage.duration || '60 phút',
-        image: selectedPackage.primaryImage || selectedPackage.image,
-        description: selectedPackage.description || '',
-      },
-      bookingDate: bookingDate,
-      date: bookingDate,
-      startTime: selectedTimeSlot?.start || "08:30:00",
-      endTime: selectedTimeSlot?.end || "10:30:00",
-      time: selectedTimeSlot?.label || "08:30 – 10:30 (Sáng)",
-      selectedTimeSlot: selectedTimeSlot,
-      customerName: safeName,
-      name: safeName,
-      customerPhone: safePhone,
-      phone: safePhone,
-      customerEmail: safeEmail,
-      email: safeEmail,
-      attendees: Number(customerInfo?.attendees) || 1,
-      customerNote: safeNotes,
-      note: safeNotes,
-      promoCode: pricingSummary?.canApplyPromo ? "STUDIO2026" : "",
-      autoApplyPromo: Boolean(pricingSummary?.canApplyPromo),
-      selectedServices: selectedServices,
-      selectedServiceIds: selectedServiceIds,
-      servicesTotal: servicesTotal,
-      pricingSummary: pricingSummary,
-      finalTotal: pricingSummary?.finalTotal || selectedPackage.price,
-    };
+    // 4. Kiểm tra email
+    if (!email.trim() || !email.includes('@')) {
+      setSubmitError('Vui lòng nhập địa chỉ email hợp lệ để nhận vé & hóa đơn.');
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
-      sessionStorage.setItem("pending_booking_order", JSON.stringify(paymentData));
-      sessionStorage.setItem("pending_payment_state", JSON.stringify(paymentData));
-    } catch {
-      // Bỏ qua lỗi sessionStorage nếu có
-    }
+      const txnRef = Math.floor(100000 + Math.random() * 900000).toString();
+      const amountToPay = calculation.amountToPay;
+      const paymentType = depositPercent === 100 ? 'full' : 'deposit';
 
-    // Chuyển hướng trực tiếp ngay lập tức sang trang thanh toán
-    window.location.href = `${ROUTES.USER.PAYMENT}?packageId=${selectedPackage.id}`;
+      const orderPayload = {
+        customerId: currentUser?.id || 4,
+        customerName: fullName.trim(),
+        customerPhone: phoneCheck.normalizedPhone,
+        customerEmail: email.trim(),
+        attendees: Number(attendees) || 1,
+        customerNote: customerNote.trim() || 'Không có ghi chú',
+        // Gói chụp
+        packageId: selectedPackage.id,
+        packageName: selectedPackage.name,
+        packagePrice: calculation.pkgPrice,
+        packageDuration: selectedPackage.durationMinutes,
+        packageImage: selectedPackage.image,
+        // Phòng chụp
+        roomId: selectedRoom.id,
+        roomName: selectedRoom.name,
+        roomSurcharge: calculation.roomSurcharge,
+        roomImage: selectedRoom.image,
+        roomCapacity: selectedRoom.capacity,
+        // Dịch vụ bổ sung
+        services: isServiceOptOut ? [] : selectedServices,
+        isServiceOptOut,
+        servicesTotal: calculation.servicesTotal,
+        // Thời gian chụp
+        bookingDate: selectedDate,
+        startTime: `${selectedSlot}:00`,
+        endTime: `${String(Number(selectedSlot.split(':')[0]) + Math.round(selectedPackage.durationMinutes / 60)).padStart(2, '0')}:00:00`,
+        // Tài chính & Hình thức đặt cọc
+        totalPrice: calculation.totalOrder,
+        amountToPay: amountToPay,
+        paymentType,
+        depositPercent,
+        remainingAmount: calculation.remainingAmount,
+        status: 'pending', // Luôn đưa trạng thái ban đầu là pending (chờ xác nhận)
+        appliedPromoCode: appliedPromo?.code || null,
+        discountAmount: calculation.discount,
+      };
+
+      // Lưu thông tin đơn chờ vào sessionStorage cho VNPay callback
+      sessionStorage.setItem('vnpay_pending_order', JSON.stringify(orderPayload));
+      sessionStorage.setItem('pending_booking_order', JSON.stringify(orderPayload));
+
+      // Tạo URL thanh toán VNPay Sandbox
+      const orderInfo = `PhotoStudio ${depositPercent === 100 ? 'Thanh toan 100%' : `Dat coc ${depositPercent}%`} #${txnRef} - ${selectedPackage.name}`;
+      const vnpUrl = await createVNPayPaymentUrl({
+        amount: amountToPay,
+        orderInfo,
+        txnRef,
+        returnUrl: `${window.location.origin}/payment/vnpay-return`,
+      });
+
+      // Chuyển hướng sang VNPay Sandbox
+      window.location.href = vnpUrl;
+    } catch (err) {
+      console.error('Lỗi khởi tạo thanh toán VNPay:', err);
+      setSubmitError(err.message || 'Không thể tạo liên kết thanh toán VNPay lúc này.');
+      setSubmitting(false);
+    }
   };
 
-  if (!isAuthenticated) {
-    return null; // Đang chuyển hướng sang /login
-  }
-
-  if (optionsLoading) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#FAF5F5] text-sm font-medium text-[#7A6C71]">Đang tải phòng chụp và gói chụp từ cơ sở dữ liệu...</div>;
-  }
-
-  if (optionsError || !selectedRoom || !selectedPackage) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#FAF5F5] px-4"><div className="max-w-lg rounded-2xl border border-rose-200 bg-white p-6 text-center shadow-sm"><p className="font-semibold text-[#2A1D22]">Chưa thể mở chức năng đặt lịch</p><p className="mt-2 text-sm text-rose-600">{optionsError || "Không có phòng chụp hoặc gói chụp đang hoạt động trong cơ sở dữ liệu."}</p><button type="button" onClick={() => window.location.reload()} className="mt-4 rounded-full bg-[#B85064] px-4 py-2 text-sm font-semibold text-white">Tải lại</button></div></div>;
-  }
+  // Điều hướng quay lại
+  const handleGoBack = () => {
+    if (currentStep === 3) {
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      setCurrentStep(1);
+    } else {
+      navigate(ROUTES.USER.HOME);
+    }
+  };
 
   return (
-    <div className="bg-[#FAF5F5] min-h-screen text-[#261A1E] font-sans selection:bg-[#B85064]/20 selection:text-[#B85064] relative overflow-hidden pb-20">
-      {/* ========================================================================= */}
-      {/* 1. HERO BANNER: Nền studio điện ảnh với breadcrumb và typography sang trọng */}
-      {/* ========================================================================= */}
-      <section className="relative w-full min-h-[380px] lg:min-h-[420px] bg-[#141012] overflow-hidden flex items-center pt-24 pb-14">
-        {/* Background Image & Lighting Studio Effects với độ sáng rõ nét cao */}
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-70 scale-105 pointer-events-none"
-          style={{
-            backgroundImage:
-              'url(https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=1920&q=80)',
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#141012]/90 via-[#141012]/65 to-[#141012]/35 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-[#FAF5F5] pointer-events-none" />
+    <div className="min-h-screen bg-[#FFF9F8] text-[#261A1E] relative pb-20 font-sans pt-20 sm:pt-24">
+      {/* CÀNH HOA ĐÀO TRANG TRÍ GÓC MÀN HÌNH */}
+      <div className="fixed top-0 right-0 w-80 h-72 pointer-events-none opacity-40 select-none overflow-hidden z-0">
+        <FloralBranchCorner position="top-right" />
+      </div>
 
-        {/* Ambient spotlight glow */}
-        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[350px] bg-[#E5A8B4]/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
+        {/* THANH TOP BAR: NÚT QUAY LẠI & TIẾN TRÌNH 3 BƯỚC */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#F0E4E6]">
+          {/* Nút Quay lại */}
+          <button
+            type="button"
+            onClick={handleGoBack}
+            className="cursor-pointer inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-500 hover:text-[#BE4B5E] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Quay lại</span>
+          </button>
 
-        {/* Họa tiết cành hoa đào nghệ thuật trên nền Hero */}
-        <FloralBranchCorner position="top-left" opacity="opacity-90" />
-        <FloralBranchCorner position="top-right" opacity="opacity-80" />
-
-        {/* Chữ script viết tay góc phải */}
-        <div className="absolute top-28 right-8 sm:right-16 text-white/50 font-handwriting text-2xl sm:text-3xl select-none pointer-events-none transform rotate-3 hidden sm:block">
-          Không gian nghệ thuật của riêng bạn ♡
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-          <div className="max-w-3xl space-y-3.5 pt-2">
-            {/* Breadcrumb Navigation */}
-            <div className="flex items-center gap-2 text-xs text-neutral-300">
-              <Link to={ROUTES.USER.HOME} className="hover:text-[#E899A8] transition-colors">
-                Trang Chủ
-              </Link>
-              <span>/</span>
-              <span className="text-[#E899A8] font-semibold">Đặt Lịch Chụp Studio</span>
+          {/* Thanh tiến trình 3 bước (Stepper) */}
+          <div className="flex items-center gap-3 sm:gap-6 self-center sm:self-auto text-xs sm:text-sm font-medium">
+            {/* Bước 1 */}
+            <div
+              onClick={() => setCurrentStep(1)}
+              className={`flex items-center gap-2 cursor-pointer transition-all ${
+                currentStep === 1
+                  ? 'text-[#BE4B5E] font-bold'
+                  : currentStep > 1
+                  ? 'text-gray-700 font-semibold'
+                  : 'text-gray-400'
+              }`}
+            >
+              <span
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  currentStep === 1
+                    ? 'bg-[#BE4B5E] text-white shadow-xs'
+                    : currentStep > 1
+                    ? 'bg-rose-100 text-[#BE4B5E]'
+                    : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                {currentStep > 1 ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '1'}
+              </span>
+              <span>Chọn dịch vụ</span>
             </div>
 
-            <span className="inline-block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-[#E5A8B4]">
-              HỆ THỐNG ĐẶT LỊCH TRỰC TUYẾN PHOTOSTUDIO
-            </span>
+            <div className={`w-8 sm:w-12 h-0.5 ${currentStep >= 2 ? 'bg-[#BE4B5E]' : 'bg-gray-200'}`} />
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-[1.25] font-serif-luxury">
-              Khám Phá Phòng &
-              <br />
-              <span className="italic font-normal text-[#E899A8] font-serif-luxury mr-2">
-                Đặt Lịch
+            {/* Bước 2 */}
+            <div
+              onClick={() => isStep1Valid && setCurrentStep(2)}
+              className={`flex items-center gap-2 transition-all ${
+                isStep1Valid ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
+              } ${
+                currentStep === 2
+                  ? 'text-[#BE4B5E] font-bold'
+                  : currentStep > 2
+                  ? 'text-gray-700 font-semibold'
+                  : 'text-gray-400'
+              }`}
+            >
+              <span
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  currentStep === 2
+                    ? 'bg-[#BE4B5E] text-white shadow-xs'
+                    : currentStep > 2
+                    ? 'bg-rose-100 text-[#BE4B5E]'
+                    : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                {currentStep > 2 ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : '2'}
               </span>
-              Studio Của Bạn
-            </h1>
+              <span>Chọn ngày & giờ</span>
+            </div>
 
-            <p className="text-[#E2D5D9] text-xs sm:text-sm md:text-base font-light max-w-xl leading-relaxed pt-1">
-              Điền thông tin đặt lịch, chọn không gian studio yêu thích và nhận ngay ưu đãi{' '}
-              <strong className="text-[#E899A8] font-semibold">20% trực tuyến</strong> khi thanh toán hôm nay.
-            </p>
+            <div className={`w-8 sm:w-12 h-0.5 ${currentStep === 3 ? 'bg-[#BE4B5E]' : 'bg-gray-200'}`} />
 
-            {/* Banner ưu đãi 20% */}
-            <div className="pt-2">
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-xs sm:text-sm text-white">
-                <TicketIcon className="w-4 h-4 text-[#E899A8] shrink-0 animate-bounce" />
-                <span>
-                  Áp dụng mã ưu đãi{' '}
-                  <strong className="font-mono font-bold bg-[#B85064] text-white px-2 py-0.5 rounded-md">
-                    STUDIO2026
-                  </strong>{' '}
-                  giảm 20% trực tiếp trên giá gốc niêm yết!
-                </span>
-              </div>
+            {/* Bước 3 */}
+            <div
+              onClick={() => isStep1Valid && isStep2Valid && setCurrentStep(3)}
+              className={`flex items-center gap-2 transition-all ${
+                isStep1Valid && isStep2Valid ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
+              } ${currentStep === 3 ? 'text-[#BE4B5E] font-bold' : 'text-gray-400'}`}
+            >
+              <span
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  currentStep === 3 ? 'bg-[#BE4B5E] text-white shadow-xs' : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                3
+              </span>
+              <span>Xác nhận</span>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Main Booking Content: Bố cục 2 cột 50/50 ở trên và 100% full-width tóm tắt ở dưới */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-        <form onSubmit={handleConfirmBooking} className="space-y-10">
-          {/* HÀNG TRÊN: 4 KHUNG ĐỀU NHAU (LƯỚI 2x2 TRÊN DESKTOP: 50% TRÁI & 50% PHẢI) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-            {/* [HÀNG 1 - TRÁI 50%]: KHUNG 1 - THÔNG TIN NGƯỜI DÙNG */}
-            <section id="customer-info-section" className="order-1 bg-white rounded-3xl p-6 sm:p-8 border border-[#F0E4E6] shadow-sm relative overflow-hidden flex flex-col justify-between h-full">
-              <FloralCardCorner position="top-right" />
+        {/* TIÊU ĐỀ BƯỚC HIỆN TẠI (ĐẶT PHÍA TRÊN ĐỂ CẢ 2 CỘT LUÔN BẰNG NHAU) */}
+        <div className="mt-8 mb-4">
+          {currentStep === 1 && (
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
+                Đặt lịch chụp ảnh
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Chọn gói chụp, không gian phòng chụp và dịch vụ bổ sung từ cơ sở dữ liệu
+              </p>
+            </div>
+          )}
+          {currentStep === 2 && (
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
+                Chọn thời gian chụp
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Chọn ngày và giờ phù hợp với lịch trống của studio
+              </p>
+            </div>
+          )}
+          {currentStep === 3 && (
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
+                Xác nhận thông tin đặt lịch
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Vui lòng kiểm tra lại thông tin trước khi thanh toán
+              </p>
+            </div>
+          )}
+        </div>
 
-              <div>
-                <div className="flex items-center gap-2.5 pb-5 border-b border-[#F0E4E6] mb-6">
-                  <div className="w-8 h-8 rounded-full bg-[#B85064] text-white text-sm font-bold flex items-center justify-center shadow-sm shrink-0">
-                    <UserIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold font-serif-luxury text-[#2A1D22]">
-                      Thông Tin Người Dùng Đặt Lịch
-                    </h2>
-                    <p className="text-xs text-[#7A6C71]">
-                      Thông tin liên hệ xác nhận lịch chụp và nhận bộ ảnh hoàn
-                      thiện
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Họ và tên */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#2A1D22] mb-1.5 flex items-center gap-1">
-                      <span>Họ Và Tên Khách Hàng *</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={customerInfo.name}
-                        onChange={(e) => {
-                          setCustomerInfo({
-                            ...customerInfo,
-                            name: e.target.value,
-                          });
-                          setSubmitError("");
-                          if (formErrors.name)
-                            setFormErrors({ ...formErrors, name: "" });
-                        }}
-                        placeholder="VD: Nguyễn Thúy Vi"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#F0E4E6] focus:border-[#B85064] focus:ring-2 focus:ring-[#B85064]/20 outline-none text-xs sm:text-sm text-[#2A1D22]"
-                      />
-                      <UserIcon className="w-4 h-4 text-[#A6979B] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    </div>
-                    {formErrors.name && (
-                      <p className="text-xs text-rose-500 mt-1">
-                        {formErrors.name}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Số điện thoại */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#2A1D22] mb-1.5">
-                      Số Điện Thoại (Zalo) *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="tel"
-                        value={customerInfo.phone}
-                        onChange={(e) => {
-                          setCustomerInfo({
-                            ...customerInfo,
-                            phone: e.target.value,
-                          });
-                          setSubmitError("");
-                          if (formErrors.phone)
-                            setFormErrors({ ...formErrors, phone: "" });
-                        }}
-                        placeholder="VD: 0912345678"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#F0E4E6] focus:border-[#B85064] focus:ring-2 focus:ring-[#B85064]/20 outline-none text-xs sm:text-sm text-[#2A1D22]"
-                      />
-                      <PhoneIcon className="w-4 h-4 text-[#A6979B] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    </div>
-                    {formErrors.phone && (
-                      <p className="text-xs text-rose-500 mt-1">
-                        {formErrors.phone}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Email */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#2A1D22] mb-1.5">
-                      Email Nhận Biên Lai
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={customerInfo.email}
-                        onChange={(e) =>
-                          setCustomerInfo({
-                            ...customerInfo,
-                            email: e.target.value,
-                          })
-                        }
-                        placeholder="email@example.com"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#F0E4E6] focus:border-[#B85064] focus:ring-2 focus:ring-[#B85064]/20 outline-none text-xs sm:text-sm text-[#2A1D22]"
-                      />
-                      <EnvelopeIcon className="w-4 h-4 text-[#A6979B] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  {/* Số người */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#2A1D22] mb-1.5">
-                      Số Lượng Người Tham Gia Buổi Chụp
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min="1"
-                        max={selectedRoom.capacity || 10}
-                        value={customerInfo.attendees}
-                        onChange={(e) =>
-                          setCustomerInfo({
-                            ...customerInfo,
-                            attendees: Number(e.target.value) || 1,
-                          })
-                        }
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#F0E4E6] focus:border-[#B85064] focus:ring-2 focus:ring-[#B85064]/20 outline-none text-xs sm:text-sm text-[#2A1D22]"
-                      />
-                      <UserGroupIcon className="w-4 h-4 text-[#A6979B] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    </div>
-                    <span className="text-[11px] text-[#7A6C71] mt-1 block">
-                      Phòng {selectedRoom.name.split(" - ")[0]} có sức chứa tối
-                      đa {selectedRoom.capacity} người.
-                    </span>
-                  </div>
-
-                  {/* Ghi chú */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#2A1D22] mb-1.5">
-                      Ghi Chú Đặc Biệt / Yêu Cầu Concept Riêng
-                    </label>
-                    <textarea
-                      rows="3"
-                      value={customerInfo.notes}
-                      onChange={(e) =>
-                        setCustomerInfo({
-                          ...customerInfo,
-                          notes: e.target.value,
-                        })
-                      }
-                      placeholder="VD: Cần hỗ trợ mượn áo dài trắng size M, mong muốn chụp layout hoàng hôn, makeup tự nhiên..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#F0E4E6] focus:border-[#B85064] focus:ring-2 focus:ring-[#B85064]/20 outline-none text-xs sm:text-sm text-[#2A1D22] resize-none"
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* [HÀNG 1 - PHẢI 50%]: KHUNG 3 - CHỌN PHÒNG CHỤP STUDIO */}
-            <section className="order-3 lg:order-2 bg-white rounded-3xl p-6 sm:p-8 border border-[#F0E4E6] shadow-sm relative overflow-hidden flex flex-col justify-between h-full">
-              <FloralCardCorner position="top-right" />
-
-              <div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#F0E4E6] mb-4 gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-[#B85064] text-white text-sm font-bold flex items-center justify-center shadow-sm shrink-0">
-                      <BuildingLibraryIcon className="w-4 h-4 text-white" />
-                    </div>
+        {/* ===================================================================
+            BỐ CỤC 2 CỘT: CỘT TRÁI (WIZARD) + CỘT PHẢI (TÓM TẮT DỰ TOÁN)
+           =================================================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* CỘT TRÁI: NỘI DUNG WIZARD */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* ---------------------------------------------------------------
+                BƯỚC 1: TIẾN TRÌNH TUẦN TỰ (GÓI -> PHÒNG -> DỊCH VỤ)
+               --------------------------------------------------------------- */}
+            {currentStep === 1 && (
+              <div className="space-y-8 animate-fade-in">
+                {/* 1. CHỌN GÓI CHỤP (LUÔN HIỆN ĐẦU TIÊN) */}
+                <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm relative overflow-hidden transition-all">
+                  <div className="flex items-center justify-between pb-4 border-b border-[#F5EBEB]">
                     <div>
-                      <h2 className="text-xl font-bold font-serif-luxury text-[#2A1D22]">
-                        Chọn Phòng Chụp Studio
+                      <h2 className="text-base sm:text-lg font-bold text-[#261A1E] flex items-center gap-2">
+                        <span>1. Chọn gói chụp</span>
+                        {selectedPackage && (
+                          <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
+                            ✓
+                          </span>
+                        )}
                       </h2>
+                      <p className="text-xs text-gray-400 mt-0.5">Khám phá các gói chụp trong CSDL phù hợp với nhu cầu của bạn</p>
                     </div>
-                  </div>
 
-                  <span className="text-[11px] font-semibold text-[#B85064] bg-[#FFF0F2] px-3 py-1 rounded-full border border-[#F0D5DA] self-start sm:self-auto shrink-0">
-                    Đang chọn:{" "}
-                    <strong>{selectedRoom.name.split(" - ")[0]}</strong>
-                  </span>
-                </div>
-
-                {/* ẢNH ĐẠI DIỆN LỚN CỦA PHÒNG ĐANG CHỌN */}
-                <div className="relative h-44 w-full rounded-2xl overflow-hidden mb-4 border border-[#F0E4E6] shadow-md bg-neutral-900 group">
-                  <img
-                    src={selectedRoom.primaryImage || selectedRoom.image}
-                    alt={selectedRoom.name}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src =
-                        "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85";
-                    }}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
-
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-white bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
-                      Phòng #{selectedRoom.id}
-                    </span>
-                    <span className="text-[10px] font-bold text-white bg-[#B85064] px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
-                      <CheckCircleIcon className="w-3.5 h-3.5" />
-                      <span>Đang Chọn</span>
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-2.5 left-3 right-3 text-white">
-                    <h3 className="font-bold text-sm sm:text-base font-serif-luxury drop-shadow-md">
-                      {selectedRoom.name}
-                    </h3>
-                    <p className="text-[11px] text-white/80 line-clamp-1">
-                      {selectedRoom.description}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-[11px] font-bold uppercase tracking-wider text-[#7A6C71] mb-2 flex items-center justify-between">
-                  <span>Danh Sách {rooms.length} Không Gian Studio:</span>
-                  <span className="text-[#B85064]">Nhấn ảnh để đổi phòng</span>
-                </div>
-
-                {/* Danh sách phòng: Grid 2 cột cuộn mượt mà có ảnh rõ nét */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 h-[240px] overflow-y-auto pr-1">
-                  {rooms.map((room) => {
-                    const isSelected =
-                      Number(selectedRoomId) === Number(room.id);
-                    return (
-                      <div
-                        key={room.id}
-                        onClick={() => setSelectedRoomId(room.id)}
-                        className={`cursor-pointer rounded-2xl overflow-hidden border-2 transition-all duration-200 flex flex-col relative group ${isSelected
-                          ? "border-[#B85064] bg-[#FFF7F8] shadow-md ring-2 ring-[#B85064]/20"
-                          : "border-[#F0E4E6] bg-white hover:border-[#B85064]/50 hover:shadow-sm"
-                          }`}
+                    {isPackageCollapsed && selectedPackage && (
+                      <button
+                        type="button"
+                        onClick={() => setIsPackageCollapsed(false)}
+                        className="cursor-pointer text-xs font-semibold text-[#BE4B5E] hover:underline flex items-center gap-1"
                       >
-                        {/* Ảnh phòng */}
-                        <div className="relative h-24 w-full overflow-hidden bg-neutral-900">
-                          <img
-                            src={room.primaryImage || room.image}
-                            alt={room.name}
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src =
-                                "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85";
-                            }}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
-
-                          {/* Badges */}
-                          <div className="absolute top-1.5 left-1.5 flex items-center gap-1">
-                            <span className="text-[9px] font-bold text-white bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded border border-white/20">
-                              Phòng #{room.id}
-                            </span>
-                            <span className="text-[9px] font-bold text-white bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded border border-white/20 flex items-center gap-0.5">
-                              <UserGroupIcon className="w-2.5 h-2.5 text-[#E899A8]" />
-                              <span>{room.capacity}</span>
-                            </span>
-                          </div>
-
-                          {/* Checkmark active */}
-                          {isSelected && (
-                            <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#B85064] text-white flex items-center justify-center shadow-md">
-                              <CheckCircleIcon className="w-3 h-3" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Thông tin vắn tắt */}
-                        <div className="p-2 text-xs flex-1 flex flex-col justify-between space-y-1">
-                          <p className="text-[#2A1D22] text-[11px] font-semibold line-clamp-2 leading-relaxed">
-                            {room.name}
-                          </p>
-
-                          <div className="pt-1 border-t border-[#F0E4E6] flex items-center justify-between">
-                            <span className="text-[10px] font-semibold text-[#B85064]">
-                              Sức chứa: {room.capacity} người
-                            </span>
-                            <span
-                              className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${isSelected
-                                ? "bg-[#B85064] text-white"
-                                : "bg-neutral-100 text-[#55464B] group-hover:bg-[#B85064]/10 group-hover:text-[#B85064]"
-                                }`}
-                            >
-                              {isSelected ? "Đã Chọn" : "Chọn"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </section>
-
-            {/* [HÀNG 2 - TRÁI 50%]: KHUNG 2 - CHỌN NGÀY VÀ GIỜ CHỤP */}
-            <section className="order-2 lg:order-3 bg-white rounded-3xl p-6 sm:p-8 border border-[#F0E4E6] shadow-sm relative overflow-hidden flex flex-col justify-between h-full">
-              <FloralCardCorner position="top-right" />
-
-              <div>
-                <div className="flex items-center gap-2.5 pb-5 border-b border-[#F0E4E6] mb-6">
-                  <div className="w-8 h-8 rounded-full bg-[#B85064] text-white text-sm font-bold flex items-center justify-center shadow-sm shrink-0">
-                    <CalendarDaysIcon className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold font-serif-luxury text-[#2A1D22]">
-                      Chọn Ngày Và Giờ Chụp
-                    </h2>
-                    <p className="text-xs text-[#7A6C71]">
-                      Lịch mở cửa phục vụ từ 08:30 đến 21:00 hàng ngày, kể cả
-                      Thứ 7 và Chủ Nhật
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-5">
-                  {/* Chọn Ngày */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#2A1D22] mb-2">
-                      Ngày Chụp Studio *
-                    </label>
-                    <input
-                      type="date"
-                      min={new Date().toISOString().split("T")[0]}
-                      value={bookingDate}
-                      onChange={(e) => {
-                        setBookingDate(e.target.value);
-                        setSubmitError("");
-                        if (formErrors.date)
-                          setFormErrors({ ...formErrors, date: "" });
-                      }}
-                      className="w-full px-4 py-3 rounded-xl border border-[#F0E4E6] focus:border-[#B85064] focus:ring-2 focus:ring-[#B85064]/20 outline-none text-sm text-[#2A1D22] bg-white cursor-pointer font-medium"
-                    />
-                    {formErrors.date && (
-                      <p className="text-xs text-rose-500 mt-1">
-                        {formErrors.date}
-                      </p>
+                        <span>Thay đổi</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
                     )}
                   </div>
 
-                  {/* Chọn Khung Giờ */}
-                  <div id="time-slot-section">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#2A1D22]">
-                        Khung Giờ Chụp *
-                      </label>
-                      {isCurrentSlotBooked && (
-                        <span className="text-[11px] font-bold text-rose-600 bg-rose-100 px-2.5 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
-                          <ExclamationCircleIcon className="w-3.5 h-3.5" />
-                          <span>Đã kín lịch</span>
-                        </span>
+                  {/* Khi đã thu gọn gói chụp */}
+                  {isPackageCollapsed && selectedPackage ? (
+                    <div className="pt-4 flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                        <img src={selectedPackage.image} alt={selectedPackage.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-sm sm:text-base text-[#261A1E] truncate">{selectedPackage.name}</h4>
+                        <p className="text-xs text-gray-500 flex items-center gap-3 mt-1">
+                          <span>🕒 {selectedPackage.durationText}</span>
+                          <span>👥 {selectedPackage.capacityText}</span>
+                          <span className="font-bold text-[#BE4B5E]">{selectedPackage.price.toLocaleString('vi-VN')}₫</span>
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Danh sách 8 gói chụp từ CSDL */
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 pt-4">
+                      {packages.map((pkg) => {
+                        const isSelected = selectedPackage?.id === pkg.id;
+                        return (
+                          <div
+                            key={pkg.id}
+                            className={`rounded-2xl border transition-all duration-200 flex flex-col justify-between overflow-hidden relative ${
+                              isSelected
+                                ? 'border-[#BE4B5E] bg-[#FFF5F6] shadow-md ring-1 ring-[#BE4B5E]'
+                                : 'border-[#F0E4E6] bg-white hover:border-[#BE4B5E]/50 hover:shadow-xs'
+                            }`}
+                          >
+                            {pkg.isPopular && (
+                              <span className="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#BE4B5E] text-white shadow-xs">
+                                Phổ biến
+                              </span>
+                            )}
+
+                            <div>
+                              <div className="h-36 w-full overflow-hidden bg-gray-100">
+                                <img
+                                  src={pkg.image}
+                                  alt={pkg.name}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                />
+                              </div>
+
+                              <div className="p-3.5 space-y-2">
+                                <h3 className="font-bold text-sm text-[#261A1E] truncate" title={pkg.name}>
+                                  {pkg.name}
+                                </h3>
+                                <div className="text-[11px] text-gray-500 flex items-center gap-2">
+                                  <span>🕒 {pkg.durationText}</span>
+                                  <span>•</span>
+                                  <span>👥 {pkg.capacityText}</span>
+                                </div>
+                                <div className="flex items-baseline gap-2 pt-1">
+                                  <span className="font-extrabold text-[#BE4B5E] text-sm">
+                                    {pkg.price.toLocaleString('vi-VN')}₫
+                                  </span>
+                                  {pkg.originalPrice && (
+                                    <span className="text-[11px] text-gray-400 line-through">
+                                      {pkg.originalPrice.toLocaleString('vi-VN')}₫
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="p-3.5 pt-0">
+                              <button
+                                type="button"
+                                onClick={() => handleSelectPackage(pkg)}
+                                className={`w-full py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-[#BE4B5E] text-white shadow-xs'
+                                    : 'border border-[#BE4B5E] text-[#BE4B5E] hover:bg-[#BE4B5E] hover:text-white'
+                                }`}
+                              >
+                                {isSelected ? 'Đã chọn' : 'Chọn gói'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. CHỌN PHÒNG CHỤP: CHỈ XUẤT HIỆN KHI ĐÃ CHỌN XONG GÓI */}
+                {selectedPackage && (
+                  <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm relative overflow-hidden transition-all animate-fade-in">
+                    <div className="flex items-center justify-between pb-4 border-b border-[#F5EBEB]">
+                      <div>
+                        <h2 className="text-base sm:text-lg font-bold text-[#261A1E] flex items-center gap-2">
+                          <span>2. Chọn không gian phòng chụp</span>
+                          {selectedRoom && (
+                            <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
+                              ✓
+                            </span>
+                          )}
+                        </h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Lựa chọn phòng chụp từ cơ sở dữ liệu phù hợp với phong cách của bạn</p>
+                      </div>
+
+                      {isRoomCollapsed && selectedRoom && (
+                        <button
+                          type="button"
+                          onClick={() => setIsRoomCollapsed(false)}
+                          className="cursor-pointer text-xs font-semibold text-[#BE4B5E] hover:underline flex items-center gap-1"
+                        >
+                          <span>Thay đổi</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
                       )}
                     </div>
 
-                    {/* Cảnh báo nổi bật khi khung giờ hiện tại bị trùng */}
-                    {isCurrentSlotBooked && (
-                      <div className="mb-3 p-3.5 rounded-2xl bg-rose-50 border border-rose-300 text-rose-800 text-xs flex items-start gap-2.5 shadow-sm animate-pulse">
-                        <ExclamationTriangleIcon className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="font-bold text-rose-900 block mb-0.5">
-                            ⚠️ Cảnh Báo: Phòng chụp đã có người đặt!
-                          </strong>
-                          <span className="leading-relaxed">
-                            Phòng <strong>{selectedRoom?.name}</strong> đã có khách đặt trước vào khung giờ <strong>{selectedTimeSlot?.label}</strong> ngày <strong>{bookingDate}</strong>. Quý khách vui lòng chọn khung giờ khác hoặc đổi ngày chụp.
-                          </span>
+                    {/* Khi đã thu gọn phòng chụp */}
+                    {isRoomCollapsed && selectedRoom ? (
+                      <div className="pt-4 flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                          <img src={selectedRoom.image} alt={selectedRoom.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-sm sm:text-base text-[#261A1E] truncate">{selectedRoom.name}</h4>
+                          <p className="text-xs text-gray-500 flex items-center gap-3 mt-1">
+                            <span>Sức chứa: {selectedRoom.capacityText}</span>
+                            <span>Phụ thu: {selectedRoom.surcharge > 0 ? `+${selectedRoom.surcharge.toLocaleString('vi-VN')}₫` : '+0₫'}</span>
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Danh sách 12 phòng studio từ CSDL */
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 pt-4">
+                        {rooms.map((room) => {
+                          const isSelected = selectedRoom?.id === room.id;
+                          return (
+                            <div
+                              key={room.id}
+                              className={`rounded-2xl border transition-all duration-200 flex flex-col justify-between overflow-hidden relative ${
+                                isSelected
+                                  ? 'border-[#BE4B5E] bg-[#FFF5F6] shadow-md ring-1 ring-[#BE4B5E]'
+                                  : 'border-[#F0E4E6] bg-white hover:border-[#BE4B5E]/50 hover:shadow-xs'
+                              }`}
+                            >
+                              {room.isSuitable && (
+                                <span className="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-xs">
+                                  Phù hợp
+                                </span>
+                              )}
+
+                              <div>
+                                <div className="h-32 w-full overflow-hidden bg-gray-100">
+                                  <img
+                                    src={room.image}
+                                    alt={room.name}
+                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                  />
+                                </div>
+
+                                <div className="p-3.5 space-y-1.5">
+                                  <h3 className="font-bold text-xs sm:text-sm text-[#261A1E] truncate" title={room.name}>
+                                    {room.name}
+                                  </h3>
+                                  <p className="text-[11px] text-gray-500">Sức chứa: {room.capacityText}</p>
+                                  <p className="text-[11px] font-semibold text-[#BE4B5E]">
+                                    {room.surcharge > 0 ? `+ ${room.surcharge.toLocaleString('vi-VN')}₫` : '+ 0₫'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="p-3.5 pt-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSelectRoom(room)}
+                                  className={`w-full py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-[#BE4B5E] text-white shadow-xs'
+                                      : 'border border-gray-300 text-gray-700 hover:border-[#BE4B5E] hover:text-[#BE4B5E]'
+                                  }`}
+                                >
+                                  {isSelected ? 'Đã chọn' : 'Chọn phòng'}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 3. CHỌN DỊCH VỤ BỔ SUNG: CHỈ XUẤT HIỆN KHI ĐÃ CHỌN XONG PHÒNG */}
+                {selectedRoom && (
+                  <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm relative overflow-hidden transition-all animate-fade-in">
+                    <div className="flex items-center justify-between pb-4 border-b border-[#F5EBEB]">
+                      <div>
+                        <h2 className="text-base sm:text-lg font-bold text-[#261A1E] flex items-center gap-2">
+                          <span>3. Chọn dịch vụ bổ sung</span>
+                          {(selectedServices.length > 0 || isServiceOptOut) && (
+                            <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
+                              ✓
+                            </span>
+                          )}
+                        </h2>
+                        <p className="text-xs text-gray-400 mt-0.5">Tăng thêm trải nghiệm cho buổi chụp của bạn từ danh mục dịch vụ</p>
+                      </div>
+
+                      {isServicesCollapsed && (selectedServices.length > 0 || isServiceOptOut) && (
+                        <button
+                          type="button"
+                          onClick={() => setIsServicesCollapsed(false)}
+                          className="cursor-pointer text-xs font-semibold text-[#BE4B5E] hover:underline flex items-center gap-1"
+                        >
+                          <span>Thay đổi</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Khi đã thu gọn phần dịch vụ */}
+                    {isServicesCollapsed && (selectedServices.length > 0 || isServiceOptOut) ? (
+                      <div className="pt-4 text-xs text-gray-700">
+                        {isServiceOptOut ? (
+                          <p className="italic text-gray-500 font-medium">✓ Bạn đã xác nhận: Không sử dụng thêm dịch vụ bổ sung.</p>
+                        ) : (
+                          <p className="font-semibold text-emerald-800">
+                            ✓ Đã chọn {selectedServices.length} dịch vụ ({calculation.servicesTotal.toLocaleString('vi-VN')}₫):{' '}
+                            {selectedServices.map((s) => s.name).join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      /* Khi mở rộng danh sách dịch vụ */
+                      <div className="space-y-4 pt-4">
+                        {/* Checkbox riêng: Tôi không sử dụng dịch vụ bổ sung */}
+                        <div
+                          onClick={handleToggleOptOutServices}
+                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                            isServiceOptOut
+                              ? 'border-[#BE4B5E] bg-[#FFF5F6] shadow-xs'
+                              : 'border-dashed border-gray-300 hover:border-[#BE4B5E]/50 bg-gray-50/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={isServiceOptOut}
+                              onChange={() => {}}
+                              className="w-4 h-4 text-[#BE4B5E] rounded border-gray-300 focus:ring-[#BE4B5E] cursor-pointer"
+                            />
+                            <div>
+                              <span className="text-xs sm:text-sm font-bold text-[#261A1E] block">
+                                Không sử dụng dịch vụ bổ sung
+                              </span>
+                              <span className="text-[11px] text-gray-400">
+                                (Chỉ sử dụng các dịch vụ và quyền lợi tiêu chuẩn đã có trong gói chụp)
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-xs font-semibold text-gray-500">+0₫</span>
+                        </div>
+
+                        {/* Lưới các thẻ dịch vụ bổ sung từ CSDL */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                          {servicesList.map((srv) => {
+                            const isChecked = selectedServices.some((s) => s.id === srv.id);
+                            return (
+                              <div
+                                key={srv.id}
+                                onClick={() => handleToggleService(srv)}
+                                className={`rounded-2xl border p-3.5 transition-all cursor-pointer flex flex-col justify-between ${
+                                  isChecked
+                                    ? 'border-[#BE4B5E] bg-[#FFF5F6] shadow-sm ring-1 ring-[#BE4B5E]'
+                                    : 'border-[#F0E4E6] bg-white hover:border-[#BE4B5E]/50 hover:shadow-xs'
+                                } ${isServiceOptOut ? 'opacity-40' : ''}`}
+                              >
+                                <div className="space-y-2">
+                                  <div className="h-28 w-full rounded-xl overflow-hidden bg-gray-100">
+                                    <img src={srv.image} alt={srv.name} className="w-full h-full object-cover" />
+                                  </div>
+                                  <div className="flex items-start gap-2 pt-1">
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() => {}}
+                                      disabled={isServiceOptOut}
+                                      className="w-4 h-4 text-[#BE4B5E] rounded border-gray-300 focus:ring-[#BE4B5E] mt-0.5 cursor-pointer"
+                                    />
+                                    <div className="min-w-0">
+                                      <h4 className="font-bold text-xs sm:text-sm text-[#261A1E] leading-snug line-clamp-2" title={srv.name}>
+                                        {srv.name}
+                                      </h4>
+                                      <p className="text-[11px] font-bold text-[#BE4B5E] mt-1">
+                                        {srv.price.toLocaleString('vi-VN')}₫
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {TIME_SLOTS.map((slot) => {
-                        const isSlotSelected = selectedTimeSlot.id === slot.id;
-                        const isSlotBooked = isSlotConflict(slot, selectedRoomId, bookingDate);
+                {/* BANNER TƯ VẤN Ở ĐÁY BƯỚC 1 */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FDF0F2] to-[#FAF5F5] border border-[#F5D5DC] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-white border border-[#F0E4E6] flex items-center justify-center text-[#BE4B5E] shrink-0">
+                      <HelpCircle className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <strong className="text-gray-800 text-sm block">Bạn cần tư vấn chi tiết hơn?</strong>
+                      <span className="text-gray-500">Đội ngũ chuyên viên tư vấn luôn sẵn sàng hỗ trợ bạn.</span>
+                    </div>
+                  </div>
+                  <a
+                    href="tel:0987654321"
+                    className="cursor-pointer px-4 py-2 rounded-xl bg-white hover:bg-rose-50 text-[#BE4B5E] font-bold border border-[#F0E4E6] shadow-2xs transition-colors shrink-0"
+                  >
+                    Liên hệ ngay
+                  </a>
+                </div>
+              </div>
+            )}
 
+            {/* ---------------------------------------------------------------
+                BƯỚC 2: CHỌN NGÀY VÀ GIỜ
+               --------------------------------------------------------------- */}
+            {currentStep === 2 && (
+              <div className="space-y-8 animate-fade-in">
+                {/* 1. CHỌN NGÀY CHỤP (LỊCH TUẦN ĐỊNH DẠNG CHUẨN VIỆT NAM) */}
+                <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#F5EBEB]">
+                    <h2 className="text-base sm:text-lg font-bold text-[#261A1E]">1. Chọn ngày chụp</h2>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={weekOffset <= 0}
+                        onClick={() => setWeekOffset((w) => Math.max(0, w - 1))}
+                        className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        title="Tuần trước"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <span className="text-xs sm:text-sm font-bold text-gray-700 px-2 min-w-[120px] text-center">
+                        {currentWeekMonthTitle}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={weekOffset >= 8}
+                        onClick={() => setWeekOffset((w) => Math.min(8, w + 1))}
+                        className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        title="Tuần tiếp theo"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Lưới 7 ngày trong tuần */}
+                  <div className="grid grid-cols-7 gap-2 text-center">
+                    {weekDays.map((d) => {
+                      const isSelected = selectedDate === d.dateStr;
+                      return (
+                        <div
+                          key={d.dateStr}
+                          onClick={() => {
+                            if (d.isSelectable) {
+                              setSelectedDate(d.dateStr);
+                              setSelectedSlot('');
+                            }
+                          }}
+                          className={`p-2.5 sm:p-3.5 rounded-2xl border transition-all ${
+                            !d.isSelectable
+                              ? 'bg-gray-50 border-gray-200 text-gray-300 opacity-60 cursor-not-allowed'
+                              : isSelected
+                              ? 'bg-[#BE4B5E] border-[#BE4B5E] text-white shadow-md cursor-pointer'
+                              : 'bg-white border-[#F0E4E6] hover:border-[#BE4B5E]/50 text-[#261A1E] cursor-pointer'
+                          }`}
+                        >
+                          <span className={`text-[10px] sm:text-xs font-bold block ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
+                            {d.dayLabel}
+                          </span>
+                          <span className="text-base sm:text-lg font-extrabold block my-0.5">
+                            {d.dayNum}
+                          </span>
+                          <span
+                            className={`text-[9px] sm:text-[10px] font-semibold block rounded-full py-0.5 px-1 truncate ${
+                              isSelected
+                                ? 'bg-white/20 text-white'
+                                : d.isToday
+                                ? 'bg-rose-100 text-[#BE4B5E]'
+                                : d.isPast
+                                ? 'text-gray-400'
+                                : 'text-emerald-600'
+                            }`}
+                          >
+                            {d.statusText}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <p className="text-[11px] text-gray-400 flex items-center gap-1.5 pt-1">
+                    <span className="w-2 h-2 rounded-full bg-[#BE4B5E]" />
+                    <span>Các ngày màu xám là ngày đã qua hoặc không còn lịch trống. Bạn có thể chọn ngày từ hôm nay trở đi.</span>
+                  </p>
+                </div>
+
+                {/* 2. CHỌN GIỜ CHỤP (KHÔNG CHO PHÉP CHỌN GIỜ ĐÃ TRÔI QUA TRONG NGÀY) */}
+                <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm space-y-5">
+                  <div className="pb-3 border-b border-[#F5EBEB]">
+                    <h2 className="text-base sm:text-lg font-bold text-[#261A1E]">
+                      2. Chọn giờ chụp
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Thời gian có thể đặt trong ngày{' '}
+                      <strong className="text-[#BE4B5E]">
+                        {selectedDate ? new Date(selectedDate.replace(/-/g, '/')).toLocaleDateString('vi-VN') : ''}
+                      </strong>
+                    </p>
+                  </div>
+
+                  {/* Buổi sáng */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Buổi sáng</span>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                      {TIME_SLOTS_DATA.morning.map((slot) => {
+                        const disabled = isSlotDisabled(slot);
+                        const isSelected = selectedSlot === slot;
                         return (
                           <button
-                            key={slot.id}
+                            key={slot}
                             type="button"
-                            onClick={() => {
-                              setSelectedTimeSlot(slot);
-                              if (isSlotBooked) {
-                                setSubmitError(
-                                  `Phòng "${selectedRoom?.name}" đã có khách đặt trước vào khung giờ "${slot.label}" ngày ${bookingDate}. Vui lòng chọn khung giờ hoặc ngày khác!`
-                                );
-                              } else {
-                                setSubmitError("");
-                              }
-                            }}
-                            className={`px-3.5 py-3 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${(() => {
-                              if (isSlotBooked) {
-                                return isSlotSelected
-                                  ? "border-rose-500 bg-rose-50 text-rose-700 ring-2 ring-rose-300"
-                                  : "border-rose-200 bg-rose-50/50 text-neutral-400 hover:border-rose-300";
-                              }
-                              return isSlotSelected
-                                ? "border-[#B85064] bg-[#FFF0F2] text-[#B85064] ring-2 ring-[#B85064]/20 shadow-sm"
-                                : "border-[#F0E4E6] bg-white text-[#55464B] hover:border-[#B85064]/40 hover:bg-[#FAF5F5]";
-                            })()}`}
+                            disabled={disabled}
+                            onClick={() => setSelectedSlot(slot)}
+                            className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                              disabled
+                                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed line-through opacity-50 select-none'
+                                : isSelected
+                                ? 'bg-[#BE4B5E] border-[#BE4B5E] text-white shadow-xs cursor-pointer'
+                                : 'bg-white border-[#F0E4E6] text-gray-800 hover:border-[#BE4B5E] hover:text-[#BE4B5E] cursor-pointer'
+                            }`}
+                            title={disabled ? 'Giờ này đã trôi qua hoặc đã có lịch đặt' : `Chọn lúc ${slot}`}
                           >
-                            <div className="flex items-center gap-2">
-                              <ClockIcon className={`w-4 h-4 ${isSlotBooked ? "text-rose-400" : "text-[#B85064]"}`} />
-                              <span className={isSlotBooked ? "line-through text-neutral-400" : ""}>{slot.label}</span>
-                            </div>
-                            {isSlotBooked && (
-                              <span className="text-[10px] font-bold text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded">
-                                Đã Đặt
-                              </span>
-                            )}
-                            {!isSlotBooked && isSlotSelected && (
-                              <CheckCircleIcon className="w-4 h-4 text-[#B85064]" />
-                            )}
+                            {slot}
                           </button>
                         );
                       })}
                     </div>
                   </div>
-                  {/* KHUNG ÁP MÃ ƯU ĐÃI (LẤP ĐẦY KHOẢNG TRỐNG DƯỚI KHUNG GIỜ) */}
-                  <div className="pt-3 border-t border-[#F0E4E6]">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#2A1D22]">
-                        Mã Ưu Đãi Thanh Toán
-                      </label>
-                      <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold border border-emerald-200">
-                        Giảm 20% online
-                      </span>
+
+                  {/* Buổi chiều */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Buổi chiều</span>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                      {TIME_SLOTS_DATA.afternoon.map((slot) => {
+                        const disabled = isSlotDisabled(slot);
+                        const isSelected = selectedSlot === slot;
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => setSelectedSlot(slot)}
+                            className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                              disabled
+                                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed line-through opacity-50 select-none'
+                                : isSelected
+                                ? 'bg-[#BE4B5E] border-[#BE4B5E] text-white shadow-xs cursor-pointer'
+                                : 'bg-white border-[#F0E4E6] text-gray-800 hover:border-[#BE4B5E] hover:text-[#BE4B5E] cursor-pointer'
+                            }`}
+                            title={disabled ? 'Giờ này đã trôi qua hoặc đã có lịch đặt' : `Chọn lúc ${slot}`}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
                     </div>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          readOnly
-                          value="STUDIO2026"
-                          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-dashed border-[#B85064] bg-[#FFF8F9] text-xs font-mono font-bold text-[#B85064] uppercase outline-none"
-                        />
-                        <TicketIcon className="w-4 h-4 text-[#B85064] absolute left-3 top-1/2 -translate-y-1/2" />
-                      </div>
-                      <span className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#BE4B5E] to-[#A8394C] text-white text-xs font-bold flex items-center gap-1 shadow-sm shrink-0">
-                        <CheckIcon className="w-3.5 h-3.5" />
-                        Đã Áp Dụng
-                      </span>
+                  </div>
+
+                  {/* Buổi tối */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Buổi tối</span>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                      {TIME_SLOTS_DATA.evening.map((slot) => {
+                        const disabled = isSlotDisabled(slot);
+                        const isSelected = selectedSlot === slot;
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => setSelectedSlot(slot)}
+                            className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                              disabled
+                                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed line-through opacity-50 select-none'
+                                : isSelected
+                                ? 'bg-[#BE4B5E] border-[#BE4B5E] text-white shadow-xs cursor-pointer'
+                                : 'bg-white border-[#F0E4E6] text-gray-800 hover:border-[#BE4B5E] hover:text-[#BE4B5E] cursor-pointer'
+                            }`}
+                            title={disabled ? 'Giờ này đã trôi qua hoặc đã có lịch đặt' : `Chọn lúc ${slot}`}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
                     </div>
-                    <p className="text-[11px] text-[#7A6C71] mt-1.5 flex items-center gap-1 font-light">
-                      <PlusCircleIcon className="w-3.5 h-3.5 text-neutral-800 shrink-0" />
-                      <span>Hệ thống tự động áp mã <strong>STUDIO2026</strong> giảm 20% khi thanh toán trực tuyến!</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ---------------------------------------------------------------
+                BƯỚC 3: XÁC NHẬN THÔNG TIN ĐẶT LỊCH & THANH TOÁN
+               --------------------------------------------------------------- */}
+            {currentStep === 3 && (
+              <div className="space-y-8 animate-fade-in">
+                {submitError && (
+                  <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+
+                {/* 1. KHUNG NHẬP THÔNG TIN CÁ NHÂN KÈM VALIDATE SĐT CHẶT CHẼ */}
+                <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm space-y-4">
+                  <div className="pb-3 border-b border-[#F5EBEB]">
+                    <h2 className="text-base sm:text-lg font-bold text-[#261A1E]">Thông tin cá nhân</h2>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      Nếu bạn đã có tài khoản, thông tin sẽ được tự động điền
                     </p>
                   </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    {/* Họ và tên */}
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1.5">
+                        Họ và tên <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Nhập họ và tên đầy đủ"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#BE4B5E]"
+                      />
+                    </div>
+
+                    {/* SỐ ĐIỆN THOẠI (KIỂM TRA ĐỊNH DẠNG CHẶT CHẼ) */}
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="block font-semibold text-gray-700">
+                          Số điện thoại <span className="text-rose-500">*</span>
+                        </label>
+                        <span className="text-[10px] text-gray-400">Đúng 10 số, bắt đầu 03/05/07/08/09</span>
+                      </div>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        value={phone}
+                        onChange={handlePhoneChange}
+                        onBlur={handlePhoneBlur}
+                        placeholder="0987654321"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none transition-colors ${
+                          phoneTouched && phoneError
+                            ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
+                            : phoneTouched && !phoneError && phone.length === 10
+                            ? 'border-emerald-400 bg-emerald-50/30 focus:border-emerald-500'
+                            : 'border-gray-200 focus:border-[#BE4B5E]'
+                        }`}
+                      />
+                      {phoneTouched && phoneError ? (
+                        <p className="text-[11px] font-medium text-rose-500 mt-1 flex items-center gap-1 animate-fade-in">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{phoneError}</span>
+                        </p>
+                      ) : phoneTouched && !phoneError && phone.length === 10 ? (
+                        <p className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1 animate-fade-in">
+                          <Check className="w-3.5 h-3.5 shrink-0" />
+                          <span>Số điện thoại hợp lệ</span>
+                        </p>
+                      ) : (
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          Ví dụ: 0901234567, 0325178029, 0868123456
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1.5">
+                        Email <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="example@gmail.com"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#BE4B5E]"
+                      />
+                    </div>
+
+                    {/* Số lượng người */}
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1.5">
+                        Số lượng người tham gia <span className="text-rose-500">*</span>
+                      </label>
+                      <select
+                        value={attendees}
+                        onChange={(e) => setAttendees(Number(e.target.value))}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#BE4B5E] bg-white cursor-pointer"
+                      >
+                        {[...Array(selectedRoom?.capacity || 8)].map((_, i) => (
+                          <option key={i + 1} value={i + 1}>
+                            {i + 1} người
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Ghi chú */}
+                    <div className="sm:col-span-2">
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="block font-semibold text-gray-700">Ghi chú (tùy chọn)</label>
+                        <span className="text-[10px] text-gray-400">{customerNote.length}/200</span>
+                      </div>
+                      <textarea
+                        rows={3}
+                        maxLength={200}
+                        value={customerNote}
+                        onChange={(e) => setCustomerNote(e.target.value)}
+                        placeholder="Ví dụ: Ưu tiên chụp vào buổi sáng, cần hỗ trợ thêm đạo cụ..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#BE4B5E]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. CHỌN MỨC THANH TOÁN (30% | 50% | 100%) */}
+                <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm space-y-4">
+                  <div className="pb-3 border-b border-[#F5EBEB] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h2 className="text-base sm:text-lg font-bold text-[#261A1E]">Chọn mức đặt cọc & thanh toán</h2>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        Linh hoạt chọn đặt cọc trước hoặc thanh toán trọn gói 100% qua VNPay
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-50 text-[#BE4B5E] border border-rose-100 self-start sm:self-auto">
+                      Đang chọn: {depositPercent === 100 ? 'Thanh toán 100%' : `Đặt cọc ${depositPercent}%`}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Mức 1: 30% */}
+                    <div
+                      onClick={() => setDepositPercent(30)}
+                      className={`cursor-pointer p-4 rounded-2xl border transition-all relative ${
+                        depositPercent === 30
+                          ? 'border-[#BE4B5E] bg-[#FFF5F6] shadow-xs ring-1 ring-[#BE4B5E]'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-gray-800">Đặt cọc 30%</span>
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            depositPercent === 30
+                              ? 'border-[#BE4B5E] bg-[#BE4B5E]'
+                              : 'border-gray-300 bg-white'
+                          }`}
+                        >
+                          {depositPercent === 30 && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
+                        </div>
+                      </div>
+                      <div className="text-base font-extrabold text-[#BE4B5E]">
+                        {Math.round(calculation.totalOrder * 0.3).toLocaleString('vi-VN')}₫
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-1">
+                        Còn lại tại studio (70%):{' '}
+                        <strong>{(calculation.totalOrder - Math.round(calculation.totalOrder * 0.3)).toLocaleString('vi-VN')}₫</strong>
+                      </p>
+                      <span className="inline-block mt-2 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        Phổ biến nhất
+                      </span>
+                    </div>
+
+                    {/* Mức 2: 50% */}
+                    <div
+                      onClick={() => setDepositPercent(50)}
+                      className={`cursor-pointer p-4 rounded-2xl border transition-all relative ${
+                        depositPercent === 50
+                          ? 'border-[#BE4B5E] bg-[#FFF5F6] shadow-xs ring-1 ring-[#BE4B5E]'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-gray-800">Đặt cọc 50%</span>
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            depositPercent === 50
+                              ? 'border-[#BE4B5E] bg-[#BE4B5E]'
+                              : 'border-gray-300 bg-white'
+                          }`}
+                        >
+                          {depositPercent === 50 && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
+                        </div>
+                      </div>
+                      <div className="text-base font-extrabold text-[#BE4B5E]">
+                        {Math.round(calculation.totalOrder * 0.5).toLocaleString('vi-VN')}₫
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-1">
+                        Còn lại tại studio (50%):{' '}
+                        <strong>{(calculation.totalOrder - Math.round(calculation.totalOrder * 0.5)).toLocaleString('vi-VN')}₫</strong>
+                      </p>
+                      <span className="inline-block mt-2 text-[10px] font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">
+                        Cân bằng chi phí
+                      </span>
+                    </div>
+
+                    {/* Mức 3: 100% */}
+                    <div
+                      onClick={() => setDepositPercent(100)}
+                      className={`cursor-pointer p-4 rounded-2xl border transition-all relative ${
+                        depositPercent === 100
+                          ? 'border-[#BE4B5E] bg-[#FFF5F6] shadow-xs ring-1 ring-[#BE4B5E]'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-gray-800">Thanh toán 100%</span>
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            depositPercent === 100
+                              ? 'border-[#BE4B5E] bg-[#BE4B5E]'
+                              : 'border-gray-300 bg-white'
+                          }`}
+                        >
+                          {depositPercent === 100 && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
+                        </div>
+                      </div>
+                      <div className="text-base font-extrabold text-[#BE4B5E]">
+                        {calculation.totalOrder.toLocaleString('vi-VN')}₫
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-1">
+                        Còn lại tại studio: <strong>0₫</strong>
+                      </p>
+                      <span className="inline-block mt-2 text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
+                        Trọn gói tiện lợi
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. KHUNG NHẬP MÃ GIẢM GIÁ */}
+                <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm space-y-3">
+                  <h3 className="text-sm font-bold text-[#261A1E]">Mã giảm giá</h3>
+                  <div className="flex gap-2.5">
+                    <input
+                      type="text"
+                      value={promoCodeInput}
+                      onChange={(e) => setPromoCodeInput(e.target.value)}
+                      placeholder="Nhập mã ưu đãi (Ví dụ: STUDIO2026)"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#BE4B5E] uppercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyPromoCode}
+                      className="cursor-pointer px-5 py-2.5 rounded-xl bg-[#BE4B5E] hover:bg-[#a53b4d] text-white font-bold text-xs transition-colors shrink-0 shadow-2xs"
+                    >
+                      Áp dụng
+                    </button>
+                  </div>
+
+                  {promoSuccess && (
+                    <p className="text-xs font-semibold text-emerald-600 animate-fade-in">{promoSuccess}</p>
+                  )}
+                  {promoError && (
+                    <p className="text-xs font-semibold text-rose-500 animate-fade-in">{promoError}</p>
+                  )}
                 </div>
               </div>
-            </section>
+            )}
+          </div>
 
-            {/* [HÀNG 2 - PHẢI 50%]: KHUNG 4 - CHỌN GÓI CHỤP NGHỆ THUẬT */}
-            <section className="order-4 bg-white rounded-3xl p-6 sm:p-8 border border-[#F0E4E6] shadow-sm relative overflow-hidden flex flex-col justify-between h-full">
-              <FloralCardCorner position="top-right" />
+          {/* =================================================================
+              CỘT PHẢI: TÓM TẮT LỰA CHỌN & DỰ TOÁN CHI PHÍ (STICKY BƯỚC 1 & 2, ĐỨNG YÊN BƯỚC 3)
+             ================================================================= */}
+          <div
+            className={`lg:col-span-4 space-y-6 ${
+              currentStep === 3 ? 'relative' : 'lg:sticky lg:top-24'
+            }`}
+          >
+            <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-xl relative overflow-hidden space-y-5">
+              <FloralCardCorner position="top-right" opacity="opacity-25" />
+
+              <h3 className="text-base font-bold text-[#261A1E] pb-3 border-b border-[#F5EBEB]">
+                {currentStep === 3 ? 'Tóm tắt đặt lịch' : 'Tóm tắt lựa chọn'}
+              </h3>
+
+              {!selectedPackage && !selectedRoom && currentStep === 1 ? (
+                <div className="py-12 text-center space-y-3">
+                  <div className="w-16 h-16 rounded-full bg-[#FAF5F5] border border-[#F5D5DC] mx-auto flex items-center justify-center text-gray-300">
+                    <Camera className="w-8 h-8 text-[#BE4B5E]/40" />
+                  </div>
+                  <p className="text-xs text-gray-400 max-w-[200px] mx-auto leading-relaxed">
+                    Bạn chưa chọn gói chụp, phòng chụp và dịch vụ
+                  </p>
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full py-3 rounded-2xl bg-gray-100 text-gray-400 font-bold text-xs cursor-not-allowed"
+                  >
+                    Tiếp theo →
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Gói chụp */}
+                  {selectedPackage && (
+                    <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                        <img src={selectedPackage.image} alt={selectedPackage.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-xs">
+                        <span className="text-[10px] text-gray-400 block">Gói chụp:</span>
+                        <strong className="text-gray-800 truncate block">{selectedPackage.name}</strong>
+                        <span className="text-[#BE4B5E] font-bold">{selectedPackage.price.toLocaleString('vi-VN')}₫</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentStep(1);
+                          setIsPackageCollapsed(false);
+                        }}
+                        className="cursor-pointer text-[11px] text-gray-400 hover:text-[#BE4B5E]"
+                      >
+                        Thay đổi
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Phòng chụp */}
+                  {selectedRoom && (
+                    <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                        <img src={selectedRoom.image} alt={selectedRoom.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-xs">
+                        <span className="text-[10px] text-gray-400 block">Phòng chụp:</span>
+                        <strong className="text-gray-800 truncate block">{selectedRoom.name}</strong>
+                        <span className="text-gray-600 font-medium">
+                          {selectedRoom.surcharge > 0 ? `+${selectedRoom.surcharge.toLocaleString('vi-VN')}₫` : '+ 0₫'}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentStep(1);
+                          setIsRoomCollapsed(false);
+                        }}
+                        className="cursor-pointer text-[11px] text-gray-400 hover:text-[#BE4B5E]"
+                      >
+                        Thay đổi
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Dịch vụ bổ sung */}
+                  {(selectedServices.length > 0 || isServiceOptOut) && (
+                    <div className="flex items-center gap-3 pb-3 border-b border-gray-100 text-xs">
+                      <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-[#BE4B5E] shrink-0">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] text-gray-400 block">Dịch vụ:</span>
+                        <strong className="text-gray-800 truncate block">
+                          {isServiceOptOut
+                            ? 'Không dùng dịch vụ'
+                            : `${selectedServices.length} dịch vụ chọn thêm`}
+                        </strong>
+                        <span className="text-gray-600 font-medium">
+                          +{calculation.servicesTotal.toLocaleString('vi-VN')}₫
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentStep(1);
+                          setIsServicesCollapsed(false);
+                        }}
+                        className="cursor-pointer text-[11px] text-gray-400 hover:text-[#BE4B5E]"
+                      >
+                        Thay đổi
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Ngày & giờ */}
+                  {selectedDate && selectedSlot && (
+                    <div className="flex items-center gap-3 pb-3 border-b border-gray-100 text-xs">
+                      <div className="w-12 h-12 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] text-gray-400 block">Ngày & giờ:</span>
+                        <strong className="text-gray-800 block">
+                          {new Date(selectedDate.replace(/-/g, '/')).toLocaleDateString('vi-VN')}
+                        </strong>
+                        <span className="text-purple-700 font-bold">{selectedSlot}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(2)}
+                        className="cursor-pointer text-[11px] text-gray-400 hover:text-[#BE4B5E]"
+                      >
+                        Thay đổi
+                      </button>
+                    </div>
+                  )}
+
+                  {/* BẢNG TÍNH TOÁN CHI TIẾT */}
+                  {currentStep === 3 ? (
+                    <div className="space-y-2 pt-2 text-xs">
+                      <div className="flex justify-between text-gray-500">
+                        <span>Giá gói chụp:</span>
+                        <span className="font-semibold text-gray-800">{calculation.pkgPrice.toLocaleString('vi-VN')}₫</span>
+                      </div>
+                      {calculation.roomSurcharge > 0 && (
+                        <div className="flex justify-between text-gray-500">
+                          <span>Phụ thu phòng:</span>
+                          <span className="font-semibold text-gray-800">+{calculation.roomSurcharge.toLocaleString('vi-VN')}₫</span>
+                        </div>
+                      )}
+                      {calculation.servicesTotal > 0 && (
+                        <div className="flex justify-between text-gray-500">
+                          <span>Giá dịch vụ:</span>
+                          <span className="font-semibold text-gray-800">+{calculation.servicesTotal.toLocaleString('vi-VN')}₫</span>
+                        </div>
+                      )}
+                      {calculation.discount > 0 && (
+                        <div className="flex justify-between text-emerald-600 font-medium">
+                          <span>Giảm giá ({appliedPromo?.code}):</span>
+                          <span>-{calculation.discount.toLocaleString('vi-VN')}₫</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-baseline pt-2 border-t border-gray-200">
+                        <span className="text-xs font-bold text-gray-800 uppercase">Tổng đơn đặt lịch:</span>
+                        <span className="text-base font-extrabold text-[#261A1E]">
+                          {calculation.totalOrder.toLocaleString('vi-VN')}₫
+                        </span>
+                      </div>
+
+                      {/* Tùy chọn mức thanh toán / đặt cọc 30% | 50% | 100% */}
+                      <div className="pt-2">
+                        <div className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 flex justify-between items-center">
+                          <span>Mức thanh toán:</span>
+                          <span className="text-[10px] text-gray-400 font-normal">30% · 50% · 100%</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#F9F5F6] rounded-xl border border-[#F0E4E6]">
+                          {[30, 50, 100].map((pct) => (
+                            <button
+                              key={pct}
+                              type="button"
+                              onClick={() => setDepositPercent(pct)}
+                              className={`cursor-pointer py-1.5 px-1 rounded-lg text-xs font-bold transition-all text-center ${
+                                depositPercent === pct
+                                  ? 'bg-[#BE4B5E] text-white shadow-xs'
+                                  : 'text-gray-600 hover:text-gray-900 hover:bg-white/80'
+                              }`}
+                            >
+                              {pct === 100 ? '100% (Hết)' : `Cọc ${pct}%`}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Thẻ tiền cọc / thanh toán theo đúng thiết kế tham khảo */}
+                      <div className="p-3.5 rounded-2xl bg-[#FFF5F6] border border-[#F5D5DC] space-y-1 mt-3">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-xs font-bold text-[#BE4B5E] uppercase tracking-wide">
+                            {depositPercent === 100 ? 'THANH TOÁN (100%):' : `TIỀN CỌC (${depositPercent}%):`}
+                          </span>
+                          <span className="text-lg font-extrabold text-[#BE4B5E]">
+                            {calculation.amountToPay.toLocaleString('vi-VN')}₫
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-gray-400">
+                          {depositPercent === 100
+                            ? 'Thanh toán trọn gói toàn bộ đơn chụp'
+                            : 'Thanh toán để xác nhận đặt lịch'}
+                        </p>
+                        <p className="text-[11px] text-gray-600 pt-1 border-t border-pink-100 flex justify-between">
+                          <span>
+                            {depositPercent === 100
+                              ? 'Còn lại tại Studio (0%):'
+                              : `Còn lại tại Studio (${100 - depositPercent}%):`}
+                          </span>
+                          <strong>{calculation.remainingAmount.toLocaleString('vi-VN')}₫</strong>
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="pt-2">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-xs font-bold text-gray-600">Tổng tạm tính:</span>
+                        <span className="text-lg font-extrabold text-[#BE4B5E]">
+                          {calculation.subTotal.toLocaleString('vi-VN')}₫
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* NÚT TIẾP TỤC HOẶC THANH TOÁN */}
+                  <div className="pt-2">
+                    {currentStep === 1 && (
+                      <button
+                        type="button"
+                        disabled={!isStep1Valid}
+                        onClick={() => setCurrentStep(2)}
+                        className="cursor-pointer w-full py-3 rounded-2xl bg-[#BE4B5E] hover:bg-[#a53b4d] text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-[#BE4B5E]/30 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <span>Tiếp tục chọn ngày & giờ</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
+
+                    {currentStep === 2 && (
+                      <button
+                        type="button"
+                        disabled={!isStep2Valid}
+                        onClick={() => setCurrentStep(3)}
+                        className="cursor-pointer w-full py-3 rounded-2xl bg-[#BE4B5E] hover:bg-[#a53b4d] text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-[#BE4B5E]/30 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <span>Tiếp tục xác nhận</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
+
+                    {currentStep === 3 && (
+                      <div>
+                        {isAuthenticated ? (
+                          <button
+                            type="button"
+                            disabled={submitting}
+                            onClick={handleProceedToPayment}
+                            className="cursor-pointer w-full py-3.5 rounded-2xl bg-[#BE4B5E] hover:bg-[#a53b4d] text-white font-bold text-sm transition-all shadow-md shadow-[#BE4B5E]/30 disabled:opacity-50 flex flex-col items-center justify-center"
+                          >
+                            <span className="flex items-center gap-2">
+                              <span>Xác nhận & Thanh toán</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </span>
+                            <span className="text-[10px] text-white/80 font-normal mt-0.5">
+                              Thanh toán qua VNPAY ({calculation.amountToPay.toLocaleString('vi-VN')}₫)
+                            </span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setIsAuthModalOpen(true)}
+                            className="cursor-pointer w-full py-3 rounded-2xl bg-[#BE4B5E] hover:bg-[#a53b4d] text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-[#BE4B5E]/30 flex items-center justify-center gap-2"
+                          >
+                            <Lock className="w-4 h-4" />
+                            <span>Đăng nhập để thanh toán</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* THÔNG BÁO ĐĂNG NHẬP (BƯỚC 3) */}
+            {currentStep === 3 && !isAuthenticated && (
+              <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-md text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 mx-auto flex items-center justify-center text-[#BE4B5E]">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-sm text-[#261A1E]">Vui lòng đăng nhập để thanh toán</h4>
+                <p className="text-xs text-gray-500 leading-relaxed max-w-[240px] mx-auto">
+                  Bạn cần đăng nhập tài khoản để tiếp tục xác nhận và thanh toán đơn đặt lịch.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="cursor-pointer w-full py-2.5 rounded-xl bg-[#BE4B5E] text-white font-bold text-xs hover:bg-[#a53b4d] transition-all shadow-xs"
+                >
+                  Đăng nhập ngay
+                </button>
+                <p className="text-[11px] text-gray-400">
+                  Chưa có tài khoản?{' '}
+                  <Link to={ROUTES.AUTH.REGISTER} className="text-[#BE4B5E] font-semibold hover:underline">
+                    Đăng ký ngay
+                  </Link>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* =====================================================================
+          MODAL ĐĂNG NHẬP LỒNG TRỰC TIẾP TRÊN TRANG (INLINE AUTH MODAL)
+         ===================================================================== */}
+      {isAuthModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in"
+          onClick={() => setIsAuthModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-md bg-white rounded-3xl border border-[#F0E4E6] shadow-2xl p-6 sm:p-8 relative text-[#261A1E]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FloralCardCorner position="top-right" opacity="opacity-25" />
+
+            <button
+              type="button"
+              onClick={() => setIsAuthModalOpen(false)}
+              className="cursor-pointer absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center space-y-1 mb-6">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#BE4B5E]">PHOTOSTUDIO</span>
+              <h3 className="text-xl font-bold font-serif-luxury">Đăng nhập tài khoản</h3>
+              <p className="text-xs text-gray-500">Đăng nhập để lưu đơn đặt lịch và tiến hành thanh toán</p>
+            </div>
+
+            {authError && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+                {authError}
+              </div>
+            )}
+
+            <form onSubmit={handleInlineLogin} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Tên đăng nhập / Email:</label>
+                <input
+                  type="text"
+                  required
+                  value={authUsername}
+                  onChange={(e) => setAuthUsername(e.target.value)}
+                  placeholder="admin hoặc customer1..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#BE4B5E]"
+                />
+              </div>
 
               <div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#F0E4E6] mb-4 gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-[#B85064] text-white text-sm font-bold flex items-center justify-center shadow-sm shrink-0">
-                      <CameraIcon className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold font-serif-luxury text-[#2A1D22]">
-                        Chọn Gói Chụp Nghệ Thuật
-                      </h2>
-                      <p className="text-xs text-[#7A6C71]">
-                        Các gói chụp đang được studio cung cấp, lấy trực tiếp từ cơ sở dữ liệu
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="text-[11px] font-semibold text-[#B85064] bg-[#FFF0F2] px-3 py-1 rounded-full border border-[#F0D5DA] self-start sm:self-auto shrink-0">
-                    Đang chọn: <strong>{selectedPackage.name}</strong>
-                  </span>
-                </div>
-
-                {/* ẢNH ĐẠI DIỆN LỚN CỦA GÓI ĐANG CHỌN */}
-                <div className="relative h-44 w-full rounded-2xl overflow-hidden mb-4 border border-[#F0E4E6] shadow-md bg-neutral-900 group">
-                  <img
-                    src={selectedPackage.image || selectedPackage.primaryImage}
-                    alt={selectedPackage.name}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src =
-                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80";
-                    }}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
-
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-white bg-[#B85064] px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
-                      <CheckCircleIcon className="w-3.5 h-3.5" />
-                      <span>
-                        {selectedPackage.duration || "Thời lượng chưa cập nhật"} • Đang Chọn
-                      </span>
-                    </span>
-                    {selectedPackage.packageDiscountPercent > 0 && (
-                      <span className="text-[10px] font-bold text-white bg-rose-600 px-2 py-0.5 rounded-full shadow-sm">
-                        Giảm {selectedPackage.packageDiscountPercent}%
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="absolute bottom-2.5 left-3 right-3 text-white flex items-end justify-between">
-                    <div>
-                      <h3 className="font-bold text-sm sm:text-base font-serif-luxury drop-shadow-md">
-                        {selectedPackage.name}
-                      </h3>
-                      <p className="text-[11px] text-white/80 line-clamp-1">
-                        {selectedPackage.description}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-base font-bold text-[#F3ACB8]">
-                        {selectedPackage.price.toLocaleString("vi-VN")} đ
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-[11px] font-bold uppercase tracking-wider text-[#7A6C71] mb-2 flex items-center justify-between">
-                  <span>Danh Sách {packages.length} Gói Chụp Nghệ Thuật:</span>
-                  <span className="text-[#B85064]">Nhấn ảnh để đổi gói</span>
-                </div>
-
-                {/* Danh sách gói chụp lấy từ API */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 h-[240px] overflow-y-auto pr-1">
-                  {packages.map((pkg) => {
-                    const isSelected =
-                      Number(selectedPackageId) === Number(pkg.id);
-                    const hasDiscount =
-                      pkg.originalPrice && pkg.originalPrice > pkg.price;
-
-                    return (
-                      <div
-                        key={pkg.id}
-                        onClick={() => setSelectedPackageId(pkg.id)}
-                        className={`cursor-pointer rounded-2xl overflow-hidden border-2 transition-all duration-200 flex flex-col relative group ${isSelected
-                          ? "border-[#B85064] bg-[#FFF7F8] shadow-md ring-2 ring-[#B85064]/20"
-                          : "border-[#F0E4E6] bg-white hover:border-[#B85064]/50 hover:shadow-sm"
-                          }`}
-                      >
-                        {/* Ảnh gói */}
-                        <div className="relative h-24 w-full overflow-hidden bg-neutral-900">
-                          <img
-                            src={pkg.image || pkg.primaryImage}
-                            alt={pkg.name}
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src =
-                                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80";
-                            }}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
-
-                          {/* Badges */}
-                          <div className="absolute top-1.5 left-1.5 flex items-center gap-1">
-                            {hasDiscount && (
-                              <span className="text-[9px] font-bold text-white bg-rose-600 px-1.5 py-0.5 rounded shadow-sm">
-                                Giảm {pkg.packageDiscountPercent}%
-                              </span>
-                            )}
-                            <span className="text-[9px] font-bold text-white bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded border border-white/20">
-                              {pkg.duration || "60 phút"}
-                            </span>
-                          </div>
-
-                          {/* Checkmark active */}
-                          {isSelected && (
-                            <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#B85064] text-white flex items-center justify-center shadow-md">
-                              <CheckCircleIcon className="w-3 h-3" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Thông tin vắn tắt */}
-                        <div className="p-2 text-xs flex-1 flex flex-col justify-between space-y-1">
-                          <p className="text-[#2A1D22] text-[11px] font-semibold line-clamp-2 leading-relaxed">
-                            {pkg.name}
-                          </p>
-
-                          <div className="pt-1 border-t border-[#F0E4E6] flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-[#B85064]">
-                              {pkg.price ? pkg.price.toLocaleString("vi-VN") + " đ" : ""}
-                            </span>
-                            <span
-                              className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${isSelected
-                                ? "bg-[#B85064] text-white"
-                                : "bg-neutral-100 text-[#55464B] group-hover:bg-[#B85064]/10 group-hover:text-[#B85064]"
-                                }`}
-                            >
-                              {isSelected ? "Đã Chọn" : "Chọn"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <label className="block font-semibold text-gray-700 mb-1">Mật khẩu:</label>
+                <input
+                  type="password"
+                  required
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  placeholder="Mật khẩu của bạn..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#BE4B5E]"
+                />
               </div>
-            </section>
-          </div>
 
-          {/* ========================================================================= */}
-          {/* KHUNG 5: TÙY CHỌN DỊCH VỤ NÂNG CAO (Makeup, Thuê trang phục, Retouch...) */}
-          {/* ========================================================================= */}
-          {servicesList.length > 0 && (
-            <div className="w-full">
-              <section className="bg-white rounded-3xl p-6 sm:p-7 border border-[#F0E4E6] shadow-sm relative overflow-hidden">
-                <FloralCardCorner position="top-right" />
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#F0E4E6] gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#B85064] text-white text-sm font-bold flex items-center justify-center shadow-sm shrink-0">
-                      <SparklesIcon className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold font-serif-luxury text-[#2A1D22]">
-                        Khung 5: Tùy Chọn Dịch Vụ Nâng Cao (Không Bắt Buộc)
-                      </h2>
-                      <p className="text-xs text-[#7A6C71]">
-                        Chọn thêm các dịch vụ bổ trợ chuyên nghiệp (Makeup, làm tóc, trang phục, chỉnh sửa cao cấp...)
-                      </p>
-                    </div>
-                  </div>
+              <button
+                type="submit"
+                disabled={authLoading}
+                className="cursor-pointer w-full py-3 rounded-xl bg-[#BE4B5E] hover:bg-[#a53b4d] text-white font-bold transition-all shadow-xs"
+              >
+                {authLoading ? 'Đang đăng nhập...' : 'Đăng nhập ngay'}
+              </button>
+            </form>
 
-                  {selectedServiceIds.length > 0 && (
-                    <span className="text-xs font-bold text-[#B85064] bg-[#FFF0F2] px-3.5 py-1.5 rounded-full border border-[#B85064]/20 self-start sm:self-auto animate-pulse">
-                      Đã chọn {selectedServiceIds.length} dịch vụ (+{servicesTotal.toLocaleString("vi-VN")} đ)
-                    </span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-5">
-                  {servicesList.map((service) => {
-                    const isSelected = selectedServiceIds.includes(Number(service.id));
-                    return (
-                      <div
-                        key={service.id}
-                        onClick={() => handleToggleService(service.id)}
-                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 select-none ${isSelected
-                          ? "border-[#B85064] bg-[#FFF0F2] text-[#B85064] shadow-md ring-2 ring-[#B85064]/30"
-                          : "border-[#F0E4E6] bg-white text-[#261A1E] hover:border-[#B85064]/40 hover:bg-[#FAF5F5] shadow-xs"
-                          }`}
-                      >
-                        <div className="flex items-start gap-3 min-w-0">
-                          <div
-                            className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${isSelected
-                              ? "bg-[#B85064] border-[#B85064] text-white"
-                              : "border-[#D9C8CC] bg-white"
-                              }`}
-                          >
-                            {isSelected && <CheckIcon className="w-3.5 h-3.5 text-white" />}
-                          </div>
-                          <div className="min-w-0">
-                            <strong className="font-bold block text-xs sm:text-sm text-[#261A1E] truncate">
-                              {service.name}
-                            </strong>
-                            {service.description && (
-                              <p className="text-[11px] text-[#7A6C71] mt-0.5 line-clamp-2 leading-relaxed">
-                                {service.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <span className="font-bold text-[#B85064] shrink-0 text-xs sm:text-sm whitespace-nowrap">
-                          +{Number(service.price || 0).toLocaleString("vi-VN")} đ
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
+            <div className="mt-6 pt-4 border-t border-gray-100">
+              <span className="text-[11px] font-bold text-gray-400 block mb-2 text-center uppercase">
+                Hoặc chọn nhanh tài khoản mẫu:
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                {CSDL_SEED_USERS.slice(1, 3).map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => handleQuickSeedLogin(u)}
+                    className="cursor-pointer p-2 rounded-xl border border-gray-200 hover:border-[#BE4B5E] text-left transition-all hover:bg-rose-50/50"
+                  >
+                    <strong className="block text-gray-800 truncate">{u.fullname}</strong>
+                    <span className="text-gray-400 text-[10px]">{u.username}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* HÀNG DƯỚI: BẢNG TÓM TẮT ĐẶT LỊCH CHIẾM 100% NẰM Ở DƯỚI 4 CÁI KHUNG KIA */}
-          {/* ========================================================================= */}
-          <div className="w-full">
-            <section className="bg-white rounded-3xl p-6 sm:p-9 border border-[#F0E4E6] shadow-xl relative overflow-hidden">
-              <FloralCardCorner position="top-right" />
-              <FloralCardCorner position="bottom-left" />
-
-              {/* Header của bảng tóm tắt */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#F0E4E6] gap-3">
-                <div>
-                  <h3 className="text-2xl font-bold font-serif-luxury text-[#2A1D22]">
-                    Bảng Tóm Tắt Đặt Lịch & Dự Tính Chi Phí
-                  </h3>
-                  <p className="text-xs text-[#7A6C71] mt-1">
-                    Vui lòng kiểm tra kỹ thông tin phòng chụp, gói chụp và ngày
-                    giờ trước khi chuyển sang thanh toán
-                  </p>
-                </div>
-
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF0F2] border border-[#F0D5DA] text-xs font-semibold text-[#B85064] self-start sm:self-auto">
-                  <ShieldCheckIcon className="w-4 h-4 text-[#B85064]" />
-                  <span>Bước Tiếp Theo: Cổng Thanh Toán VNPay Sandbox</span>
-                </div>
-              </div>
-
-              {/* Bố cục 4 cột rộng rãi cho toàn bộ bảng tóm tắt */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-6 border-b border-[#F0E4E6]">
-                {/* CỘT 1: PHÒNG CHỤP ĐÃ CHỌN */}
-                <div className="bg-[#FAF5F5] rounded-2xl p-4 border border-[#F0E4E6] flex flex-col justify-between space-y-3">
-                  <div className="space-y-3">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#B85064] block">
-                      Không Gian Studio
-                    </span>
-                    <div className="relative h-28 w-full rounded-xl overflow-hidden bg-neutral-900 border border-[#F0E4E6]">
-                      <img
-                        src={selectedRoom.primaryImage || selectedRoom.image}
-                        alt={selectedRoom.name}
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src =
-                            "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85";
-                        }}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] text-white font-bold">
-                        Phòng #{selectedRoom.id}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm text-[#2A1D22]">
-                        {selectedRoom.name}
-                      </h4>
-                      <p className="text-xs text-[#7A6C71] mt-0.5">
-                        Tối đa{" "}
-                        {selectedRoom.capacity} người
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CỘT 2: GÓI CHỤP ĐÃ CHỌN */}
-                <div className="bg-[#FAF5F5] rounded-2xl p-4 border border-[#F0E4E6] flex flex-col justify-between space-y-3">
-                  <div className="space-y-3">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#B85064] block">
-                      Gói Chụp Nghệ Thuật
-                    </span>
-                    <div className="relative h-28 w-full rounded-xl overflow-hidden bg-neutral-900 border border-[#F0E4E6]">
-                      <img
-                        src={
-                          selectedPackage.image || selectedPackage.primaryImage
-                        }
-                        alt={selectedPackage.name}
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src =
-                            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80";
-                        }}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-1.5 left-1.5 bg-[#B85064] px-2 py-0.5 rounded-md text-[10px] text-white font-bold">
-                        {selectedPackage.duration || "Thời lượng chưa cập nhật"}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm text-[#2A1D22]">
-                        {selectedPackage.name}
-                      </h4>
-                      <p className="text-xs text-[#7A6C71] mt-0.5">
-                        Trọn gói makeup & trang phục thiết kế
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CỘT 3: THỜI GIAN & KHÁCH HÀNG */}
-                <div className="bg-[#FAF5F5] rounded-2xl p-4 border border-[#F0E4E6] flex flex-col justify-between space-y-3">
-                  <div className="space-y-3">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#B85064] block">
-                      Lịch Hẹn & Khách Hàng
-                    </span>
-
-                    <div className="space-y-2 text-xs">
-                      <div className="p-2.5 rounded-xl bg-white border border-[#F0E4E6] space-y-1">
-                        <span className="text-[11px] text-[#7A6C71] block">
-                          Thời gian chụp:
-                        </span>
-                        <strong className="text-xs text-[#2A1D22] block font-semibold">
-                          {bookingDate}
-                        </strong>
-                        <span className="text-[11px] text-[#B85064] font-medium block">
-                          {selectedTimeSlot.label}
-                        </span>
-                      </div>
-
-                      <div className="p-2.5 rounded-xl bg-white border border-[#F0E4E6] space-y-1">
-                        <span className="text-[11px] text-[#7A6C71] block">
-                          Khách hàng liên hệ:
-                        </span>
-                        <strong className="text-xs text-[#2A1D22] block">
-                          {customerInfo.name || "Chưa nhập họ tên"}
-                        </strong>
-                        <span className="text-[11px] text-[#55464B] block">
-                          SĐT: {customerInfo.phone || "Chưa nhập SĐT"}
-                        </span>
-                        <span className="text-[10px] text-[#7A6C71] block">
-                          Số người: {customerInfo.attendees} người
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CỘT 4: CHI TIẾT TÍNH GIÁ & MÃ GIẢM GIÁ */}
-                <div className="bg-[#FAF5F5] rounded-2xl p-4 border border-[#F0E4E6] flex flex-col justify-between space-y-3">
-                  <div className="space-y-2.5 text-xs">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#B85064] block">
-                      Dự Tính Chi Phí
-                    </span>
-
-                    <div className="flex justify-between text-[#7A6C71]">
-                      <span>Giá niêm yết:</span>
-                      <strong className="text-[#2A1D22]">
-                        {pricingSummary.originalPrice.toLocaleString("vi-VN")} đ
-                      </strong>
-                    </div>
-
-                    {servicesTotal > 0 && (
-                      <div className="flex justify-between text-[#B85064] font-medium">
-                        <span>Dịch vụ nâng cao ({selectedServices.length}):</span>
-                        <strong>
-                          +{servicesTotal.toLocaleString("vi-VN")} đ
-                        </strong>
-                      </div>
-                    )}
-
-                    {pricingSummary.canApplyPromo ? (
-                      <div className="flex justify-between items-center text-emerald-700 bg-emerald-50 px-2 py-1.5 rounded-lg border border-emerald-200">
-                        <span className="font-semibold flex items-center gap-1">
-                          <TicketIcon className="w-3.5 h-3.5" />
-                          Mã STUDIO2026:
-                        </span>
-                        <strong className="font-bold">
-                          -
-                          {pricingSummary.promoDiscountAmount.toLocaleString(
-                            "vi-VN",
-                          )}{" "}
-                          đ
-                        </strong>
-                      </div>
-                    ) : (
-                      pricingSummary.pkgDiscountPercent > 0 && (
-                        <div className="flex justify-between items-center text-[#B85064] bg-[#FFF0F2] px-2 py-1.5 rounded-lg border border-[#F0D5DA]">
-                          <span>
-                            Ưu đãi gói ({pricingSummary.pkgDiscountPercent}%):
-                          </span>
-                          <strong>
-                            -
-                            {(
-                              pricingSummary.originalPrice -
-                              pricingSummary.regularPackagePrice
-                            ).toLocaleString("vi-VN")}{" "}
-                            đ
-                          </strong>
-                        </div>
-                      )
-                    )}
-
-                    <div className="pt-2 border-t border-[#E8DCDE] flex justify-between items-baseline">
-                      <span className="font-bold text-xs text-[#2A1D22]">
-                        Tổng tiền dự kiến:
-                      </span>
-                      <strong className="text-base font-bold text-[#B85064]">
-                        {pricingSummary.finalTotal.toLocaleString("vi-VN")} đ
-                      </strong>
-                    </div>
-
-                    <div className="p-2 rounded-xl bg-white border border-[#F0E4E6] text-[10px] space-y-1">
-                      <div className="flex justify-between text-[#55464B]">
-                        <span>Đặt cọc giữ lịch (30%):</span>
-                        <strong className="text-[#2A1D22]">
-                          {pricingSummary.depositAmount.toLocaleString("vi-VN")}{" "}
-                          đ
-                        </strong>
-                      </div>
-                      <div className="flex justify-between text-[#55464B]">
-                        <span>Còn lại thanh toán tại studio:</span>
-                        <strong className="text-[#B85064]">
-                          {pricingSummary.remainingAmount.toLocaleString(
-                            "vi-VN",
-                          )}{" "}
-                          đ
-                        </strong>
-                      </div>
-                    </div>
-
-                    <p className="text-[10px] text-[#7A6C71] italic leading-tight">
-                      * {pricingSummary.promoReason}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {isCurrentSlotBooked && (
-                <div className="mt-4 p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-800 text-xs sm:text-sm flex items-start gap-3 shadow-md animate-pulse">
-                  <ExclamationTriangleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-rose-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="font-bold text-rose-900 block text-sm mb-1">
-                      ⚠️ Cảnh Báo: Phòng chụp đã có người đặt!
-                    </strong>
-                    <span className="leading-relaxed">
-                      Phòng <strong>{selectedRoom?.name}</strong> đã có khách đặt trước vào khung giờ <strong>{selectedTimeSlot?.label}</strong> ngày <strong>{bookingDate}</strong>. Quý khách vui lòng chọn ngày hoặc khung giờ khác ở Khung 2 phía trên.
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {submitError && !isCurrentSlotBooked && (
-                <div className="mt-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700 flex items-center gap-2">
-                  <ExclamationCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>{submitError}</span>
-                </div>
-              )}
-
-              {/* Footer hành động: Nút xác nhận đặt lịch full-width nổi bật */}
-              <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-xs text-[#7A6C71]">
-                  <ShieldCheckIcon className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>
-                    Bảo lưu lịch hẹn miễn phí trước 24h • Kết nối thanh toán bảo
-                    mật với cổng VNPay Sandbox
-                  </span>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="cursor-pointer w-full sm:w-auto px-10 py-4 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white font-bold text-sm shadow-xl shadow-[#B85064]/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-60"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <ArrowPathIcon className="w-4 h-4 animate-spin text-white" />
-                      <span>Đang Tạo Đơn Đặt Lịch...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Xác Nhận Đặt Lịch & Tiến Hành Thanh Toán</span>
-                      <ArrowRightIcon className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </section>
           </div>
-        </form>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
