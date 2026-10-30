@@ -16,7 +16,6 @@ import {
   CameraIcon,
   UserIcon,
   LockClosedIcon,
-  TrashIcon,
 } from "@heroicons/react/24/solid";
 
 import BlurText from "../../components/animations/BlurText";
@@ -27,7 +26,7 @@ import {
   ScatteredPetals,
 } from "../../components/common/FloralDecorations";
 import { ROUTES } from "../../routes/web";
-import axiosCustomer, { customerAuth } from "../../lib/axiosCustomer";
+import { customerAuth } from "../../lib/axiosCustomer";
 import customerReviewService from "../../services/user/reviewService";
 
 const ITEMS_PER_PAGE = 6;
@@ -52,19 +51,6 @@ export default function ReviewsPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [userBookings, setUserBookings] = useState([]);
-  const [selectedBookingId, setSelectedBookingId] = useState("");
-  const [isLoadingBookings, setIsLoadingBookings] = useState(false);
-  const [bookingErrorMsg, setBookingErrorMsg] = useState("");
-
-  // Modal Sửa & Xóa Đánh Giá Của Bản Thân
-  const [editingReview, setEditingReview] = useState(null);
-  const [editRating, setEditRating] = useState(5);
-  const [editComment, setEditComment] = useState("");
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [updateError, setUpdateError] = useState("");
-  const [deletingReviewId, setDeletingReviewId] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const reviewsSectionRef = useRef(null);
   const ratingDropdownRef = useRef(null);
@@ -127,18 +113,16 @@ export default function ReviewsPage() {
     };
   }, []);
 
-  // Tính toán số liệu thống kê đầy đủ 1 - 5 sao từ API CSDL
+  // Tính toán số liệu thống kê
   const stats = useMemo(() => {
     const total = reviews.length;
     if (total === 0)
       return {
-        avg: "5.0",
+        avg: 5.0,
         total: 0,
         count5: 0,
         count4: 0,
         count3: 0,
-        count2: 0,
-        count1: 0,
         satisfaction: 100,
       };
 
@@ -154,15 +138,9 @@ export default function ReviewsPage() {
     const count3 = reviews.filter(
       (r) => Math.round(Number(r.rating) || 5) === 3,
     ).length;
-    const count2 = reviews.filter(
-      (r) => Math.round(Number(r.rating) || 5) === 2,
-    ).length;
-    const count1 = reviews.filter(
-      (r) => Math.round(Number(r.rating) || 5) === 1,
-    ).length;
     const satisfaction = (((count5 + count4) / total) * 100).toFixed(1);
 
-    return { avg, total, count5, count4, count3, count2, count1, satisfaction };
+    return { avg, total, count5, count4, count3, satisfaction };
   }, [reviews]);
 
   // Đếm số lượng theo từng mức sao cho menu xổ xuống
@@ -416,9 +394,8 @@ export default function ReviewsPage() {
               </div>
             </div>
 
-            {/* Star breakdown bar (Đầy đủ 1 đến 5 sao theo CSDL API) */}
+            {/* Star breakdown bar */}
             <div className="space-y-2 pt-3 border-t border-[#F0E4E6]">
-              {/* 5 sao */}
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">5 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
@@ -434,7 +411,6 @@ export default function ReviewsPage() {
                 </span>
               </div>
 
-              {/* 4 sao */}
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">4 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
@@ -450,7 +426,6 @@ export default function ReviewsPage() {
                 </span>
               </div>
 
-              {/* 3 sao */}
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">3 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
@@ -463,38 +438,6 @@ export default function ReviewsPage() {
                 </div>
                 <span className="w-8 text-right font-bold text-[#2A1D22]">
                   {stats.count3}
-                </span>
-              </div>
-
-              {/* 2 sao */}
-              <div className="flex items-center gap-3 text-xs">
-                <span className="w-12 text-[#3E2F35] font-semibold">2 sao</span>
-                <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700"
-                    style={{
-                      width: `${(stats.count2 / (stats.total || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="w-8 text-right font-bold text-[#2A1D22]">
-                  {stats.count2}
-                </span>
-              </div>
-
-              {/* 1 sao */}
-              <div className="flex items-center gap-3 text-xs">
-                <span className="w-12 text-[#3E2F35] font-semibold">1 sao</span>
-                <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700"
-                    style={{
-                      width: `${(stats.count1 / (stats.total || 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-                <span className="w-8 text-right font-bold text-[#2A1D22]">
-                  {stats.count1}
                 </span>
               </div>
             </div>
@@ -869,49 +812,24 @@ export default function ReviewsPage() {
                       </div>
                     </div>
 
-                    {/* Bên phải: Hiển thị số sao họ đánh giá & nút Sửa / Xóa cho bài của mình */}
-                    <div className="flex items-center gap-3 self-start sm:self-auto shrink-0 flex-wrap">
-                      <div className="flex items-center gap-2 bg-[#FAF5F5] border border-[#F0E4E6] px-3.5 py-1.5 rounded-full">
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <StarIcon
-                              key={i}
-                              className={`w-4 h-4 ${
-                                i < ratingCount
-                                  ? "text-amber-400 fill-amber-400"
-                                  : "text-neutral-200"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs font-bold text-[#B85064] ml-1">
-                          {rev.rating ? Number(rev.rating).toFixed(1) : "5.0"} / 5.0
-                        </span>
+                    {/* Bên phải: Hiển thị số sao họ đánh giá */}
+                    <div className="flex items-center gap-2 self-start sm:self-auto bg-[#FAF5F5] border border-[#F0E4E6] px-3.5 py-1.5 rounded-full shrink-0">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <StarIcon
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < ratingCount
+                                ? "text-amber-400 fill-amber-400"
+                                : "text-neutral-200"
+                            }`}
+                          />
+                        ))}
                       </div>
-
-                      {/* Nút Sửa / Xóa đánh giá của bản thân */}
-                      {isOwnReview(rev) && (
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(rev)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#B85064] bg-[#FDF0F3] hover:bg-[#FBE4E8] border border-[#F5D5DC] transition-all cursor-pointer shadow-xs"
-                            title="Sửa đánh giá của bạn"
-                          >
-                            <PencilSquareIcon className="w-3.5 h-3.5" />
-                            <span>Sửa</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setDeletingReviewId(rev.id)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all cursor-pointer shadow-xs"
-                            title="Xóa đánh giá của bạn"
-                          >
-                            <TrashIcon className="w-3.5 h-3.5" />
-                            <span>Xóa</span>
-                          </button>
-                        </div>
-                      )}
+                      <span className="text-xs font-bold text-[#B85064] ml-1">
+                        {rev.rating ? Number(rev.rating).toFixed(1) : "5.0"} /
+                        5.0
+                      </span>
                     </div>
                   </div>
 
@@ -1161,34 +1079,6 @@ export default function ReviewsPage() {
                 </div>
               ) : (
                 <form onSubmit={handleCreateReview} className="space-y-4">
-                  {/* Lựa chọn buổi chụp đã hoàn thành */}
-                  {isLoadingBookings ? (
-                    <div className="p-3 bg-neutral-50 rounded-xl text-xs text-[#7A6C71] text-center border border-neutral-200">
-                      Đang kiểm tra các buổi chụp của bạn...
-                    </div>
-                  ) : bookingErrorMsg ? (
-                    <div className="p-3.5 bg-amber-50 rounded-xl text-xs text-amber-800 border border-amber-200 leading-relaxed">
-                      {bookingErrorMsg}
-                    </div>
-                  ) : userBookings.length > 0 ? (
-                    <div>
-                      <label className="block text-xs font-bold text-[#2A1D22] mb-1.5">
-                        Chọn buổi chụp bạn muốn đánh giá: *
-                      </label>
-                      <select
-                        value={selectedBookingId}
-                        onChange={(e) => setSelectedBookingId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-[#FAF5F5] border border-[#F0E4E6] rounded-xl text-xs text-[#2A1D22] font-semibold focus:outline-none focus:border-[#B85064]"
-                      >
-                        {userBookings.map((b) => (
-                          <option key={b.id} value={b.id}>
-                            Đơn #{b.id} - {b.packageName || b.customerNote || 'Buổi chụp Studio'} ({b.bookingDate ? new Date(b.bookingDate).toLocaleDateString('vi-VN') : 'Gần đây'})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : null}
-
                   {/* 1. Rating Selector (Chọn số sao) */}
                   <div>
                     <label className="block text-xs font-bold text-[#2A1D22] mb-1.5">
@@ -1277,7 +1167,7 @@ export default function ReviewsPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={isSubmitting || !newReviewForm.comment.trim() || Boolean(bookingErrorMsg && userBookings.length === 0)}
+                      disabled={isSubmitting || !newReviewForm.comment.trim()}
                       className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmitting ? "Đang gửi..." : "Gửi Đánh Giá Ngay"}
@@ -1347,171 +1237,6 @@ export default function ReviewsPage() {
                 className="cursor-pointer text-xs text-[#8C7D82] hover:text-[#2A1D22] pt-1"
               >
                 Để sau
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL CHỈNH SỬA ĐÁNH GIÁ CỦA BẢN THÂN */}
-      <AnimatePresence>
-        {editingReview && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl max-w-lg w-full p-7 border border-[#F0E4E6] shadow-2xl relative overflow-hidden text-[#2A1D22]"
-            >
-              <div className="flex items-center justify-between pb-4 border-b border-[#F0E4E6] mb-5">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#FDF0F3] border border-[#F5D5DC] flex items-center justify-center text-[#B85064]">
-                    <PencilSquareIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[#2A1D22] font-serif-luxury">
-                      Chỉnh Sửa Đánh Giá Của Bạn
-                    </h3>
-                    <p className="text-[11px] text-[#7A6C71]">
-                      Cập nhật số sao và cảm nhận trải nghiệm buổi chụp
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setEditingReview(null)}
-                  className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-500 flex items-center justify-center transition-all cursor-pointer"
-                >
-                  <XMarkIcon className="w-4 h-4" />
-                </button>
-              </div>
-
-              {updateError && (
-                <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                  {updateError}
-                </div>
-              )}
-
-              <form onSubmit={handleUpdateReview} className="space-y-4">
-                {/* 1. Rating Selector */}
-                <div>
-                  <label className="block text-xs font-bold text-[#2A1D22] mb-1.5">
-                    Đánh giá số sao:
-                  </label>
-                  <div className="flex items-center gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setEditRating(star)}
-                        className="p-1 text-2xl transition-transform hover:scale-125 focus:outline-none cursor-pointer"
-                      >
-                        <StarIcon
-                          className={`w-7 h-7 ${
-                            star <= editRating
-                              ? "text-amber-400 fill-amber-400"
-                              : "text-neutral-200"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                    <span className="text-xs font-bold text-[#B85064] ml-2">
-                      {editRating}.0 / 5.0 Sao
-                    </span>
-                  </div>
-                </div>
-
-                {/* 2. Customer Name (Locked) */}
-                <div>
-                  <label className="block text-xs font-bold text-[#2A1D22] mb-1">
-                    Người đánh giá
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    disabled
-                    value={editingReview.customerName || currentUser?.fullname || "Bạn"}
-                    className="w-full px-3.5 py-2.5 bg-neutral-100 border border-[#E8DCDD] rounded-xl text-xs text-[#2A1D22] font-semibold cursor-not-allowed select-none"
-                  />
-                </div>
-
-                {/* 3. Comment */}
-                <div>
-                  <label className="block text-xs font-bold text-[#2A1D22] mb-1">
-                    Nội dung đánh giá *
-                  </label>
-                  <textarea
-                    required
-                    rows={5}
-                    value={editComment}
-                    onChange={(e) => setEditComment(e.target.value)}
-                    placeholder="Nhập nội dung chỉnh sửa đánh giá..."
-                    className="w-full px-3.5 py-2.5 bg-[#FAF5F5] border border-[#F0E4E6] rounded-xl text-xs focus:outline-none focus:border-[#B85064] resize-none leading-relaxed"
-                  />
-                </div>
-
-                {/* Buttons */}
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#F0E4E6]">
-                  <button
-                    type="button"
-                    onClick={() => setEditingReview(null)}
-                    className="px-4 py-2.5 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 cursor-pointer"
-                  >
-                    Hủy Bỏ
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isUpdating || !editComment.trim()}
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer"
-                  >
-                    {isUpdating ? "Đang lưu..." : "Cập Nhật Đánh Giá"}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* POPUP XÁC NHẬN XÓA ĐÁNH GIÁ */}
-      {deletingReviewId && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
-          onClick={() => !isDeleting && setDeletingReviewId(null)}
-        >
-          <div
-            className="relative w-full max-w-sm rounded-3xl bg-white border border-[#F2E8E9] shadow-2xl p-6 sm:p-7 text-center overflow-hidden text-[#2A1D22]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-4 text-rose-600 shadow-sm">
-              <TrashIcon className="w-7 h-7" />
-            </div>
-
-            <h3 className="text-lg font-bold font-serif-luxury text-[#1F1418] mb-2">
-              Xác Nhận Xóa Đánh Giá?
-            </h3>
-            <p className="text-xs text-[#7A6C71] leading-relaxed mb-6">
-              Bạn có chắc chắn muốn xóa bài đánh giá này? Hành động này sẽ xóa dữ liệu trên hệ thống CSDL và không thể hoàn tác.
-            </p>
-
-            <div className="space-y-2.5">
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={handleConfirmDeleteReview}
-                className="cursor-pointer w-full py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-md shadow-rose-600/25 flex items-center justify-center gap-1.5 disabled:opacity-50"
-              >
-                <span>{isDeleting ? "Đang xóa..." : "Xóa Bài Đánh Giá"}</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={() => setDeletingReviewId(null)}
-                className="cursor-pointer w-full py-2.5 rounded-full border border-[#F0E4E6] text-[#4A3C41] hover:bg-[#FAF5F5] text-xs font-semibold transition-colors"
-              >
-                Hủy Bỏ
               </button>
             </div>
           </div>
