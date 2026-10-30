@@ -810,10 +810,11 @@ export default function PackageDetailPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (!customerAuth.isAuthenticated()) {
+                    const isAuth = customerAuth.isAuthenticated();
+                    const user = customerAuth.getUser();
+                    if (!isAuth || !user || !user.role) {
                       setRequireLoginModalOpen(true);
                     } else {
-                      const user = customerAuth.getUser();
                       setCurrentCustomer(user);
                       setNewReviewForm({
                         name: user?.fullname || user?.username || 'Khách Hàng',
@@ -928,6 +929,49 @@ export default function PackageDetailPage() {
                     <p className="text-xs sm:text-sm text-[#4A3C41] leading-relaxed font-light">
                       "{rev.comment}"
                     </p>
+
+                    {/* Phản hồi từ Studio / Nhân viên */}
+                    {rev.adminReply && (
+                      <div className="p-3 rounded-2xl bg-[#FDF0F3]/80 border border-[#F5D5DC] text-[11px] text-[#2A1D22]">
+                        <div className="flex items-center gap-1.5 text-[#B85064] font-bold mb-1">
+                          <CheckIcon className="w-3.5 h-3.5 text-[#B85064]" />
+                          <span>PhotoStudio phản hồi:</span>
+                        </div>
+                        <p className="text-[#3E2F35] font-light leading-relaxed italic">
+                          "{rev.adminReply}"
+                        </p>
+                      </div>
+                    )}
+
+                    {rev.employeeReviews &&
+                      rev.employeeReviews.some((er) => er.adminReply) && (
+                        <div className="space-y-2">
+                          {rev.employeeReviews
+                            .filter((er) => er.adminReply)
+                            .map((er, erIdx) => (
+                              <div
+                                key={er.id || erIdx}
+                                className="p-3 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] text-[11px] text-[#2A1D22]"
+                              >
+                                <div className="flex items-center gap-1.5 text-[#B85064] font-bold mb-1">
+                                  <CheckIcon className="w-3.5 h-3.5 text-[#B85064]" />
+                                  <span>
+                                    {er.employeeName || 'Nhân viên'}
+                                    {er.employeePosition && (
+                                      <span className="font-normal text-[#7A6C71] ml-1">
+                                        ({er.employeePosition})
+                                      </span>
+                                    )}{' '}
+                                    phản hồi:
+                                  </span>
+                                </div>
+                                <p className="text-[#3E2F35] font-light leading-relaxed italic">
+                                  "{er.adminReply}"
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      )}
 
                     <div className="pt-2 border-t border-[#F8EFEF] flex items-center justify-between text-[11px] text-[#8C7D82]">
                       <span className="flex items-center gap-1 text-[#2EA46D]">
@@ -1426,10 +1470,10 @@ export default function PackageDetailPage() {
             </div>
 
             <h3 className="text-lg font-bold font-serif-luxury text-[#1F1418] mb-2">
-              Yêu Cầu Đăng Nhập
+              Yêu Cầu Tài Khoản Hợp Lệ
             </h3>
             <p className="text-xs text-[#7A6C71] leading-relaxed mb-6">
-              Bạn cần đăng nhập tài khoản khách hàng để viết đánh giá cho gói chụp <strong>{pkg.name}</strong>. Đánh giá sẽ được ghi nhận cùng tên tài khoản của bạn.
+              Tính năng đánh giá chỉ dành cho người dùng đã đăng ký và có vai trò (role) trong hệ thống Studio. Vui lòng đăng nhập để gửi đánh giá cho gói chụp <strong>{pkg.name}</strong>.
             </p>
 
             <div className="space-y-2.5">
