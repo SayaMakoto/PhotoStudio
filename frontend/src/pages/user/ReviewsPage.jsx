@@ -394,8 +394,9 @@ export default function ReviewsPage() {
               </div>
             </div>
 
-            {/* Star breakdown bar */}
+            {/* Star breakdown bar (Đầy đủ 1 đến 5 sao theo CSDL API) */}
             <div className="space-y-2 pt-3 border-t border-[#F0E4E6]">
+              {/* 5 sao */}
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">5 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
@@ -411,6 +412,7 @@ export default function ReviewsPage() {
                 </span>
               </div>
 
+              {/* 4 sao */}
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">4 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
@@ -426,6 +428,7 @@ export default function ReviewsPage() {
                 </span>
               </div>
 
+              {/* 3 sao */}
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">3 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
@@ -438,6 +441,38 @@ export default function ReviewsPage() {
                 </div>
                 <span className="w-8 text-right font-bold text-[#2A1D22]">
                   {stats.count3}
+                </span>
+              </div>
+
+              {/* 2 sao */}
+              <div className="flex items-center gap-3 text-xs">
+                <span className="w-12 text-[#3E2F35] font-semibold">2 sao</span>
+                <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(stats.count2 / (stats.total || 1)) * 100}%`,
+                    }}
+                  />
+                </div>
+                <span className="w-8 text-right font-bold text-[#2A1D22]">
+                  {stats.count2}
+                </span>
+              </div>
+
+              {/* 1 sao */}
+              <div className="flex items-center gap-3 text-xs">
+                <span className="w-12 text-[#3E2F35] font-semibold">1 sao</span>
+                <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(stats.count1 / (stats.total || 1)) * 100}%`,
+                    }}
+                  />
+                </div>
+                <span className="w-8 text-right font-bold text-[#2A1D22]">
+                  {stats.count1}
                 </span>
               </div>
             </div>
