@@ -65,12 +65,10 @@ export default function CustomerReviewsSection({
       if (replyFilter === 'replied' && !hasReply) return false;
       if (replyFilter === 'unreplied' && hasReply) return false;
 
-      // Lọc số sao
+      // Lọc số sao (Đầy đủ 1 đến 5 sao)
       if (ratingFilter !== 'all') {
-        const starVal = Math.floor(Number(item.rating) || 0);
-        if (ratingFilter === '5' && starVal !== 5) return false;
-        if (ratingFilter === '4' && starVal !== 4) return false;
-        if (ratingFilter === '3' && starVal > 3) return false;
+        const starVal = Math.round(Number(item.rating) || 0);
+        if (starVal !== Number(ratingFilter)) return false;
       }
 
       // Tìm kiếm từ khóa
@@ -348,16 +346,18 @@ export default function CustomerReviewsSection({
               </button>
             ))}
 
-            {/* Rating Stars Filter */}
+            {/* Rating Stars Filter (Đầy đủ từ 1 đến 5 sao) */}
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
               className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#FAF5F5] border border-[#F0E4E6] text-[#7A6C71] focus:border-[#B85064] focus:outline-none shrink-0"
             >
               <option value="all">Tất cả sao</option>
-              <option value="5">★ 5.0 Sao</option>
-              <option value="4">★ 4.0 - 4.9 Sao</option>
-              <option value="3">★ ≤ 3.9 Sao</option>
+              <option value="5">★ 5 Sao</option>
+              <option value="4">★ 4 Sao</option>
+              <option value="3">★ 3 Sao</option>
+              <option value="2">★ 2 Sao</option>
+              <option value="1">★ 1 Sao</option>
             </select>
           </div>
         </div>

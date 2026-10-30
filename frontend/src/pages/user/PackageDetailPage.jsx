@@ -850,21 +850,20 @@ export default function PackageDetailPage() {
 
                   <div className="hidden md:block h-16 w-px bg-[#F0D5DC]" />
 
-                  <div className="hidden md:block space-y-1.5 text-xs text-[#55464B]">
-                    <div className="flex items-center gap-2">
-                      <span className="w-12 text-[11px] font-semibold">5 sao</span>
-                      <div className="w-36 h-2 bg-white rounded-full overflow-hidden border border-[#F0D5DC]">
-                        <div className="h-full bg-[#B85064] w-[95%]" />
-                      </div>
-                      <span className="text-[10px] text-[#8C7D82]">95%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-12 text-[11px] font-semibold">4 sao</span>
-                      <div className="w-36 h-2 bg-white rounded-full overflow-hidden border border-[#F0D5DC]">
-                        <div className="h-full bg-[#B85064] w-[5%]" />
-                      </div>
-                      <span className="text-[10px] text-[#8C7D82]">5%</span>
-                    </div>
+                  <div className="hidden md:block space-y-1 text-xs text-[#55464B]">
+                    {[5, 4, 3, 2, 1].map((s) => {
+                      const count = reviews.filter((r) => Math.round(Number(r.rating) || 5) === s).length;
+                      const percent = reviews.length > 0 ? Math.round((count / reviews.length) * 100) : (s === 5 ? 100 : 0);
+                      return (
+                        <div key={s} className="flex items-center gap-2">
+                          <span className="w-10 text-[11px] font-semibold">{s} sao</span>
+                          <div className="w-32 h-1.5 bg-white rounded-full overflow-hidden border border-[#F0D5DC]">
+                            <div className="h-full bg-[#B85064] transition-all duration-500" style={{ width: `${percent}%` }} />
+                          </div>
+                          <span className="text-[10px] text-[#8C7D82] w-7 text-right">{percent}%</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
