@@ -56,6 +56,20 @@ public class BookingController {
         return ResponseEntity.ok(service.updateStatus(id, targetStatus));
     }
 
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponse> cancel(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+        return ResponseEntity.ok(service.updateStatus(id, "cancelled"));
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponse> cancelPut(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+        return ResponseEntity.ok(service.updateStatus(id, "cancelled"));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

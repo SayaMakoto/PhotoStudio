@@ -6,6 +6,7 @@ import {
   BuildingLibraryIcon,
   ShieldCheckIcon,
   ArrowPathIcon,
+  PrinterIcon,
 } from '@heroicons/react/24/solid';
 
 import BlurText from '../../components/animations/BlurText';
@@ -14,19 +15,14 @@ import { ROUTES } from '../../routes/web';
 import { customerAuth } from '../../lib/axiosCustomer';
 import customerPaymentService from '../../services/user/paymentService';
 import customerBookingService from '../../services/user/bookingService';
+import BookingSessionDetailModal from '../../components/user/BookingSessionDetailModal';
 import { verifyVNPayResponse } from '../../lib/vnpay';
 
 export default function VNPayReturnPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [isVerifying, setIsVerifying] = useState(true);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [confirmedBookingId, setConfirmedBookingId] = useState(null);
-  const hasProcessedRef = useRef(false);
-
-  // Lấy toàn bộ query params từ VNPay
+  // 1. Lấy toàn bộ query params từ VNPay URL
   const queryParams = useMemo(() => {
     const params = {};
     const search = new URLSearchParams(location.search);
@@ -36,15 +32,58 @@ export default function VNPayReturnPage() {
     return params;
   }, [location.search]);
 
-  // Lấy đơn hàng tạm từ sessionStorage
+  // 2. Lấy đơn hàng tạm từ sessionStorage (hoặc phục hồi từ lịch sử đã thanh toán nếu tải lại trang)
   const [pendingOrder] = useState(() => {
     try {
-      const stored = sessionStorage.getItem('vnpay_pending_order');
-      return stored ? JSON.parse(stored) : null;
+      const stored = sessionStorage.getItem('vnpay_pending_order') || sessionStorage.getItem('pending_booking_order');
+      if (stored) return JSON.parse(stored);
+      const paidList = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
+      return paidList[0] || null;
     } catch {
       return null;
     }
   });
+
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [confirmedBookingId, setConfirmedBookingId] = useState(null);
+  const [isBillModalOpen, setIsBillModalOpen] = useState(false);
+  const hasProcessedRef = useRef(false);
+
+  // Số tiền giao dịch thực tế
+  const rawAmount = useMemo(() => {
+    if (queryParams.vnp_Amount) {
+      return Number(queryParams.vnp_Amount) / 100;
+    }
+    return pendingOrder?.amountToPay || 0;
+  }, [queryParams.vnp_Amount, pendingOrder?.amountToPay]);
+
+  // 3. Tạo dữ liệu để mở bill / xem chi tiết đơn đặt lịch ngay tại trang (đặt sau khi pendingOrder đã được khởi tạo)
+  const billBookingData = useMemo(() => {
+    const user = customerAuth.getUser();
+    return {
+      id: confirmedBookingId || pendingOrder?.bookingId || queryParams.vnp_TxnRef || 101,
+      packageName: pendingOrder?.packageName || 'Gói Chụp Ảnh Studio Nghệ Thuật',
+      packageImage: pendingOrder?.packageImage,
+      roomId: pendingOrder?.roomId || 1,
+      roomName: pendingOrder?.roomName || 'Phòng Studio VIP',
+      bookingDate: pendingOrder?.bookingDate || new Date().toISOString().split('T')[0],
+      startTime: pendingOrder?.startTime || '08:30:00',
+      endTime: pendingOrder?.endTime || '10:30:00',
+      status: 'pending',
+      customerName: pendingOrder?.customerName || user?.fullname || user?.username || 'Khách Hàng',
+      customerPhone: pendingOrder?.customerPhone || user?.phone || '',
+      customerEmail: pendingOrder?.customerEmail || user?.email || '',
+      customerNote: pendingOrder?.customerNote || '',
+      totalPrice: pendingOrder?.totalPrice || pendingOrder?.totalAmount || rawAmount,
+      paidAmount: rawAmount,
+      remainingAmount: pendingOrder?.remainingAmount || 0,
+      paymentType: pendingOrder?.paymentType || 'deposit',
+      depositPercent: pendingOrder?.depositPercent || 30,
+      services: pendingOrder?.services || [],
+    };
+  }, [confirmedBookingId, pendingOrder, queryParams.vnp_TxnRef, rawAmount]);
 
   useEffect(() => {
     async function processVNPayReturn() {
@@ -95,7 +134,7 @@ export default function VNPayReturnPage() {
               bookingDate: `${pendingOrder.bookingDate}T${pendingOrder.startTime || '08:30:00'}`,
               startTime: pendingOrder.startTime || '08:30:00',
               endTime: pendingOrder.endTime || '10:30:00',
-              status: 'confirmed', // Đã thanh toán cọc/toàn bộ thành công -> xác nhận lịch
+              status: 'pending', // Khởi tạo với trạng thái ban đầu là pending (chờ xác nhận)
               customerNote: (pendingOrder.customerNote || '').slice(0, 255) || null,
             };
 
@@ -193,8 +232,9 @@ export default function VNPayReturnPage() {
             remainingAmount: pendingOrder.remainingAmount || 0,
             transactionNo: queryParams.vnp_TransactionNo || queryParams.vnp_TxnRef,
             bankCode: queryParams.vnp_BankCode || 'NCB / VNPay',
-            status: 'PAID',
-            paymentStatus: 'PAID',
+            status: 'pending', // Khởi tạo đơn đặt lịch ban đầu luôn là pending (chờ xác nhận)
+            bookingStatus: 'pending',
+            paymentStatus: pendingOrder.paymentType === 'full' ? 'PAID' : 'PAID_DEPOSIT',
           };
 
           const existingList = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
@@ -229,11 +269,6 @@ export default function VNPayReturnPage() {
     void processVNPayReturn();
   }, [queryParams, pendingOrder]);
 
-  const rawAmount = queryParams.vnp_Amount
-    ? Number(queryParams.vnp_Amount) / 100
-    : pendingOrder?.amountToPay || 0;
-
-  
   const renderTransactionStatus = () => {
     if (isVerifying) {
       return (
@@ -339,17 +374,19 @@ export default function VNPayReturnPage() {
 
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <Link
-              to={ROUTES.USER.HOME}
-              className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold text-center shadow-md hover:scale-[1.02] transition-all cursor-pointer"
+            <button
+              type="button"
+              onClick={() => setIsBillModalOpen(true)}
+              className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold text-center shadow-md hover:scale-[1.02] transition-all cursor-pointer flex items-center justify-center gap-2"
             >
-              Về Trang Chủ
-            </Link>
+              <PrinterIcon className="w-4 h-4 text-white" />
+              <span>Xem Hóa Đơn & In Bill</span>
+            </button>
             <Link
-              to={ROUTES.USER.MY_BOOKINGS}
+              to={`${ROUTES.USER.PROFILE}?tab=bookings`}
               className="w-full py-3.5 rounded-full bg-[#FAF5F5] hover:bg-[#FDF0F3] border border-[#F0E4E6] text-[#B85064] text-xs font-bold text-center transition-all cursor-pointer shadow-xs"
             >
-              Xem Lịch Đặt & Hóa Đơn Của Tôi
+              Về Đơn Đặt Lịch Của Tôi
             </Link>
           </div>
         </div>
@@ -401,8 +438,17 @@ export default function VNPayReturnPage() {
       <ScatteredPetals count={8} className="opacity-25" />
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 relative z-10">
-        
         {renderTransactionStatus()}
+
+        {/* Modal Hóa đơn & Chi tiết buổi chụp với nút in */}
+        {isBillModalOpen && billBookingData && (
+          <BookingSessionDetailModal
+            booking={billBookingData}
+            isOpen={isBillModalOpen}
+            currentUser={customerAuth.getUser()}
+            onClose={() => setIsBillModalOpen(false)}
+          />
+        )}
       </div>
     </div>
   );

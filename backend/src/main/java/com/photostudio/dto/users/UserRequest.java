@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.regex.Pattern;
 
 @Getter
@@ -41,6 +42,10 @@ public class UserRequest {
 
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+    // Số điện thoại Việt Nam chuẩn: Bắt đầu bằng 0, số thứ hai là 3, 5, 7, 8, 9, độ dài 10 chữ số
+    private static final Pattern PHONE_PATTERN =
+            Pattern.compile("^0[3|5|7|8|9][0-9]{8}$");
 
     public void validate() {
         validate(true);
@@ -91,9 +96,26 @@ public class UserRequest {
             throw new IllegalArgumentException("Họ và tên tối đa 255 ký tự");
         }
 
+        // Kiểm tra số điện thoại: Bắt đầu bằng số 0, số thứ hai là 3, 5, 7, 8, 9, độ dài đúng 10 số
         if (phone != null && !phone.isBlank()) {
-            if (phone.length() > 11) {
-                throw new IllegalArgumentException("Số điện thoại tối đa 11 chữ số");
+            String trimmedPhone = phone.trim().replaceAll("[\\s.-]", "");
+            if (trimmedPhone.startsWith("+84")) {
+                trimmedPhone = "0" + trimmedPhone.substring(3);
+            }
+            if (!PHONE_PATTERN.matcher(trimmedPhone).matches()) {
+                throw new IllegalArgumentException("Số điện thoại phải bắt đầu bằng số 0, số thứ hai là 3, 5, 7, 8, 9 và có đúng 10 chữ số (VD: 0901234567)");
+            }
+        }
+
+        // Kiểm tra ngày sinh: Không được lớn hơn ngày hiện tại và phải từ đủ 13 tuổi trở lên
+        if (dateOfBirth != null) {
+            LocalDate today = LocalDate.now();
+            if (dateOfBirth.isAfter(today)) {
+                throw new IllegalArgumentException("Ngày sinh không được lớn hơn ngày hiện tại");
+            }
+            int age = Period.between(dateOfBirth, today).getYears();
+            if (age < 13) {
+                throw new IllegalArgumentException("Người dùng phải từ đủ 13 tuổi trở lên");
             }
         }
 
@@ -102,7 +124,10 @@ public class UserRequest {
         }
 
         if (avatar != null && avatar.length() > 255) {
-            throw new IllegalArgumentException("Đường dẫn ảnh đại diện tối đa 255 ký tự");
+            // Nếu là data URI base64 thì cho phép lưu trữ avatar
+            if (!avatar.startsWith("data:image/")) {
+                throw new IllegalArgumentException("Đường dẫn ảnh đại diện tối đa 255 ký tự");
+            }
         }
     }
 }
