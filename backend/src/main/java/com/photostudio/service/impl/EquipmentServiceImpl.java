@@ -6,8 +6,6 @@ import com.photostudio.dto.equipment.EquipmentResponse;
 import com.photostudio.mapper.EquipmentMapper;
 import com.photostudio.model.equipment.Equipment;
 import com.photostudio.model.equipment.EquipmentType;
-import com.photostudio.model.bookings.BookingEquipmentStatus;
-import com.photostudio.repository.BookingEquipmentRepository;
 import com.photostudio.repository.EquipmentRepository;
 import com.photostudio.service.EquipmentService;
 
@@ -21,13 +19,8 @@ import java.util.List;
 public class EquipmentServiceImpl implements EquipmentService {
 
     private final EquipmentRepository repository;
-    private final BookingEquipmentRepository bookingEquipmentRepository;
-
-    public EquipmentServiceImpl(
-            EquipmentRepository repository,
-            BookingEquipmentRepository bookingEquipmentRepository) {
+    public EquipmentServiceImpl(EquipmentRepository repository) {
         this.repository = repository;
-        this.bookingEquipmentRepository = bookingEquipmentRepository;
     }
 
     private Equipment findEntity(Long id) {
@@ -137,11 +130,6 @@ public class EquipmentServiceImpl implements EquipmentService {
     @Transactional
     public void delete(Long id) {
         Equipment equipment = findEntity(id);
-        if (bookingEquipmentRepository.existsByEquipmentIdAndStatus(
-                id, BookingEquipmentStatus.assigned)) {
-            throw new IllegalArgumentException(
-                    "Không thể đưa thiết bị đang được cấp phát vào thùng rác");
-        }
         equipment.setDeletedAt(LocalDateTime.now());
         repository.save(equipment);
     }
@@ -162,10 +150,6 @@ public class EquipmentServiceImpl implements EquipmentService {
         Equipment equipment = repository.findByIdAndDeletedAtIsNotNull(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy thiết bị trong thùng rác có id: " + id));
-        if (bookingEquipmentRepository.existsByEquipment_Id(id)) {
-            throw new IllegalArgumentException(
-                    "Không thể xóa vĩnh viễn thiết bị đã có lịch sử cấp phát");
-        }
         repository.delete(equipment);
     }
 

@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   StarIcon,
   SparklesIcon,
@@ -16,16 +16,18 @@ import {
   CameraIcon,
   UserIcon,
   LockClosedIcon,
-} from '@heroicons/react/24/solid';
+} from "@heroicons/react/24/solid";
 
-import BlurText from '../../components/animations/BlurText';
-import ScrollReveal from '../../components/animations/ScrollReveal';
-import ShinyText from '../../components/animations/ShinyText';
-import CountUp from '../../components/animations/CountUp';
-import { FloralBranchCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
-import { ROUTES } from '../../routes/web';
-import { customerAuth } from '../../lib/axiosCustomer';
-import customerReviewService from '../../services/user/reviewService';
+import BlurText from "../../components/animations/BlurText";
+import ScrollReveal from "../../components/animations/ScrollReveal";
+import CountUp from "../../components/animations/CountUp";
+import {
+  FloralBranchCorner,
+  ScatteredPetals,
+} from "../../components/common/FloralDecorations";
+import { ROUTES } from "../../routes/web";
+import { customerAuth } from "../../lib/axiosCustomer";
+import customerReviewService from "../../services/user/reviewService";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -33,18 +35,18 @@ export default function ReviewsPage() {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedRatingFilter, setSelectedRatingFilter] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedRatingFilter, setSelectedRatingFilter] = useState("all");
   const [isRatingDropdownOpen, setIsRatingDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Modal Viết Đánh Giá
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newReviewForm, setNewReviewForm] = useState({
-    customerName: '',
+    customerName: "",
     rating: 5,
-    packageName: '',
-    comment: '',
+    packageName: "",
+    comment: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -55,12 +57,15 @@ export default function ReviewsPage() {
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (ratingDropdownRef.current && !ratingDropdownRef.current.contains(event.target)) {
+      if (
+        ratingDropdownRef.current &&
+        !ratingDropdownRef.current.contains(event.target)
+      ) {
         setIsRatingDropdownOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Lấy dữ liệu từ CSDL qua API
@@ -76,16 +81,18 @@ export default function ReviewsPage() {
             id: item.id,
             bookingId: item.bookingId || item.id,
             customerId: item.customerId,
-            customerName: item.customerName || 'Khách hàng PhotoStudio',
-            rating: typeof item.rating === 'number' ? item.rating : 5.0,
-            comment: item.comment || '',
+            customerName: item.customerName || "Khách hàng PhotoStudio",
+            rating: typeof item.rating === "number" ? item.rating : 5.0,
+            comment: item.comment || "",
             createdAt: item.createdAt || new Date().toISOString(),
-            packageName: item.packageName || 'Dịch Vụ Nhiếp Ảnh Chuyên Nghiệp',
-            category: item.category || 'portrait',
+            packageName: item.packageName || "Dịch Vụ Nhiếp Ảnh Chuyên Nghiệp",
+            category: item.category || "portrait",
             avatar: item.avatar || null,
             adminReply: item.adminReply || null,
             adminRepliedAt: item.adminRepliedAt || null,
-            employeeReviews: Array.isArray(item.employeeReviews) ? item.employeeReviews : [],
+            employeeReviews: Array.isArray(item.employeeReviews)
+              ? item.employeeReviews
+              : [],
           }));
           setReviews(mapped);
         } else {
@@ -93,7 +100,7 @@ export default function ReviewsPage() {
         }
       })
       .catch((err) => {
-        console.warn('[ReviewsPage] Lỗi khi tải đánh giá từ API:', err.message);
+        console.warn("[ReviewsPage] Lỗi khi tải đánh giá từ API:", err.message);
         setReviews([]);
       })
       .finally(() => {
@@ -108,15 +115,29 @@ export default function ReviewsPage() {
   // Tính toán số liệu thống kê
   const stats = useMemo(() => {
     const total = reviews.length;
-    if (total === 0) return { avg: 5.0, total: 0, count5: 0, count4: 0, count3: 0, satisfaction: 100 };
-    
+    if (total === 0)
+      return {
+        avg: 5.0,
+        total: 0,
+        count5: 0,
+        count4: 0,
+        count3: 0,
+        satisfaction: 100,
+      };
+
     const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 5), 0);
     const avg = (sum / total).toFixed(1);
-    
-    const count5 = reviews.filter((r) => Math.round(Number(r.rating) || 5) === 5).length;
-    const count4 = reviews.filter((r) => Math.round(Number(r.rating) || 5) === 4).length;
-    const count3 = reviews.filter((r) => Math.round(Number(r.rating) || 5) === 3).length;
-    const satisfaction = ((count5 + count4) / total * 100).toFixed(1);
+
+    const count5 = reviews.filter(
+      (r) => Math.round(Number(r.rating) || 5) === 5,
+    ).length;
+    const count4 = reviews.filter(
+      (r) => Math.round(Number(r.rating) || 5) === 4,
+    ).length;
+    const count3 = reviews.filter(
+      (r) => Math.round(Number(r.rating) || 5) === 3,
+    ).length;
+    const satisfaction = (((count5 + count4) / total) * 100).toFixed(1);
 
     return { avg, total, count5, count4, count3, satisfaction };
   }, [reviews]);
@@ -137,11 +158,11 @@ export default function ReviewsPage() {
   const filteredReviews = useMemo(() => {
     return reviews.filter((r) => {
       // 1. Lọc theo Category gói chụp
-      if (selectedCategory !== 'all' && r.category !== selectedCategory) {
+      if (selectedCategory !== "all" && r.category !== selectedCategory) {
         return false;
       }
       // 2. Lọc theo số sao xổ xuống (1, 2, 3, 4, 5 sao)
-      if (selectedRatingFilter !== 'all') {
+      if (selectedRatingFilter !== "all") {
         const reviewStar = Math.round(Number(r.rating) || 5);
         if (reviewStar !== Number(selectedRatingFilter)) {
           return false;
@@ -152,7 +173,10 @@ export default function ReviewsPage() {
   }, [reviews, selectedCategory, selectedRatingFilter]);
 
   // Phân trang
-  const totalPages = Math.max(1, Math.ceil(filteredReviews.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredReviews.length / ITEMS_PER_PAGE),
+  );
   const currentReviews = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredReviews.slice(start, start + ITEMS_PER_PAGE);
@@ -162,7 +186,10 @@ export default function ReviewsPage() {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
       if (reviewsSectionRef.current) {
-        reviewsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        reviewsSectionRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       }
     }
   };
@@ -191,9 +218,9 @@ export default function ReviewsPage() {
 
     // Nếu đã đăng nhập: lấy tên từ tài khoản và khóa lại
     setNewReviewForm({
-      customerName: user.fullname || user.username || 'Khách hàng PhotoStudio',
+      customerName: user.fullname || user.username || "Khách hàng PhotoStudio",
       rating: 5,
-      comment: '',
+      comment: "",
     });
     setIsModalOpen(true);
   };
@@ -217,7 +244,10 @@ export default function ReviewsPage() {
       try {
         await customerReviewService.createReview(payload);
       } catch (apiErr) {
-        console.warn('Gửi API review thất bại, thêm trực tiếp vào giao diện:', apiErr.message);
+        console.warn(
+          "Gửi API review thất bại, thêm trực tiếp vào giao diện:",
+          apiErr.message,
+        );
       }
 
       const createdReview = {
@@ -227,9 +257,9 @@ export default function ReviewsPage() {
         customerName: newReviewForm.customerName,
         rating: payload.rating,
         comment: payload.comment,
-        packageName: 'Đánh Giá Khách Hàng Trực Tiếp',
+        packageName: "Đánh Giá Khách Hàng Trực Tiếp",
         createdAt: new Date().toISOString(),
-        category: selectedCategory !== 'all' ? selectedCategory : 'portrait',
+        category: selectedCategory !== "all" ? selectedCategory : "portrait",
         avatar: user?.avatar || null,
       };
 
@@ -239,9 +269,9 @@ export default function ReviewsPage() {
         setSubmitSuccess(false);
         setIsModalOpen(false);
         setNewReviewForm({
-          customerName: '',
+          customerName: "",
           rating: 5,
-          comment: '',
+          comment: "",
         });
       }, 1500);
     } finally {
@@ -251,7 +281,7 @@ export default function ReviewsPage() {
 
   // Lấy nhãn hiển thị cho dropdown số sao
   const currentRatingOptionLabel = useMemo(() => {
-    if (selectedRatingFilter === 'all') return 'Tất Cả Số Sao';
+    if (selectedRatingFilter === "all") return "Tất Cả Số Sao";
     return `${selectedRatingFilter} Sao (${ratingCounts[selectedRatingFilter] || 0})`;
   }, [selectedRatingFilter, ratingCounts]);
 
@@ -260,52 +290,61 @@ export default function ReviewsPage() {
       {/* Ambient background glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] bg-rose-500/10 rounded-full blur-[170px] pointer-events-none" />
       <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-[#B85064]/5 rounded-full blur-[160px] pointer-events-none" />
-      
+
       {/* Decorative Floral elements */}
-      <FloralBranchCorner position="top-right" className="opacity-20 pointer-events-none" />
-      <FloralBranchCorner position="bottom-left" className="opacity-15 pointer-events-none rotate-180" />
+      <FloralBranchCorner
+        position="top-right"
+        className="opacity-20 pointer-events-none"
+      />
+      <FloralBranchCorner
+        position="bottom-left"
+        className="opacity-15 pointer-events-none rotate-180"
+      />
       <ScatteredPetals count={8} className="opacity-25" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-[#7A6C71] mb-8 font-medium">
-          <Link to={ROUTES.USER.HOME} className="hover:text-[#B85064] transition-colors">
+          <Link
+            to={ROUTES.USER.HOME}
+            className="hover:text-[#B85064] transition-colors"
+          >
             Trang Chủ
           </Link>
           <span>/</span>
-          <span className="text-[#B85064] font-semibold">Đánh Giá Của Khách Hàng</span>
+          <span className="text-[#B85064] font-semibold">
+            Đánh Giá Của Khách Hàng
+          </span>
         </nav>
 
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto mb-14">
           <ScrollReveal direction="down">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-bold uppercase tracking-wider mb-5 shadow-sm">
-              <StarIcon className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" />
-              <ShinyText text="100% ĐÁNH GIÁ THỰC TẾ TỪ CƠ SỞ DỮ LIỆU" speed={4} />
-            </div>
-
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-serif-luxury tracking-tight text-[#2A1D22] mb-6 leading-tight">
-              <BlurText text="Lắng Nghe Cảm Nhận Từ" delay={40} className="inline" />{' '}
+              <BlurText
+                text="Lắng Nghe Cảm Nhận Từ"
+                delay={40}
+                className="inline"
+              />{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B85064] via-[#D46B81] to-[#8C3A4B]">
                 Khách Hàng Hài Lòng
               </span>
             </h1>
 
             <p className="text-base sm:text-lg text-[#7A6C71] font-light leading-relaxed max-w-3xl mx-auto">
-              Hơn {stats.total}+ đánh giá trung thực từ những khách hàng đã trực tiếp chụp ảnh tại PhotoStudio. 
-              Sự tin tưởng và nụ cười của bạn là nguồn cảm hứng nghệ thuật lớn nhất của chúng tôi.
+              Hơn {stats.total}+ đánh giá trung thực từ những khách hàng đã trực
+              tiếp chụp ảnh tại PhotoStudio. Sự tin tưởng và nụ cười của bạn là
+              nguồn cảm hứng nghệ thuật lớn nhất của chúng tôi.
             </p>
           </ScrollReveal>
         </div>
 
         {/* Rating Overview & Trust Stats Banner */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-14 items-stretch">
-          
           {/* Card Điểm Trung Bình Tổng Thể */}
           <div className="lg:col-span-5 bg-white border border-[#F0E4E6] rounded-3xl p-7 shadow-sm flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-bl-full pointer-events-none" />
-            
+
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs uppercase tracking-wider font-bold text-[#7A6C71]">
@@ -324,15 +363,24 @@ export default function ReviewsPage() {
                 <div>
                   <div className="flex items-center gap-1 mb-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <StarIcon key={star} className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      <StarIcon
+                        key={star}
+                        className="w-5 h-5 text-amber-400 fill-amber-400"
+                      />
                     ))}
                   </div>
-                  <p className="text-xs text-[#7A6C71]">Trên thang điểm 5.0 tuyệt đối</p>
+                  <p className="text-xs text-[#7A6C71]">
+                    Trên thang điểm 5.0 tuyệt đối
+                  </p>
                 </div>
               </div>
 
               <p className="text-xs text-[#7A6C71] leading-relaxed mb-5 font-light">
-                Dựa trên <strong className="text-[#2A1D22] font-semibold">{stats.total} bài đánh giá</strong> hoàn chỉnh được ghi nhận từ hệ thống khách hàng thật.
+                Dựa trên{" "}
+                <strong className="text-[#2A1D22] font-semibold">
+                  {stats.total} bài đánh giá
+                </strong>{" "}
+                hoàn chỉnh được ghi nhận từ hệ thống khách hàng thật.
               </p>
             </div>
 
@@ -341,41 +389,52 @@ export default function ReviewsPage() {
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">5 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700" 
-                    style={{ width: `${(stats.count5 / (stats.total || 1)) * 100}%` }}
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(stats.count5 / (stats.total || 1)) * 100}%`,
+                    }}
                   />
                 </div>
-                <span className="w-8 text-right font-bold text-[#2A1D22]">{stats.count5}</span>
+                <span className="w-8 text-right font-bold text-[#2A1D22]">
+                  {stats.count5}
+                </span>
               </div>
 
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">4 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700" 
-                    style={{ width: `${(stats.count4 / (stats.total || 1)) * 100}%` }}
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(stats.count4 / (stats.total || 1)) * 100}%`,
+                    }}
                   />
                 </div>
-                <span className="w-8 text-right font-bold text-[#2A1D22]">{stats.count4}</span>
+                <span className="w-8 text-right font-bold text-[#2A1D22]">
+                  {stats.count4}
+                </span>
               </div>
 
               <div className="flex items-center gap-3 text-xs">
                 <span className="w-12 text-[#3E2F35] font-semibold">3 sao</span>
                 <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700" 
-                    style={{ width: `${(stats.count3 / (stats.total || 1)) * 100}%` }}
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 to-[#B85064] rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(stats.count3 / (stats.total || 1)) * 100}%`,
+                    }}
                   />
                 </div>
-                <span className="w-8 text-right font-bold text-[#2A1D22]">{stats.count3}</span>
+                <span className="w-8 text-right font-bold text-[#2A1D22]">
+                  {stats.count3}
+                </span>
               </div>
             </div>
           </div>
 
           {/* 3 Metric Cards + Viết Đánh Giá Banner */}
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
             <div className="bg-white border border-[#F0E4E6] rounded-3xl p-5 shadow-sm flex flex-col justify-between">
               <div className="w-11 h-11 rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] flex items-center justify-center text-[#B85064] mb-3">
                 <HeartIcon className="w-5 h-5 text-[#B85064]" />
@@ -384,8 +443,12 @@ export default function ReviewsPage() {
                 <div className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#2A1D22] mb-0.5">
                   <CountUp to={stats.total} duration={2} />+
                 </div>
-                <h4 className="text-xs font-bold text-[#2A1D22] mb-0.5">Đánh Giá Được Ghi Nhận</h4>
-                <p className="text-[11px] text-[#7A6C71] font-light">100% được xác minh sau mỗi buổi chụp hoàn tất</p>
+                <h4 className="text-xs font-bold text-[#2A1D22] mb-0.5">
+                  Đánh Giá Được Ghi Nhận
+                </h4>
+                <p className="text-[11px] text-[#7A6C71] font-light">
+                  100% được xác minh sau mỗi buổi chụp hoàn tất
+                </p>
               </div>
             </div>
 
@@ -397,8 +460,12 @@ export default function ReviewsPage() {
                 <div className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#2A1D22] mb-0.5">
                   {stats.satisfaction}%
                 </div>
-                <h4 className="text-xs font-bold text-[#2A1D22] mb-0.5">Khách Hàng Hài Lòng</h4>
-                <p className="text-[11px] text-[#7A6C71] font-light">Sẵn sàng giới thiệu bạn bè và quay lại chụp tiếp</p>
+                <h4 className="text-xs font-bold text-[#2A1D22] mb-0.5">
+                  Khách Hàng Hài Lòng
+                </h4>
+                <p className="text-[11px] text-[#7A6C71] font-light">
+                  Sẵn sàng giới thiệu bạn bè và quay lại chụp tiếp
+                </p>
               </div>
             </div>
 
@@ -410,8 +477,12 @@ export default function ReviewsPage() {
                 <div className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#2A1D22] mb-0.5">
                   8 Gói Chụp
                 </div>
-                <h4 className="text-xs font-bold text-[#2A1D22] mb-0.5">Bao Phủ Đa Dạng Concept</h4>
-                <p className="text-[11px] text-[#7A6C71] font-light">Từ ảnh cưới, nàng thơ, gia đình đến lookbook</p>
+                <h4 className="text-xs font-bold text-[#2A1D22] mb-0.5">
+                  Bao Phủ Đa Dạng Concept
+                </h4>
+                <p className="text-[11px] text-[#7A6C71] font-light">
+                  Từ ảnh cưới, nàng thơ, gia đình đến lookbook
+                </p>
               </div>
             </div>
 
@@ -425,7 +496,8 @@ export default function ReviewsPage() {
                   Bạn Đã Từng Chụp Tại Studio?
                 </h4>
                 <p className="text-[11px] text-[#7A6C71] leading-relaxed mb-3 font-light">
-                  Đăng nhập để chia sẻ đánh giá trải nghiệm thực tế cùng PhotoStudio.
+                  Đăng nhập để chia sẻ đánh giá trải nghiệm thực tế cùng
+                  PhotoStudio.
                 </p>
               </div>
 
@@ -438,7 +510,6 @@ export default function ReviewsPage() {
                 <span>Viết Đánh Giá Của Bạn</span>
               </button>
             </div>
-
           </div>
         </div>
 
@@ -448,16 +519,15 @@ export default function ReviewsPage() {
         {/* Filter Bar: Gói chụp bên trái, Dropdown số sao bên phải (ĐÃ BỎ HOÀN TOÀN THANH TÌM KIẾM) */}
         <div className="bg-white border border-[#F0E4E6] rounded-3xl p-4 sm:p-5 mb-8 shadow-sm">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            
             {/* 1. Category Filter Tabs (Lọc theo các gói chụp) */}
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               {[
-                { key: 'all', label: `Tất Cả (${reviews.length})` },
-                { key: 'wedding', label: 'Ảnh Cưới' },
-                { key: 'portrait', label: 'Nàng Thơ & Cá Nhân' },
-                { key: 'family', label: 'Gia Đình' },
-                { key: 'business', label: 'Doanh Nhân & Lookbook' },
-                { key: 'concept', label: 'Cổ Trang & Kỷ Yếu' },
+                { key: "all", label: `Tất Cả (${reviews.length})` },
+                { key: "wedding", label: "Ảnh Cưới" },
+                { key: "portrait", label: "Nàng Thơ & Cá Nhân" },
+                { key: "family", label: "Gia Đình" },
+                { key: "business", label: "Doanh Nhân & Lookbook" },
+                { key: "concept", label: "Cổ Trang & Kỷ Yếu" },
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -465,8 +535,8 @@ export default function ReviewsPage() {
                   onClick={() => handleCategoryChange(tab.key)}
                   className={`px-3.5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     selectedCategory === tab.key
-                      ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/20'
-                      : 'bg-neutral-100 text-[#7A6C71] hover:bg-neutral-200/80 hover:text-[#2A1D22]'
+                      ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/20"
+                      : "bg-neutral-100 text-[#7A6C71] hover:bg-neutral-200/80 hover:text-[#2A1D22]"
                   }`}
                 >
                   {tab.label}
@@ -475,7 +545,10 @@ export default function ReviewsPage() {
             </div>
 
             {/* 2. Dropdown Lọc Số Sao Xổ Xuống (1, 2, 3, 4, 5 sao) */}
-            <div className="relative shrink-0 w-full md:w-auto" ref={ratingDropdownRef}>
+            <div
+              className="relative shrink-0 w-full md:w-auto"
+              ref={ratingDropdownRef}
+            >
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-[#7A6C71] hidden sm:inline">
                   Lọc số sao:
@@ -491,7 +564,7 @@ export default function ReviewsPage() {
                   </div>
                   <ChevronDownIcon
                     className={`w-4 h-4 text-[#7A6C71] transition-transform duration-200 ${
-                      isRatingDropdownOpen ? 'rotate-180 text-[#B85064]' : ''
+                      isRatingDropdownOpen ? "rotate-180 text-[#B85064]" : ""
                     }`}
                   />
                 </button>
@@ -514,11 +587,11 @@ export default function ReviewsPage() {
                     {/* Lựa chọn Tất cả */}
                     <button
                       type="button"
-                      onClick={() => handleSelectRatingFilter('all')}
+                      onClick={() => handleSelectRatingFilter("all")}
                       className={`w-full px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
-                        selectedRatingFilter === 'all'
-                          ? 'bg-[#FDF0F3] text-[#B85064] font-bold'
-                          : 'text-[#3E2F35] hover:bg-neutral-50'
+                        selectedRatingFilter === "all"
+                          ? "bg-[#FDF0F3] text-[#B85064] font-bold"
+                          : "text-[#3E2F35] hover:bg-neutral-50"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -538,14 +611,17 @@ export default function ReviewsPage() {
                         onClick={() => handleSelectRatingFilter(String(star))}
                         className={`w-full px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                           selectedRatingFilter === String(star)
-                            ? 'bg-[#FDF0F3] text-[#B85064] font-bold'
-                            : 'text-[#3E2F35] hover:bg-neutral-50'
+                            ? "bg-[#FDF0F3] text-[#B85064] font-bold"
+                            : "text-[#3E2F35] hover:bg-neutral-50"
                         }`}
                       >
                         <div className="flex items-center gap-1.5">
                           <div className="flex items-center">
                             {[...Array(star)].map((_, i) => (
-                              <StarIcon key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                              <StarIcon
+                                key={i}
+                                className="w-3.5 h-3.5 text-amber-400 fill-amber-400"
+                              />
                             ))}
                           </div>
                           <span>{star} sao</span>
@@ -558,9 +634,7 @@ export default function ReviewsPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-
             </div>
-
           </div>
         </div>
 
@@ -597,13 +671,14 @@ export default function ReviewsPage() {
               Không Tìm Thấy Đánh Giá Phù Hợp
             </h3>
             <p className="text-xs text-[#7A6C71] mb-6">
-              Chưa có bài đánh giá nào phù hợp với bộ lọc hiện tại. Vui lòng chọn mức sao hoặc gói chụp khác.
+              Chưa có bài đánh giá nào phù hợp với bộ lọc hiện tại. Vui lòng
+              chọn mức sao hoặc gói chụp khác.
             </p>
             <button
               type="button"
               onClick={() => {
-                setSelectedCategory('all');
-                setSelectedRatingFilter('all');
+                setSelectedCategory("all");
+                setSelectedRatingFilter("all");
                 setCurrentPage(1);
               }}
               className="px-5 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A8394C] transition-all cursor-pointer shadow-sm"
@@ -619,12 +694,12 @@ export default function ReviewsPage() {
             {currentReviews.map((rev, idx) => {
               const ratingCount = Math.round(rev.rating || 5);
               const formattedDate = rev.createdAt
-                ? new Date(rev.createdAt).toLocaleDateString('vi-VN', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
+                ? new Date(rev.createdAt).toLocaleDateString("vi-VN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
                   })
-                : '10/2026';
+                : "10/2026";
 
               return (
                 <motion.div
@@ -636,7 +711,6 @@ export default function ReviewsPage() {
                 >
                   {/* Hàng ngang Header: Khách hàng (bên trái) & Số sao đánh giá (bên phải) */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#F5EAEB] mb-4">
-                    
                     {/* Bên trái: Avatar, Tên, Badge đã trải nghiệm, Gói chụp, Ngày tháng */}
                     <div className="flex items-center gap-3.5">
                       {rev.avatar ? (
@@ -648,14 +722,16 @@ export default function ReviewsPage() {
                         />
                       ) : (
                         <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#FDF0F3] border-2 border-[#F5D5DC] flex items-center justify-center text-[#B85064] font-bold text-sm sm:text-base shrink-0">
-                          {rev.customerName ? rev.customerName.charAt(0).toUpperCase() : 'K'}
+                          {rev.customerName
+                            ? rev.customerName.charAt(0).toUpperCase()
+                            : "K"}
                         </div>
                       )}
 
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="text-sm sm:text-base font-bold text-[#2A1D22]">
-                            {rev.customerName || 'Khách hàng PhotoStudio'}
+                            {rev.customerName || "Khách hàng PhotoStudio"}
                           </h4>
 
                           <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -683,16 +759,18 @@ export default function ReviewsPage() {
                           <StarIcon
                             key={i}
                             className={`w-4 h-4 ${
-                              i < ratingCount ? 'text-amber-400 fill-amber-400' : 'text-neutral-200'
+                              i < ratingCount
+                                ? "text-amber-400 fill-amber-400"
+                                : "text-neutral-200"
                             }`}
                           />
                         ))}
                       </div>
                       <span className="text-xs font-bold text-[#B85064] ml-1">
-                        {rev.rating ? Number(rev.rating).toFixed(1) : '5.0'} / 5.0
+                        {rev.rating ? Number(rev.rating).toFixed(1) : "5.0"} /
+                        5.0
                       </span>
                     </div>
-
                   </div>
 
                   {/* Phần đánh giá chi tiết của họ (Chiếm toàn bộ chiều ngang hàng) */}
@@ -705,11 +783,11 @@ export default function ReviewsPage() {
                     <div className="mt-4 pt-3 border-t border-dashed border-[#F5EAEB] flex items-center gap-2 text-xs text-[#7A6C71] pl-1 sm:pl-2">
                       <SparklesIcon className="w-4 h-4 text-[#B85064] shrink-0" />
                       <span>
-                        <strong>Ghi chú dịch vụ:</strong> "{rev.employeeReviews[0].comment}"
+                        <strong>Ghi chú dịch vụ:</strong> "
+                        {rev.employeeReviews[0].comment}"
                       </span>
                     </div>
                   )}
-
                 </motion.div>
               );
             })}
@@ -719,17 +797,20 @@ export default function ReviewsPage() {
         {/* Phân Trang (Pagination Controls) */}
         {!isLoading && filteredReviews.length > ITEMS_PER_PAGE && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6 border-t border-[#F0E4E6] mt-4">
-            
             <p className="text-xs text-[#7A6C71]">
-              Hiển thị{' '}
+              Hiển thị{" "}
               <strong className="text-[#2A1D22]">
                 {(currentPage - 1) * ITEMS_PER_PAGE + 1}
-              </strong>{' '}
-              -{' '}
+              </strong>{" "}
+              -{" "}
               <strong className="text-[#2A1D22]">
                 {Math.min(currentPage * ITEMS_PER_PAGE, filteredReviews.length)}
-              </strong>{' '}
-              trên tổng số <strong className="text-[#2A1D22]">{filteredReviews.length}</strong> bài đánh giá
+              </strong>{" "}
+              trên tổng số{" "}
+              <strong className="text-[#2A1D22]">
+                {filteredReviews.length}
+              </strong>{" "}
+              bài đánh giá
             </p>
 
             <div className="flex items-center gap-1.5">
@@ -739,8 +820,8 @@ export default function ReviewsPage() {
                 disabled={currentPage === 1}
                 className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center gap-1 transition-all ${
                   currentPage === 1
-                    ? 'border-neutral-200 text-neutral-300 cursor-not-allowed bg-neutral-50'
-                    : 'border-[#F0E4E6] bg-white text-[#3E2F35] hover:bg-[#FDF0F3] hover:text-[#B85064] hover:border-[#F5D5DC] cursor-pointer shadow-xs'
+                    ? "border-neutral-200 text-neutral-300 cursor-not-allowed bg-neutral-50"
+                    : "border-[#F0E4E6] bg-white text-[#3E2F35] hover:bg-[#FDF0F3] hover:text-[#B85064] hover:border-[#F5D5DC] cursor-pointer shadow-xs"
                 }`}
                 aria-label="Trang trước"
               >
@@ -759,8 +840,8 @@ export default function ReviewsPage() {
                       onClick={() => handlePageChange(pageNum)}
                       className={`w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         isActive
-                          ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/20 scale-105'
-                          : 'bg-white border border-[#F0E4E6] text-[#7A6C71] hover:bg-neutral-50 hover:text-[#2A1D22]'
+                          ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/20 scale-105"
+                          : "bg-white border border-[#F0E4E6] text-[#7A6C71] hover:bg-neutral-50 hover:text-[#2A1D22]"
                       }`}
                     >
                       {pageNum}
@@ -775,8 +856,8 @@ export default function ReviewsPage() {
                 disabled={currentPage === totalPages}
                 className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center gap-1 transition-all ${
                   currentPage === totalPages
-                    ? 'border-neutral-200 text-neutral-300 cursor-not-allowed bg-neutral-50'
-                    : 'border-[#F0E4E6] bg-white text-[#3E2F35] hover:bg-[#FDF0F3] hover:text-[#B85064] hover:border-[#F5D5DC] cursor-pointer shadow-xs'
+                    ? "border-neutral-200 text-neutral-300 cursor-not-allowed bg-neutral-50"
+                    : "border-[#F0E4E6] bg-white text-[#3E2F35] hover:bg-[#FDF0F3] hover:text-[#B85064] hover:border-[#F5D5DC] cursor-pointer shadow-xs"
                 }`}
                 aria-label="Trang tiếp"
               >
@@ -784,14 +865,13 @@ export default function ReviewsPage() {
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
             </div>
-
           </div>
         )}
 
         {/* Bottom CTA Banner */}
         <div className="mt-16 p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-[#1C1619] via-[#2A1D22] to-[#141012] border border-white/10 text-white relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-rose-500/10 rounded-full blur-[140px] pointer-events-none" />
-          
+
           <div className="relative z-10 max-w-2xl">
             <span className="inline-block px-3.5 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[#E899A8] text-xs font-semibold mb-4">
               Khởi Đầu Cho Bộ Ảnh Đẹp Nhất Của Bạn
@@ -800,7 +880,9 @@ export default function ReviewsPage() {
               Bạn Sẵn Sàng Trở Thành Khách Hàng Hài Lòng Tiếp Theo?
             </h3>
             <p className="text-xs sm:text-sm text-neutral-300 font-light leading-relaxed mb-6">
-              Đội ngũ nhiếp ảnh gia và stylist hàng đầu tại PhotoStudio luôn tận tâm lắng nghe mọi ý tưởng concept của bạn. Đặt lịch ngay hôm nay để nhận ưu đãi mùa cưới và kỷ yếu.
+              Đội ngũ nhiếp ảnh gia và stylist hàng đầu tại PhotoStudio luôn tận
+              tâm lắng nghe mọi ý tưởng concept của bạn. Đặt lịch ngay hôm nay
+              để nhận ưu đãi mùa cưới và kỷ yếu.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -820,7 +902,6 @@ export default function ReviewsPage() {
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Interactive Modal Gửi Đánh Giá Mới (Chỉ giữ Tên bị khóa và Nội dung đánh giá) */}
@@ -872,7 +953,6 @@ export default function ReviewsPage() {
                 </div>
               ) : (
                 <form onSubmit={handleCreateReview} className="space-y-4">
-                  
                   {/* 1. Rating Selector (Chọn số sao) */}
                   <div>
                     <label className="block text-xs font-bold text-[#2A1D22] mb-1.5">
@@ -883,14 +963,16 @@ export default function ReviewsPage() {
                         <button
                           key={star}
                           type="button"
-                          onClick={() => setNewReviewForm({ ...newReviewForm, rating: star })}
+                          onClick={() =>
+                            setNewReviewForm({ ...newReviewForm, rating: star })
+                          }
                           className="p-1 text-2xl transition-transform hover:scale-125 focus:outline-none cursor-pointer"
                         >
                           <StarIcon
                             className={`w-7 h-7 ${
                               star <= newReviewForm.rating
-                                ? 'text-amber-400 fill-amber-400'
-                                : 'text-neutral-200'
+                                ? "text-amber-400 fill-amber-400"
+                                : "text-neutral-200"
                             }`}
                           />
                         </button>
@@ -938,7 +1020,10 @@ export default function ReviewsPage() {
                       rows={5}
                       value={newReviewForm.comment}
                       onChange={(e) =>
-                        setNewReviewForm({ ...newReviewForm, comment: e.target.value })
+                        setNewReviewForm({
+                          ...newReviewForm,
+                          comment: e.target.value,
+                        })
                       }
                       placeholder="Chia sẻ cảm nhận chi tiết của bạn về chất lượng dịch vụ, ánh sáng, góc chụp của photographer, makeup hoặc trải nghiệm tại PhotoStudio..."
                       className="w-full px-3.5 py-2.5 bg-[#FAF5F5] border border-[#F0E4E6] rounded-xl text-xs focus:outline-none focus:border-[#B85064] resize-none leading-relaxed"
@@ -959,17 +1044,15 @@ export default function ReviewsPage() {
                       disabled={isSubmitting || !newReviewForm.comment.trim()}
                       className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer"
                     >
-                      {isSubmitting ? 'Đang gửi...' : 'Gửi Đánh Giá Ngay'}
+                      {isSubmitting ? "Đang gửi..." : "Gửi Đánh Giá Ngay"}
                     </button>
                   </div>
-
                 </form>
               )}
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

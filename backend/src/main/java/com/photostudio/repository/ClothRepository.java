@@ -4,11 +4,11 @@ import com.photostudio.model.clothes.Cloth;
 import com.photostudio.model.clothes.ClothStatus;
 import com.photostudio.model.clothes.ClothType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface ClothRepository extends JpaRepository<Cloth, Long> {
 
@@ -32,6 +32,7 @@ public interface ClothRepository extends JpaRepository<Cloth, Long> {
 
     List<Cloth> findByDeletedAtIsNullAndStatus(ClothStatus status);
 
-    @Query("SELECT CASE WHEN COUNT(bc) > 0 THEN true ELSE false END FROM BookingClothing bc WHERE bc.cloth.id = :clothId")
-    boolean existsBookingReference(@Param("clothId") Long clothId);
+    @Query("SELECT CASE WHEN COUNT(pc) > 0 THEN true ELSE false END FROM PackageCloth pc WHERE pc.cloth.id = :clothId")
+    boolean existsPackageReference(@Param("clothId") Long clothId);
+
 }

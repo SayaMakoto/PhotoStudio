@@ -6,7 +6,6 @@ import com.photostudio.mapper.BackgroundMapper;
 import com.photostudio.model.backgrounds.Background;
 import com.photostudio.model.backgrounds.BackgroundStatus;
 import com.photostudio.repository.BackgroundRepository;
-import com.photostudio.repository.BookingBackgroundRepository;
 import com.photostudio.repository.PackageBackgroundRepository;
 import com.photostudio.service.BackgroundService;
 import org.springframework.stereotype.Service;
@@ -21,14 +20,11 @@ public class BackgroundServiceImpl implements BackgroundService {
 
     private final BackgroundRepository repository;
     private final PackageBackgroundRepository packageBackgroundRepository;
-    private final BookingBackgroundRepository bookingBackgroundRepository;
 
     public BackgroundServiceImpl(BackgroundRepository repository,
-                                 PackageBackgroundRepository packageBackgroundRepository,
-                                 BookingBackgroundRepository bookingBackgroundRepository) {
+                                 PackageBackgroundRepository packageBackgroundRepository) {
         this.repository = repository;
         this.packageBackgroundRepository = packageBackgroundRepository;
-        this.bookingBackgroundRepository = bookingBackgroundRepository;
     }
 
     private Background findEntity(Long id) {
@@ -115,7 +111,7 @@ public class BackgroundServiceImpl implements BackgroundService {
     public void permanentlyDelete(Long id) {
         Background background = repository.findByIdAndDeletedAtIsNotNull(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bối cảnh trong thùng rác: " + id));
-        if (packageBackgroundRepository.existsByBackgroundId(id) || bookingBackgroundRepository.existsByBackgroundId(id)) {
+        if (packageBackgroundRepository.existsByBackgroundId(id)) {
             throw new IllegalArgumentException("Không thể xóa vĩnh viễn bối cảnh đã được sử dụng trong gói chụp hoặc đơn đặt lịch.");
         }
         repository.delete(background);
