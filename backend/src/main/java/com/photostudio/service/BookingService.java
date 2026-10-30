@@ -18,6 +18,8 @@ public interface BookingService {
 
     BookingResponse updateStatus(Long id, String status);
 
+    BookingResponse updateAdminDecision(Long id, String status);
+
     void delete(Long id);
 
     List<BookingResponse> findByCustomerId(Long customerId);

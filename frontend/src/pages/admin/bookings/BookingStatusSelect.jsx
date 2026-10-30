@@ -1,17 +1,16 @@
 import GlideSelect from '../../../components/admin/common/GlideSelect';
 import { BOOKING_STATUS_OPTIONS } from './bookingConfig';
 
-export default function BookingStatusSelect({ nextStatus, onChange, disabled = false }) {
-  const nextOption = BOOKING_STATUS_OPTIONS.find((option) => option.value === nextStatus);
-  if (!nextOption) return null;
+export default function BookingStatusSelect({ options = BOOKING_STATUS_OPTIONS, onChange, disabled = false }) {
+  if (!options.length) return null;
 
   return <GlideSelect
-    options={[nextOption]}
+    options={options}
     value=""
     onChange={onChange}
     disabled={disabled}
-    ariaLabel={`Chuyển sang trạng thái ${nextOption.label}`}
-    placeholder="Chọn trạng thái tiếp theo"
+    ariaLabel="Chọn quyết định cho đơn đặt lịch"
+    placeholder="Chọn xác nhận hoặc từ chối"
     showTags={false}
     size="md"
     accentColor="#fbbf24"

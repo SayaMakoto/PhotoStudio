@@ -56,6 +56,13 @@ public class BookingController {
         return ResponseEntity.ok(service.updateStatus(id, targetStatus));
     }
 
+    @PatchMapping("/{id}/admin-decision")
+    public ResponseEntity<BookingResponse> updateAdminDecision(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(service.updateAdminDecision(id, body == null ? null : body.get("status")));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

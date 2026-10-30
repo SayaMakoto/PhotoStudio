@@ -3,18 +3,21 @@ export const BOOKING_STATUS_OPTIONS = [
   { value: 'confirmed', label: 'Đã xác nhận' },
   { value: 'in_progress', label: 'Đang thực hiện' },
   { value: 'completed', label: 'Hoàn tất' },
-  { value: 'cancelled', label: 'Đã hủy' },
+  { value: 'cancelled', label: 'Đã từ chối' },
 ];
 
-const NEXT_BOOKING_STATUS = {
-  pending: 'confirmed',
-  confirmed: 'in_progress',
-  in_progress: 'completed',
-};
+const ADMIN_DECISION_OPTIONS = BOOKING_STATUS_OPTIONS.filter((option) =>
+  ['confirmed', 'cancelled'].includes(option.value),
+);
 
-export function getNextBookingStatus(status) {
-  const nextStatus = NEXT_BOOKING_STATUS[status];
-  return BOOKING_STATUS_OPTIONS.find((option) => option.value === nextStatus) || null;
+export function getAdminBookingStatusOptions(status) {
+  return status === 'pending'
+    ? ADMIN_DECISION_OPTIONS
+    : [];
+}
+
+export function canAdminUpdateBookingStatus(currentStatus, nextStatus) {
+  return currentStatus === 'pending' && ['confirmed', 'cancelled'].includes(nextStatus);
 }
 
 export function formatBookingDate(value) {
