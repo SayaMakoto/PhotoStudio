@@ -24,6 +24,41 @@ export default function Navbar({ onOpenBooking }) {
     return customerAuth.isAuthenticated() ? customerAuth.getUser() : null;
   });
 
+  const [isDismissed, setIsDismissed] = useState(() => {
+    return sessionStorage.getItem('dismiss_user_info_reminder') === 'true';
+  });
+
+  // Lắng nghe sự kiện cập nhật profile để tự động cập nhật banner theo thời gian thực
+  useEffect(() => {
+    const handleProfileUpdated = (e) => {
+      if (e.detail) {
+        setUser(e.detail);
+      } else {
+        setUser(customerAuth.getUser());
+      }
+    };
+
+    window.addEventListener('user_profile_updated', handleProfileUpdated);
+    window.addEventListener('storage', handleProfileUpdated);
+
+    return () => {
+      window.removeEventListener('user_profile_updated', handleProfileUpdated);
+      window.removeEventListener('storage', handleProfileUpdated);
+    };
+  }, []);
+
+  const isAuth = customerAuth.isAuthenticated();
+  const hasPhone = Boolean(user?.phone && user.phone.trim());
+  const hasAddress = Boolean(user?.address && user.address.trim());
+  const isMissingPhone = !hasPhone;
+  const isMissingAddress = !hasAddress;
+  const showReminder = isAuth && (isMissingPhone || isMissingAddress) && !isDismissed;
+
+  const handleDismissReminder = () => {
+    sessionStorage.setItem('dismiss_user_info_reminder', 'true');
+    setIsDismissed(true);
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
@@ -62,6 +97,8 @@ export default function Navbar({ onOpenBooking }) {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled || [ROUTES.USER.BOOKING, ROUTES.USER.PAYMENT, ROUTES.USER.MY_BOOKINGS].includes(location.pathname)
           ? 'bg-[#141012]/95 backdrop-blur-2xl border-b border-white/10 py-3 shadow-2xl shadow-black/80'
+          : showReminder
+          ? 'bg-[#141012]/90 backdrop-blur-md border-b border-white/10 py-3 shadow-lg'
           : 'bg-transparent py-5'
       }`}
     >
@@ -260,6 +297,62 @@ export default function Navbar({ onOpenBooking }) {
           </div>
         )}
       </div>
+
+      {/* THANH THÔNG BÁO NHẮC NHỞ CẬP NHẬT SĐT & ĐỊA CHỈ DƯỚI THANH MENU */}
+      {showReminder && (
+        <div className="w-full mt-2.5 bg-gradient-to-r from-[#201217]/95 via-[#311622]/95 to-[#201217]/95 border-t border-[#BE4B5E]/30 border-b border-[#BE4B5E]/40 backdrop-blur-xl shadow-md transition-all animate-fade-in py-2 px-4">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-rose-100">
+            {/* Lời nhắc nhở tinh tế, không ép buộc */}
+            <div className="flex items-center gap-2.5 text-left w-full sm:w-auto">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-[#E899A8] border border-rose-500/30">
+                <SparklesIcon className="w-3 h-3" />
+              </span>
+              <p className="leading-snug text-neutral-200">
+                <span className="font-semibold text-[#E899A8]">Nhắc nhở nhẹ:</span>{' '}
+                {isMissingPhone && isMissingAddress ? (
+                  <>
+                    Tài khoản của bạn chưa có <span className="text-white font-medium underline decoration-rose-400/50">Số điện thoại</span> và{' '}
+                    <span className="text-white font-medium underline decoration-rose-400/50">Địa chỉ</span>.
+                  </>
+                ) : isMissingPhone ? (
+                  <>
+                    Tài khoản của bạn chưa có <span className="text-white font-medium underline decoration-rose-400/50">Số điện thoại</span>.
+                  </>
+                ) : (
+                  <>
+                    Tài khoản của bạn chưa có <span className="text-white font-medium underline decoration-rose-400/50">Địa chỉ</span>.
+                  </>
+                )}{' '}
+                <span className="text-neutral-400 hidden sm:inline">
+                  (Nếu bạn muốn đặt hàng hoặc đặt lịch chụp, vui lòng bổ sung để studio thuận tiện liên hệ và phục vụ nhé!)
+                </span>
+                <span className="text-neutral-400 sm:hidden">
+                  (Cần bổ sung để liên hệ khi đặt lịch/đặt hàng)
+                </span>
+              </p>
+            </div>
+
+            {/* Các nút thao tác: Cập nhật ngay & Đóng */}
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+              <Link
+                to={ROUTES.USER.PROFILE}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-[#BE4B5E] to-[#A8394C] hover:brightness-110 text-white font-semibold text-[11px] shadow-sm transition-all"
+              >
+                <span>Cập nhật ngay</span>
+              </Link>
+              <button
+                type="button"
+                onClick={handleDismissReminder}
+                title="Tạm đóng nhắc nhở"
+                className="cursor-pointer p-1 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Đóng nhắc nhở"
+              >
+                <XMarkIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -124,7 +124,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/status").hasRole("EMPLOYEE")
 
                         // Chỉ admin được tải ảnh lên và thay đổi bản ghi ảnh; ảnh đã lưu được đọc công khai.
-                        .requestMatchers(HttpMethod.POST, "/api/uploads/images", "/api/images/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/images/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/images/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/images/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/images/**").hasRole("ADMIN")

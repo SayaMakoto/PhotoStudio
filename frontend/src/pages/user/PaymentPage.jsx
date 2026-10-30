@@ -445,7 +445,7 @@ export default function PaymentPage() {
         // Ignored: Bỏ qua lỗi nếu sessionStorage bị chặn trên môi trường trình duyệt
       }
 
-      navigate(ROUTES.USER.HOME, {
+      navigate(`${ROUTES.USER.PROFILE}?tab=bookings&bookingId=${createdBookingId}`, {
         state: {
           bookingSuccess: true,
           bookingCode: `BK-${createdBookingId}`,
@@ -926,33 +926,6 @@ export default function PaymentPage() {
 
                 </div>
 
-                {/* Tiền mặt tại Studio */}
-                <div
-                  onClick={() => setPaymentMethod('cash')}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${paymentMethod === 'cash'
-                    ? 'border-[#B85064] bg-[#FDF0F3]/50 shadow-sm ring-1 ring-[#B85064]'
-                    : 'border-[#F0E4E6] bg-white hover:border-[#B85064]/40'
-                    }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 font-bold text-xs shrink-0">
-                      CASH
-                    </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-[#2A1D22]">
-                        Thanh Toán Trực Tiếp Tại Studio
-                      </h4>
-                      <p className="text-[11px] text-[#7A6C71] font-light">
-                        Thanh toán tiền mặt hoặc chuyển khoản tại quầy lễ tân studio vào ngày chụp
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${paymentMethod === 'cash' ? 'border-[#B85064] bg-[#B85064] text-white' : 'border-neutral-300'
-                    }`}>
-                    {paymentMethod === 'cash' && <CheckIcon className="w-3 h-3 stroke-[3]" />}
-                  </div>
-                </div>
                 <div className="p-3.5 rounded-2xl border border-dashed border-[#B85064]/60 bg-[#FFF8F9] space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-[#2A1D22] flex items-center gap-1.5">

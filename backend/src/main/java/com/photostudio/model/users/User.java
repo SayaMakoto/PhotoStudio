@@ -41,7 +41,7 @@ public class User {
     @Column(name = "address", length = 255)
     private String address;
 
-    @Column(name = "phone", length = 11)
+    @Column(name = "phone", length = 20)
     private String phone;
 
     @Column(name = "avatar", length = 255)

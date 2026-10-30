@@ -65,7 +65,7 @@ export default function AppRoutes() {
         <Route path={ROUTES.USER.CHECKOUT} element={<PaymentPage />} />
         <Route path={ROUTES.USER.VNPAY_RETURN} element={<VNPayReturnPage />} />
         <Route path={ROUTES.USER.PROFILE} element={<ProfilePage />} />
-        <Route path={ROUTES.USER.MY_BOOKINGS} element={<MyBookingsPage />} />
+        <Route path={ROUTES.USER.MY_BOOKINGS} element={<Navigate to={`${ROUTES.USER.PROFILE}?tab=bookings`} replace />} />
         <Route path={ROUTES.USER.CONTACT} element={<ContactPage />} />
       </Route>
 
