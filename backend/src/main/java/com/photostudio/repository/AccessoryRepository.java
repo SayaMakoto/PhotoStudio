@@ -29,6 +29,7 @@ public interface AccessoryRepository extends JpaRepository<Accessory, Long> {
 
     List<Accessory> findByDeletedAtIsNullAndStatus(AccessoryStatus status);
 
-    @Query("SELECT CASE WHEN COUNT(ba) > 0 THEN true ELSE false END FROM BookingAccessory ba WHERE ba.accessory.id = :accessoryId")
-    boolean existsBookingReference(@Param("accessoryId") Long accessoryId);
+    @Query("SELECT CASE WHEN COUNT(pa) > 0 THEN true ELSE false END FROM PackageAccessory pa WHERE pa.accessory.id = :accessoryId")
+    boolean existsPackageReference(@Param("accessoryId") Long accessoryId);
+
 }

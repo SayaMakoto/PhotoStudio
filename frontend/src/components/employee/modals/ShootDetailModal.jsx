@@ -71,31 +71,19 @@ export default function ShootDetailModal({
     const fetchBookingDetails = async () => {
       setLoadingDetails(true);
       try {
-        const [eqRes, clothRes, accRes, pkgRes, srvRes, assignRes] = await Promise.allSettled([
-          employeeBookingService.getEquipments(booking.id),
-          employeeBookingService.getClothing(booking.id),
-          employeeBookingService.getAccessories(booking.id),
+        const [pkgRes, assignRes] = await Promise.allSettled([
           employeeBookingService.getPackages(booking.id),
-          employeeBookingService.getServices(booking.id),
           employeeBookingService.getAssignments(booking.id),
         ]);
 
         if (!isMounted) return;
 
-        if (eqRes.status === 'fulfilled' && Array.isArray(eqRes.value)) {
-          setEquipments(eqRes.value);
-        }
-        if (clothRes.status === 'fulfilled' && Array.isArray(clothRes.value)) {
-          setClothing(clothRes.value);
-        }
-        if (accRes.status === 'fulfilled' && Array.isArray(accRes.value)) {
-          setAccessories(accRes.value);
-        }
+        setEquipments([]);
+        setClothing([]);
+        setAccessories([]);
+        setServices([]);
         if (pkgRes.status === 'fulfilled' && Array.isArray(pkgRes.value)) {
           setPackages(pkgRes.value);
-        }
-        if (srvRes.status === 'fulfilled' && Array.isArray(srvRes.value)) {
-          setServices(srvRes.value);
         }
         if (assignRes.status === 'fulfilled' && Array.isArray(assignRes.value)) {
           setAssignments(assignRes.value);

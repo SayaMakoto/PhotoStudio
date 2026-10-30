@@ -283,47 +283,7 @@ CREATE TABLE `booking_packages` (
     CONSTRAINT `fk_bp_package` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Chi tiết gói chụp được sử dụng trong buổi chụp';
 
--- Bảng 16: booking_services (Dịch vụ phát sinh/thêm trong đơn booking)
-CREATE TABLE `booking_services` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
-    `booking_id` BIGINT NOT NULL COMMENT 'FK - bookings',
-    `service_id` BIGINT NOT NULL COMMENT 'FK - services',
-    `quantity` INT NOT NULL DEFAULT 1 COMMENT 'Số lượng dịch vụ',
-    `unit_price` DOUBLE NOT NULL DEFAULT 0.0 COMMENT 'Đơn giá dịch vụ tại thời điểm đặt',
-    CONSTRAINT `fk_bs_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_bs_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Chi tiết dịch vụ thêm trong buổi chụp';
-
--- Bảng 17: booking_backgrounds (Bối cảnh sử dụng trong đơn booking)
-CREATE TABLE `booking_backgrounds` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
-    `booking_id` BIGINT NOT NULL COMMENT 'FK - bookings',
-    `background_id` BIGINT NOT NULL COMMENT 'FK - backgrounds',
-    CONSTRAINT `fk_bbg_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_bbg_background` FOREIGN KEY (`background_id`) REFERENCES `backgrounds` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Chi tiết bối cảnh sử dụng cho buổi chụp';
-
--- Bảng 18: booking_clothing (Trang phục thuê trong đơn booking)
-CREATE TABLE `booking_clothing` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
-    `booking_id` BIGINT NOT NULL COMMENT 'FK - bookings',
-    `cloth_id` BIGINT NOT NULL COMMENT 'FK - clothes',
-    `quantity` INT NOT NULL DEFAULT 1 COMMENT 'Số lượng trang phục thuê',
-    CONSTRAINT `fk_bc_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_bc_cloth` FOREIGN KEY (`cloth_id`) REFERENCES `clothes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Chi tiết trang phục thuê trong buổi chụp';
-
--- Bảng 19: booking_accessories (Phụ kiện thuê trong đơn booking)
-CREATE TABLE `booking_accessories` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
-    `booking_id` BIGINT NOT NULL COMMENT 'FK - bookings',
-    `accessory_id` BIGINT NOT NULL COMMENT 'FK - accessories',
-    `quantity` INT NOT NULL DEFAULT 1 COMMENT 'Số lượng phụ kiện thuê',
-    CONSTRAINT `fk_ba_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_ba_accessory` FOREIGN KEY (`accessory_id`) REFERENCES `accessories` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Chi tiết phụ kiện thuê trong buổi chụp';
-
--- Bảng 20: booking_employee_assignments (Phân công nhân viên cho đơn booking)
+-- Bảng 16: booking_employee_assignments (Phân công nhân viên cho đơn booking)
 CREATE TABLE `booking_employee_assignments` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
     `booking_id` BIGINT NOT NULL COMMENT 'FK - bookings',
@@ -335,25 +295,11 @@ CREATE TABLE `booking_employee_assignments` (
     CONSTRAINT `fk_bea_employee` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Phân công nhân viên phụ trách buổi chụp';
 
--- Bảng 21: booking_equipment (Cấp phát thiết bị cho đơn booking)
-CREATE TABLE `booking_equipment` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
-    `booking_id` BIGINT NOT NULL COMMENT 'FK - bookings',
-    `equipment_id` BIGINT NOT NULL COMMENT 'FK - equipments',
-    `assigned_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày bắt đầu cấp thiết bị cho nhân viên',
-    `returned_at` DATETIME NULL COMMENT 'Ngày hoàn trả thiết bị',
-    `status` ENUM('assigned', 'returned', 'cancelled') NOT NULL DEFAULT 'assigned' COMMENT 'Trạng thái thiết bị',
-    `note` VARCHAR(255) NULL COMMENT 'Ghi chú bàn giao/tình trạng thiết bị',
-    CONSTRAINT `fk_be_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_be_equipment` FOREIGN KEY (`equipment_id`) REFERENCES `equipments` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý cấp phát và hoàn trả thiết bị cho buổi chụp';
-
-
 -- =====================================================================
 -- 6. NHÓM QUẢN LÝ THANH TOÁN VÀ ĐÁNH GIÁ (Sheet: QL TT & DG)
 -- =====================================================================
 
--- Bảng 22: payments (Lịch sử thanh toán đơn booking - Quan hệ 1-N)
+-- Bảng 17: payments (Lịch sử thanh toán đơn booking - Quan hệ 1-N)
 CREATE TABLE `payments` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
     `booking_id` BIGINT NOT NULL COMMENT 'FK - bookings (1 booking có thể có nhiều lần thanh toán/đặt cọc)',
@@ -365,7 +311,7 @@ CREATE TABLE `payments` (
     CONSTRAINT `fk_payments_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý giao dịch thanh toán của đơn đặt lịch';
 
--- Bảng 23: reviews (Đánh giá buổi chụp từ khách hàng - Quan hệ 1-1 với booking)
+-- Bảng 18: reviews (Đánh giá buổi chụp từ khách hàng - Quan hệ 1-1 với booking)
 CREATE TABLE `reviews` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'Khóa chính',
     `booking_id` BIGINT NOT NULL UNIQUE COMMENT 'FK - bookings (1 booking chỉ có tối đa 1 bài đánh giá)',
@@ -1206,17 +1152,7 @@ INSERT INTO `package_accessories` (`package_id`, `accessory_id`, `quantity`) VAL
 -- ON DUPLICATE KEY UPDATE `status` = VALUES(`status`), `note` = VALUES(`note`);
 --
 -- -- ---------------------------------------------------------------------
--- -- 7. CẤP PHÁT THIẾT BỊ / ĐẠO CỤ CHO BUỔI CHỤP (BOOKING_EQUIPMENT)
--- -- ---------------------------------------------------------------------
--- INSERT INTO `booking_equipment` (`id`, `booking_id`, `equipment_id`, `assigned_at`, `returned_at`, `status`, `note`) VALUES
--- (1, 1, 3, '2026-10-10 08:30:00', '2026-10-10 11:30:00', 'returned', 'Đèn Godox AD600 hoạt động tốt, đã hoàn trả kho'),
--- (2, 2, 4, '2026-10-12 13:30:00', '2026-10-12 16:00:00', 'returned', 'Đèn Nanlite Forza 500B đã hoàn trả đủ chóa đèn'),
--- (3, 7, 3, NOW(), NULL, 'assigned', 'Cấp đèn Godox cho ca chụp cá nhân mùa thu phòng A'),
--- (4, 8, 4, NOW(), NULL, 'assigned', 'Cấp đèn Nanlite cho ca chụp Profile phòng VIP')
--- ON DUPLICATE KEY UPDATE `status` = VALUES(`status`);
---
--- -- ---------------------------------------------------------------------
--- -- 8. NẠP ĐÁNH GIÁ TỪ KHÁCH HÀNG (REVIEWS TABLE)
+-- -- 7. NẠP ĐÁNH GIÁ TỪ KHÁCH HÀNG (REVIEWS TABLE)
 -- -- ---------------------------------------------------------------------
 -- INSERT INTO `reviews` (`id`, `booking_id`, `customer_id`, `rating`, `comment`, `created_at`, `updated_at`) VALUES
 -- (1, 1, 4, 5.0, 'Ekip chụp ảnh cưới có tâm nhất mình từng trải nghiệm! Makeup bạn Mai làm nhẹ nhàng trong trẻo đúng style mình thích. Ảnh nhận về đẹp lung linh!', '2026-10-11 16:45:00', NOW()),

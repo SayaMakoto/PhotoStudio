@@ -7,7 +7,6 @@ import com.photostudio.model.clothes.Cloth;
 import com.photostudio.model.clothes.ClothStatus;
 import com.photostudio.model.clothes.ClothType;
 import com.photostudio.repository.ClothRepository;
-import com.photostudio.repository.BookingClothingRepository;
 import com.photostudio.service.ClothService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +19,9 @@ import java.time.LocalDateTime;
 public class ClothServiceImpl implements ClothService {
 
     private final ClothRepository repository;
-    private final BookingClothingRepository bookingClothingRepository;
 
-    public ClothServiceImpl(ClothRepository repository, BookingClothingRepository bookingClothingRepository) {
+    public ClothServiceImpl(ClothRepository repository) {
         this.repository = repository;
-        this.bookingClothingRepository = bookingClothingRepository;
     }
 
     private Cloth findEntity(Long id) {
@@ -124,8 +121,8 @@ public class ClothServiceImpl implements ClothService {
     public void permanentlyDelete(Long id) {
         Cloth cloth = repository.findByIdAndDeletedAtIsNotNull(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy trang phục trong thùng rác có id: " + id));
-        if (repository.existsBookingReference(id)) {
-            throw new IllegalArgumentException("Không thể xóa vĩnh viễn trang phục đã được sử dụng trong đơn đặt lịch.");
+        if (repository.existsPackageReference(id)) {
+            throw new IllegalArgumentException("Không thể xóa vĩnh viễn trang phục đang nằm trong gói chụp. Hãy gỡ trang phục khỏi các gói trước.");
         }
         repository.delete(cloth);
     }

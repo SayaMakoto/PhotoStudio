@@ -112,19 +112,6 @@ export default function VNPayReturnPage() {
               }).catch((pkgErr) => console.warn('Lỗi gắn gói chụp:', pkgErr.message));
             }
 
-            // Gắn các dịch vụ nâng cao đã chọn vào đơn đặt lịch
-            if (finalBookingId && Array.isArray(pendingOrder.selectedServices)) {
-              for (const srv of pendingOrder.selectedServices) {
-                if (srv?.id) {
-                  customerBookingService.addService({
-                    bookingId: finalBookingId,
-                    serviceId: srv.id,
-                    quantity: 1,
-                    unitPrice: Number(srv.price || 0),
-                  }).catch((sErr) => console.warn('Lỗi gắn dịch vụ nâng cao:', sErr.message));
-                }
-              }
-            }
           } catch (createErr) {
             console.warn('[VNPay Return] Lỗi tạo đơn đặt lịch:', createErr.message);
           }

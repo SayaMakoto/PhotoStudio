@@ -107,8 +107,8 @@ public class AccessoryServiceImpl implements AccessoryService {
     public void permanentlyDeleteAccessory(Long id) {
         Accessory accessory = accessoryRepository.findByIdAndDeletedAtIsNotNull(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phụ kiện trong thùng rác với ID: " + id));
-        if (accessoryRepository.existsBookingReference(id)) {
-            throw new IllegalArgumentException("Không thể xóa vĩnh viễn phụ kiện đã được sử dụng trong đơn đặt lịch.");
+        if (accessoryRepository.existsPackageReference(id)) {
+            throw new IllegalArgumentException("Không thể xóa vĩnh viễn phụ kiện đang nằm trong gói chụp. Hãy gỡ phụ kiện khỏi các gói trước.");
         }
         accessoryRepository.delete(accessory);
     }

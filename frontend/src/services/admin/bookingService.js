@@ -18,13 +18,6 @@ export const adminBookingService = {
     return updated;
   },
   getPackages: (bookingId) => axiosAdmin.get(`/api/booking-packages/booking/${bookingId}`),
-  getServices: (bookingId) => axiosAdmin.get(`/api/booking-services/booking/${bookingId}`),
-  getBackgrounds: (bookingId) => axiosAdmin.get(`/api/booking-backgrounds/booking/${bookingId}`),
-  getBookingEquipments: (bookingId) =>
-    axiosAdmin.get(`/api/booking-equipments/booking/${bookingId}`),
-  getBookingAccessories: (bookingId) =>
-    axiosAdmin.get(`/api/booking-accessories/booking/${bookingId}`),
-  getBookingClothes: (bookingId) => axiosAdmin.get(`/api/booking-clothing/booking/${bookingId}`),
   getEmployeeAssignments: (bookingId) => axiosAdmin.get(`/api/booking-employee-assignments/booking/${bookingId}`),
   getEmployees: () => adminEmployeeService.getAll(),
   assignEmployee: (bookingId, employeeId) => axiosAdmin.post('/api/booking-employee-assignments', { bookingId, employeeId }),

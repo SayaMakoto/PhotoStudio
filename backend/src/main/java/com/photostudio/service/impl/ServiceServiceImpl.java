@@ -8,7 +8,6 @@ import com.photostudio.model.services.ServiceType;
 import com.photostudio.model.services.StudioService;
 import com.photostudio.repository.ServiceRepository;
 import com.photostudio.repository.PackageServiceRepository;
-import com.photostudio.repository.BookingServiceRepository;
 import com.photostudio.service.ServiceService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,14 +21,11 @@ public class ServiceServiceImpl implements ServiceService {
 
     private final ServiceRepository repository;
     private final PackageServiceRepository packageServiceRepository;
-    private final BookingServiceRepository bookingServiceRepository;
 
     public ServiceServiceImpl(ServiceRepository repository,
-                              PackageServiceRepository packageServiceRepository,
-                              BookingServiceRepository bookingServiceRepository) {
+                              PackageServiceRepository packageServiceRepository) {
         this.repository = repository;
         this.packageServiceRepository = packageServiceRepository;
-        this.bookingServiceRepository = bookingServiceRepository;
     }
 
     private StudioService findEntity(Long id) {
@@ -67,9 +63,6 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public void delete(Long id) {
         StudioService service = findEntity(id);
-        if (bookingServiceRepository.existsByServiceId(id)) {
-            throw new IllegalArgumentException("Không thể chuyển dịch vụ vào thùng rác vì dịch vụ đã được sử dụng trong đơn đặt lịch. Hãy chuyển trạng thái sang ngừng hoạt động.");
-        }
         service.setDeletedAt(LocalDateTime.now());
         repository.save(service);
     }
@@ -132,9 +125,6 @@ public class ServiceServiceImpl implements ServiceService {
     public void permanentlyDelete(Long id) {
         StudioService service = repository.findByIdAndDeletedAtIsNotNull(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dịch vụ trong thùng rác có id: " + id));
-        if (bookingServiceRepository.existsByServiceId(id)) {
-            throw new IllegalArgumentException("Không thể xóa vĩnh viễn dịch vụ đã được sử dụng trong đơn đặt lịch.");
-        }
         if (packageServiceRepository.existsByServiceId(id)) {
             throw new IllegalArgumentException("Không thể xóa vĩnh viễn dịch vụ đang nằm trong gói chụp. Hãy gỡ dịch vụ khỏi các gói trước.");
         }

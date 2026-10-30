@@ -3,6 +3,7 @@ import { CalendarDays, Clock3, FileText, MapPin, Package, Users, Wallet, X, User
 import StatusBadge from '../../../components/admin/common/StatusBadge';
 import GlideSelect from '../../../components/admin/common/GlideSelect';
 import adminBookingService from '../../../services/admin/bookingService';
+import adminPackageService from '../../../services/admin/packageService';
 import BookingStatusSelect from './BookingStatusSelect';
 import { formatBookingDate, formatBookingDateTime, formatBookingPrice, formatBookingTime, getNextBookingStatus } from './bookingConfig';
 import { EMPLOYEE_POSITION_LABELS } from '../employees/employeeConfig';
@@ -29,41 +30,65 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
 
   useEffect(() => {
     let mounted = true;
-    const requests = [
-      adminBookingService.getPackages(booking.id),
-      adminBookingService.getServices(booking.id),
-      adminBookingService.getBackgrounds(booking.id),
-      adminBookingService.getBookingEquipments(booking.id),
-      adminBookingService.getBookingAccessories(booking.id),
-      adminBookingService.getBookingClothes(booking.id),
-      adminBookingService.getEmployeeAssignments(booking.id),
-      adminBookingService.getPayments(booking.id),
-      adminBookingService.getReview(booking.id),
-      adminBookingService.getEmployees(),
-    ];
-    Promise.allSettled(requests).then((results) => {
+    const loadDetails = async () => {
+      const results = await Promise.allSettled([
+        adminBookingService.getPackages(booking.id),
+        adminBookingService.getEmployeeAssignments(booking.id),
+        adminBookingService.getPayments(booking.id),
+        adminBookingService.getReview(booking.id),
+        adminBookingService.getEmployees(),
+      ]);
       if (!mounted) return;
       const next = { ...INITIAL_ITEMS };
       results.forEach((result, index) => {
         if (result.status !== 'fulfilled') return;
         const value = result.value;
-        if (index === 8) next.review = value;
-        else if (index === 9) setEmployees(Array.isArray(value) ? value : []);
-        else next[['packages', 'services', 'backgrounds', 'equipments', 'accessories', 'clothes', 'employees', 'payments'][index]] = Array.isArray(value) ? value : [];
+        if (index === 3) next.review = value;
+        else if (index === 4) setEmployees(Array.isArray(value) ? value : []);
+        else next[['packages', 'employees', 'payments'][index]] = Array.isArray(value) ? value : [];
       });
-      const sectionNames = ['Gói chụp', 'Dịch vụ kèm theo', 'Bối cảnh', 'Thiết bị', 'Phụ kiện', 'Trang phục', 'Nhân viên phụ trách', 'Thanh toán'];
+
+      const packageDetails = await Promise.allSettled(next.packages.map(async (bookingPackage) => {
+        const [packageResult, servicesResult, backgroundsResult] = await Promise.allSettled([
+          adminPackageService.getById(bookingPackage.packageId),
+          adminPackageService.getPackageServices(bookingPackage.packageId),
+          adminPackageService.getPackageBackgrounds(bookingPackage.packageId),
+        ]);
+        return {
+          bookingPackage,
+          packageData: packageResult.status === 'fulfilled' ? packageResult.value : null,
+          services: servicesResult.status === 'fulfilled' && Array.isArray(servicesResult.value) ? servicesResult.value : [],
+          backgrounds: backgroundsResult.status === 'fulfilled' && Array.isArray(backgroundsResult.value) ? backgroundsResult.value : [],
+        };
+      }));
+      if (!mounted) return;
+      const linkedPackages = packageDetails.flatMap((result) => result.status === 'fulfilled' ? [result.value] : []);
+      const withPackageItemIds = (items, bookingPackage, kind) => (items || []).map((item, index) => ({
+        ...item,
+        id: `${kind}-${bookingPackage.id}-${item.id ?? index}`,
+        packageName: bookingPackage.packageName,
+      }));
+      next.equipments = linkedPackages.flatMap(({ bookingPackage, packageData }) => withPackageItemIds(packageData?.equipments, bookingPackage, 'equipment'));
+      next.clothes = linkedPackages.flatMap(({ bookingPackage, packageData }) => withPackageItemIds(packageData?.clothes, bookingPackage, 'cloth'));
+      next.accessories = linkedPackages.flatMap(({ bookingPackage, packageData }) => withPackageItemIds(packageData?.accessories, bookingPackage, 'accessory'));
+      next.services = linkedPackages.flatMap(({ bookingPackage, services }) => withPackageItemIds(services, bookingPackage, 'service'));
+      next.backgrounds = linkedPackages.flatMap(({ bookingPackage, backgrounds }) => withPackageItemIds(backgrounds, bookingPackage, 'background'));
+
+      const sectionNames = ['Gói chụp', 'Nhân viên phụ trách', 'Thanh toán'];
       const failures = results.flatMap((result, index) => {
         if (result.status !== 'rejected') return [];
         // Booking chưa được đánh giá là tình huống bình thường, backend hiện trả 4xx.
         const reviewErrorMessage = result.reason?.response?.data?.message || '';
-        if (index === 8 && (result.reason?.response?.status === 404 || reviewErrorMessage.includes('chưa có đánh giá'))) return [];
-        if (index === 9) return [];
-        return index < 8 ? [sectionNames[index]] : ['Đánh giá'];
+        if (index === 3 && (result.reason?.response?.status === 404 || reviewErrorMessage.includes('chưa có đánh giá'))) return [];
+        if (index === 4) return [];
+        return index < 3 ? [sectionNames[index]] : ['Đánh giá'];
       });
       setFailedSections(failures);
       if (failures.length) setLoadError(`Không tải được: ${failures.join(', ')}.`);
       setItems(next);
-    }).finally(() => { if (mounted) setLoading(false); });
+    };
+    loadDetails().catch((error) => setLoadError(error?.message || 'Không thể tải chi tiết đơn đặt lịch.'))
+      .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [booking.id]);
 
@@ -73,7 +98,7 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const total = [...items.packages, ...items.services, ...items.accessories, ...items.clothes].reduce((sum, item) => sum + (Number(item.subTotal ?? item.subtotal) || 0), 0);
+  const total = items.packages.reduce((sum, item) => sum + (Number(item.subTotal ?? item.subtotal) || 0), 0);
   const paid = items.payments.filter((payment) => payment.status === 'paid').reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
   const nextStatus = getNextBookingStatus(booking.status);
   const activeAssignments = items.employees.filter((item) => item.status === 'assigned');
@@ -115,11 +140,11 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
         {loadError && <p role="status" className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{loadError}</p>}
         <div className="grid gap-6 lg:grid-cols-2">
           <ItemSection title="Gói chụp" icon={Package} items={items.packages} error={failedSections.includes('Gói chụp')} loading={loading} renderItem={(item) => <><span className="font-medium text-neutral-200">{item.packageName} <span className="text-neutral-500">× {item.quantity}</span></span><span>{formatBookingPrice(item.subTotal)}</span></>} />
-          <ItemSection title="Dịch vụ kèm theo" icon={Package} items={items.services} error={failedSections.includes('Dịch vụ kèm theo')} loading={loading} renderItem={(item) => <><span className="font-medium text-neutral-200">{item.serviceName} <span className="text-neutral-500">× {item.quantity}</span></span><span>{formatBookingPrice(item.subtotal)}</span></>} />
-          <ItemSection title="Bối cảnh" icon={MapPin} items={items.backgrounds} error={failedSections.includes('Bối cảnh')} loading={loading} renderItem={(item) => <span className="font-medium text-neutral-200">{item.backgroundName}</span>} />
-          <ItemSection title="Thiết bị" icon={Package} items={items.equipments} error={failedSections.includes('Thiết bị')} loading={loading} renderItem={(item) => <><span className="font-medium text-neutral-200">{item.equipmentName} <span className="text-neutral-500">{item.equipmentSerialNumber ? `· ${item.equipmentSerialNumber}` : ''}</span></span><StatusBadge status={item.status} /></>} />
-          <ItemSection title="Phụ kiện" icon={Package} items={items.accessories} error={failedSections.includes('Phụ kiện')} loading={loading} renderItem={(item) => <><span className="font-medium text-neutral-200">{item.accessoryName} <span className="text-neutral-500">× {item.quantity}</span></span><span>{formatBookingPrice(item.subTotal)}</span></>} />
-          <ItemSection title="Trang phục" icon={Package} items={items.clothes} error={failedSections.includes('Trang phục')} loading={loading} renderItem={(item) => <><span className="font-medium text-neutral-200">{item.clothName} <span className="text-neutral-500">{[item.size, item.color, item.gender].filter(Boolean).join(' · ')}</span></span><span>{item.quantity} × {formatBookingPrice(item.unitPrice)}</span></>} />
+          <ItemSection title="Dịch vụ trong gói" icon={Package} items={items.services} loading={loading} renderItem={(item) => <><span className="font-medium text-neutral-200">{item.serviceName} <span className="text-neutral-500">· {item.packageName} · × {item.quantity}</span></span><span>{formatBookingPrice(item.subtotal)}</span></>} />
+          <ItemSection title="Bối cảnh trong gói" icon={MapPin} items={items.backgrounds} loading={loading} renderItem={(item) => <span className="font-medium text-neutral-200">{item.backgroundName} <span className="text-neutral-500">· {item.packageName}</span></span>} />
+          <ItemSection title="Thiết bị theo gói" icon={Package} items={items.equipments} loading={loading} renderItem={(item) => <span className="font-medium text-neutral-200">{item.equipmentType} <span className="text-neutral-500">· {item.packageName} · × {item.quantity}</span></span>} />
+          <ItemSection title="Phụ kiện trong gói" icon={Package} items={items.accessories} loading={loading} renderItem={(item) => <span className="font-medium text-neutral-200">{item.accessoryName} <span className="text-neutral-500">· {item.packageName} · × {item.quantity}</span></span>} />
+          <ItemSection title="Trang phục trong gói" icon={Package} items={items.clothes} loading={loading} renderItem={(item) => <span className="font-medium text-neutral-200">{item.clothName} <span className="text-neutral-500">{[item.size, item.color, item.packageName, `× ${item.quantity}`].filter(Boolean).join(' · ')}</span></span>} />
           <section className="space-y-2"><h3 className="flex items-center gap-2 text-sm font-medium text-neutral-200"><Users className="h-4 w-4 text-amber-300" />Nhân viên phụ trách</h3>{loading ? <p className="text-xs text-neutral-500">Đang tải...</p> : failedSections.includes('Nhân viên phụ trách') ? <p className="text-xs text-red-300">Không tải được danh sách phân công.</p> : <><div className="flex items-end gap-2"><div className="min-w-0 flex-1"><GlideSelect options={employeeOptions} value={employeeId} onChange={setEmployeeId} placeholder="Chọn nhân viên đang hoạt động" ariaLabel="Chọn nhân viên phân công" showTags={false} disabled={assignmentBusy || !['pending','confirmed','in_progress'].includes(booking.status)} size="md" accentColor="#fbbf24" surfaceColor="#0a0a0a" highlightColor="#262626" textColor="#e5e5e5" menuWidth={320} className="w-full [&>button]:min-h-10 [&>button]:w-full [&>button]:justify-between [&>button]:border [&>button]:border-neutral-800" /></div><button type="button" onClick={assignEmployee} disabled={!employeeId || assignmentBusy || !['pending','confirmed','in_progress'].includes(booking.status)} className="inline-flex h-10 shrink-0 items-center gap-1 rounded-xl bg-amber-400 px-3 text-xs font-semibold text-neutral-950 disabled:opacity-40"><UserPlus className="h-3.5 w-3.5"/>Giao</button></div>{assignmentError && <p role="alert" className="text-xs text-rose-300">{assignmentError}</p>}{visibleAssignments.length ? <div className="space-y-2">{visibleAssignments.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-neutral-800 bg-neutral-950/40 px-3 py-2 text-xs"><span className="font-medium text-neutral-200">{item.employeeName} <span className="text-neutral-500">{EMPLOYEE_POSITION_LABELS[item.position] || item.position || ''}{item.employeePhone ? ` · ${item.employeePhone}` : ''}</span></span><span className="flex items-center gap-2"><StatusBadge status={item.status} />{item.status === 'assigned' && <button type="button" onClick={() => releaseEmployee(item)} disabled={assignmentBusy} aria-label={`Giải phóng ${item.employeeName}`} title="Giải phóng nhân viên" className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-rose-300 disabled:opacity-40"><UserMinus className="h-4 w-4"/></button>}</span></div>)}</div> : <p className="rounded-xl border border-dashed border-neutral-800 px-3 py-3 text-xs text-neutral-500">Chưa có nhân viên được phân công.</p>}<p className="text-[11px] text-neutral-500">Nhân viên được giải phóng tự động khi buổi chụp hoàn tất hoặc bị hủy.</p></>}</section>
           <ItemSection title="Thanh toán" icon={Wallet} items={items.payments} error={failedSections.includes('Thanh toán')} loading={loading} empty="Chưa phát sinh thanh toán." renderItem={(item) => <><span className="font-medium text-neutral-200">{item.paymentMethod || 'Thanh toán'} · <StatusBadge status={item.status} /></span><span>{formatBookingPrice(item.amount)}{item.paidAt ? ` · ${formatBookingDateTime(item.paidAt)}` : ''}</span></>} />
         </div>
