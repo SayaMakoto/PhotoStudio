@@ -68,6 +68,8 @@ public class BookingController {
             @PathVariable Long id,
             @RequestBody(required = false) Map<String, String> body) {
         return ResponseEntity.ok(service.updateStatus(id, "cancelled"));
+    }
+
     @PatchMapping("/{id}/admin-decision")
     public ResponseEntity<BookingResponse> updateAdminDecision(
             @PathVariable Long id,
