@@ -987,7 +987,7 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF9F8] text-[#261A1E] relative pb-20 font-sans">
+    <div className="min-h-screen bg-[#FFF9F8] text-[#261A1E] relative pb-20 font-sans pt-20 sm:pt-24">
       {/* CÀNH HOA ĐÀO TRANG TRÍ GÓC MÀN HÌNH */}
       <div className="fixed top-0 right-0 w-80 h-72 pointer-events-none opacity-40 select-none overflow-hidden z-0">
         <FloralBranchCorner position="top-right" />
@@ -1083,10 +1083,44 @@ export default function BookingPage() {
           </div>
         </div>
 
+        {/* TIÊU ĐỀ BƯỚC HIỆN TẠI (ĐẶT PHÍA TRÊN ĐỂ CẢ 2 CỘT LUÔN BẰNG NHAU) */}
+        <div className="mt-8 mb-4">
+          {currentStep === 1 && (
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
+                Đặt lịch chụp ảnh
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Chọn gói chụp, không gian phòng chụp và dịch vụ bổ sung từ cơ sở dữ liệu
+              </p>
+            </div>
+          )}
+          {currentStep === 2 && (
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
+                Chọn thời gian chụp
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Chọn ngày và giờ phù hợp với lịch trống của studio
+              </p>
+            </div>
+          )}
+          {currentStep === 3 && (
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
+                Xác nhận thông tin đặt lịch
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Vui lòng kiểm tra lại thông tin trước khi thanh toán
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* ===================================================================
             BỐ CỤC 2 CỘT: CỘT TRÁI (WIZARD) + CỘT PHẢI (TÓM TẮT DỰ TOÁN)
            =================================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* CỘT TRÁI: NỘI DUNG WIZARD */}
           <div className="lg:col-span-8 space-y-8">
@@ -1096,16 +1130,6 @@ export default function BookingPage() {
                --------------------------------------------------------------- */}
             {currentStep === 1 && (
               <div className="space-y-8 animate-fade-in">
-                {/* Tiêu đề trang */}
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
-                    Đặt lịch chụp ảnh
-                  </h1>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                    Chọn gói chụp, không gian phòng chụp và dịch vụ bổ sung từ cơ sở dữ liệu
-                  </p>
-                </div>
-
                 {/* 1. CHỌN GÓI CHỤP (LUÔN HIỆN ĐẦU TIÊN) */}
                 <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm relative overflow-hidden transition-all">
                   <div className="flex items-center justify-between pb-4 border-b border-[#F5EBEB]">
@@ -1464,15 +1488,6 @@ export default function BookingPage() {
                --------------------------------------------------------------- */}
             {currentStep === 2 && (
               <div className="space-y-8 animate-fade-in">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
-                    Chọn thời gian chụp
-                  </h1>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                    Chọn ngày và giờ phù hợp với lịch trống của studio
-                  </p>
-                </div>
-
                 {/* 1. CHỌN NGÀY CHỤP (LỊCH TUẦN ĐỊNH DẠNG CHUẨN VIỆT NAM) */}
                 <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-sm space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-[#F5EBEB]">
@@ -1663,15 +1678,6 @@ export default function BookingPage() {
                --------------------------------------------------------------- */}
             {currentStep === 3 && (
               <div className="space-y-8 animate-fade-in">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
-                    Xác nhận thông tin đặt lịch
-                  </h1>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                    Vui lòng kiểm tra lại thông tin trước khi thanh toán
-                  </p>
-                </div>
-
                 {submitError && (
                   <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
@@ -1940,9 +1946,13 @@ export default function BookingPage() {
           </div>
 
           {/* =================================================================
-              CỘT PHẢI: TÓM TẮT LỰA CHỌN & DỰ TOÁN CHI PHÍ (STICKY)
+              CỘT PHẢI: TÓM TẮT LỰA CHỌN & DỰ TOÁN CHI PHÍ (STICKY BƯỚC 1 & 2, ĐỨNG YÊN BƯỚC 3)
              ================================================================= */}
-          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8">
+          <div
+            className={`lg:col-span-4 space-y-6 ${
+              currentStep === 3 ? 'relative' : 'lg:sticky lg:top-24'
+            }`}
+          >
             <div className="p-6 rounded-3xl bg-white border border-[#F0E4E6] shadow-xl relative overflow-hidden space-y-5">
               <FloralCardCorner position="top-right" opacity="opacity-25" />
 
