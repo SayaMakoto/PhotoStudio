@@ -19,7 +19,7 @@ export const STATUS_CONFIG = {
   confirmed: { label: "Đã xác nhận", className: blue },
   in_progress: { label: "Đang thực hiện", className: blue },
   completed: { label: "Hoàn tất", className: green },
-  cancelled: { label: "Đã hủy", className: red },
+      cancelled: { label: "Đã từ chối", className: red },
   assigned: { label: "Đã phân công", className: blue },
   returned: { label: "Đã hoàn trả", className: green },
   paid: { label: "Đã thanh toán", className: green },

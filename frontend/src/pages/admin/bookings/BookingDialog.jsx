@@ -5,7 +5,7 @@ import GlideSelect from '../../../components/admin/common/GlideSelect';
 import adminBookingService from '../../../services/admin/bookingService';
 import adminPackageService from '../../../services/admin/packageService';
 import BookingStatusSelect from './BookingStatusSelect';
-import { formatBookingDate, formatBookingDateTime, formatBookingPrice, formatBookingTime, getNextBookingStatus } from './bookingConfig';
+import { formatBookingDate, formatBookingDateTime, formatBookingPrice, formatBookingTime, getAdminBookingStatusOptions } from './bookingConfig';
 import { EMPLOYEE_POSITION_LABELS } from '../employees/employeeConfig';
 
 function Info({ label, children }) {
@@ -100,7 +100,7 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
 
   const total = items.packages.reduce((sum, item) => sum + (Number(item.subTotal ?? item.subtotal) || 0), 0);
   const paid = items.payments.filter((payment) => payment.status === 'paid').reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
-  const nextStatus = getNextBookingStatus(booking.status);
+  const nextStatuses = getAdminBookingStatusOptions(booking.status);
   const activeAssignments = items.employees.filter((item) => item.status === 'assigned');
   const visibleAssignments = items.employees.filter((item) => item.status !== 'cancelled');
   const availableEmployees = employees.filter((employee) => employee.status === 'active' && !activeAssignments.some((item) => String(item.employeeId) === String(employee.id)));
@@ -136,7 +136,19 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
     <section role="dialog" aria-modal="true" aria-labelledby="booking-dialog-title" className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-900 shadow-2xl">
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-neutral-800 bg-neutral-900/95 px-5 py-4 backdrop-blur"><div><p className="text-[11px] font-semibold uppercase tracking-wider text-amber-300">Chi tiết đơn đặt lịch</p><h2 id="booking-dialog-title" className="mt-1 text-lg font-semibold text-white">Đơn #{booking.id}</h2></div><button type="button" onClick={onClose} aria-label="Đóng" className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white"><X className="h-4 w-4" /></button></header>
       <div className="space-y-6 px-5 py-5">
-        <section><h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-neutral-200"><CalendarDays className="h-4 w-4 text-amber-300" />Thông tin lịch</h3><dl className="grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3"><Info label="Khách hàng">{booking.customerName}</Info><Info label="Số điện thoại">{booking.customerPhone}</Info><Info label="Phòng chụp"><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-neutral-500" />{booking.roomName || `Phòng #${booking.roomId}`}</span></Info><Info label="Ngày chụp">{formatBookingDate(booking.bookingDate)}</Info><Info label="Khung giờ"><span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5 text-neutral-500" />{formatBookingTime(booking.startTime)} – {formatBookingTime(booking.endTime)}</span></Info><Info label="Trạng thái hiện tại"><StatusBadge status={booking.status} domain="booking" /></Info><Info label="Ghi chú khách hàng"><span className="inline-flex items-start gap-1"><FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-neutral-500" />{booking.customerNote || 'Không có ghi chú'}</span></Info><Info label="Ngày tạo đơn">{formatBookingDateTime(booking.createdAt)}</Info><Info label="Cập nhật lần cuối">{formatBookingDateTime(booking.updatedAt)}</Info></dl>{nextStatus ? <div className="mt-4 max-w-sm space-y-1.5"><p className="text-[11px] font-medium text-neutral-400">Chuyển sang mốc tiếp theo</p><BookingStatusSelect nextStatus={nextStatus.value} onChange={(status) => changeBookingStatus(booking, status)} disabled={updating} /></div> : <p className="mt-3 text-[11px] text-neutral-500">{booking.status === 'cancelled' ? 'Đơn đã hủy bởi khách hàng; admin không thể thay đổi trạng thái.' : 'Đơn đã ở mốc trạng thái cuối cùng.'}</p>}</section>
+        <section>
+          <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-neutral-200"><CalendarDays className="h-4 w-4 text-amber-300" />Thông tin lịch</h3>
+          <dl className="grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
+            <Info label="Khách hàng">{booking.customerName}</Info><Info label="Số điện thoại">{booking.customerPhone}</Info>
+            <Info label="Phòng chụp"><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-neutral-500" />{booking.roomName || `Phòng #${booking.roomId}`}</span></Info>
+            <Info label="Ngày chụp">{formatBookingDate(booking.bookingDate)}</Info>
+            <Info label="Khung giờ"><span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5 text-neutral-500" />{formatBookingTime(booking.startTime)} – {formatBookingTime(booking.endTime)}</span></Info>
+            <Info label="Trạng thái hiện tại"><StatusBadge status={booking.status} domain="booking" /></Info>
+            <Info label="Ghi chú khách hàng"><span className="inline-flex items-start gap-1"><FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-neutral-500" />{booking.customerNote || 'Không có ghi chú'}</span></Info>
+            <Info label="Ngày tạo đơn">{formatBookingDateTime(booking.createdAt)}</Info><Info label="Cập nhật lần cuối">{formatBookingDateTime(booking.updatedAt)}</Info>
+          </dl>
+          {nextStatuses.length ? <div className="mt-4 max-w-sm space-y-1.5"><p className="text-[11px] font-medium text-neutral-400">Quyết định đơn đặt lịch</p><BookingStatusSelect options={nextStatuses} onChange={(status) => changeBookingStatus(booking, status)} disabled={updating} /></div> : <p className="mt-3 text-[11px] text-neutral-500">{booking.status === 'cancelled' ? 'Đơn đã từ chối hoặc bị hủy, không thể cập nhật tiếp.' : 'Admin chỉ xử lý đơn đang chờ xác nhận; các trạng thái sau do nhân viên cập nhật.'}</p>}
+        </section>
         {loadError && <p role="status" className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{loadError}</p>}
         <div className="grid gap-6 lg:grid-cols-2">
           <ItemSection title="Gói chụp" icon={Package} items={items.packages} error={failedSections.includes('Gói chụp')} loading={loading} renderItem={(item) => <><span className="font-medium text-neutral-200">{item.packageName} <span className="text-neutral-500">× {item.quantity}</span></span><span>{formatBookingPrice(item.subTotal)}</span></>} />
