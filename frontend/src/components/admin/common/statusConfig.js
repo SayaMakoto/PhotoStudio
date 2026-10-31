@@ -50,6 +50,11 @@ export const STATUS_DOMAIN_CONFIG = {
     replied: { label: "Đã phản hồi", className: green },
     unreplied: { label: "Chưa phản hồi", className: amber },
   },
+  contact: {
+    pending: { label: "Chờ phản hồi", className: amber },
+    completed: { label: "Đã phản hồi", className: green },
+    cancelled: { label: "Đã đóng", className: neutral },
+  },
   visibility: {
     active: { label: "Đang hiện", className: green },
     inactive: { label: "Đang ẩn", className: neutral },

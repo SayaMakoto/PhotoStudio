@@ -208,6 +208,7 @@ export default function VNPayReturnPage() {
             roomName: pendingOrder.roomName,
             roomImage: pendingOrder.roomImage,
             roomCapacity: pendingOrder.roomCapacity,
+            roomSurcharge: pendingOrder.roomSurcharge || 0,
             // Package
             packageId: pendingOrder.packageId,
             packageName: pendingOrder.packageName,
@@ -217,8 +218,10 @@ export default function VNPayReturnPage() {
             packageDuration: pendingOrder.packageDuration,
             packageImage: pendingOrder.packageImage,
             // Services
-            selectedServices: pendingOrder.selectedServices || [],
+            services: pendingOrder.services || pendingOrder.selectedServices || [],
+            selectedServices: pendingOrder.selectedServices || pendingOrder.services || [],
             servicesTotal: pendingOrder.servicesTotal || 0,
+            isServiceOptOut: pendingOrder.isServiceOptOut || false,
             // Booking Date & Time
             bookingDate: pendingOrder.bookingDate,
             startTime: pendingOrder.startTime,
@@ -415,7 +418,11 @@ export default function VNPayReturnPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
             type="button"
-            onClick={() => navigate(ROUTES.USER.PAYMENT)}
+            onClick={() => {
+              navigate(ROUTES.USER.BOOKING, {
+                state: { retryOrder: pendingOrder, step: 3 },
+              });
+            }}
             className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#B85064] text-white text-xs font-bold shadow-md hover:bg-[#A8394C] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <ArrowPathIcon className="w-4 h-4" />

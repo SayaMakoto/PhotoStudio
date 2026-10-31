@@ -125,18 +125,10 @@ export const ADMIN_MENU_CONFIG = [
     path: ROUTES.ADMIN.PAYMENTS,
   },
   {
-    id: "reviews_group",
+    id: "reviews",
     title: "Quản lý đánh giá",
     icon: Star,
-    children: [
-      {
-        id: "reviews",
-        title: "Đánh giá buổi chụp",
-        subkey: "reviews",
-        icon: Star,
-        path: ROUTES.ADMIN.REVIEWS.REVIEWS,
-      },
-    ],
+    path: ROUTES.ADMIN.REVIEWS.REVIEWS,
   },
   {
     id: "system",
@@ -178,6 +170,5 @@ export const ADMIN_MENU_CONFIG = [
     title: "Quản lý liên hệ",
     icon: Mail,
     path: ROUTES.ADMIN.CONTACTS,
-    badge: "3",
   },
 ];
