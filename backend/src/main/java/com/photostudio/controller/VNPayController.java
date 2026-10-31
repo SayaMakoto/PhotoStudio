@@ -150,7 +150,11 @@ public class VNPayController {
                     payment.setPaymentMethod(PaymentMethod.vnpay);
                     payment.setAmount(amount);
                     payment.setPaidAt(LocalDateTime.now());
-                    payment.setStatus(PaymentStatus.paid);
+                    String orderInfo = queryParams.getOrDefault("vnp_OrderInfo", "").toLowerCase();
+                    PaymentStatus paymentStatus = orderInfo.contains("50%")
+                            ? PaymentStatus.deposit_50
+                            : orderInfo.contains("30%") ? PaymentStatus.deposit_30 : PaymentStatus.paid;
+                    payment.setStatus(paymentStatus);
                     payment.setNote("VNPay Sandbox #" + vnp_TxnRef);
                     paymentRepository.save(payment);
 

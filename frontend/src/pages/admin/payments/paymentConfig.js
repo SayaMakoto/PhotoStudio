@@ -1,8 +1,8 @@
 export const PAYMENT_STATUS_OPTIONS = [
-  { value: 'pending', label: 'Chờ thanh toán' },
+  { value: 'pending', label: 'Đang chờ thanh toán' },
+  { value: 'deposit_30', label: 'Đã cọc 30%' },
+  { value: 'deposit_50', label: 'Đã cọc 50%' },
   { value: 'paid', label: 'Đã thanh toán' },
-  { value: 'failed', label: 'Thất bại' },
-  { value: 'refunded', label: 'Đã hoàn tiền' },
 ];
 
 export const PAYMENT_METHOD_OPTIONS = [

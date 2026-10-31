@@ -27,6 +27,7 @@ import {
   PhotoIcon,
 } from "@heroicons/react/24/solid";
 import customerBookingService from "../../services/user/bookingService";
+import customerPaymentService from "../../services/user/paymentService";
 import customerReviewService from "../../services/user/reviewService";
 import BookingSessionDetailModal from "../../components/user/BookingSessionDetailModal";
 import { ROUTES } from "../../routes/web";
@@ -275,13 +276,16 @@ export default function ProfilePage() {
     setBookingsLoading(true);
     try {
       let rawList = [];
+      const apiBookingIds = new Set();
 
       if (targetUser?.id) {
         try {
           const resByCust = await customerBookingService.getBookingsByCustomer(targetUser.id);
-          if (Array.isArray(resByCust) && resByCust.length > 0) {
-            rawList = resByCust;
-          }
+          const apiRows = Array.isArray(resByCust) ? resByCust
+            : Array.isArray(resByCust?.data) ? resByCust.data
+              : Array.isArray(resByCust?.content) ? resByCust.content : [];
+          rawList = apiRows;
+          apiRows.forEach((booking) => apiBookingIds.add(String(booking.id)));
         } catch (e) {
           console.warn("Lấy đơn theo customerId:", e.message);
         }
@@ -301,6 +305,8 @@ export default function ProfilePage() {
 
       const filteredList = rawList.filter((item) => {
         if (!targetUser) return false;
+        // Endpoint này đã được giới hạn theo customerId; một số DTO không trả lại customerId.
+        if (apiBookingIds.has(String(item.id))) return true;
         const matchId = item.customerId && Number(item.customerId) === Number(targetUser.id);
         const matchUserId = item.userId && Number(item.userId) === Number(targetUser.id);
         const matchPhone = item.customerPhone && targetUser.phone && item.customerPhone.trim() === targetUser.phone.trim();
@@ -346,6 +352,18 @@ export default function ProfilePage() {
               if (rev && rev.id) reviewInfo = rev;
             } catch {}
 
+            let bookingPayments = [];
+            try {
+              const paymentResult = await customerPaymentService.getPaymentsByBookingId(item.id);
+              bookingPayments = Array.isArray(paymentResult) ? paymentResult : Array.isArray(paymentResult?.data) ? paymentResult.data : [];
+            } catch {}
+            const depositPayment = bookingPayments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
+            const savedPackageTotal = Number(totalPrice || 0);
+            if (depositPayment && Math.abs(savedPackageTotal - Number(depositPayment.amount || 0)) < 1) {
+              const rate = depositPayment.status.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
+              totalPrice = Number(depositPayment.amount || 0) / rate;
+            }
+
             // Ngày có thứ
             let dayOfWeekAndDate = "Chưa xếp ngày";
             let timeLabel = "Chờ xếp";
@@ -382,20 +400,19 @@ export default function ProfilePage() {
               } catch {}
             }
 
-            const rawStatus = (item.status || "pending").toLowerCase();
-            let paymentStatusText = "Chờ thanh toán";
-            let paymentBadgeClass = "bg-gray-100 text-gray-600 border-gray-200";
-            if (rawStatus === "completed") {
-              paymentStatusText = "Đã thanh toán (100%)";
-              paymentBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
-            } else if (rawStatus === "confirmed") {
-              paymentStatusText = "Đã đặt cọc";
-              paymentBadgeClass = "bg-amber-50 text-amber-700 border-amber-200";
-            } else if (rawStatus === "cancelled") {
-              paymentStatusText = "Đã hủy đơn";
-              paymentBadgeClass = "bg-rose-50 text-rose-700 border-rose-200";
-            }
+            const paymentPriority = { pending: 0, deposit_30: 1, deposit_50: 2, paid: 3, success: 3, completed: 3 };
+            const paymentStatus = ([...bookingPayments].sort((a, b) => (paymentPriority[(b.status || '').toLowerCase()] || 0) - (paymentPriority[(a.status || '').toLowerCase()] || 0))[0]?.status || "pending").toLowerCase();
+            const paymentLabels = {
+              pending: ["Đang chờ thanh toán", "bg-gray-100 text-gray-600 border-gray-200"],
+              deposit_30: ["Đã cọc 30%", "bg-amber-50 text-amber-700 border-amber-200"],
+              deposit_50: ["Đã cọc 50%", "bg-amber-50 text-amber-700 border-amber-200"],
+              paid: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
+              success: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
+              completed: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
+            };
+            const [paymentStatusText, paymentBadgeClass] = paymentLabels[paymentStatus] || paymentLabels.pending;
 
+            const rawStatus = (item.status || "pending").toLowerCase();
             return {
               id: item.id,
               customerId: item.customerId,
@@ -436,6 +453,15 @@ export default function ProfilePage() {
       setBookingsLoading(false);
     }
   };
+
+  // Làm mới khi người dùng quay lại tab đơn đặt lịch hoặc quay lại cửa sổ sau khi admin cập nhật.
+  useEffect(() => {
+    if (activeTab !== "bookings" || !user) return undefined;
+    fetchRealBookings(user);
+    const refreshOnFocus = () => fetchRealBookings(user);
+    window.addEventListener("focus", refreshOnFocus);
+    return () => window.removeEventListener("focus", refreshOnFocus);
+  }, [activeTab, user?.id]);
 
   // Tải danh sách đánh giá của tôi
   const fetchMyReviews = async (targetUser) => {

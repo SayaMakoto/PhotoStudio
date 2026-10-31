@@ -76,7 +76,9 @@ export default function VNPayReturnPage() {
       customerPhone: pendingOrder?.customerPhone || user?.phone || '',
       customerEmail: pendingOrder?.customerEmail || user?.email || '',
       customerNote: pendingOrder?.customerNote || '',
-      totalPrice: pendingOrder?.totalPrice || pendingOrder?.totalAmount || rawAmount,
+      totalPrice: pendingOrder?.totalOrderPrice || pendingOrder?.totalPrice || pendingOrder?.totalAmount || pendingOrder?.finalPackagePrice || rawAmount,
+      totalOrderPrice: pendingOrder?.totalOrderPrice || pendingOrder?.totalPrice || pendingOrder?.totalAmount || pendingOrder?.finalPackagePrice,
+      finalPackagePrice: pendingOrder?.finalPackagePrice,
       paidAmount: rawAmount,
       remainingAmount: pendingOrder?.remainingAmount || 0,
       paymentType: pendingOrder?.paymentType || 'deposit',
@@ -147,7 +149,8 @@ export default function VNPayReturnPage() {
                 bookingId: finalBookingId,
                 packageId: pendingOrder.packageId,
                 quantity: 1,
-                unitPrice: Number(pendingOrder.finalPackagePrice || pendingOrder.amountToPay || 0),
+                // BookingPage stores the full package price in packagePrice; amountToPay is only the deposit.
+                unitPrice: Number(pendingOrder.finalPackagePrice || pendingOrder.packagePrice || pendingOrder.totalPrice || pendingOrder.amountToPay || 0),
               }).catch((pkgErr) => console.warn('Lỗi gắn gói chụp:', pkgErr.message));
             }
 
@@ -178,7 +181,9 @@ export default function VNPayReturnPage() {
             bookingId: finalBookingId,
             paymentMethod: 'vnpay',
             amount: rawAmount,
-            status: 'paid',
+            status: pendingOrder?.paymentType === 'deposit'
+              ? Number(pendingOrder?.depositPercent) === 50 ? 'deposit_50' : 'deposit_30'
+              : 'paid',
             note: `VNPay Sandbox GD #${queryParams.vnp_TransactionNo || queryParams.vnp_TxnRef} (${pendingOrder?.paymentType === 'deposit' ? `Cọc ${pendingOrder?.depositPercent}%` : 'Toàn bộ 100%'})`,
           });
         } catch (apiErr) {
@@ -227,7 +232,7 @@ export default function VNPayReturnPage() {
             promoCode: pendingOrder.appliedPromoCode || '',
             discountAmount: pendingOrder.discountAmount || 0,
             finalPackagePrice: pendingOrder.finalPackagePrice,
-            totalOrderPrice: pendingOrder.totalOrderPrice || rawAmount,
+            totalOrderPrice: pendingOrder.totalOrderPrice || pendingOrder.totalPrice || pendingOrder.finalPackagePrice || rawAmount,
             amountPaid: rawAmount,
             remainingAmount: pendingOrder.remainingAmount || 0,
             transactionNo: queryParams.vnp_TransactionNo || queryParams.vnp_TxnRef,
