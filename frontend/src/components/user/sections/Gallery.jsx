@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  SparklesIcon,
   ArrowsPointingOutIcon,
   XMarkIcon,
   ChevronLeftIcon,
@@ -472,7 +471,7 @@ export default function Gallery() {
                   to={ROUTES.USER.GALLERY}
                   className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs sm:text-sm font-bold shadow-lg shadow-rose-950/20 hover:scale-105 transition-all"
                 >
-                  <SparklesIcon className="w-4 h-4 text-white" />
+                  <PhotoIcon className="w-4 h-4 text-white" />
                   <span>Xem Thêm Tác Phẩm Khác Trong Bộ Sưu Tập ({photos.length}+ Tác Phẩm)</span>
                   <ChevronRightIcon className="w-4 h-4 text-white" />
                 </Link>

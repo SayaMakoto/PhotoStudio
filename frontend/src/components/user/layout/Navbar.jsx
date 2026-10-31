@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   CameraIcon, 
-  SparklesIcon, 
+  BellAlertIcon, 
   Bars3Icon, 
   XMarkIcon, 
   PhoneIcon, 
@@ -305,7 +305,7 @@ export default function Navbar({ onOpenBooking }) {
             {/* Lời nhắc nhở tinh tế, không ép buộc */}
             <div className="flex items-center gap-2.5 text-left w-full sm:w-auto">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-[#E899A8] border border-rose-500/30">
-                <SparklesIcon className="w-3 h-3" />
+                <BellAlertIcon className="w-3 h-3" />
               </span>
               <p className="leading-snug text-neutral-200">
                 <span className="font-semibold text-[#E899A8]">Nhắc nhở nhẹ:</span>{' '}

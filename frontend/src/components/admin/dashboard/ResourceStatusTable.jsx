@@ -3,7 +3,7 @@ import {
   Image,
   DoorOpen,
   Shirt,
-  Sparkles,
+  Gem,
   CheckCircle2,
   Wrench,
 } from "lucide-react";
@@ -57,7 +57,7 @@ export default function ResourceStatusTable() {
     {
       id: "accessories",
       category: "Quản lý phụ kiện",
-      icon: Sparkles,
+      icon: Gem,
       total: 145,
       active: 138,
       inUse: 52,

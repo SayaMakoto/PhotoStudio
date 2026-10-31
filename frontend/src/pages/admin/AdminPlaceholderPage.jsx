@@ -1,4 +1,4 @@
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { Layers, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../routes/web";
 
@@ -33,7 +33,7 @@ export default function AdminPlaceholderPage({ title, description, category }) {
       {/* Placeholder Container */}
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-12 text-center backdrop-blur-md">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-4 shadow-lg shadow-amber-500/5">
-          <Sparkles className="h-7 w-7" />
+          <Layers className="h-7 w-7" />
         </div>
         <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
         <p className="text-sm text-neutral-400 max-w-lg mx-auto mb-6">

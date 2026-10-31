@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  SparklesIcon,
+  CakeIcon,
   CubeIcon,
   CheckBadgeIcon,
   UserGroupIcon,
@@ -590,7 +590,7 @@ export default function StudiosPage() {
                 desc: 'Kết nối Tethering trực tiếp từ máy ảnh lên màn hình lớn giúp bạn và stylist kiểm tra ảnh ngay trong buổi chụp.',
               },
               {
-                icon: SparklesIcon,
+                icon: CakeIcon,
                 title: 'Trà Hoa & Quầy Coffee Bar',
                 desc: 'Thưởng thức trà thảo mộc thơm mát, cà phê và bánh ngọt miễn phí trong suốt thời gian trang điểm và nghỉ ngơi.',
               },
