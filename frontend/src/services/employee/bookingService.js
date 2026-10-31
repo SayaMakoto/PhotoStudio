@@ -18,6 +18,13 @@ export const employeeBookingService = {
   getPackages: (bookingId) =>
     axiosEmployee.get(`/api/booking-packages/booking/${bookingId}`),
 
+  // Lấy cấu hình vật tư và nội dung theo gói chụp
+  getPackageDetails: (packageId) => axiosEmployee.get(`/api/packages/${packageId}`),
+  getPackageServices: (packageId) =>
+    axiosEmployee.get(`/api/package-services/package/${packageId}`),
+  getPackageBackgrounds: (packageId) =>
+    axiosEmployee.get(`/api/package-backgrounds/package/${packageId}`),
+
   // Lấy phân công nhân viên của ca chụp
   getAssignments: (bookingId) =>
     axiosEmployee.get(`/api/booking-employee-assignments/booking/${bookingId}`),
