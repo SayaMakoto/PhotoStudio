@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Camera,
   Shirt,
-  Sparkles,
   Package,
   Layers,
   Users,
@@ -448,7 +447,7 @@ export default function ShootDetailModal({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-[#261A1E] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#B85064]" />
+                    <Package className="w-3.5 h-3.5 text-[#B85064]" />
                     Phụ Kiện Đạo Cụ Đi Kèm ({accessories.length})
                   </span>
                 </div>

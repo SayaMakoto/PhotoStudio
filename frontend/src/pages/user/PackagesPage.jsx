@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   CameraIcon,
-  SparklesIcon,
+  ShoppingBagIcon,
   PhotoIcon,
   ClockIcon,
   HeartIcon,
@@ -72,7 +72,7 @@ const SORT_OPTIONS = [
     id: 'newest',
     label: 'Mới nhất',
     subtext: 'Concept ra mắt gần đây',
-    icon: SparklesIcon,
+    icon: ClockIcon,
   },
   {
     id: 'best-deal',
@@ -439,7 +439,7 @@ export default function PackagesPage() {
       case 'camera':
         return <CameraIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
       case 'outfit':
-        return <SparklesIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
+        return <ShoppingBagIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
       case 'photo':
         return <PhotoIcon className="w-4 h-4 text-[#9E8E93] shrink-0" />;
       case 'clock':
