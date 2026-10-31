@@ -28,6 +28,7 @@ import {
 import { ROUTES } from "../../routes/web";
 import { customerAuth } from "../../lib/axiosCustomer";
 import customerReviewService from "../../services/user/reviewService";
+import customerBookingService from "../../services/user/bookingService";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -50,6 +51,9 @@ export default function ReviewsPage() {
     comment: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [eligibleBookings, setEligibleBookings] = useState([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const reviewsSectionRef = useRef(null);
@@ -222,7 +226,7 @@ export default function ReviewsPage() {
   };
 
   // Mở modal viết đánh giá (Chỉ dành cho người dùng đã có role hợp lệ)
-  const handleOpenReviewModal = () => {
+  const handleOpenReviewModal = async () => {
     const isAuth = customerAuth.isAuthenticated();
     const user = customerAuth.getUser();
 
@@ -232,19 +236,38 @@ export default function ReviewsPage() {
       return;
     }
 
-    // Nếu đã đăng nhập và có role hợp lệ: lấy tên từ tài khoản và khóa lại
     setNewReviewForm({
       customerName: user.fullname || user.username || "Khách hàng PhotoStudio",
       rating: 5,
+      bookingId: "",
       comment: "",
     });
+    setSubmitError("");
+    setEligibleBookings([]);
     setIsModalOpen(true);
-  };
 
+    // Chỉ cho đánh giá các đơn đã hoàn thành của chính khách và chưa được đánh giá
+    setIsLoadingBookings(true);
+    try {
+      const data = await customerBookingService.getBookingsByCustomer(user.id);
+      const reviewedIds = new Set(reviews.map((r) => Number(r.bookingId)));
+      const list = (Array.isArray(data) ? data : []).filter(
+        (b) => b.status === "completed" && !reviewedIds.has(Number(b.id)),
+      );
+      setEligibleBookings(list);
+      if (list.length > 0) {
+        setNewReviewForm((f) => ({ ...f, bookingId: String(list[0].id) }));
+      }
+    } catch (err) {
+      setSubmitError(err.response?.data?.message || "Không tải được danh sách đơn đặt lịch của bạn.");
+    } finally {
+      setIsLoadingBookings(false);
+    }
+  };
   // Submit modal form
   const handleCreateReview = async (e) => {
     e.preventDefault();
-    if (!newReviewForm.comment.trim()) return;
+    if (!newReviewForm.comment.trim() || !newReviewForm.bookingId) return;
 
     const isAuth = customerAuth.isAuthenticated();
     const user = customerAuth.getUser();
@@ -255,53 +278,48 @@ export default function ReviewsPage() {
     }
 
     setIsSubmitting(true);
+    setSubmitError("");
     try {
-      const payload = {
+      const saved = await customerReviewService.createReview({
         customerName: newReviewForm.customerName,
         rating: Number(newReviewForm.rating) || 5.0,
         comment: newReviewForm.comment.trim(),
-        customerId: user?.id,
-        bookingId: 1,
-      };
+        customerId: user.id,
+        bookingId: Number(newReviewForm.bookingId),
+      });
 
-      try {
-        await customerReviewService.createReview(payload);
-      } catch (apiErr) {
-        console.warn(
-          "Gửi API review thất bại, thêm trực tiếp vào giao diện:",
-          apiErr.message,
+      // Tải lại danh sách từ CSDL để hiển thị đúng dữ liệu đã lưu
+      const fresh = await customerReviewService.getAllReviews();
+      if (Array.isArray(fresh)) {
+        setReviews(
+          fresh.map((item) => ({
+            ...item,
+            bookingId: item.bookingId || item.id,
+            customerName: item.customerName || "Khách hàng PhotoStudio",
+            rating: typeof item.rating === "number" ? item.rating : 5.0,
+            comment: item.comment || "",
+            createdAt: item.createdAt || new Date().toISOString(),
+            packageName: item.packageName || "Dịch Vụ Nhiếp Ảnh Chuyên Nghiệp",
+            category: item.category || "portrait",
+          })),
         );
+      } else if (saved) {
+        setReviews([saved, ...reviews]);
       }
-
-      const createdReview = {
-        id: Date.now(),
-        bookingId: Date.now(),
-        customerId: user?.id || 99,
-        customerName: newReviewForm.customerName,
-        rating: payload.rating,
-        comment: payload.comment,
-        packageName: "Đánh Giá Khách Hàng Trực Tiếp",
-        createdAt: new Date().toISOString(),
-        category: selectedCategory !== "all" ? selectedCategory : "portrait",
-        avatar: user?.avatar || null,
-      };
-
-      setReviews([createdReview, ...reviews]);
       setSubmitSuccess(true);
       setTimeout(() => {
         setSubmitSuccess(false);
         setIsModalOpen(false);
-        setNewReviewForm({
-          customerName: "",
-          rating: 5,
-          comment: "",
-        });
+        setNewReviewForm({ customerName: "", rating: 5, bookingId: "", comment: "" });
       }, 1500);
+    } catch (err) {
+      setSubmitError(
+        err.response?.data?.message || err.message || "Không thể gửi đánh giá lúc này.",
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-
   // Lấy nhãn hiển thị cho dropdown số sao
   const currentRatingOptionLabel = useMemo(() => {
     if (selectedRatingFilter === "all") return "Tất Cả Số Sao";
@@ -1095,6 +1113,40 @@ export default function ReviewsPage() {
                     </div>
                   </div>
 
+                  {submitError && (
+                    <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs">
+                      {submitError}
+                    </div>
+                  )}
+
+                  {/* Chọn đơn đã hoàn thành để đánh giá */}
+                  <div>
+                    <label className="block text-xs font-bold text-[#2A1D22] mb-1.5">
+                      Đơn đặt lịch cần đánh giá *
+                    </label>
+                    {isLoadingBookings ? (
+                      <p className="text-xs text-[#7A6C71]">Đang tải đơn của bạn...</p>
+                    ) : eligibleBookings.length === 0 ? (
+                      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                        Bạn chưa có đơn nào đã hoàn thành và chưa đánh giá. Chỉ có thể đánh giá sau khi buổi chụp hoàn thành.
+                      </p>
+                    ) : (
+                      <select
+                        required
+                        value={newReviewForm.bookingId}
+                        onChange={(e) =>
+                          setNewReviewForm({ ...newReviewForm, bookingId: e.target.value })
+                        }
+                        className="w-full px-3 py-2.5 bg-[#FAF5F5] border border-[#F0E4E6] rounded-xl text-xs focus:outline-none focus:border-[#B85064]"
+                      >
+                        {eligibleBookings.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            Đơn #{b.id}{b.bookingDate ? ` - ${new Date(b.bookingDate).toLocaleDateString("vi-VN")}` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                   {/* 2. Customer Name (Tên người đăng nhập, BỊ KHÓA KHÔNG CHO SỬA) */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
@@ -1153,7 +1205,7 @@ export default function ReviewsPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={isSubmitting || !newReviewForm.comment.trim()}
+                      disabled={isSubmitting || !newReviewForm.comment.trim() || !newReviewForm.bookingId}
                       className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmitting ? "Đang gửi..." : "Gửi Đánh Giá Ngay"}
