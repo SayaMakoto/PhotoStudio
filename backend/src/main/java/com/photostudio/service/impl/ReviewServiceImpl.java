@@ -156,10 +156,9 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional(readOnly = true)
     public ReviewResponse findByBookingId(Long bookingId) {
         checkId(bookingId, "Mã đơn đặt lịch không hợp lệ");
-        Review review = repository.findByBookingId(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Đơn đặt lịch (bookingId: " + bookingId + ") chưa có đánh giá"));
-        return ReviewMapper.toResponse(review);
+        return repository.findByBookingId(bookingId)
+                .map(ReviewMapper::toResponse)
+                .orElse(null);
     }
 
     @Override

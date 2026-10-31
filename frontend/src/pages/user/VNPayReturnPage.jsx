@@ -50,6 +50,9 @@ export default function VNPayReturnPage() {
   const [confirmedBookingId, setConfirmedBookingId] = useState(null);
   const [isBillModalOpen, setIsBillModalOpen] = useState(false);
   const hasProcessedRef = useRef(false);
+  const paymentStatus = Number(pendingOrder?.depositPercent) >= 100 || pendingOrder?.paymentType === 'full'
+    ? 'paid'
+    : Number(pendingOrder?.depositPercent) === 50 ? 'deposit_50' : 'deposit_30';
 
   // Số tiền giao dịch thực tế
   const rawAmount = useMemo(() => {
@@ -181,9 +184,7 @@ export default function VNPayReturnPage() {
             bookingId: finalBookingId,
             paymentMethod: 'vnpay',
             amount: rawAmount,
-            status: pendingOrder?.paymentType === 'deposit'
-              ? Number(pendingOrder?.depositPercent) === 50 ? 'deposit_50' : 'deposit_30'
-              : 'paid',
+            status: paymentStatus,
             note: `VNPay Sandbox GD #${queryParams.vnp_TransactionNo || queryParams.vnp_TxnRef} (${pendingOrder?.paymentType === 'deposit' ? `Cọc ${pendingOrder?.depositPercent}%` : 'Toàn bộ 100%'})`,
           });
         } catch (apiErr) {
@@ -242,7 +243,7 @@ export default function VNPayReturnPage() {
             bankCode: queryParams.vnp_BankCode || 'NCB / VNPay',
             status: 'pending', // Khởi tạo đơn đặt lịch ban đầu luôn là pending (chờ xác nhận)
             bookingStatus: 'pending',
-            paymentStatus: pendingOrder.paymentType === 'full' ? 'PAID' : 'PAID_DEPOSIT',
+            paymentStatus,
           };
 
           const existingList = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');

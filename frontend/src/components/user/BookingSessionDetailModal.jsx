@@ -63,11 +63,10 @@ export default function BookingSessionDetailModal({
   onBookingCancelled,
 }) {
   const navigate = useNavigate();
-  if (!isOpen || !booking) return null;
 
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState([]);
-  const [existingReview, setExistingReview] = useState(booking.review || null);
+  const [existingReview, setExistingReview] = useState(booking?.review || null);
   const [roomDetail, setRoomDetail] = useState(null);
   const [packageDetail, setPackageDetail] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -82,6 +81,7 @@ export default function BookingSessionDetailModal({
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
+    if (!isOpen || !booking) return undefined;
     let isMounted = true;
     setLoading(true);
     setSubmitError('');
@@ -256,7 +256,9 @@ export default function BookingSessionDetailModal({
     return () => {
       isMounted = false;
     };
-  }, [booking]);
+  }, [booking, isOpen]);
+
+  if (!isOpen || !booking) return null;
 
   // Lấy dữ liệu đơn hàng đã lưu từ photostudio_paid_orders (nếu có)
   const cachedOrder = (() => {
@@ -294,7 +296,7 @@ export default function BookingSessionDetailModal({
   const successfulPaymentStatuses = ['completed', 'paid', 'deposit_30', 'deposit_50'];
   const paidAmount = payments.length > 0
     ? payments.reduce((sum, p) => sum + (successfulPaymentStatuses.includes(p.status?.toLowerCase()) ? Number(p.amount || 0) : 0), 0)
-    : Number(booking.paidAmount || 0);
+    : Number(booking.paidAmount || (['paid', 'success', 'completed'].includes(String(booking.paymentStatus || '').toLowerCase()) ? booking.totalOrderPrice || booking.totalPrice : 0) || 0);
 
   const packageTotal = Number(packageDetail?.subTotal)
     || Number(packageDetail?.unitPrice) * Number(packageDetail?.quantity || 1)
@@ -319,6 +321,8 @@ export default function BookingSessionDetailModal({
     packageDetail?.unitPrice ??
     (totalAmount >= roomSurcharge + servicesTotal ? totalAmount - roomSurcharge - servicesTotal : totalAmount)
   );
+  const packageName = booking.packageName || packageDetail?.packageName || 'Gói Chụp Ảnh Studio Tiêu Chuẩn';
+  const roomName = booking.roomName || roomDetail?.name || 'Phòng Studio VIP';
 
   const discountAmount = Number(booking.discountAmount ?? cachedOrder?.discountAmount ?? 0);
 
@@ -1346,7 +1350,7 @@ export default function BookingSessionDetailModal({
                       <td className="py-2 text-center text-gray-500">{new Date().toLocaleDateString('vi-VN')}</td>
                       <td className="py-2 text-right">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          Đang chờ thanh toán
+                          {booking.paymentStatus === 'paid' ? 'Đã thanh toán' : booking.paymentStatus === 'deposit_50' ? 'Đã cọc 50%' : booking.paymentStatus === 'deposit_30' ? 'Đã cọc 30%' : 'Đang chờ thanh toán'}
                         </span>
                       </td>
                     </tr>

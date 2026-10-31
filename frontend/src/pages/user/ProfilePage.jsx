@@ -400,8 +400,22 @@ export default function ProfilePage() {
               } catch {}
             }
 
+            // Local receipt is a fallback for successful redirects when the payment API was unavailable.
+            let matchedPaid = null;
+            try {
+              const paidList = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
+              matchedPaid = paidList.find((p) => String(p.id) === String(item.id) || String(p.bookingId) === String(item.id)) || null;
+            } catch {}
+            const localPaymentStatus = String(matchedPaid?.paymentStatus || '').toLowerCase();
+            const normalizedLocalStatus = ['paid', 'success', 'completed'].includes(localPaymentStatus) || (localPaymentStatus === 'paid_deposit' && Number(matchedPaid?.depositPercent) >= 100)
+              ? 'paid'
+              : localPaymentStatus === 'deposit_50' || (localPaymentStatus === 'paid_deposit' && Number(matchedPaid?.depositPercent) === 50)
+                ? 'deposit_50'
+                : localPaymentStatus === 'deposit_30' || localPaymentStatus === 'paid_deposit' ? 'deposit_30' : 'pending';
             const paymentPriority = { pending: 0, deposit_30: 1, deposit_50: 2, paid: 3, success: 3, completed: 3 };
-            const paymentStatus = ([...bookingPayments].sort((a, b) => (paymentPriority[(b.status || '').toLowerCase()] || 0) - (paymentPriority[(a.status || '').toLowerCase()] || 0))[0]?.status || "pending").toLowerCase();
+            const apiPaymentStatus = [...bookingPayments]
+              .sort((a, b) => (paymentPriority[(b.status || '').toLowerCase()] || 0) - (paymentPriority[(a.status || '').toLowerCase()] || 0))[0]?.status;
+            const paymentStatus = String(apiPaymentStatus || normalizedLocalStatus || "pending").toLowerCase();
             const paymentLabels = {
               pending: ["Đang chờ thanh toán", "bg-gray-100 text-gray-600 border-gray-200"],
               deposit_30: ["Đã cọc 30%", "bg-amber-50 text-amber-700 border-amber-200"],
@@ -413,13 +427,6 @@ export default function ProfilePage() {
             const [paymentStatusText, paymentBadgeClass] = paymentLabels[paymentStatus] || paymentLabels.pending;
 
             const rawStatus = (item.status || "pending").toLowerCase();
-
-            // Lấy thông tin lưu từ photostudio_paid_orders (nếu đơn được đặt và thanh toán trên máy)
-            let matchedPaid = null;
-            try {
-              const paidList = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
-              matchedPaid = paidList.find((p) => p.id === item.id || p.bookingId === item.id) || null;
-            } catch {}
 
             return {
               id: item.id,
@@ -440,6 +447,8 @@ export default function ProfilePage() {
               staffCount: 2,
               totalPrice: matchedPaid?.totalOrderPrice || totalPrice,
               totalOrderPrice: matchedPaid?.totalOrderPrice || totalPrice,
+              paymentStatus,
+              paidAmount: matchedPaid?.amountPaid || matchedPaid?.paidAmount || (paymentStatus === 'paid' ? totalPrice : undefined),
               paymentStatusText,
               paymentBadgeClass,
               dayOfWeekAndDate,

@@ -75,16 +75,28 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
       next.backgrounds = linkedPackages.flatMap(({ bookingPackage, backgrounds }) => withPackageItemIds(backgrounds, bookingPackage, 'background'));
 
       const depositPayment = next.payments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
-      const packageTotal = next.packages.reduce((sum, item) => sum + (Number(item.subTotal ?? item.subtotal) || 0), 0);
-      if (depositPayment && next.packages.length === 1 && Math.abs(packageTotal - Number(depositPayment.amount || 0)) < 1) {
-        const rate = depositPayment.status.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
-        const fullTotal = Number(depositPayment.amount || 0) / rate;
-        next.packages = next.packages.map((item) => ({
-          ...item,
-          unitPrice: fullTotal / Number(item.quantity || 1),
-          subTotal: fullTotal,
-        }));
-      }
+      const successfulPaid = next.payments
+        .filter((payment) => ['paid', 'deposit_30', 'deposit_50', 'completed', 'success'].includes((payment.status || '').toLowerCase()))
+        .reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
+      const packagePriceById = new Map(linkedPackages.map(({ bookingPackage, packageData }) => [
+        String(bookingPackage.packageId), Number(packageData?.price) || 0,
+      ]));
+      next.packages = next.packages.map((item) => {
+        const quantity = Number(item.quantity || 1);
+        const storedSubtotal = Number(item.subTotal ?? item.subtotal) || 0;
+        const catalogUnitPrice = packagePriceById.get(String(item.packageId)) || 0;
+        const catalogSubtotal = catalogUnitPrice * quantity;
+        const isDepositStoredAsPackagePrice = depositPayment
+          && Math.abs(storedSubtotal - Number(depositPayment.amount || 0)) < 1;
+        const isOrderTotalStoredAsPackagePrice = successfulPaid > catalogSubtotal
+          && Math.abs(storedSubtotal - successfulPaid) < 1;
+        const exceedsCatalogPrice = catalogSubtotal > 0 && storedSubtotal > catalogSubtotal;
+
+        if (catalogUnitPrice > 0 && (isDepositStoredAsPackagePrice || isOrderTotalStoredAsPackagePrice || exceedsCatalogPrice)) {
+          return { ...item, unitPrice: catalogUnitPrice, subTotal: catalogSubtotal };
+        }
+        return item;
+      });
 
       const sectionNames = ['Gói chụp', 'Nhân viên phụ trách', 'Thanh toán'];
       const failures = results.flatMap((result, index) => {
@@ -113,10 +125,11 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
   const packageTotal = items.packages.reduce((sum, item) => sum + (Number(item.subTotal ?? item.subtotal) || 0), 0);
   const paid = items.payments.filter((payment) => ['paid', 'deposit_30', 'deposit_50', 'completed', 'success'].includes((payment.status || '').toLowerCase())).reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
   const depositPayment = items.payments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
-  const packageLooksLikeDeposit = depositPayment && Math.abs(packageTotal - Number(depositPayment.amount || 0)) < 1;
-  const total = packageLooksLikeDeposit
+  const inferredDepositTotal = depositPayment
     ? Number(depositPayment.amount || 0) / (depositPayment.status.toLowerCase() === 'deposit_50' ? 0.5 : 0.3)
-    : packageTotal;
+    : 0;
+  // Booking-package stores only package price; successful payments can also include room/services/surcharges.
+  const total = Math.max(packageTotal, inferredDepositTotal, paid);
   const remaining = Math.max(0, total - paid);
   const nextStatuses = getAdminBookingStatusOptions(booking.status);
   const activeAssignments = items.employees.filter((item) => item.status === 'assigned');
