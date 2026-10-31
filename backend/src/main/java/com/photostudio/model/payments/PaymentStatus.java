@@ -2,7 +2,7 @@ package com.photostudio.model.payments;
 
 public enum PaymentStatus {
     pending,
-    paid,
-    failed,
-    refunded
+    deposit_30,
+    deposit_50,
+    paid
 }

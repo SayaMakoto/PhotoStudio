@@ -87,7 +87,7 @@ export default function MyBookingsPage() {
         const paidBookingIds = new Set();
         allPayments.forEach((p) => {
           const pStatus = (p.status || '').toLowerCase();
-          if (pStatus === 'paid' || pStatus === 'success' || pStatus === 'completed') {
+          if (['paid', 'success', 'completed', 'deposit_30', 'deposit_50'].includes(pStatus)) {
             paidBookingIds.add(Number(p.bookingId));
           }
         });
@@ -101,14 +101,18 @@ export default function MyBookingsPage() {
             return matchesUser && isConfirmedOrPaid;
           })
           .map((b) => {
-            const bPay = allPayments.find((p) => Number(p.bookingId) === Number(b.id)) || {};
+            const bPays = allPayments.filter((p) => Number(p.bookingId) === Number(b.id));
+            const paymentPriority = { pending: 0, deposit_30: 1, deposit_50: 2, paid: 3, success: 3, completed: 3 };
+            const bPay = [...bPays].sort((a, b) => (paymentPriority[(b.status || '').toLowerCase()] || 0) - (paymentPriority[(a.status || '').toLowerCase()] || 0))[0] || {};
             const bRoom = allRooms.find((r) => Number(r.id) === Number(b.roomId)) || {};
-
-            const total = Number(bPay.amount || b.totalPrice || b.price || 0);
-            const isDeposit = total < 1000000 && total > 0;
-            const depPercent = isDeposit ? 30 : 100;
-            const fullEst = isDeposit ? Math.round(total / 0.3) : total;
-            const remaining = isDeposit ? Math.max(0, fullEst - total) : 0;
+            const successfulPayments = bPays.filter((p) => ['paid', 'success', 'completed', 'deposit_30', 'deposit_50'].includes((p.status || '').toLowerCase()));
+            const total = successfulPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+            const fullEst = Number(b.totalPrice || b.price || bPay.amount || 0);
+            const status = (bPay.status || '').toLowerCase();
+            const depPercent = status === 'deposit_50' ? 50 : status === 'deposit_30' ? 30 : (fullEst > total && total > 0 ? Math.round(total / fullEst * 100) : 100);
+            const isDeposit = depPercent < 100 && total > 0;
+            const remaining = Math.max(0, fullEst - total);
+            const paymentStatus = status === 'deposit_30' ? 'Đã cọc 30%' : status === 'deposit_50' ? 'Đã cọc 50%' : total >= fullEst && fullEst > 0 ? 'Đã thanh toán' : 'Đang chờ thanh toán';
 
             return {
               id: b.id,
@@ -123,7 +127,7 @@ export default function MyBookingsPage() {
               remainingAmount: remaining,
               totalAmount: fullEst,
               paymentMethod: bPay.paymentMethod || 'vnpay',
-              paymentStatus: 'Đã thanh toán',
+              paymentStatus,
               paidAt: bPay.paymentDate || b.createdAt || new Date().toISOString(),
               selectedServices: [],
               servicesTotal: 0,
@@ -289,7 +293,7 @@ export default function MyBookingsPage() {
                   : 'text-[#7A6C71] hover:text-[#261A1E]'
               }`}
             >
-              Đã cọc 30% ({paidBookings.filter((b) => b.paymentType === 'deposit').length})
+              Đã cọc ({paidBookings.filter((b) => b.paymentType === 'deposit').length})
             </button>
             <button
               type="button"
@@ -378,12 +382,12 @@ export default function MyBookingsPage() {
                       {isDeposit ? (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-300 shadow-2xs">
                           <CheckCircleIcon className="w-4 h-4 text-amber-600" />
-                          <span>ĐÃ ĐẶT CỌC 30%</span>
+                          <span>{(booking.paymentStatus || `Đã cọc ${booking.depositPercent}%`).toUpperCase()}</span>
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs">
                           <CheckCircleIcon className="w-4 h-4 text-emerald-600" />
-                          <span>ĐÃ THANH TOÁN 100%</span>
+                          <span>{(booking.paymentStatus || 'Đã thanh toán').toUpperCase()}</span>
                         </span>
                       )}
 
@@ -562,7 +566,7 @@ export default function MyBookingsPage() {
                                 SỐ TIỀN ĐÃ THANH TOÁN:
                               </span>
                               <strong className="text-lg font-extrabold text-emerald-700">
-                                {Number(booking.amountPaid).toLocaleString('vi-VN')} đ
+                                {Number(booking.amountPaid ?? booking.paidAmount ?? 0).toLocaleString('vi-VN')} đ
                               </strong>
                             </div>
                             <p className="text-[10px] text-emerald-700 mt-0.5">

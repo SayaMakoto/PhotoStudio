@@ -307,7 +307,7 @@ CREATE TABLE `payments` (
     `amount` DOUBLE NOT NULL DEFAULT 0.0 COMMENT 'Số tiền thanh toán',
     `paid_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời điểm thanh toán',
     `note` VARCHAR(255) NULL COMMENT 'Ghi chú thanh toán',
-    `status` ENUM('pending', 'paid', 'failed', 'refunded') NOT NULL DEFAULT 'pending' COMMENT 'Trạng thái giao dịch',
+    `status` ENUM('pending', 'deposit_30', 'deposit_50', 'paid') NOT NULL DEFAULT 'pending' COMMENT 'Tiến độ thanh toán',
     CONSTRAINT `fk_payments_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Quản lý giao dịch thanh toán của đơn đặt lịch';
 

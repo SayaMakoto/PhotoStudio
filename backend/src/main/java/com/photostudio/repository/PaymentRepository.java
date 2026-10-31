@@ -18,8 +18,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // Tổng tiền đã thanh toán thành công của một booking
     @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p "
-            + "WHERE p.booking.id = :bookingId AND p.status = :status")
-    Double sumAmountByBookingIdAndStatus(
+            + "WHERE p.booking.id = :bookingId AND p.status IN :statuses")
+    Double sumAmountByBookingIdAndStatuses(
             @Param("bookingId") Long bookingId,
-            @Param("status") PaymentStatus status);
+            @Param("statuses") List<PaymentStatus> statuses);
 }

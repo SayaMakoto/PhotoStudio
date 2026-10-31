@@ -21,7 +21,7 @@ import java.util.Map;
 public class PaymentServiceImpl implements PaymentService {
 
     private static final String INVALID_STATUS_MSG =
-            "Trạng thái thanh toán không hợp lệ. Các trạng thái hợp lệ: pending, paid, failed, refunded";
+            "Trạng thái thanh toán không hợp lệ. Các trạng thái hợp lệ: pending, deposit_30, deposit_50, paid";
 
     private final PaymentRepository repository;
     private final BookingRepository bookingRepository;
@@ -125,7 +125,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("bookingId", bookingId);
-        result.put("totalPaid", repository.sumAmountByBookingIdAndStatus(bookingId, PaymentStatus.paid));
+        result.put("totalPaid", repository.sumAmountByBookingIdAndStatuses(bookingId,
+                List.of(PaymentStatus.deposit_30, PaymentStatus.deposit_50, PaymentStatus.paid)));
         return result;
     }
 }

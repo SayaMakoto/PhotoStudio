@@ -176,6 +176,7 @@ export default function BookingSessionDetailModal({
             const pRes = await customerPackageService.getPackageById(booking.packageId);
             if (pRes) {
               loadedPkg = {
+                packageId: pRes.id,
                 packageName: pRes.name,
                 unitPrice: pRes.price,
                 quantity: 1,
@@ -198,6 +199,24 @@ export default function BookingSessionDetailModal({
             loadedPayments = payRes;
           }
         } catch {}
+
+        // Repair old booking-package rows that stored the deposit as the package price.
+        const depositPayment = loadedPayments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
+        const linkedPackageId = loadedPkg?.packageId || booking.packageId;
+        const linkedPackageTotal = Number(loadedPkg?.subTotal)
+          || Number(loadedPkg?.unitPrice) * Number(loadedPkg?.quantity || 1)
+          || 0;
+        if (depositPayment && linkedPackageId && Math.abs(linkedPackageTotal - Number(depositPayment.amount || 0)) < 1) {
+          const depositRate = depositPayment.status.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
+          const correctedUnitPrice = Number(depositPayment.amount || 0) / depositRate;
+          if (correctedUnitPrice > linkedPackageTotal && loadedPkg) {
+            loadedPkg = {
+              ...loadedPkg,
+              unitPrice: correctedUnitPrice / Number(loadedPkg.quantity || 1),
+              subTotal: correctedUnitPrice,
+            };
+          }
+        }
 
         // 5. Đánh giá
         let reviewData = booking.review || null;
@@ -284,7 +303,7 @@ export default function BookingSessionDetailModal({
           <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-transform:uppercase;">${p.paymentMethod || 'VNPay'}</td>
           <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-align:center;color:#6b7280;">${p.createdAt ? new Date(p.createdAt).toLocaleString('vi-VN') : 'Vừa xong'}</td>
           <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-align:right;font-weight:bold;color:#111827;">${Number(p.amount || 0).toLocaleString('vi-VN')} đ</td>
-          <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-align:right;"><span style="color:#059669;font-weight:bold;font-size:11px;">Thành công</span></td>
+          <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-align:right;"><span style="color:#059669;font-weight:bold;font-size:11px;">${p.status?.toLowerCase() === 'deposit_30' ? 'Đã cọc 30%' : p.status?.toLowerCase() === 'deposit_50' ? 'Đã cọc 50%' : p.status?.toLowerCase() === 'pending' ? 'Đang chờ thanh toán' : 'Đã thanh toán'}</span></td>
         </tr>
       `).join('')
       : `
@@ -293,7 +312,7 @@ export default function BookingSessionDetailModal({
           <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;">Thanh toán tại Studio</td>
           <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-align:center;color:#6b7280;">${new Date().toLocaleDateString('vi-VN')}</td>
           <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-align:right;font-weight:bold;color:#111827;">${paidAmount.toLocaleString('vi-VN')} đ</td>
-          <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-align:right;"><span style="color:#059669;font-weight:bold;font-size:11px;">Đã ghi nhận</span></td>
+          <td style="padding:7px 4px;border-bottom:1px solid #f3f4f6;text-align:right;"><span style="color:#6b7280;font-weight:bold;font-size:11px;">Đang chờ thanh toán</span></td>
         </tr>
       `;
 
@@ -746,11 +765,25 @@ export default function BookingSessionDetailModal({
     navigate(ROUTES.USER.BOOKING);
   };
 
-  // Tính toán thanh toán
-  const totalAmount = Number(booking.totalPrice || packageDetail?.subTotal || packageDetail?.unitPrice || 1500000);
+  // Tính số đã trả trước để không nhầm booking.totalPrice chứa trong dữ liệu cũ với tiền cọc.
+  const successfulPaymentStatuses = ['completed', 'paid', 'deposit_30', 'deposit_50'];
   const paidAmount = payments.length > 0
-    ? payments.reduce((sum, p) => sum + (p.status?.toLowerCase() === 'completed' || p.status?.toLowerCase() === 'paid' ? Number(p.amount || 0) : 0), 0)
-    : (booking.paidAmount || (booking.status === 'completed' ? totalAmount : Math.round(totalAmount * 0.3)));
+    ? payments.reduce((sum, p) => sum + (successfulPaymentStatuses.includes(p.status?.toLowerCase()) ? Number(p.amount || 0) : 0), 0)
+    : Number(booking.paidAmount || 0);
+  const packageTotal = Number(packageDetail?.subTotal)
+    || Number(packageDetail?.unitPrice) * Number(packageDetail?.quantity || 1)
+    || 0;
+  const bookingTotal = Number(booking.totalOrderPrice || booking.finalPackagePrice || booking.totalAmount || booking.totalPrice || 0);
+  const depositPayment = payments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
+  const depositRate = depositPayment?.status?.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
+  const depositAmount = Number(depositPayment?.amount || 0);
+  const storedPriceLooksLikeDeposit = depositPayment && (
+    Math.abs(bookingTotal - depositAmount) < 1 || Math.abs(packageTotal - depositAmount) < 1
+  );
+  const inferredOrderTotal = storedPriceLooksLikeDeposit ? depositAmount / depositRate : 0;
+  const totalAmount = Number(booking.totalOrderPrice || booking.finalPackagePrice)
+    || (bookingTotal > paidAmount ? bookingTotal : inferredOrderTotal || packageTotal || bookingTotal)
+    || 1500000;
   const remainingAmount = Math.max(0, totalAmount - paidAmount);
 
   const statusKey = (booking.status || 'pending').toLowerCase();
@@ -1095,7 +1128,7 @@ export default function BookingSessionDetailModal({
                         <td className="py-2 text-center text-gray-500">{p.createdAt ? new Date(p.createdAt).toLocaleString('vi-VN') : 'Vừa xong'}</td>
                         <td className="py-2 text-right">
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            Thành công
+                            {p.status?.toLowerCase() === 'deposit_30' ? 'Đã cọc 30%' : p.status?.toLowerCase() === 'deposit_50' ? 'Đã cọc 50%' : p.status?.toLowerCase() === 'pending' ? 'Đang chờ thanh toán' : 'Đã thanh toán'}
                           </span>
                         </td>
                       </tr>
@@ -1108,7 +1141,7 @@ export default function BookingSessionDetailModal({
                       <td className="py-2 text-center text-gray-500">{new Date().toLocaleDateString('vi-VN')}</td>
                       <td className="py-2 text-right">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          Đã ghi nhận
+                          Đang chờ thanh toán
                         </span>
                       </td>
                     </tr>

@@ -74,6 +74,18 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
       next.services = linkedPackages.flatMap(({ bookingPackage, services }) => withPackageItemIds(services, bookingPackage, 'service'));
       next.backgrounds = linkedPackages.flatMap(({ bookingPackage, backgrounds }) => withPackageItemIds(backgrounds, bookingPackage, 'background'));
 
+      const depositPayment = next.payments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
+      const packageTotal = next.packages.reduce((sum, item) => sum + (Number(item.subTotal ?? item.subtotal) || 0), 0);
+      if (depositPayment && next.packages.length === 1 && Math.abs(packageTotal - Number(depositPayment.amount || 0)) < 1) {
+        const rate = depositPayment.status.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
+        const fullTotal = Number(depositPayment.amount || 0) / rate;
+        next.packages = next.packages.map((item) => ({
+          ...item,
+          unitPrice: fullTotal / Number(item.quantity || 1),
+          subTotal: fullTotal,
+        }));
+      }
+
       const sectionNames = ['Gói chụp', 'Nhân viên phụ trách', 'Thanh toán'];
       const failures = results.flatMap((result, index) => {
         if (result.status !== 'rejected') return [];
@@ -98,8 +110,14 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const total = items.packages.reduce((sum, item) => sum + (Number(item.subTotal ?? item.subtotal) || 0), 0);
-  const paid = items.payments.filter((payment) => payment.status === 'paid').reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
+  const packageTotal = items.packages.reduce((sum, item) => sum + (Number(item.subTotal ?? item.subtotal) || 0), 0);
+  const paid = items.payments.filter((payment) => ['paid', 'deposit_30', 'deposit_50', 'completed', 'success'].includes((payment.status || '').toLowerCase())).reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0);
+  const depositPayment = items.payments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
+  const packageLooksLikeDeposit = depositPayment && Math.abs(packageTotal - Number(depositPayment.amount || 0)) < 1;
+  const total = packageLooksLikeDeposit
+    ? Number(depositPayment.amount || 0) / (depositPayment.status.toLowerCase() === 'deposit_50' ? 0.5 : 0.3)
+    : packageTotal;
+  const remaining = Math.max(0, total - paid);
   const nextStatuses = getAdminBookingStatusOptions(booking.status);
   const activeAssignments = items.employees.filter((item) => item.status === 'assigned');
   const visibleAssignments = items.employees.filter((item) => item.status !== 'cancelled');
@@ -160,7 +178,7 @@ export default function BookingDialog({ booking, onClose, onStatusChange, updati
           <section className="space-y-2"><h3 className="flex items-center gap-2 text-sm font-medium text-neutral-200"><Users className="h-4 w-4 text-amber-300" />Nhân viên phụ trách</h3>{loading ? <p className="text-xs text-neutral-500">Đang tải...</p> : failedSections.includes('Nhân viên phụ trách') ? <p className="text-xs text-red-300">Không tải được danh sách phân công.</p> : <><div className="flex items-end gap-2"><div className="min-w-0 flex-1"><GlideSelect options={employeeOptions} value={employeeId} onChange={setEmployeeId} placeholder="Chọn nhân viên đang hoạt động" ariaLabel="Chọn nhân viên phân công" showTags={false} disabled={assignmentBusy || !['pending','confirmed','in_progress'].includes(booking.status)} size="md" accentColor="#fbbf24" surfaceColor="#0a0a0a" highlightColor="#262626" textColor="#e5e5e5" menuWidth={320} className="w-full [&>button]:min-h-10 [&>button]:w-full [&>button]:justify-between [&>button]:border [&>button]:border-neutral-800" /></div><button type="button" onClick={assignEmployee} disabled={!employeeId || assignmentBusy || !['pending','confirmed','in_progress'].includes(booking.status)} className="inline-flex h-10 shrink-0 items-center gap-1 rounded-xl bg-amber-400 px-3 text-xs font-semibold text-neutral-950 disabled:opacity-40"><UserPlus className="h-3.5 w-3.5"/>Giao</button></div>{assignmentError && <p role="alert" className="text-xs text-rose-300">{assignmentError}</p>}{visibleAssignments.length ? <div className="space-y-2">{visibleAssignments.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-neutral-800 bg-neutral-950/40 px-3 py-2 text-xs"><span className="font-medium text-neutral-200">{item.employeeName} <span className="text-neutral-500">{EMPLOYEE_POSITION_LABELS[item.position] || item.position || ''}{item.employeePhone ? ` · ${item.employeePhone}` : ''}</span></span><span className="flex items-center gap-2"><StatusBadge status={item.status} />{item.status === 'assigned' && <button type="button" onClick={() => releaseEmployee(item)} disabled={assignmentBusy} aria-label={`Giải phóng ${item.employeeName}`} title="Giải phóng nhân viên" className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-rose-300 disabled:opacity-40"><UserMinus className="h-4 w-4"/></button>}</span></div>)}</div> : <p className="rounded-xl border border-dashed border-neutral-800 px-3 py-3 text-xs text-neutral-500">Chưa có nhân viên được phân công.</p>}<p className="text-[11px] text-neutral-500">Nhân viên được giải phóng tự động khi buổi chụp hoàn tất hoặc bị hủy.</p></>}</section>
           <ItemSection title="Thanh toán" icon={Wallet} items={items.payments} error={failedSections.includes('Thanh toán')} loading={loading} empty="Chưa phát sinh thanh toán." renderItem={(item) => <><span className="font-medium text-neutral-200">{item.paymentMethod || 'Thanh toán'} · <StatusBadge status={item.status} /></span><span>{formatBookingPrice(item.amount)}{item.paidAt ? ` · ${formatBookingDateTime(item.paidAt)}` : ''}</span></>} />
         </div>
-        <section className="grid gap-3 sm:grid-cols-3"><div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-3"><p className="text-[11px] text-neutral-500">Tổng tiền các hạng mục</p><p className="mt-1 text-sm font-semibold text-white">{formatBookingPrice(total)}</p></div><div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-3"><p className="text-[11px] text-neutral-500">Đã thanh toán</p><p className="mt-1 text-sm font-semibold text-emerald-300">{formatBookingPrice(paid)}</p></div><div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-3"><p className="text-[11px] text-neutral-500">Đánh giá</p><p className="mt-1 text-sm text-neutral-200">{items.review ? `★ ${items.review.rating ?? '—'}${items.review.comment ? ` · ${items.review.comment}` : ''}` : 'Chưa có đánh giá'}</p></div></section>
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-3"><p className="text-[11px] text-neutral-500">Tổng tiền cả đơn (100%)</p><p className="mt-1 text-sm font-semibold text-white">{formatBookingPrice(total)}</p></div><div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-3"><p className="text-[11px] text-neutral-500">Đã thanh toán</p><p className="mt-1 text-sm font-semibold text-emerald-300">{formatBookingPrice(paid)}</p></div><div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-3"><p className="text-[11px] text-neutral-500">Còn lại tại studio</p><p className="mt-1 text-sm font-semibold text-rose-300">{formatBookingPrice(remaining)}</p></div><div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-3"><p className="text-[11px] text-neutral-500">Đánh giá</p><p className="mt-1 text-sm text-neutral-200">{items.review ? `★ ${items.review.rating ?? '—'}${items.review.comment ? ` · ${items.review.comment}` : ''}` : 'Chưa có đánh giá'}</p></div></section>
       </div>
       <footer className="flex justify-end border-t border-neutral-800 px-5 py-4"><button type="button" onClick={onClose} className="rounded-xl border border-neutral-700 px-4 py-2.5 text-xs font-medium text-neutral-300 hover:bg-neutral-800">Đóng</button></footer>
     </section>

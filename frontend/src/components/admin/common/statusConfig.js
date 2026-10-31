@@ -34,10 +34,10 @@ export const STATUS_CONFIG = {
 
 export const STATUS_DOMAIN_CONFIG = {
   payment: {
-    pending: { label: "Chờ thanh toán", className: amber },
+    pending: { label: "Đang chờ thanh toán", className: amber },
+    deposit_30: { label: "Đã cọc 30%", className: blue },
+    deposit_50: { label: "Đã cọc 50%", className: blue },
     paid: { label: "Đã thanh toán", className: green },
-    failed: { label: "Thất bại", className: red },
-    refunded: { label: "Đã hoàn tiền", className: purple },
   },
   booking: {
     pending: { label: "Chờ xác nhận", className: amber },

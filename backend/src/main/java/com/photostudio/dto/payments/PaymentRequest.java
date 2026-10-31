@@ -22,7 +22,7 @@ public class PaymentRequest {
     private String status;
 
     private static final Set<String> VALID_METHODS = Set.of("cash", "vnpay", "credit_card");
-    private static final Set<String> VALID_STATUSES = Set.of("pending", "paid", "failed", "refunded");
+    private static final Set<String> VALID_STATUSES = Set.of("pending", "deposit_30", "deposit_50", "paid");
 
     public void validate() {
         if (bookingId == null || bookingId <= 0) {
@@ -50,7 +50,7 @@ public class PaymentRequest {
 
         if (status != null && !status.isBlank() && !VALID_STATUSES.contains(status.trim().toLowerCase())) {
             throw new IllegalArgumentException(
-                    "Trạng thái thanh toán không hợp lệ. Các trạng thái hợp lệ: pending, paid, failed, refunded");
+                    "Trạng thái thanh toán không hợp lệ. Các trạng thái hợp lệ: pending, deposit_30, deposit_50, paid");
         }
     }
 }
