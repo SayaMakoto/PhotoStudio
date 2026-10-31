@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo, useRef } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CubeIcon,
   ArrowsPointingOutIcon,
@@ -17,63 +17,100 @@ import {
   ShareIcon,
   CheckIcon,
   ArrowPathIcon,
-} from '@heroicons/react/24/solid';
-import { HeartIcon as HeartOutlineIcon } from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/solid";
+import { HeartIcon as HeartOutlineIcon } from "@heroicons/react/24/outline";
 
 // React Bits Animations & Cards
-import BlurText from '../../components/animations/BlurText';
-import ShinyText from '../../components/animations/ShinyText';
-import Magnet from '../../components/animations/Magnet';
-import CountUp from '../../components/animations/CountUp';
-import ScrollReveal from '../../components/animations/ScrollReveal';
-import SpotlightCard from '../../components/cards/SpotlightCard';
-import TiltedCard from '../../components/cards/TiltedCard';
+import BlurText from "../../components/animations/BlurText";
+import ShinyText from "../../components/animations/ShinyText";
+import Magnet from "../../components/animations/Magnet";
+import CountUp from "../../components/animations/CountUp";
+import ScrollReveal from "../../components/animations/ScrollReveal";
+import SpotlightCard from "../../components/cards/SpotlightCard";
+import TiltedCard from "../../components/cards/TiltedCard";
 
-import { FloralBranchCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
-import { ROUTES } from '../../routes/web';
-import userImageService from '../../services/user/imageService';
+import {
+  FloralBranchCorner,
+  ScatteredPetals,
+} from "../../components/common/FloralDecorations";
+import { ROUTES } from "../../routes/web";
+import userImageService from "../../services/user/imageService";
 
 const ITEMS_PER_PAGE = 20;
 
 /**
  * Tự động phân loại danh mục dựa trên mô tả và mã gói trong CSDL
  */
-function detectCategoryFromText(text = '', packageId = 0) {
+function detectCategoryFromText(text = "", packageId = 0) {
   const t = text.toLowerCase();
-  if (t.includes('cưới') || t.includes('wedding') || t.includes('cô dâu') || t.includes('chú rể') || t.includes('tuxedo') || t.includes('váy cưới')) {
-    return 'wedding';
+  if (
+    t.includes("cưới") ||
+    t.includes("wedding") ||
+    t.includes("cô dâu") ||
+    t.includes("chú rể") ||
+    t.includes("tuxedo") ||
+    t.includes("váy cưới")
+  ) {
+    return "wedding";
   }
-  if (t.includes('cặp đôi') || t.includes('couple') || t.includes('tình yêu') || t.includes('hẹn hò')) {
-    return 'couple';
+  if (
+    t.includes("cặp đôi") ||
+    t.includes("couple") ||
+    t.includes("tình yêu") ||
+    t.includes("hẹn hò")
+  ) {
+    return "couple";
   }
-  if (t.includes('gia đình') || t.includes('family') || t.includes('kỷ yếu') || t.includes('bạn bè') || t.includes('tốt nghiệp') || t.includes('bé') || t.includes('nhóm')) {
-    return 'family';
+  if (
+    t.includes("gia đình") ||
+    t.includes("family") ||
+    t.includes("kỷ yếu") ||
+    t.includes("bạn bè") ||
+    t.includes("tốt nghiệp") ||
+    t.includes("bé") ||
+    t.includes("nhóm")
+  ) {
+    return "family";
   }
-  if (t.includes('doanh nhân') || t.includes('profile') || t.includes('lookbook') || t.includes('thời trang') || t.includes('lãnh đạo') || t.includes('forbes')) {
-    return 'profile';
+  if (
+    t.includes("doanh nhân") ||
+    t.includes("profile") ||
+    t.includes("lookbook") ||
+    t.includes("thời trang") ||
+    t.includes("lãnh đạo") ||
+    t.includes("forbes")
+  ) {
+    return "profile";
   }
-  if (t.includes('nàng thơ') || t.includes('portrait') || t.includes('beauty') || t.includes('áo dài') || t.includes('cổ trang') || t.includes('chân dung')) {
-    return 'portrait';
+  if (
+    t.includes("nàng thơ") ||
+    t.includes("portrait") ||
+    t.includes("beauty") ||
+    t.includes("áo dài") ||
+    t.includes("cổ trang") ||
+    t.includes("chân dung")
+  ) {
+    return "portrait";
   }
 
   // Phân theo ID gói nếu mô tả ngắn
   const pkgMap = {
-    1: 'portrait',
-    2: 'wedding',
-    3: 'family',
-    4: 'wedding',
-    5: 'family',
-    6: 'profile',
-    7: 'portrait',
-    8: 'profile',
+    1: "portrait",
+    2: "wedding",
+    3: "family",
+    4: "wedding",
+    5: "family",
+    6: "profile",
+    7: "portrait",
+    8: "profile",
   };
-  return pkgMap[packageId] || 'portrait';
+  return pkgMap[packageId] || "portrait";
 }
 
 export default function GalleryPage() {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'newest' | 'likes'
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("popular"); // 'popular' | 'newest' | 'likes'
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [slideDirection, setSlideDirection] = useState(1);
@@ -85,38 +122,38 @@ export default function GalleryPage() {
   const galleryGridRef = useRef(null);
 
   const categories = [
-    { id: 'all', label: 'Tất Cả Tác Phẩm' },
-    { id: 'wedding', label: 'Ảnh Cưới Studio' },
-    { id: 'couple', label: 'Cặp Đôi & Tình Yêu' },
-    { id: 'portrait', label: 'Nàng Thơ & Beauty' },
-    { id: 'profile', label: 'Doanh Nhân & Lookbook' },
-    { id: 'family', label: 'Gia Đình & Kỷ Yếu' },
+    { id: "all", label: "Tất Cả Tác Phẩm" },
+    { id: "wedding", label: "Ảnh Cưới Studio" },
+    { id: "couple", label: "Cặp Đôi & Tình Yêu" },
+    { id: "portrait", label: "Nàng Thơ & Beauty" },
+    { id: "profile", label: "Doanh Nhân & Lookbook" },
+    { id: "family", label: "Gia Đình & Kỷ Yếu" },
   ];
 
   const mapDbImages = (data) => {
     return data.map((img, idx) => {
-      const desc = img.description || '';
+      const desc = img.description || "";
       const cat = detectCategoryFromText(desc, img.imageableId);
       const title = desc
-        ? desc.includes('–')
-          ? desc.split('–')[0].trim()
+        ? desc.includes("–")
+          ? desc.split("–")[0].trim()
           : desc.length > 38
-          ? desc.substring(0, 38).trim() + '...'
-          : desc
+            ? desc.substring(0, 38).trim() + "..."
+            : desc
         : `Tác Phẩm #${img.id}`;
 
-      const photographers = ['Tuấn Trần', 'Linh Đan', 'Hoàng Nam', 'Quang Huy'];
+      const photographers = ["Tuấn Trần", "Linh Đan", "Hoàng Nam", "Quang Huy"];
       const gears = [
-        'Nikon Z9 • 85mm f/1.2 S',
-        'Sony A7R V • 50mm f/1.2 GM',
-        'Canon R5 • 28-70mm f/2L',
-        'Fujifilm GFX 100S • 110mm f/2',
+        "Nikon Z9 • 85mm f/1.2 S",
+        "Sony A7R V • 50mm f/1.2 GM",
+        "Canon R5 • 28-70mm f/2L",
+        "Fujifilm GFX 100S • 110mm f/2",
       ];
       const tones = [
-        'Tone Ánh Sáng Studio Tự Nhiên',
-        'Tone Trầm Ấm Quý Tộc',
-        'Tone Trong Trẻo Hàn Quốc',
-        'Tone Golden Hour Hoàng Hôn',
+        "Tone Ánh Sáng Studio Tự Nhiên",
+        "Tone Trầm Ấm Quý Tộc",
+        "Tone Trong Trẻo Hàn Quốc",
+        "Tone Golden Hour Hoàng Hôn",
       ];
 
       return {
@@ -124,12 +161,12 @@ export default function GalleryPage() {
         isPrimary: Boolean(img.isPrimary),
         category: cat,
         title: title,
-        concept: desc || 'Chụp ảnh nghệ thuật độc bản',
+        concept: desc || "Chụp ảnh nghệ thuật độc bản",
         photographer: photographers[idx % photographers.length],
         gear: gears[idx % gears.length],
         tone: tones[idx % tones.length],
-        likes: 180 + (idx * 23) % 490,
-        views: `${(5 + (idx * 1.2) % 15).toFixed(1)}K`,
+        likes: 180 + ((idx * 23) % 490),
+        views: `${(5 + ((idx * 1.2) % 15)).toFixed(1)}K`,
         src: img.imageUrl,
       };
     });
@@ -148,8 +185,10 @@ export default function GalleryPage() {
         }
       })
       .catch((err) => {
-        console.error('[GalleryPage] Lỗi lấy dữ liệu ảnh:', err.message);
-        setErrorMessage('Không thể kết nối với máy chủ để lấy ảnh. Vui lòng kiểm tra lại dịch vụ backend.');
+        console.error("[GalleryPage] Lỗi lấy dữ liệu ảnh:", err.message);
+        setErrorMessage(
+          "Không thể kết nối với máy chủ để lấy ảnh. Vui lòng kiểm tra lại dịch vụ backend.",
+        );
         setPhotos([]);
       })
       .finally(() => {
@@ -158,7 +197,7 @@ export default function GalleryPage() {
   };
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     userImageService
       .getAllImages()
@@ -170,8 +209,10 @@ export default function GalleryPage() {
         }
       })
       .catch((err) => {
-        console.error('[GalleryPage] Lỗi lấy dữ liệu ảnh :', err.message);
-        setErrorMessage('Không thể kết nối với máy chủ để lấy ảnh. Vui lòng kiểm tra lại dịch vụ backend.');
+        console.error("[GalleryPage] Lỗi lấy dữ liệu ảnh :", err.message);
+        setErrorMessage(
+          "Không thể kết nối với máy chủ để lấy ảnh. Vui lòng kiểm tra lại dịch vụ backend.",
+        );
         setPhotos([]);
       })
       .finally(() => {
@@ -183,7 +224,7 @@ export default function GalleryPage() {
   const filteredPhotos = useMemo(() => {
     let list = [...photos];
 
-    if (activeFilter !== 'all') {
+    if (activeFilter !== "all") {
       list = list.filter((p) => p.category === activeFilter);
     }
 
@@ -193,13 +234,18 @@ export default function GalleryPage() {
         (p) =>
           p.title.toLowerCase().includes(q) ||
           p.concept.toLowerCase().includes(q) ||
-          p.photographer.toLowerCase().includes(q)
+          p.photographer.toLowerCase().includes(q),
       );
     }
 
-    if (sortBy === 'likes') {
-      list.sort((a, b) => (b.likes + (likedPhotos[b.id] ? 1 : 0)) - (a.likes + (likedPhotos[a.id] ? 1 : 0)));
-    } else if (sortBy === 'newest') {
+    if (sortBy === "likes") {
+      list.sort(
+        (a, b) =>
+          b.likes +
+          (likedPhotos[b.id] ? 1 : 0) -
+          (a.likes + (likedPhotos[a.id] ? 1 : 0)),
+      );
+    } else if (sortBy === "newest") {
       list.sort((a, b) => b.id - a.id);
     }
     // 'popular' keeps default database order
@@ -208,7 +254,10 @@ export default function GalleryPage() {
   }, [photos, activeFilter, searchQuery, sortBy, likedPhotos]);
 
   // Phân trang: 20 hình / trang
-  const totalPages = Math.max(1, Math.ceil(filteredPhotos.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredPhotos.length / ITEMS_PER_PAGE),
+  );
   const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const displayedPhotos = useMemo(() => {
@@ -218,13 +267,17 @@ export default function GalleryPage() {
 
   // Danh sách Tiêu Điểm 3D (Lấy trực tiếp từ 3 ảnh đại diện CSDL)
   const primaries = photos.filter((p) => p.isPrimary);
-  const masterpiecePhotos = primaries.length >= 3 ? primaries.slice(0, 3) : photos.slice(0, 3);
+  const masterpiecePhotos =
+    primaries.length >= 3 ? primaries.slice(0, 3) : photos.slice(0, 3);
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
     setCurrentPage(newPage);
     if (galleryGridRef.current) {
-      galleryGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      galleryGridRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -243,7 +296,9 @@ export default function GalleryPage() {
 
   const handlePrev = () => {
     setSlideDirection(-1);
-    setSelectedIndex((prev) => (prev - 1 + filteredPhotos.length) % filteredPhotos.length);
+    setSelectedIndex(
+      (prev) => (prev - 1 + filteredPhotos.length) % filteredPhotos.length,
+    );
   };
 
   const handleCopyLink = () => {
@@ -255,27 +310,38 @@ export default function GalleryPage() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (selectedIndex === null) return;
-      if (e.key === 'Escape') setSelectedIndex(null);
-      if (e.key === 'ArrowRight') {
+      if (e.key === "Escape") setSelectedIndex(null);
+      if (e.key === "ArrowRight") {
         setSlideDirection(1);
         setSelectedIndex((prev) => (prev + 1) % filteredPhotos.length);
       }
-      if (e.key === 'ArrowLeft') {
+      if (e.key === "ArrowLeft") {
         setSlideDirection(-1);
-        setSelectedIndex((prev) => (prev - 1 + filteredPhotos.length) % filteredPhotos.length);
+        setSelectedIndex(
+          (prev) => (prev - 1 + filteredPhotos.length) % filteredPhotos.length,
+        );
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedIndex, filteredPhotos.length]);
 
-  const selectedPhoto = selectedIndex !== null ? filteredPhotos[selectedIndex] : null;
+  const selectedPhoto =
+    selectedIndex !== null ? filteredPhotos[selectedIndex] : null;
 
   return (
     <div className="bg-[#FAF5F5] min-h-screen text-[#261A1E] font-sans selection:bg-[#B85064]/20 selection:text-[#B85064] relative overflow-hidden">
       {/* Cành hoa đào trang trí góc */}
-      <FloralBranchCorner position="top-right" opacity="opacity-75" className="top-24 z-10" />
-      <FloralBranchCorner position="bottom-left" opacity="opacity-60" className="bottom-96 z-10" />
+      <FloralBranchCorner
+        position="top-right"
+        opacity="opacity-75"
+        className="top-24 z-10"
+      />
+      <FloralBranchCorner
+        position="bottom-left"
+        opacity="opacity-60"
+        className="bottom-96 z-10"
+      />
 
       {/* ========================================================================= */}
       {/* 1. HERO BANNER: Nền điện ảnh, Ánh sáng studio, React Bits Title & Badges */}
@@ -285,7 +351,7 @@ export default function GalleryPage() {
           className="absolute inset-0 bg-cover bg-center opacity-75 scale-105 pointer-events-none transition-transform duration-1000"
           style={{
             backgroundImage:
-              'url(https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1920&q=85)',
+              "url(https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1920&q=85)",
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#141012]/92 via-[#141012]/70 to-[#141012]/40 pointer-events-none" />
@@ -296,18 +362,27 @@ export default function GalleryPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-xs text-white/60 mb-6">
-            <Link to={ROUTES.USER.HOME} className="hover:text-white transition-colors">
+            <Link
+              to={ROUTES.USER.HOME}
+              className="hover:text-white transition-colors"
+            >
               Trang Chủ
             </Link>
             <span>/</span>
-            <span className="text-[#E899A8] font-semibold">Bộ Sưu Tập Tác Phẩm</span>
+            <span className="text-[#E899A8] font-semibold">
+              Bộ Sưu Tập Tác Phẩm
+            </span>
           </div>
 
           <div className="max-w-3xl">
             {/* Shimmering Badge với React Bits ShinyText */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/15 border border-rose-500/30 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-5 shadow-lg backdrop-blur-md">
               <PhotoIcon className="w-4 h-4 text-white" />
-              <ShinyText text="DỮ LIỆU TÁC PHẨM TRỰC TIẾP TỪ HỆ THỐNG" speed={3.5} className="text-white" />
+              <ShinyText
+                text="DỮ LIỆU TÁC PHẨM TRỰC TIẾP TỪ HỆ THỐNG"
+                speed={3.5}
+                className="text-white"
+              />
             </div>
 
             {/* Title với React Bits BlurText */}
@@ -316,18 +391,24 @@ export default function GalleryPage() {
             </h1>
 
             <p className="text-neutral-300 text-sm sm:text-base leading-relaxed mb-8 max-w-2xl font-light">
-              Mỗi bức hình là một tác phẩm nghệ thuật độc bản được quản lý tập trung từ cơ sở dữ liệu hệ thống PhotoStudio,
-              kết hợp nghệ thuật phối sáng điện ảnh và cảm xúc thăng hoa của chính bạn.
+              Mỗi bức hình là một tác phẩm nghệ thuật độc bản được quản lý tập
+              trung từ hệ thống PhotoStudio, kết hợp nghệ thuật phối sáng điện
+              ảnh và cảm xúc thăng hoa của chính bạn.
             </p>
 
             {/* Quick Stats với React Bits CountUp */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/10">
               <div>
                 <div className="text-2xl sm:text-3xl font-extrabold text-white font-serif-luxury flex items-center">
-                  <CountUp to={photos.length > 0 ? photos.length : 64} duration={2.0} />
+                  <CountUp
+                    to={photos.length > 0 ? photos.length : 64}
+                    duration={2.0}
+                  />
                   <span className="text-[#E899A8]">+</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Bức ảnh trong kho</div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Bức ảnh trong kho
+                </div>
               </div>
 
               <div>
@@ -335,7 +416,9 @@ export default function GalleryPage() {
                   <CountUp to={8} duration={1.5} />
                   <span className="text-[#E899A8]">+</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Gói chụp độc quyền</div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Gói chụp độc quyền
+                </div>
               </div>
 
               <div>
@@ -343,7 +426,9 @@ export default function GalleryPage() {
                   <CountUp to={99} duration={1.8} />
                   <span className="text-[#E899A8]">.8%</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Khách hàng hài lòng</div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Khách hàng hài lòng
+                </div>
               </div>
 
               <div>
@@ -351,7 +436,9 @@ export default function GalleryPage() {
                   <CountUp to={12} duration={1.6} />
                   <span className="text-[#E899A8]">+</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Năm kinh nghiệm</div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Năm kinh nghiệm
+                </div>
               </div>
             </div>
           </div>
@@ -368,7 +455,6 @@ export default function GalleryPage() {
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-3">
-
                     <CubeIcon className="w-3.5 h-3.5 text-[#E899A8]" />
                     <span>TIÊU ĐIỂM NGHỆ THUẬT 3D</span>
                   </div>
@@ -377,7 +463,8 @@ export default function GalleryPage() {
                   </h2>
                 </div>
                 <p className="text-neutral-300 text-xs sm:text-sm font-light max-w-md">
-                  Rê chuột lên các bức ảnh để trải nghiệm hiệu ứng thị giác 3D với góc nghiêng đa chiều sống động.
+                  Rê chuột lên các bức ảnh để trải nghiệm hiệu ứng thị giác 3D
+                  với góc nghiêng đa chiều sống động.
                 </p>
               </div>
             </ScrollReveal>
@@ -394,7 +481,9 @@ export default function GalleryPage() {
                     rotateAmplitude={14}
                     captionText={`Tác phẩm tiêu biểu • ${item.photographer}`}
                     onClick={() => {
-                      const foundIndex = filteredPhotos.findIndex((p) => p.id === item.id);
+                      const foundIndex = filteredPhotos.findIndex(
+                        (p) => p.id === item.id,
+                      );
                       setSelectedIndex(foundIndex !== -1 ? foundIndex : idx);
                     }}
                     overlayContent={
@@ -432,7 +521,6 @@ export default function GalleryPage() {
       {/* ========================================================================= */}
       <section ref={galleryGridRef} className="py-20 bg-[#FAF5F5] relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
           {/* Section Header */}
           <ScrollReveal direction="down">
             <div className="text-center max-w-2xl mx-auto mb-12">
@@ -444,7 +532,8 @@ export default function GalleryPage() {
                 Khám Phá Theo Chủ Đề Yêu Thích
               </h2>
               <p className="text-[#7A6C71] text-sm">
-                Toàn bộ hình ảnh được đồng bộ từ cơ sở dữ liệu hệ thống, sắp xếp theo hàng chuẩn đẹp không để lại khoảng trống.
+                Toàn bộ hình ảnh được đồng bộ từ hệ thống, sắp xếp theo hàng
+                chuẩn đẹp không để lại khoảng trống.
               </p>
             </div>
           </ScrollReveal>
@@ -455,7 +544,7 @@ export default function GalleryPage() {
             <div className="flex items-center justify-center flex-wrap gap-2.5 sm:gap-3">
               {categories.map((cat) => {
                 const count =
-                  cat.id === 'all'
+                  cat.id === "all"
                     ? photos.length
                     : photos.filter((p) => p.category === cat.id).length;
                 const isActive = activeFilter === cat.id;
@@ -465,7 +554,7 @@ export default function GalleryPage() {
                     key={cat.id}
                     whileHover={{ y: -3, scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     onClick={() => {
                       setActiveFilter(cat.id);
                       setCurrentPage(1);
@@ -473,16 +562,16 @@ export default function GalleryPage() {
                     }}
                     className={`cursor-pointer whitespace-nowrap px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-colors duration-200 flex items-center gap-2 shadow-sm ${
                       isActive
-                        ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 ring-2 ring-[#B85064]/30'
-                        : 'bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 hover:bg-[#FFF9FA]'
+                        ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 ring-2 ring-[#B85064]/30"
+                        : "bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 hover:bg-[#FFF9FA]"
                     }`}
                   >
                     <span>{cat.label}</span>
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                         isActive
-                          ? 'bg-white/25 text-white'
-                          : 'bg-neutral-100 text-[#7A6C71]'
+                          ? "bg-white/25 text-white"
+                          : "bg-neutral-100 text-[#7A6C71]"
                       }`}
                     >
                       {count}
@@ -510,7 +599,7 @@ export default function GalleryPage() {
                 {searchQuery && (
                   <button
                     onClick={() => {
-                      setSearchQuery('');
+                      setSearchQuery("");
                       setCurrentPage(1);
                     }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer"
@@ -528,39 +617,39 @@ export default function GalleryPage() {
                 </span>
                 <button
                   onClick={() => {
-                    setSortBy('popular');
+                    setSortBy("popular");
                     setCurrentPage(1);
                   }}
                   className={`px-3 py-2 rounded-xl font-medium transition-colors cursor-pointer ${
-                    sortBy === 'popular'
-                      ? 'bg-[#B85064] text-white shadow-sm'
-                      : 'bg-[#FAF5F5] text-[#55464B] hover:text-[#B85064]'
+                    sortBy === "popular"
+                      ? "bg-[#B85064] text-white shadow-sm"
+                      : "bg-[#FAF5F5] text-[#55464B] hover:text-[#B85064]"
                   }`}
                 >
                   Nổi bật
                 </button>
                 <button
                   onClick={() => {
-                    setSortBy('likes');
+                    setSortBy("likes");
                     setCurrentPage(1);
                   }}
                   className={`px-3 py-2 rounded-xl font-medium transition-colors cursor-pointer ${
-                    sortBy === 'likes'
-                      ? 'bg-[#B85064] text-white shadow-sm'
-                      : 'bg-[#FAF5F5] text-[#55464B] hover:text-[#B85064]'
+                    sortBy === "likes"
+                      ? "bg-[#B85064] text-white shadow-sm"
+                      : "bg-[#FAF5F5] text-[#55464B] hover:text-[#B85064]"
                   }`}
                 >
                   Yêu thích nhất
                 </button>
                 <button
                   onClick={() => {
-                    setSortBy('newest');
+                    setSortBy("newest");
                     setCurrentPage(1);
                   }}
                   className={`px-3 py-2 rounded-xl font-medium transition-colors cursor-pointer ${
-                    sortBy === 'newest'
-                      ? 'bg-[#B85064] text-white shadow-sm'
-                      : 'bg-[#FAF5F5] text-[#55464B] hover:text-[#B85064]'
+                    sortBy === "newest"
+                      ? "bg-[#B85064] text-white shadow-sm"
+                      : "bg-[#FAF5F5] text-[#55464B] hover:text-[#B85064]"
                   }`}
                 >
                   Mới nhất
@@ -578,7 +667,9 @@ export default function GalleryPage() {
                   className="h-96 rounded-3xl bg-white border border-[#F0E4E6] animate-pulse flex flex-col items-center justify-center gap-3"
                 >
                   <PhotoIcon className="w-10 h-10 text-[#BE4B5E]/30 animate-pulse" />
-                  <span className="text-xs text-[#7A6C71] font-medium">Đang tải ảnh...</span>
+                  <span className="text-xs text-[#7A6C71] font-medium">
+                    Đang tải ảnh...
+                  </span>
                 </div>
               ))}
             </div>
@@ -588,8 +679,12 @@ export default function GalleryPage() {
           {!isLoading && errorMessage && (
             <div className="text-center py-16 bg-white rounded-3xl border border-red-200 p-8 max-w-lg mx-auto shadow-sm">
               <XMarkIcon className="w-12 h-12 text-red-500 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-[#2A1D22] mb-2">Chưa thể tải dữ liệu ảnh</h3>
-              <p className="text-xs text-[#7A6C71] mb-5 leading-relaxed">{errorMessage}</p>
+              <h3 className="text-base font-bold text-[#2A1D22] mb-2">
+                Chưa thể tải dữ liệu ảnh
+              </h3>
+              <p className="text-xs text-[#7A6C71] mb-5 leading-relaxed">
+                {errorMessage}
+              </p>
               <button
                 onClick={handleRetry}
                 className="px-6 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-bold hover:bg-[#A8394C] transition-colors inline-flex items-center gap-2 cursor-pointer"
@@ -604,12 +699,16 @@ export default function GalleryPage() {
           {!isLoading && !errorMessage && filteredPhotos.length === 0 && (
             <div className="text-center py-16 bg-white rounded-3xl border border-[#F0E4E6] p-8 max-w-md mx-auto shadow-sm">
               <PhotoIcon className="w-12 h-12 text-[#B85064]/40 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-[#2A1D22] mb-1">Không tìm thấy tác phẩm phù hợp</h3>
-              <p className="text-xs text-[#7A6C71] mb-4">Hãy thử tìm với từ khóa khác hoặc chọn xem tất cả tác phẩm.</p>
+              <h3 className="text-base font-bold text-[#2A1D22] mb-1">
+                Không tìm thấy tác phẩm phù hợp
+              </h3>
+              <p className="text-xs text-[#7A6C71] mb-4">
+                Hãy thử tìm với từ khóa khác hoặc chọn xem tất cả tác phẩm.
+              </p>
               <button
                 onClick={() => {
-                  setActiveFilter('all');
-                  setSearchQuery('');
+                  setActiveFilter("all");
+                  setSearchQuery("");
                   setCurrentPage(1);
                 }}
                 className="px-5 py-2 rounded-full bg-[#B85064] text-white text-xs font-bold hover:bg-[#A8394C] transition-colors cursor-pointer"
@@ -628,7 +727,8 @@ export default function GalleryPage() {
                 {displayedPhotos.map((photo, index) => {
                   const isLiked = likedPhotos[photo.id];
                   const totalLikes = photo.likes + (isLiked ? 1 : 0);
-                  const globalIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE + index;
+                  const globalIndex =
+                    (safeCurrentPage - 1) * ITEMS_PER_PAGE + index;
 
                   return (
                     <SpotlightCard
@@ -660,10 +760,12 @@ export default function GalleryPage() {
                               onClick={(e) => toggleLike(e, photo.id)}
                               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-md shadow-md cursor-pointer ${
                                 isLiked
-                                  ? 'bg-rose-500 text-white scale-110'
-                                  : 'bg-black/50 text-white hover:bg-white hover:text-rose-500'
+                                  ? "bg-rose-500 text-white scale-110"
+                                  : "bg-black/50 text-white hover:bg-white hover:text-rose-500"
                               }`}
-                              title={isLiked ? 'Đã yêu thích' : 'Yêu thích tác phẩm'}
+                              title={
+                                isLiked ? "Đã yêu thích" : "Yêu thích tác phẩm"
+                              }
                             >
                               {isLiked ? (
                                 <HeartIcon className="w-3.5 h-3.5" />
@@ -696,7 +798,9 @@ export default function GalleryPage() {
                       <div className="p-3.5 bg-white flex items-center justify-between text-xs text-[#7A6C71] border-t border-[#F0E4E6] mt-auto">
                         <div className="flex items-center gap-1.5 font-medium">
                           <CameraIcon className="w-3.5 h-3.5 text-[#B85064]" />
-                          <span className="truncate max-w-[110px]">{photo.photographer}</span>
+                          <span className="truncate max-w-[110px]">
+                            {photo.photographer}
+                          </span>
                         </div>
 
                         <div className="flex items-center gap-2.5">
@@ -722,13 +826,19 @@ export default function GalleryPage() {
                 <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-[#F0E4E6] shadow-sm">
                   {/* Status indicator */}
                   <div className="text-xs text-[#7A6C71] text-center sm:text-left">
-                    Đang hiển thị{' '}
+                    Đang hiển thị{" "}
                     <span className="font-bold text-[#2A1D22]">
-                      {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
-                      {Math.min(safeCurrentPage * ITEMS_PER_PAGE, filteredPhotos.length)}
-                    </span>{' '}
-                    trên tổng số <span className="font-bold text-[#B85064]">{filteredPhotos.length}</span> tác phẩm
-                    (Trang {safeCurrentPage} / {totalPages})
+                      {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
+                      {Math.min(
+                        safeCurrentPage * ITEMS_PER_PAGE,
+                        filteredPhotos.length,
+                      )}
+                    </span>{" "}
+                    trên tổng số{" "}
+                    <span className="font-bold text-[#B85064]">
+                      {filteredPhotos.length}
+                    </span>{" "}
+                    tác phẩm (Trang {safeCurrentPage} / {totalPages})
                   </div>
 
                   {/* Page selector buttons */}
@@ -744,19 +854,21 @@ export default function GalleryPage() {
                     </button>
 
                     {/* Numeric page pills */}
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`w-10 h-10 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                          safeCurrentPage === pageNum
-                            ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 scale-105'
-                            : 'bg-white border border-[#F0E4E6] text-[#55464B] hover:text-[#B85064] hover:border-[#B85064] hover:bg-[#FFF9FA]'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    ))}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (pageNum) => (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`w-10 h-10 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                            safeCurrentPage === pageNum
+                              ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 scale-105"
+                              : "bg-white border border-[#F0E4E6] text-[#55464B] hover:text-[#B85064] hover:border-[#B85064] hover:bg-[#FFF9FA]"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      ),
+                    )}
 
                     {/* Next page */}
                     <button
@@ -785,8 +897,9 @@ export default function GalleryPage() {
                   Bạn Muốn Sở Hữu Bộ Ảnh Mang Đậm Cá Tính Riêng?
                 </h3>
                 <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-light">
-                  Đội ngũ nhiếp ảnh gia và stylist chuyên nghiệp của PhotoStudio sẽ đồng hành cùng bạn từ khâu lên ý tưởng
-                  concept, trang phục đến hoàn thiện album nghệ thuật.
+                  Đội ngũ nhiếp ảnh gia và stylist chuyên nghiệp của PhotoStudio
+                  sẽ đồng hành cùng bạn từ khâu lên ý tưởng concept, trang phục
+                  đến hoàn thiện album nghệ thuật.
                 </p>
               </div>
 
@@ -795,7 +908,7 @@ export default function GalleryPage() {
                 <motion.div
                   whileHover={{ y: -3, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
                   <Link
                     to={ROUTES.USER.PACKAGES}
@@ -811,7 +924,7 @@ export default function GalleryPage() {
                 <motion.div
                   whileHover={{ y: -3, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
                   <Link
                     to={ROUTES.USER.PACKAGES}
@@ -823,7 +936,6 @@ export default function GalleryPage() {
               </div>
             </div>
           </ScrollReveal>
-
         </div>
       </section>
 
@@ -918,13 +1030,13 @@ export default function GalleryPage() {
                       x: 0,
                       opacity: 1,
                       scale: 1,
-                      transition: { duration: 0.3, ease: 'easeOut' },
+                      transition: { duration: 0.3, ease: "easeOut" },
                     }}
                     exit={{
                       x: slideDirection > 0 ? -60 : 60,
                       opacity: 0,
                       scale: 0.95,
-                      transition: { duration: 0.25, ease: 'easeIn' },
+                      transition: { duration: 0.25, ease: "easeIn" },
                     }}
                     className="relative max-h-full max-w-full flex items-center justify-center"
                   >
@@ -967,21 +1079,28 @@ export default function GalleryPage() {
                 <div className="space-y-2 pt-2 border-t border-white/10 text-xs text-neutral-300">
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-400">Nhiếp ảnh:</span>
-                    <span className="font-semibold text-white">{selectedPhoto.photographer}</span>
+                    <span className="font-semibold text-white">
+                      {selectedPhoto.photographer}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-400">Thiết bị:</span>
-                    <span className="font-medium text-neutral-200">{selectedPhoto.gear}</span>
+                    <span className="font-medium text-neutral-200">
+                      {selectedPhoto.gear}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-400">Layout ánh sáng:</span>
-                    <span className="font-medium text-neutral-200">{selectedPhoto.tone}</span>
+                    <span className="font-medium text-neutral-200">
+                      {selectedPhoto.tone}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-neutral-400">Lượt yêu thích:</span>
                     <span className="font-semibold text-rose-400 flex items-center gap-1">
                       <HeartIcon className="w-3.5 h-3.5" />
-                      {selectedPhoto.likes + (likedPhotos[selectedPhoto.id] ? 1 : 0)}
+                      {selectedPhoto.likes +
+                        (likedPhotos[selectedPhoto.id] ? 1 : 0)}
                     </span>
                   </div>
                 </div>
@@ -1012,8 +1131,8 @@ export default function GalleryPage() {
                   }}
                   className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
                     selectedIndex === idx
-                      ? 'border-[#B85064] scale-110 shadow-lg shadow-rose-500/40 ring-2 ring-white/50'
-                      : 'border-white/20 opacity-50 hover:opacity-100 hover:border-white/50'
+                      ? "border-[#B85064] scale-110 shadow-lg shadow-rose-500/40 ring-2 ring-white/50"
+                      : "border-white/20 opacity-50 hover:opacity-100 hover:border-white/50"
                   }`}
                 >
                   <img

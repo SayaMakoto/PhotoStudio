@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CakeIcon,
   CubeIcon,
@@ -18,22 +18,25 @@ import {
   ChevronRightIcon,
   BuildingOffice2Icon,
   CameraIcon,
-} from '@heroicons/react/24/solid';
+} from "@heroicons/react/24/solid";
 
 // React Bits Components
-import BlurText from '../../components/animations/BlurText';
-import ShinyText from '../../components/animations/ShinyText';
-import CountUp from '../../components/animations/CountUp';
-import ScrollReveal from '../../components/animations/ScrollReveal';
-import SpotlightCard from '../../components/cards/SpotlightCard';
-import TiltedCard from '../../components/cards/TiltedCard';
+import BlurText from "../../components/animations/BlurText";
+import ShinyText from "../../components/animations/ShinyText";
+import CountUp from "../../components/animations/CountUp";
+import ScrollReveal from "../../components/animations/ScrollReveal";
+import SpotlightCard from "../../components/cards/SpotlightCard";
+import TiltedCard from "../../components/cards/TiltedCard";
 
-import { FloralBranchCorner, ScatteredPetals } from '../../components/common/FloralDecorations';
-import { ROUTES } from '../../routes/web';
-import { customerAuth } from '../../lib/axiosCustomer';
-import customerRoomService from '../../services/user/roomService';
-import customerBackgroundService from '../../services/user/backgroundService';
-import userImageService from '../../services/user/imageService';
+import {
+  FloralBranchCorner,
+  ScatteredPetals,
+} from "../../components/common/FloralDecorations";
+import { ROUTES } from "../../routes/web";
+import { customerAuth } from "../../lib/axiosCustomer";
+import customerRoomService from "../../services/user/roomService";
+import customerBackgroundService from "../../services/user/backgroundService";
+import userImageService from "../../services/user/imageService";
 
 // =========================================================================
 // DỮ LIỆU DỰ PHÒNG CHUẨN ĐỒNG BỘ 100% VỚI SEED DATA TRONG CSDL (DOCS/PHOTO_STUDIO.SQL)
@@ -46,7 +49,7 @@ export default function StudiosPage() {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [backgrounds, setBackgrounds] = useState([]);
-  const [selectedRoomFilter, setSelectedRoomFilter] = useState('all');
+  const [selectedRoomFilter, setSelectedRoomFilter] = useState("all");
   const [activeSpaceModal, setActiveSpaceModal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +60,8 @@ export default function StudiosPage() {
       navigate(ROUTES.AUTH.LOGIN, {
         state: {
           from: targetUrl,
-          message: 'Vui lòng đăng nhập tài khoản để tiến hành đặt lịch với phòng này!',
+          message:
+            "Vui lòng đăng nhập tài khoản để tiến hành đặt lịch với phòng này!",
         },
       });
     } else {
@@ -66,7 +70,7 @@ export default function StudiosPage() {
   };
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     // Tải phòng chụp, bối cảnh và bộ sưu tập ảnh 100% từ CSDL
     Promise.allSettled([
@@ -75,31 +79,49 @@ export default function StudiosPage() {
       userImageService.getAllImages(),
     ])
       .then(([roomsRes, bgRes, imagesRes]) => {
-        const rawImages = imagesRes.status === 'fulfilled' && Array.isArray(imagesRes.value?.data || imagesRes.value)
-          ? (imagesRes.value?.data || imagesRes.value)
-          : [];
+        const rawImages =
+          imagesRes.status === "fulfilled" &&
+          Array.isArray(imagesRes.value?.data || imagesRes.value)
+            ? imagesRes.value?.data || imagesRes.value
+            : [];
 
         // 1. Đồng bộ BỐI CẢNH CHỤP từ CSDL
-        const rawBgs = bgRes.status === 'fulfilled' && Array.isArray(bgRes.value?.data || bgRes.value)
-          ? (bgRes.value?.data || bgRes.value)
-          : [];
+        const rawBgs =
+          bgRes.status === "fulfilled" &&
+          Array.isArray(bgRes.value?.data || bgRes.value)
+            ? bgRes.value?.data || bgRes.value
+            : [];
 
         if (rawBgs.length > 0) {
           const mappedBgs = rawBgs.map((b) => {
             const matchingImages = rawImages.filter(
-              (img) => (img.imageableType === 'background' || img.imageableType === 'BACKGROUND') && Number(img.imageableId) === Number(b.id)
+              (img) =>
+                (img.imageableType === "background" ||
+                  img.imageableType === "BACKGROUND") &&
+                Number(img.imageableId) === Number(b.id),
             );
-            const primary = matchingImages.find((img) => img.isPrimary)?.imageUrl || matchingImages[0]?.imageUrl || b.imageUrl || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85';
-            const gallery = matchingImages.length > 0 ? matchingImages.map((m) => m.imageUrl) : [primary];
+            const primary =
+              matchingImages.find((img) => img.isPrimary)?.imageUrl ||
+              matchingImages[0]?.imageUrl ||
+              b.imageUrl ||
+              "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85";
+            const gallery =
+              matchingImages.length > 0
+                ? matchingImages.map((m) => m.imageUrl)
+                : [primary];
 
             return {
               id: b.id,
               name: b.name || `Bối cảnh #${b.id}`,
-              description: b.description || 'Bối cảnh chụp ảnh nghệ thuật tại studio',
-              tag: b.tag || b.backgroundType || 'Bối Cảnh Nghệ Thuật',
+              description:
+                b.description || "Bối cảnh chụp ảnh nghệ thuật tại studio",
+              tag: b.tag || b.backgroundType || "Bối Cảnh Nghệ Thuật",
               primaryImage: primary,
               gallery: gallery,
-              highlights: b.highlights || ['Không gian ánh sáng tối ưu', 'Đạo cụ decor tương thích'],
+              highlights: b.highlights || [
+                "Không gian ánh sáng tối ưu",
+                "Đạo cụ decor tương thích",
+              ],
             };
           });
           setBackgrounds(mappedBgs);
@@ -108,29 +130,45 @@ export default function StudiosPage() {
         }
 
         // 2. Đồng bộ danh sách PHÒNG CHỤP từ CSDL
-        const rawRooms = roomsRes.status === 'fulfilled' && Array.isArray(roomsRes.value?.data || roomsRes.value)
-          ? (roomsRes.value?.data || roomsRes.value)
-          : [];
+        const rawRooms =
+          roomsRes.status === "fulfilled" &&
+          Array.isArray(roomsRes.value?.data || roomsRes.value)
+            ? roomsRes.value?.data || roomsRes.value
+            : [];
 
         if (rawRooms.length > 0) {
           const mappedRooms = rawRooms.map((r) => {
             const matchingImages = rawImages.filter(
-              (img) => (img.imageableType === 'room' || img.imageableType === 'ROOM') && Number(img.imageableId) === Number(r.id)
+              (img) =>
+                (img.imageableType === "room" ||
+                  img.imageableType === "ROOM") &&
+                Number(img.imageableId) === Number(r.id),
             );
-            const primary = matchingImages.find((img) => img.isPrimary)?.imageUrl || matchingImages[0]?.imageUrl || r.imageUrl || 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85';
-            const gallery = matchingImages.length > 0 ? matchingImages.map((m) => m.imageUrl) : [primary];
+            const primary =
+              matchingImages.find((img) => img.isPrimary)?.imageUrl ||
+              matchingImages[0]?.imageUrl ||
+              r.imageUrl ||
+              "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=85";
+            const gallery =
+              matchingImages.length > 0
+                ? matchingImages.map((m) => m.imageUrl)
+                : [primary];
 
             return {
               id: r.id,
               name: r.name || `Phòng Studio #${r.id}`,
-              description: r.description || 'Không gian studio ánh sáng tự nhiên cao cấp',
+              description:
+                r.description || "Không gian studio ánh sáng tự nhiên cao cấp",
               capacity: r.capacity || 4,
-              status: r.status || 'active',
+              status: r.status || "active",
               primaryImage: primary,
               gallery: gallery,
-              area: r.area || '60m²',
-              ceiling: r.ceiling || '4.0m',
-              features: r.features || ['Hệ thống ánh sáng studio chuyên nghiệp', 'Phù hợp nhiều concept'],
+              area: r.area || "60m²",
+              ceiling: r.ceiling || "4.0m",
+              features: r.features || [
+                "Hệ thống ánh sáng studio chuyên nghiệp",
+                "Phù hợp nhiều concept",
+              ],
             };
           });
           setRooms(mappedRooms);
@@ -144,7 +182,7 @@ export default function StudiosPage() {
   }, []);
 
   const filteredRooms = useMemo(() => {
-    if (selectedRoomFilter === 'all') return rooms;
+    if (selectedRoomFilter === "all") return rooms;
     return rooms.filter((r) => r.id === Number(selectedRoomFilter));
   }, [rooms, selectedRoomFilter]);
 
@@ -163,17 +201,25 @@ export default function StudiosPage() {
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    const el = document.getElementById('rooms-showcase');
+    const el = document.getElementById("rooms-showcase");
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
   return (
     <div className="bg-[#FAF5F5] min-h-screen text-[#261A1E] font-sans selection:bg-[#B85064]/20 selection:text-[#B85064] relative overflow-hidden">
       {/* Họa tiết cành hoa trang trí góc */}
-      <FloralBranchCorner position="top-right" opacity="opacity-75" className="top-24 z-10" />
-      <FloralBranchCorner position="bottom-left" opacity="opacity-60" className="bottom-96 z-10" />
+      <FloralBranchCorner
+        position="top-right"
+        opacity="opacity-75"
+        className="top-24 z-10"
+      />
+      <FloralBranchCorner
+        position="bottom-left"
+        opacity="opacity-60"
+        className="bottom-96 z-10"
+      />
 
       {/* ========================================================================= */}
       {/* 1. HERO BANNER: Không gian điện ảnh, React Bits Title & Badges */}
@@ -184,7 +230,7 @@ export default function StudiosPage() {
           className="absolute inset-0 bg-cover bg-center opacity-70 scale-105 pointer-events-none transition-transform duration-1000"
           style={{
             backgroundImage:
-              'url(https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1920&q=85)',
+              "url(https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1920&q=85)",
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#141012]/95 via-[#141012]/75 to-[#141012]/40 pointer-events-none" />
@@ -196,28 +242,42 @@ export default function StudiosPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-xs text-white/60 mb-6">
-            <Link to={ROUTES.USER.HOME} className="hover:text-white transition-colors">
+            <Link
+              to={ROUTES.USER.HOME}
+              className="hover:text-white transition-colors"
+            >
               Trang Chủ
             </Link>
             <span>/</span>
-            <span className="text-[#E899A8] font-semibold">Không Gian Studio</span>
+            <span className="text-[#E899A8] font-semibold">
+              Không Gian Studio
+            </span>
           </div>
 
           <div className="max-w-3xl">
             {/* Shimmering Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/15 border border-rose-500/30 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-5 shadow-lg backdrop-blur-md">
               <BuildingOffice2Icon className="w-4 h-4 text-white" />
-              <ShinyText text="HỆ THỐNG 12 PHÒNG CHỤP & BỐI CẢNH 500M²" speed={3.5} className="text-white" />
+              <ShinyText
+                text="HỆ THỐNG 12 PHÒNG CHỤP & BỐI CẢNH 500M²"
+                speed={3.5}
+                className="text-white"
+              />
             </div>
 
             {/* Title với React Bits BlurText */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white font-serif-luxury tracking-tight leading-tight mb-5">
-              <BlurText text="Không Gian Nghệ Thuật & Bối Cảnh Studio Độc Bản" delay={100} />
+              <BlurText
+                text="Không Gian Nghệ Thuật & Bối Cảnh Studio Độc Bản"
+                delay={100}
+              />
             </h1>
 
             <p className="text-neutral-300 text-sm sm:text-base leading-relaxed mb-8 max-w-2xl font-light">
-              Tọa lạc tại trung tâm với diện tích sàn hơn 500m², PhotoStudio sở hữu hệ thống 12 phòng chụp đại cảnh độc lập
-              và 6 bối cảnh phối cảnh 3D độc quyền mang đến chiều sâu kiến trúc, ánh sáng tự nhiên và trải nghiệm hoàn hảo cho mọi ý tưởng sáng tạo.
+              Tọa lạc tại trung tâm với diện tích sàn hơn 500m², PhotoStudio sở
+              hữu hệ thống 12 phòng chụp đại cảnh độc lập và 6 bối cảnh phối
+              cảnh 3D độc quyền mang đến chiều sâu kiến trúc, ánh sáng tự nhiên
+              và trải nghiệm hoàn hảo cho mọi ý tưởng sáng tạo.
             </p>
 
             {/* Quick Stats với React Bits CountUp */}
@@ -227,7 +287,9 @@ export default function StudiosPage() {
                   <CountUp to={12} duration={1.5} />
                   <span className="text-[#E899A8]">+</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Phòng chụp đại cảnh</div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Phòng chụp đại cảnh
+                </div>
               </div>
 
               <div>
@@ -235,7 +297,9 @@ export default function StudiosPage() {
                   <CountUp to={6} duration={1.5} />
                   <span className="text-[#E899A8]">+</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Bối cảnh độc quyền</div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Bối cảnh độc quyền
+                </div>
               </div>
 
               <div>
@@ -243,7 +307,9 @@ export default function StudiosPage() {
                   <CountUp to={500} duration={1.8} />
                   <span className="text-[#E899A8]">m²</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Diện tích sàn sáng tạo</div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Diện tích sàn sáng tạo
+                </div>
               </div>
 
               <div>
@@ -251,7 +317,9 @@ export default function StudiosPage() {
                   <CountUp to={100} duration={1.6} />
                   <span className="text-[#E899A8]">%</span>
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Không gian thoải mái</div>
+                <div className="text-xs text-neutral-400 mt-1">
+                  Không gian thoải mái
+                </div>
               </div>
             </div>
           </div>
@@ -267,16 +335,17 @@ export default function StudiosPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-[#E899A8] text-xs font-semibold uppercase tracking-wider mb-3">
-
                   <CameraIcon className="w-3.5 h-3.5 text-white" />
-                  <span>SET DESIGN NGHỆ THUẬT 3D TỪ CSDL</span>
+                  <span>SET DESIGN NGHỆ THUẬT 3D</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif-luxury tracking-tight text-white">
                   6 Bối Cảnh Studio Độc Bản
                 </h2>
               </div>
               <p className="text-neutral-300 text-xs sm:text-sm font-light max-w-md leading-relaxed">
-                Các set background được dàn dựng tỉ mỉ về kiến trúc, decor nội thất và bố cục ánh sáng. Nhấn vào từng bối cảnh để xem chi tiết góc nhìn không gian.
+                Các set background được dàn dựng tỉ mỉ về kiến trúc, decor nội
+                thất và bố cục ánh sáng. Nhấn vào từng bối cảnh để xem chi tiết
+                góc nhìn không gian.
               </p>
             </div>
           </ScrollReveal>
@@ -286,7 +355,9 @@ export default function StudiosPage() {
             {backgrounds.map((item, idx) => (
               <ScrollReveal key={item.id} direction="up" delay={idx * 0.08}>
                 <div
-                  onClick={() => setActiveSpaceModal({ type: 'background', data: item })}
+                  onClick={() =>
+                    setActiveSpaceModal({ type: "background", data: item })
+                  }
                   className="cursor-pointer group"
                 >
                   <TiltedCard
@@ -330,19 +401,19 @@ export default function StudiosPage() {
       {/* ========================================================================= */}
       <section id="rooms-showcase" className="py-20 bg-[#FAF5F5] relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
           <ScrollReveal direction="down">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-3 shadow-sm">
                 <CubeIcon className="w-4 h-4 text-[#B85064]" />
-                <span>HỆ THỐNG 12 PHÒNG CHỤP TỪ CSDL</span>
+                <span>HỆ THỐNG 12 PHÒNG CHỤP</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-[#2A1D22] font-serif-luxury tracking-tight mb-3">
                 Khám Phá Chi Tiết 12 Phòng Chụp
               </h2>
               <p className="text-[#7A6C71] text-sm leading-relaxed">
-                Hệ thống 12 phòng chụp chuyên biệt khép kín, phân trang 6 phòng mỗi trang với đầy đủ thông số diện tích,
-                sức chứa và hình ảnh thực tế giúp bạn dễ dàng chọn không gian lý tưởng nhất.
+                Hệ thống 12 phòng chụp chuyên biệt khép kín, phân trang 6 phòng
+                mỗi trang với đầy đủ thông số diện tích, sức chứa và hình ảnh
+                thực tế giúp bạn dễ dàng chọn không gian lý tưởng nhất.
               </p>
             </div>
           </ScrollReveal>
@@ -352,11 +423,11 @@ export default function StudiosPage() {
             <motion.button
               whileHover={{ y: -3, scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => handleFilterChange('all')}
+              onClick={() => handleFilterChange("all")}
               className={`cursor-pointer px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-sm ${
-                selectedRoomFilter === 'all'
-                  ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 ring-2 ring-[#B85064]/30'
-                  : 'bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 hover:bg-[#FFF9FA]'
+                selectedRoomFilter === "all"
+                  ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 ring-2 ring-[#B85064]/30"
+                  : "bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 hover:bg-[#FFF9FA]"
               }`}
             >
               Tất Cả 12 Phòng ({rooms.length})
@@ -370,11 +441,11 @@ export default function StudiosPage() {
                 onClick={() => handleFilterChange(String(room.id))}
                 className={`cursor-pointer px-3 sm:px-4 py-2 rounded-full text-xs font-semibold transition-colors duration-200 shadow-sm ${
                   selectedRoomFilter === String(room.id)
-                    ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 ring-2 ring-[#B85064]/30'
-                    : 'bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 hover:bg-[#FFF9FA]'
+                    ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 ring-2 ring-[#B85064]/30"
+                    : "bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 hover:bg-[#FFF9FA]"
                 }`}
               >
-                {room.name.split(' - ')[0]}
+                {room.name.split(" - ")[0]}
               </motion.button>
             ))}
           </div>
@@ -383,7 +454,10 @@ export default function StudiosPage() {
           {isLoading && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="h-96 rounded-3xl bg-white border border-[#F0E4E6] animate-pulse p-8" />
+                <div
+                  key={n}
+                  className="h-96 rounded-3xl bg-white border border-[#F0E4E6] animate-pulse p-8"
+                />
               ))}
             </div>
           )}
@@ -399,7 +473,9 @@ export default function StudiosPage() {
                 >
                   {/* Room Cover Photo: Ảnh không gian phòng chụp thực tế */}
                   <div
-                    onClick={() => setActiveSpaceModal({ type: 'room', data: room })}
+                    onClick={() =>
+                      setActiveSpaceModal({ type: "room", data: room })
+                    }
                     className="relative h-72 sm:h-80 w-full overflow-hidden bg-neutral-900 cursor-pointer group"
                   >
                     <img
@@ -411,7 +487,7 @@ export default function StudiosPage() {
                     {/* Top Floating Badges */}
                     <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
                       <span className="text-xs font-bold uppercase tracking-wider text-white bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
-                        {room.area || '60m²'} • Trần {room.ceiling || '4.0m'}
+                        {room.area || "60m²"} • Trần {room.ceiling || "4.0m"}
                       </span>
 
                       <div className="flex items-center gap-2">
@@ -457,12 +533,14 @@ export default function StudiosPage() {
                         </h4>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#55464B]">
-                          {(room.features || [
-                            'Hệ thống điều hòa trung tâm 2 chiều',
-                            'Gương makeup đèn LED chuẩn màu',
-                            'Hệ thống cách âm tiêu chuẩn',
-                            'Khu vực thay đồ riêng tư khép kín',
-                          ]).map((feat, fIdx) => (
+                          {(
+                            room.features || [
+                              "Hệ thống điều hòa trung tâm 2 chiều",
+                              "Gương makeup đèn LED chuẩn màu",
+                              "Hệ thống cách âm tiêu chuẩn",
+                              "Khu vực thay đồ riêng tư khép kín",
+                            ]
+                          ).map((feat, fIdx) => (
                             <div key={fIdx} className="flex items-center gap-2">
                               <span className="w-1.5 h-1.5 rounded-full bg-[#B85064] shrink-0" />
                               <span className="truncate">{feat}</span>
@@ -475,7 +553,9 @@ export default function StudiosPage() {
                     {/* Footer Action */}
                     <div className="pt-4 border-t border-[#F0E4E6] flex items-center justify-between gap-4">
                       <button
-                        onClick={() => setActiveSpaceModal({ type: 'room', data: room })}
+                        onClick={() =>
+                          setActiveSpaceModal({ type: "room", data: room })
+                        }
                         className="cursor-pointer text-xs font-semibold text-[#B85064] hover:text-[#A8394C] flex items-center gap-1.5 transition-colors"
                       >
                         <EyeIcon className="w-4 h-4" />
@@ -501,12 +581,16 @@ export default function StudiosPage() {
           {!isLoading && totalPages > 1 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-12 pt-8 border-t border-[#F0E4E6]">
               <div className="text-xs sm:text-sm text-[#7A6C71]">
-                Hiển thị{' '}
+                Hiển thị{" "}
                 <span className="font-bold text-[#2A1D22]">
-                  {(currentPage - 1) * ROOMS_PER_PAGE + 1} -{' '}
+                  {(currentPage - 1) * ROOMS_PER_PAGE + 1} -{" "}
                   {Math.min(currentPage * ROOMS_PER_PAGE, filteredRooms.length)}
-                </span>{' '}
-                trên tổng số <span className="font-bold text-[#B85064]">{filteredRooms.length}</span> phòng studio
+                </span>{" "}
+                trên tổng số{" "}
+                <span className="font-bold text-[#B85064]">
+                  {filteredRooms.length}
+                </span>{" "}
+                phòng studio
               </div>
 
               <div className="flex items-center gap-2">
@@ -515,35 +599,37 @@ export default function StudiosPage() {
                   disabled={currentPage === 1}
                   className={`cursor-pointer px-4 py-2 rounded-full border border-[#F0E4E6] text-xs font-bold flex items-center gap-1 transition-all ${
                     currentPage === 1
-                      ? 'opacity-40 cursor-not-allowed bg-neutral-100 text-neutral-400'
-                      : 'bg-white text-[#2A1D22] hover:bg-[#B85064] hover:text-white hover:border-[#B85064]'
+                      ? "opacity-40 cursor-not-allowed bg-neutral-100 text-neutral-400"
+                      : "bg-white text-[#2A1D22] hover:bg-[#B85064] hover:text-white hover:border-[#B85064]"
                   }`}
                 >
                   <ChevronLeftIcon className="w-4 h-4" />
                   <span>Trang Trước</span>
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
-                  <button
-                    key={pg}
-                    onClick={() => handlePageChange(pg)}
-                    className={`cursor-pointer w-10 h-10 rounded-full text-xs font-bold transition-all ${
-                      currentPage === pg
-                        ? 'bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 scale-105'
-                        : 'bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50'
-                    }`}
-                  >
-                    {pg}
-                  </button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (pg) => (
+                    <button
+                      key={pg}
+                      onClick={() => handlePageChange(pg)}
+                      className={`cursor-pointer w-10 h-10 rounded-full text-xs font-bold transition-all ${
+                        currentPage === pg
+                          ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 scale-105"
+                          : "bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50"
+                      }`}
+                    >
+                      {pg}
+                    </button>
+                  ),
+                )}
 
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className={`cursor-pointer px-4 py-2 rounded-full border border-[#F0E4E6] text-xs font-bold flex items-center gap-1 transition-all ${
                     currentPage === totalPages
-                      ? 'opacity-40 cursor-not-allowed bg-neutral-100 text-neutral-400'
-                      : 'bg-white text-[#2A1D22] hover:bg-[#B85064] hover:text-white hover:border-[#B85064]'
+                      ? "opacity-40 cursor-not-allowed bg-neutral-100 text-neutral-400"
+                      : "bg-white text-[#2A1D22] hover:bg-[#B85064] hover:text-white hover:border-[#B85064]"
                   }`}
                 >
                   <span>Trang Sau</span>
@@ -552,7 +638,6 @@ export default function StudiosPage() {
               </div>
             </div>
           )}
-
         </div>
       </section>
 
@@ -561,7 +646,6 @@ export default function StudiosPage() {
       {/* ========================================================================= */}
       <section className="py-20 bg-white border-t border-[#F0E4E6] relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
           <ScrollReveal direction="down">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-3 shadow-sm">
@@ -572,7 +656,9 @@ export default function StudiosPage() {
                 Trải Nghiệm Tiện Nghi & Chu Đáo Tối Đa
               </h2>
               <p className="text-[#7A6C71] text-sm leading-relaxed">
-                Mỗi buổi chụp không chỉ là tạo ra những bức ảnh đẹp, mà còn là khoảng thời gian thư thái và thoải mái tuyệt đối cho bạn cùng người thân.
+                Mỗi buổi chụp không chỉ là tạo ra những bức ảnh đẹp, mà còn là
+                khoảng thời gian thư thái và thoải mái tuyệt đối cho bạn cùng
+                người thân.
               </p>
             </div>
           </ScrollReveal>
@@ -581,23 +667,23 @@ export default function StudiosPage() {
             {[
               {
                 icon: UserGroupIcon,
-                title: 'Phòng Thử Đồ & Makeup VIP',
-                desc: 'Phòng makeup riêng tư với gương đèn LED CRI 98+ chuẩn màu và bàn trang điểm chuyên nghiệp cho từng khách hàng.',
+                title: "Phòng Thử Đồ & Makeup VIP",
+                desc: "Phòng makeup riêng tư với gương đèn LED CRI 98+ chuẩn màu và bàn trang điểm chuyên nghiệp cho từng khách hàng.",
               },
               {
                 icon: TvIcon,
-                title: 'Màn Hình 4K Preview Trực Tiếp',
-                desc: 'Kết nối Tethering trực tiếp từ máy ảnh lên màn hình lớn giúp bạn và stylist kiểm tra ảnh ngay trong buổi chụp.',
+                title: "Màn Hình 4K Preview Trực Tiếp",
+                desc: "Kết nối Tethering trực tiếp từ máy ảnh lên màn hình lớn giúp bạn và stylist kiểm tra ảnh ngay trong buổi chụp.",
               },
               {
                 icon: CakeIcon,
-                title: 'Trà Hoa & Quầy Coffee Bar',
-                desc: 'Thưởng thức trà thảo mộc thơm mát, cà phê và bánh ngọt miễn phí trong suốt thời gian trang điểm và nghỉ ngơi.',
+                title: "Trà Hoa & Quầy Coffee Bar",
+                desc: "Thưởng thức trà thảo mộc thơm mát, cà phê và bánh ngọt miễn phí trong suốt thời gian trang điểm và nghỉ ngơi.",
               },
               {
                 icon: ShieldCheckIcon,
-                title: 'Phòng Thay Đồ Trang Phục Riêng',
-                desc: 'Không gian khép kín kín đáo, trang bị tủ cất đồ cá nhân có khóa an toàn và bàn là hơi nước chăm sóc trang phục.',
+                title: "Phòng Thay Đồ Trang Phục Riêng",
+                desc: "Không gian khép kín kín đáo, trang bị tủ cất đồ cá nhân có khóa an toàn và bàn là hơi nước chăm sóc trang phục.",
               },
             ].map((amenity, idx) => (
               <ScrollReveal key={idx} direction="up" delay={idx * 0.08}>
@@ -631,7 +717,9 @@ export default function StudiosPage() {
                   Bạn Muốn Trực Tiếp Khám Phá Studio Của Chúng Tôi?
                 </h3>
                 <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-light">
-                  Hãy ghé thăm studio để được tham quan các phòng chụp thực tế, thử trang phục và nhận tư vấn concept hoàn toàn miễn phí từ stylist.
+                  Hãy ghé thăm studio để được tham quan các phòng chụp thực tế,
+                  thử trang phục và nhận tư vấn concept hoàn toàn miễn phí từ
+                  stylist.
                 </p>
               </div>
 
@@ -639,7 +727,7 @@ export default function StudiosPage() {
                 <motion.div
                   whileHover={{ y: -3, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
                   <button
                     type="button"
@@ -656,7 +744,7 @@ export default function StudiosPage() {
                 <motion.div
                   whileHover={{ y: -3, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
                   <a
                     href="tel:0901234567"
@@ -669,7 +757,6 @@ export default function StudiosPage() {
               </div>
             </div>
           </ScrollReveal>
-
         </div>
       </section>
 
@@ -683,14 +770,16 @@ export default function StudiosPage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
               className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col"
             >
               {/* Header Modal */}
               <div className="px-6 py-4 border-b border-[#F0E4E6] flex items-center justify-between bg-[#FAF5F5]">
                 <div className="flex items-center gap-2.5">
                   <span className="px-3 py-1 rounded-full bg-[#B85064] text-white text-[11px] font-bold uppercase tracking-wider">
-                    {activeSpaceModal.type === 'background' ? 'Bối Cảnh Nghệ Thuật' : 'Phòng Chụp Đại Cảnh'}
+                    {activeSpaceModal.type === "background"
+                      ? "Bối Cảnh Nghệ Thuật"
+                      : "Phòng Chụp Đại Cảnh"}
                   </span>
                   <h3 className="text-lg font-bold text-[#2A1D22] font-serif-luxury truncate max-w-md">
                     {activeSpaceModal.data.name}
@@ -721,24 +810,28 @@ export default function StudiosPage() {
                 </div>
 
                 {/* Multi-angle gallery preview */}
-                {activeSpaceModal.data.gallery && activeSpaceModal.data.gallery.length > 1 && (
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#7A6C71]">
-                      Các Góc Phối Cảnh Chi Tiết:
-                    </h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {activeSpaceModal.data.gallery.map((imgUrl, gIdx) => (
-                        <div key={gIdx} className="h-28 rounded-xl overflow-hidden border border-[#F0E4E6] shadow-sm">
-                          <img
-                            src={imgUrl}
-                            alt={`Góc phối cảnh ${gIdx + 1}`}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform"
-                          />
-                        </div>
-                      ))}
+                {activeSpaceModal.data.gallery &&
+                  activeSpaceModal.data.gallery.length > 1 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#7A6C71]">
+                        Các Góc Phối Cảnh Chi Tiết:
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {activeSpaceModal.data.gallery.map((imgUrl, gIdx) => (
+                          <div
+                            key={gIdx}
+                            className="h-28 rounded-xl overflow-hidden border border-[#F0E4E6] shadow-sm"
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`Góc phối cảnh ${gIdx + 1}`}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Description & Features */}
                 <div className="p-5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] space-y-3">
@@ -750,9 +843,13 @@ export default function StudiosPage() {
                   </p>
 
                   {/* Highlights checklist */}
-                  {(activeSpaceModal.data.highlights || activeSpaceModal.data.features) && (
+                  {(activeSpaceModal.data.highlights ||
+                    activeSpaceModal.data.features) && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-xs text-[#2A1D22] font-medium">
-                      {(activeSpaceModal.data.highlights || activeSpaceModal.data.features).map((hl, hIdx) => (
+                      {(
+                        activeSpaceModal.data.highlights ||
+                        activeSpaceModal.data.features
+                      ).map((hl, hIdx) => (
                         <div key={hIdx} className="flex items-center gap-2">
                           <CheckBadgeIcon className="w-4 h-4 text-[#B85064] shrink-0" />
                           <span>{hl}</span>
@@ -772,7 +869,10 @@ export default function StudiosPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    const rId = activeSpaceModal?.type === 'room' ? activeSpaceModal.data.id : 1;
+                    const rId =
+                      activeSpaceModal?.type === "room"
+                        ? activeSpaceModal.data.id
+                        : 1;
                     setActiveSpaceModal(null);
                     handleBookRoom(rId);
                   }}

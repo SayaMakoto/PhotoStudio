@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
-import { UserGroupIcon, TrophyIcon, CameraIcon, PaintBrushIcon } from '@heroicons/react/24/solid';
-import CountUp from '../../animations/CountUp';
-import ScrollReveal from '../../animations/ScrollReveal';
-import customerPackageService from '../../../services/user/packageService';
-import customerRoomService from '../../../services/user/roomService';
-import customerServiceService from '../../../services/user/serviceService';
-import customerReviewService from '../../../services/user/reviewService';
+import { useState, useEffect } from "react";
+import {
+  UserGroupIcon,
+  TrophyIcon,
+  CameraIcon,
+  PaintBrushIcon,
+} from "@heroicons/react/24/solid";
+import CountUp from "../../animations/CountUp";
+import ScrollReveal from "../../animations/ScrollReveal";
+import customerPackageService from "../../../services/user/packageService";
+import customerRoomService from "../../../services/user/roomService";
+import customerServiceService from "../../../services/user/serviceService";
+import customerReviewService from "../../../services/user/reviewService";
 
 export default function Stats() {
   const [counts, setCounts] = useState({
@@ -26,19 +31,21 @@ export default function Stats() {
       .then(([packagesRes, roomsRes, servicesRes, reviewsRes]) => {
         setCounts({
           packages:
-            packagesRes.status === 'fulfilled' && Array.isArray(packagesRes.value)
+            packagesRes.status === "fulfilled" &&
+            Array.isArray(packagesRes.value)
               ? packagesRes.value.length
               : 0,
           rooms:
-            roomsRes.status === 'fulfilled' && Array.isArray(roomsRes.value)
+            roomsRes.status === "fulfilled" && Array.isArray(roomsRes.value)
               ? roomsRes.value.length
               : 0,
           services:
-            servicesRes.status === 'fulfilled' && Array.isArray(servicesRes.value)
+            servicesRes.status === "fulfilled" &&
+            Array.isArray(servicesRes.value)
               ? servicesRes.value.length
               : 0,
           reviews:
-            reviewsRes.status === 'fulfilled' && Array.isArray(reviewsRes.value)
+            reviewsRes.status === "fulfilled" && Array.isArray(reviewsRes.value)
               ? reviewsRes.value.length
               : 0,
         });
@@ -47,7 +54,7 @@ export default function Stats() {
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error('[Stats] Lỗi tải thống kê:', err);
+        console.error("[Stats] Lỗi tải thống kê:", err);
       });
   }, []);
 
@@ -55,30 +62,30 @@ export default function Stats() {
     {
       icon: CameraIcon,
       value: counts.packages,
-      suffix: counts.packages > 0 ? ' Gói' : '',
-      label: 'Gói Chụp Tiêu Chuẩn',
-      description: 'Lưu trữ sẵn sàng trong hệ thống cơ sở dữ liệu',
+      suffix: counts.packages > 0 ? " Gói" : "",
+      label: "Gói Chụp Tiêu Chuẩn",
+      description: "Lưu trữ sẵn sàng trong hệ thống",
     },
     {
       icon: TrophyIcon,
       value: counts.rooms,
-      suffix: counts.rooms > 0 ? ' Phòng' : '',
-      label: 'Phòng Studio Độc Bản',
-      description: 'Không gian bối cảnh chuẩn phong cách điện ảnh',
+      suffix: counts.rooms > 0 ? " Phòng" : "",
+      label: "Phòng Studio Độc Bản",
+      description: "Không gian bối cảnh chuẩn phong cách điện ảnh",
     },
     {
       icon: PaintBrushIcon,
       value: counts.services,
-      suffix: counts.services > 0 ? ' Dịch Vụ' : '',
-      label: 'Dịch Vụ & Tiện Ích',
-      description: 'Trang điểm, làm tóc, trang phục và phụ kiện',
+      suffix: counts.services > 0 ? " Dịch Vụ" : "",
+      label: "Dịch Vụ & Tiện Ích",
+      description: "Trang điểm, làm tóc, trang phục và phụ kiện",
     },
     {
       icon: UserGroupIcon,
       value: counts.reviews,
-      suffix: counts.reviews > 0 ? ' Lượt' : '',
-      label: 'Đánh Giá Khách Hàng',
-      description: 'Phản hồi thực tế được ghi nhận từ khách hàng',
+      suffix: counts.reviews > 0 ? " Lượt" : "",
+      label: "Đánh Giá Khách Hàng",
+      description: "Phản hồi thực tế được ghi nhận từ khách hàng",
     },
   ];
 
@@ -99,7 +106,6 @@ export default function Stats() {
                 duration={0.7}
               >
                 <div className="group relative p-6 sm:p-7 rounded-3xl bg-white border border-[#F0E4E6] hover:border-[#B85064]/60 transition-all duration-300 shadow-[0_4px_20px_rgb(184,80,100,0.04)] hover:shadow-[0_12px_30px_rgb(184,80,100,0.12)] hover:-translate-y-1">
-                  
                   {/* Icon */}
                   <div className="w-12 h-12 rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-[#B85064] group-hover:text-white transition-all duration-300 shadow-sm">
                     <Icon className="w-6 h-6 text-[#B85064] group-hover:text-white transition-colors" />

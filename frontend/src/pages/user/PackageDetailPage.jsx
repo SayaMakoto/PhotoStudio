@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useMemo } from "react";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   PlusCircleIcon,
   ArrowLeftIcon,
@@ -22,29 +22,53 @@ import {
   ShieldCheckIcon,
   ChatBubbleLeftEllipsisIcon,
   HandThumbUpIcon,
-} from '@heroicons/react/24/solid';
-import { ROUTES } from '../../routes/web';
-import customerPackageService from '../../services/user/packageService';
-import customerBookingService from '../../services/user/bookingService';
-import userImageService from '../../services/user/imageService';
-import customerServiceService from '../../services/user/serviceService';
-import customerReviewService from '../../services/user/reviewService';
-import { customerAuth } from '../../lib/axiosCustomer';
+} from "@heroicons/react/24/solid";
+import { ROUTES } from "../../routes/web";
+import customerPackageService from "../../services/user/packageService";
+import customerBookingService from "../../services/user/bookingService";
+import userImageService from "../../services/user/imageService";
+import customerServiceService from "../../services/user/serviceService";
+import customerReviewService from "../../services/user/reviewService";
+import { customerAuth } from "../../lib/axiosCustomer";
 import {
   FloralCardCorner,
   FloatingPetals,
   FloralBranchCorner,
-} from '../../components/common/FloralDecorations';
+} from "../../components/common/FloralDecorations";
 
 // Khung giờ đặt lịch studio
 const TIME_SLOTS = [
-  { id: 'm1', label: '08:30 – 10:30 (Sáng)', start: '08:30:00', end: '10:30:00' },
-  { id: 'm2', label: '10:30 – 12:30 (Trưa)', start: '10:30:00', end: '12:30:00' },
-  { id: 'a1', label: '13:30 – 15:30 (Chiều)', start: '13:30:00', end: '15:30:00' },
-  { id: 'a2', label: '16:00 – 18:00 (Hoàng hôn)', start: '16:00:00', end: '18:00:00' },
-  { id: 'e1', label: '18:30 – 20:30 (Tối Studio)', start: '18:30:00', end: '20:30:00' },
+  {
+    id: "m1",
+    label: "08:30 – 10:30 (Sáng)",
+    start: "08:30:00",
+    end: "10:30:00",
+  },
+  {
+    id: "m2",
+    label: "10:30 – 12:30 (Trưa)",
+    start: "10:30:00",
+    end: "12:30:00",
+  },
+  {
+    id: "a1",
+    label: "13:30 – 15:30 (Chiều)",
+    start: "13:30:00",
+    end: "15:30:00",
+  },
+  {
+    id: "a2",
+    label: "16:00 – 18:00 (Hoàng hôn)",
+    start: "16:00:00",
+    end: "18:00:00",
+  },
+  {
+    id: "e1",
+    label: "18:30 – 20:30 (Tối Studio)",
+    start: "18:30:00",
+    end: "20:30:00",
+  },
 ];
-
 
 // =========================================================================
 // BẢNG DỮ LIỆU ĐỐI SOÁT CƠ SỞ DỮ LIỆU (ĐỒNG BỘ 100% VỚI docs/photo_studio.sql)
@@ -76,14 +100,22 @@ export default function PackageDetailPage() {
   // State dữ liệu gói chụp thực tế từ CSDL
   const [pkg, setPkg] = useState(defaultPkg);
   const [galleryImages, setGalleryImages] = useState(defaultPkg?.images || []);
-  const [packageServices, setPackageServices] = useState(defaultPkg?.services || []);
-  const [packageBackgrounds, setPackageBackgrounds] = useState(defaultPkg?.backgrounds || []);
+  const [packageServices, setPackageServices] = useState(
+    defaultPkg?.services || [],
+  );
+  const [packageBackgrounds, setPackageBackgrounds] = useState(
+    defaultPkg?.backgrounds || [],
+  );
   const packageClothes = pkg?.clothes || [];
   const packageAccessories = pkg?.accessories || [];
   const [addOnServices, setAddOnServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [newReviewForm, setNewReviewForm] = useState({ name: '', rating: 5, comment: '' });
+  const [newReviewForm, setNewReviewForm] = useState({
+    name: "",
+    rating: 5,
+    comment: "",
+  });
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [recommendedPackages, setRecommendedPackages] = useState([]);
 
@@ -101,32 +133,44 @@ export default function PackageDetailPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(TIME_SLOTS[0]);
   const [bookingForm, setBookingForm] = useState({
-    name: '',
-    phone: '',
-    date: '',
-    note: '',
+    name: "",
+    phone: "",
+    date: "",
+    note: "",
   });
 
   // Dịch vụ nâng cao được chọn
   const [selectedServiceIds, setSelectedServiceIds] = useState([]);
   const handleToggleService = (sId) => {
     setSelectedServiceIds((prev) =>
-      prev.includes(sId) ? prev.filter((id) => id !== sId) : [...prev, sId]
+      prev.includes(sId) ? prev.filter((id) => id !== sId) : [...prev, sId],
     );
   };
   const selectedAddOnServices = useMemo(() => {
     return addOnServices.filter((s) => selectedServiceIds.includes(s.id));
   }, [addOnServices, selectedServiceIds]);
   const totalAddOnPrice = useMemo(() => {
-    return selectedAddOnServices.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
+    return selectedAddOnServices.reduce(
+      (sum, s) => sum + (Number(s.price) || 0),
+      0,
+    );
   }, [selectedAddOnServices]);
 
   const handleGoToBooking = () => {
-    const serviceParams = selectedServiceIds.length > 0 ? `&services=${selectedServiceIds.join(',')}` : '';
+    const serviceParams =
+      selectedServiceIds.length > 0
+        ? `&services=${selectedServiceIds.join(",")}`
+        : "";
     const targetUrl = `${ROUTES.USER.BOOKING}?packageId=${pkg.id}${serviceParams}`;
     try {
-      sessionStorage.setItem('preselected_services', JSON.stringify(selectedAddOnServices));
-      sessionStorage.setItem('preselected_service_ids', JSON.stringify(selectedServiceIds));
+      sessionStorage.setItem(
+        "preselected_services",
+        JSON.stringify(selectedAddOnServices),
+      );
+      sessionStorage.setItem(
+        "preselected_service_ids",
+        JSON.stringify(selectedServiceIds),
+      );
     } catch {
       // Ignored: Bỏ qua lỗi nếu sessionStorage không khả dụng
     }
@@ -135,7 +179,8 @@ export default function PackageDetailPage() {
       navigate(ROUTES.AUTH.LOGIN, {
         state: {
           from: targetUrl,
-          message: 'Vui lòng đăng nhập tài khoản để tiến hành đặt gói chụp này!',
+          message:
+            "Vui lòng đăng nhập tài khoản để tiến hành đặt gói chụp này!",
         },
       });
     } else {
@@ -152,7 +197,7 @@ export default function PackageDetailPage() {
 
   // Modal Tư vấn thêm
   const [isConsultModalOpen, setIsConsultModalOpen] = useState(false);
-  const [consultPhone, setConsultPhone] = useState('');
+  const [consultPhone, setConsultPhone] = useState("");
   const [consultSubmitted, setConsultSubmitted] = useState(false);
 
   // Lightbox xem ảnh lớn
@@ -165,7 +210,7 @@ export default function PackageDetailPage() {
   // ĐỒNG BỘ DỮ LIỆU TỪ CƠ SỞ DỮ LIỆU BACKEND (API MYSQL)
   // =========================================================================
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     let isMounted = true;
 
@@ -185,7 +230,7 @@ export default function PackageDetailPage() {
           reviewsRes,
         ] = await Promise.all([
           customerPackageService.getPackageById(pkgId).catch(() => null),
-          userImageService.getImagesByType('package', pkgId).catch(() => null),
+          userImageService.getImagesByType("package", pkgId).catch(() => null),
           userImageService.getAllImages().catch(() => null),
           customerPackageService.getPackageServices(pkgId).catch(() => null),
           customerPackageService.getPackageBackgrounds(pkgId).catch(() => null),
@@ -211,17 +256,19 @@ export default function PackageDetailPage() {
           imgs = liveImages.map((img) => ({
             id: img.id,
             url: img.imageUrl,
-            caption: img.description || livePkg?.name || 'Ảnh chụp studio',
+            caption: img.description || livePkg?.name || "Ảnh chụp studio",
           }));
         } else if (Array.isArray(allLiveImages) && allLiveImages.length > 0) {
           const matched = allLiveImages.filter(
-            (img) => img.imageableType?.toLowerCase() === 'package' && Number(img.imageableId) === Number(pkgId)
+            (img) =>
+              img.imageableType?.toLowerCase() === "package" &&
+              Number(img.imageableId) === Number(pkgId),
           );
           if (matched.length > 0) {
             imgs = matched.map((img) => ({
               id: img.id,
               url: img.imageUrl,
-              caption: img.description || livePkg?.name || 'Ảnh chụp studio',
+              caption: img.description || livePkg?.name || "Ảnh chụp studio",
             }));
           }
         }
@@ -260,7 +307,9 @@ export default function PackageDetailPage() {
                 description: p.description,
                 duration: p.duration,
                 price: p.price,
-                priceDisplay: p.price ? `${Number(p.price).toLocaleString('vi-VN')}đ` : 'Liên hệ',
+                priceDisplay: p.price
+                  ? `${Number(p.price).toLocaleString("vi-VN")}đ`
+                  : "Liên hệ",
                 imageUrl: p.imageUrl || null,
               };
             });
@@ -272,11 +321,16 @@ export default function PackageDetailPage() {
         // 6. Đồng bộ đánh giá từ CSDL
         const liveReviews = unwrapData(reviewsRes);
         if (Array.isArray(liveReviews)) {
-          const matchedReviews = liveReviews.filter((r) => Number(r.packageId) === Number(pkgId));
+          const matchedReviews = liveReviews.filter(
+            (r) => Number(r.packageId) === Number(pkgId),
+          );
           setReviews(matchedReviews);
         }
       } catch (err) {
-        console.warn('[PackageDetailPage] CSDL Backend chưa bật hoặc đang kết nối, hiển thị dữ liệu gốc CSDL photo_studio.sql:', err.message);
+        console.warn(
+          "[PackageDetailPage] CSDL Backend chưa bật hoặc đang kết nối, hiển thị dữ liệu gốc CSDL photo_studio.sql:",
+          err.message,
+        );
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -291,19 +345,18 @@ export default function PackageDetailPage() {
     };
   }, [id, targetId]);
 
-
   // Handler chuyển ảnh trong gallery
   const handleNextImage = () => {
     if (galleryImages.length <= 1) return;
     setActiveImageIndex((prev) =>
-      prev === galleryImages.length - 1 ? 0 : prev + 1
+      prev === galleryImages.length - 1 ? 0 : prev + 1,
     );
   };
 
   const handlePrevImage = () => {
     if (galleryImages.length <= 1) return;
     setActiveImageIndex((prev) =>
-      prev === 0 ? galleryImages.length - 1 : prev - 1
+      prev === 0 ? galleryImages.length - 1 : prev - 1,
     );
   };
 
@@ -311,25 +364,25 @@ export default function PackageDetailPage() {
   const handleSubmitBooking = async (e) => {
     e.preventDefault();
     if (!bookingForm.name.trim() || !bookingForm.phone.trim()) {
-      alert('Vui lòng điền họ tên và số điện thoại.');
+      alert("Vui lòng điền họ tên và số điện thoại.");
       return;
     }
 
     setIsSubmitting(true);
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = new Date().toISOString().split("T")[0];
     const payload = {
       packageId: pkg.id,
       bookingDate: bookingForm.date || todayStr,
       startTime: selectedTimeSlot.start,
       endTime: selectedTimeSlot.end,
-      status: 'pending',
-      customerNote: `[CSDL Gói #${pkg.id}] Khách: ${bookingForm.name.trim()} - SĐT: ${bookingForm.phone.trim()} - Gói: ${pkg.name} (${Number(pkg.price).toLocaleString('vi-VN')}đ) - Khung giờ: ${selectedTimeSlot.label}${bookingForm.note ? ` - Ghi chú: ${bookingForm.note}` : ''}`,
+      status: "pending",
+      customerNote: `[CSDL Gói #${pkg.id}] Khách: ${bookingForm.name.trim()} - SĐT: ${bookingForm.phone.trim()} - Gói: ${pkg.name} (${Number(pkg.price).toLocaleString("vi-VN")}đ) - Khung giờ: ${selectedTimeSlot.label}${bookingForm.note ? ` - Ghi chú: ${bookingForm.note}` : ""}`,
     };
 
     try {
       await customerBookingService.createBooking(payload);
     } catch (err) {
-      console.warn('[PackageDetailPage] Gửi đơn đặt lịch:', err.message);
+      console.warn("[PackageDetailPage] Gửi đơn đặt lịch:", err.message);
     } finally {
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -349,10 +402,11 @@ export default function PackageDetailPage() {
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 bg-[#FAF5F5] text-[#261A1E]">
         <ArrowPathIcon className="w-10 h-10 animate-spin text-[#B85064] mb-4" />
         <h2 className="text-xl font-bold font-serif-luxury text-[#261A1E]">
-          Đang kết nối cơ sở dữ liệu PhotoStudio...
+          Đang kết nối với PhotoStudio...
         </h2>
         <p className="text-xs text-[#7A6C71] mt-1">
-          Đang nạp thông tin gói chụp, bộ sưu tập ảnh và bảng báo giá từ CSDL.
+          Đang nạp thông tin gói chụp, bộ sưu tập ảnh và bảng báo giá từ hệ
+          thống.
         </p>
       </div>
     );
@@ -364,10 +418,11 @@ export default function PackageDetailPage() {
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 bg-[#FAF5F5] text-[#261A1E] text-center space-y-4">
         <ArchiveBoxIcon className="w-12 h-12 text-[#CBB9BD] mx-auto" />
         <h2 className="text-2xl font-bold font-serif-luxury text-[#261A1E]">
-          Không tìm thấy gói chụp trong cơ sở dữ liệu
+          Không tìm thấy gói chụp trong hệ thống
         </h2>
         <p className="text-xs sm:text-sm text-[#7A6C71] max-w-md mx-auto">
-          Gói chụp bạn đang tìm kiếm không tồn tại hoặc đã bị tạm ngưng. Vui lòng chọn gói chụp khác từ danh mục.
+          Gói chụp bạn đang tìm kiếm không tồn tại hoặc đã bị tạm ngưng. Vui
+          lòng chọn gói chụp khác từ danh mục.
         </p>
         <Link
           to={ROUTES.USER.PACKAGES}
@@ -380,11 +435,14 @@ export default function PackageDetailPage() {
     );
   }
 
-  const activeImage = galleryImages[activeImageIndex] || galleryImages[0] || null;
-  const priceDisplay = pkg.price ? `${Number(pkg.price).toLocaleString('vi-VN')}đ` : 'Liên hệ';
+  const activeImage =
+    galleryImages[activeImageIndex] || galleryImages[0] || null;
+  const priceDisplay = pkg.price
+    ? `${Number(pkg.price).toLocaleString("vi-VN")}đ`
+    : "Liên hệ";
   const durationDisplay = pkg.duration
-    ? `${pkg.duration} phút (${(pkg.duration / 60).toFixed(1).replace('.0', '')} giờ)`
-    : '60 – 120 phút';
+    ? `${pkg.duration} phút (${(pkg.duration / 60).toFixed(1).replace(".0", "")} giờ)`
+    : "60 – 120 phút";
 
   return (
     <div className="bg-[#FAF5F5] min-h-screen text-[#261A1E] font-sans selection:bg-[#B85064]/20 selection:text-[#B85064] relative pb-20">
@@ -396,7 +454,7 @@ export default function PackageDetailPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-all duration-700 scale-105 pointer-events-none opacity-85"
           style={{
-            backgroundImage: `url(${activeImage?.url || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=1920&q=80'})`,
+            backgroundImage: `url(${activeImage?.url || "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=1920&q=80"})`,
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#141012]/80 via-[#141012]/45 to-transparent pointer-events-none" />
@@ -412,15 +470,23 @@ export default function PackageDetailPage() {
           <div className="max-w-2xl space-y-4 sm:space-y-5">
             {/* Breadcrumb Navigation */}
             <div className="flex items-center gap-2 text-xs text-neutral-300">
-              <Link to={ROUTES.USER.HOME} className="hover:text-[#E899A8] transition-colors">
+              <Link
+                to={ROUTES.USER.HOME}
+                className="hover:text-[#E899A8] transition-colors"
+              >
                 Trang Chủ
               </Link>
               <span>/</span>
-              <Link to={ROUTES.USER.PACKAGES} className="hover:text-[#E899A8] transition-colors">
+              <Link
+                to={ROUTES.USER.PACKAGES}
+                className="hover:text-[#E899A8] transition-colors"
+              >
                 Gói Chụp
               </Link>
               <span>/</span>
-              <span className="text-[#E899A8] font-semibold truncate max-w-[260px] sm:max-w-md">{pkg.name}</span>
+              <span className="text-[#E899A8] font-semibold truncate max-w-[260px] sm:max-w-md">
+                {pkg.name}
+              </span>
             </div>
 
             {/* Nút quay lại danh sách gói chụp */}
@@ -435,7 +501,7 @@ export default function PackageDetailPage() {
 
               {/* Tag định danh CSDL */}
               <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-white/90 text-[10px] font-mono border border-white/20">
-                CSDL ID: #{pkg.id}
+                ID: #{pkg.id}
               </span>
 
               {pkg.status && (
@@ -484,10 +550,8 @@ export default function PackageDetailPage() {
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-          
           {/* =================== CỘT TRÁI (~65% WIDTH) =================== */}
           <div className="lg:col-span-8 space-y-10">
-            
             {/* PHẦN 1: BỘ SƯU TẬP ẢNH TƯƠNG TÁC TỪ BẢNG IMAGES TRONG CSDL */}
             {galleryImages.length > 0 && activeImage ? (
               <div className="space-y-4">
@@ -552,8 +616,8 @@ export default function PackageDetailPage() {
                           onClick={() => setActiveImageIndex(idx)}
                           className={`cursor-pointer relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all ${
                             isCurrent
-                              ? 'border-[#B85064] scale-[1.03] shadow-md shadow-[#B85064]/20 ring-2 ring-[#B85064]/20'
-                              : 'border-transparent opacity-75 hover:opacity-100 hover:scale-[1.02]'
+                              ? "border-[#B85064] scale-[1.03] shadow-md shadow-[#B85064]/20 ring-2 ring-[#B85064]/20"
+                              : "border-transparent opacity-75 hover:opacity-100 hover:scale-[1.02]"
                           }`}
                         >
                           <img
@@ -571,7 +635,7 @@ export default function PackageDetailPage() {
               <div className="p-8 rounded-3xl bg-white border border-[#F0E4E6] text-center space-y-2">
                 <ArchiveBoxIcon className="w-12 h-12 text-[#B85064] mx-auto opacity-70" />
                 <h3 className="text-base font-bold text-[#261A1E]">
-                  Gói chụp chưa được gắn ảnh trong cơ sở dữ liệu
+                  Gói chụp chưa được gắn ảnh trong hệ thống
                 </h3>
               </div>
             )}
@@ -587,19 +651,25 @@ export default function PackageDetailPage() {
 
               <div className="p-5 sm:p-6 rounded-3xl bg-white border border-[#F2E8E9] shadow-xs space-y-3">
                 <p className="text-[#55464B] text-sm sm:text-base leading-relaxed font-light">
-                  {pkg.description || 'Chưa có thông tin mô tả chi tiết cho gói chụp này.'}
+                  {pkg.description ||
+                    "Chưa có thông tin mô tả chi tiết cho gói chụp này."}
                 </p>
 
                 {/* Thông tin thời lượng & thiết bị từ CSDL */}
                 <div className="pt-3 border-t border-[#F5E8EA] flex flex-wrap items-center gap-4 text-xs text-[#6B5A60]">
                   <div className="flex items-center gap-1.5 font-medium">
                     <ClockIcon className="w-4 h-4 text-[#B85064]" />
-                    <span>Thời lượng buổi chụp: <strong>{durationDisplay}</strong></span>
+                    <span>
+                      Thời lượng buổi chụp: <strong>{durationDisplay}</strong>
+                    </span>
                   </div>
                   {pkg.status && (
                     <div className="flex items-center gap-1.5 font-medium">
                       <CircleStackIcon className="w-4 h-4 text-[#B85064]" />
-                      <span>Trạng thái: <strong className="uppercase">{pkg.status}</strong></span>
+                      <span>
+                        Trạng thái:{" "}
+                        <strong className="uppercase">{pkg.status}</strong>
+                      </span>
                     </div>
                   )}
                 </div>
@@ -612,7 +682,8 @@ export default function PackageDetailPage() {
                 <div className="flex items-center gap-2.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#B85064]" />
                   <h2 className="text-xl sm:text-2xl font-bold font-serif-luxury text-[#261A1E]">
-                    Bối cảnh studio đính kèm ({packageBackgrounds.length} bối cảnh)
+                    Bối cảnh studio đính kèm ({packageBackgrounds.length} bối
+                    cảnh)
                   </h2>
                 </div>
 
@@ -627,10 +698,12 @@ export default function PackageDetailPage() {
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-[#261A1E]">
-                          {bg.backgroundName || bg.name || 'Bối cảnh studio'}
+                          {bg.backgroundName || bg.name || "Bối cảnh studio"}
                         </h4>
                         <p className="text-xs text-[#7A6C71] mt-0.5">
-                          {bg.backgroundType ? `Phân loại: ${bg.backgroundType}` : 'Bối cảnh nghệ thuật studio'}
+                          {bg.backgroundType
+                            ? `Phân loại: ${bg.backgroundType}`
+                            : "Bối cảnh nghệ thuật studio"}
                         </p>
                       </div>
                     </div>
@@ -643,11 +716,17 @@ export default function PackageDetailPage() {
               <div className="grid gap-4 pt-2 sm:grid-cols-2">
                 {packageClothes.length > 0 && (
                   <section className="space-y-3 rounded-3xl border border-[#F2E8E9] bg-white p-5 shadow-xs">
-                    <h2 className="text-lg font-bold font-serif-luxury text-[#261A1E]">Trang phục trong gói</h2>
+                    <h2 className="text-lg font-bold font-serif-luxury text-[#261A1E]">
+                      Trang phục trong gói
+                    </h2>
                     <ul className="space-y-2 text-sm text-[#55464B]">
                       {packageClothes.map((item) => (
-                        <li key={item.id || item.clothId} className="flex justify-between gap-3">
-                          <span>{item.clothName}</span><span className="shrink-0">× {item.quantity}</span>
+                        <li
+                          key={item.id || item.clothId}
+                          className="flex justify-between gap-3"
+                        >
+                          <span>{item.clothName}</span>
+                          <span className="shrink-0">× {item.quantity}</span>
                         </li>
                       ))}
                     </ul>
@@ -655,11 +734,17 @@ export default function PackageDetailPage() {
                 )}
                 {packageAccessories.length > 0 && (
                   <section className="space-y-3 rounded-3xl border border-[#F2E8E9] bg-white p-5 shadow-xs">
-                    <h2 className="text-lg font-bold font-serif-luxury text-[#261A1E]">Phụ kiện trong gói</h2>
+                    <h2 className="text-lg font-bold font-serif-luxury text-[#261A1E]">
+                      Phụ kiện trong gói
+                    </h2>
                     <ul className="space-y-2 text-sm text-[#55464B]">
                       {packageAccessories.map((item) => (
-                        <li key={item.id || item.accessoryId} className="flex justify-between gap-3">
-                          <span>{item.accessoryName}</span><span className="shrink-0">× {item.quantity}</span>
+                        <li
+                          key={item.id || item.accessoryId}
+                          className="flex justify-between gap-3"
+                        >
+                          <span>{item.accessoryName}</span>
+                          <span className="shrink-0">× {item.quantity}</span>
                         </li>
                       ))}
                     </ul>
@@ -674,7 +759,8 @@ export default function PackageDetailPage() {
                 <div className="flex items-center gap-2.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#B85064]" />
                   <h2 className="text-xl sm:text-2xl font-bold font-serif-luxury text-[#261A1E]">
-                    Dịch vụ đính kèm trong gói ({packageServices.length} dịch vụ)
+                    Dịch vụ đính kèm trong gói ({packageServices.length} dịch
+                    vụ)
                   </h2>
                 </div>
 
@@ -690,11 +776,13 @@ export default function PackageDetailPage() {
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-[#261A1E]">
-                            {ps.serviceName || 'Dịch vụ đính kèm'}
+                            {ps.serviceName || "Dịch vụ đính kèm"}
                           </h4>
                           <p className="text-xs text-[#6B5A60] mt-1 leading-relaxed">
-                            {ps.quantity ? `Số lượng: ${ps.quantity}` : ''}
-                            {ps.servicePrice ? ` • Giá trị: ${Number(ps.servicePrice).toLocaleString('vi-VN')}đ` : ''}
+                            {ps.quantity ? `Số lượng: ${ps.quantity}` : ""}
+                            {ps.servicePrice
+                              ? ` • Giá trị: ${Number(ps.servicePrice).toLocaleString("vi-VN")}đ`
+                              : ""}
                           </p>
                         </div>
                       </div>
@@ -722,7 +810,7 @@ export default function PackageDetailPage() {
                     >
                       <WrenchScrewdriverIcon className="w-5 h-5 text-[#B85064] mx-auto mb-1 opacity-80" />
                       <span className="block text-xs font-bold text-[#261A1E] capitalize">
-                        {eq.equipmentType || 'Thiết bị'}
+                        {eq.equipmentType || "Thiết bị"}
                       </span>
                       <span className="text-[11px] text-[#7A6C71] block">
                         Số lượng: <strong>{eq.quantity || 1}</strong>
@@ -740,17 +828,19 @@ export default function PackageDetailPage() {
                   <div className="flex items-center gap-2 text-[#261A1E]">
                     <PlusCircleIcon className="w-5 h-5 text-neutral-800" />
                     <h3 className="text-lg sm:text-xl font-bold font-serif-luxury">
-                      Tùy chọn dịch vụ nâng cấp thêm (Báo giá CSDL)
+                      Tùy chọn dịch vụ nâng cấp thêm
                     </h3>
                   </div>
                   {selectedServiceIds.length > 0 && (
                     <span className="text-xs font-bold text-[#B85064] bg-[#FFF0F2] px-3 py-1 rounded-full border border-[#B85064]/20 animate-pulse">
-                      Đã chọn {selectedServiceIds.length} dịch vụ (+{totalAddOnPrice.toLocaleString('vi-VN')}đ)
+                      Đã chọn {selectedServiceIds.length} dịch vụ (+
+                      {totalAddOnPrice.toLocaleString("vi-VN")}đ)
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-[#7A6C71]">
-                  Nhấn chọn để thêm dịch vụ vào lịch chụp của bạn. Các dịch vụ này sẽ tự động chuyển sang trang Đặt Lịch & Thanh Toán.
+                  Nhấn chọn để thêm dịch vụ vào lịch chụp của bạn. Các dịch vụ
+                  này sẽ tự động chuyển sang trang Đặt Lịch & Thanh Toán.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -762,19 +852,21 @@ export default function PackageDetailPage() {
                         onClick={() => handleToggleService(addon.id)}
                         className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 text-xs sm:text-sm select-none ${
                           isSelected
-                            ? 'border-[#B85064] bg-[#FFF0F2] text-[#B85064] shadow-md ring-2 ring-[#B85064]/30'
-                            : 'border-[#F0E4E6] bg-white text-[#261A1E] hover:border-[#B85064]/40 hover:bg-[#FAF5F5] shadow-2xs'
+                            ? "border-[#B85064] bg-[#FFF0F2] text-[#B85064] shadow-md ring-2 ring-[#B85064]/30"
+                            : "border-[#F0E4E6] bg-white text-[#261A1E] hover:border-[#B85064]/40 hover:bg-[#FAF5F5] shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <div
                             className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors shrink-0 ${
                               isSelected
-                                ? 'bg-[#B85064] border-[#B85064] text-white'
-                                : 'border-[#D9C8CC] bg-white'
+                                ? "bg-[#B85064] border-[#B85064] text-white"
+                                : "border-[#D9C8CC] bg-white"
                             }`}
                           >
-                            {isSelected && <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />}
+                            {isSelected && (
+                              <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
+                            )}
                           </div>
                           <div>
                             <span className="font-bold block text-[#261A1E]">
@@ -788,7 +880,7 @@ export default function PackageDetailPage() {
                           </div>
                         </div>
                         <span className="font-bold text-[#B85064] shrink-0 text-sm">
-                          +{Number(addon.price || 0).toLocaleString('vi-VN')}đ
+                          +{Number(addon.price || 0).toLocaleString("vi-VN")}đ
                         </span>
                       </div>
                     );
@@ -817,9 +909,9 @@ export default function PackageDetailPage() {
                     } else {
                       setCurrentCustomer(user);
                       setNewReviewForm({
-                        name: user?.fullname || user?.username || 'Khách Hàng',
+                        name: user?.fullname || user?.username || "Khách Hàng",
                         rating: 5,
-                        comment: '',
+                        comment: "",
                       });
                       setIsReviewModalOpen(true);
                     }
@@ -852,15 +944,29 @@ export default function PackageDetailPage() {
 
                   <div className="hidden md:block space-y-1 text-xs text-[#55464B]">
                     {[5, 4, 3, 2, 1].map((s) => {
-                      const count = reviews.filter((r) => Math.round(Number(r.rating) || 5) === s).length;
-                      const percent = reviews.length > 0 ? Math.round((count / reviews.length) * 100) : (s === 5 ? 100 : 0);
+                      const count = reviews.filter(
+                        (r) => Math.round(Number(r.rating) || 5) === s,
+                      ).length;
+                      const percent =
+                        reviews.length > 0
+                          ? Math.round((count / reviews.length) * 100)
+                          : s === 5
+                            ? 100
+                            : 0;
                       return (
                         <div key={s} className="flex items-center gap-2">
-                          <span className="w-10 text-[11px] font-semibold">{s} sao</span>
+                          <span className="w-10 text-[11px] font-semibold">
+                            {s} sao
+                          </span>
                           <div className="w-32 h-1.5 bg-white rounded-full overflow-hidden border border-[#F0D5DC]">
-                            <div className="h-full bg-[#B85064] transition-all duration-500" style={{ width: `${percent}%` }} />
+                            <div
+                              className="h-full bg-[#B85064] transition-all duration-500"
+                              style={{ width: `${percent}%` }}
+                            />
                           </div>
-                          <span className="text-[10px] text-[#8C7D82] w-7 text-right">{percent}%</span>
+                          <span className="text-[10px] text-[#8C7D82] w-7 text-right">
+                            {percent}%
+                          </span>
                         </div>
                       );
                     })}
@@ -888,7 +994,8 @@ export default function PackageDetailPage() {
                           className="w-11 h-11 rounded-full object-cover border border-[#F5D5DC] shrink-0"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+                            e.target.src =
+                              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
                           }}
                         />
                         <div>
@@ -908,7 +1015,7 @@ export default function PackageDetailPage() {
                               {[1, 2, 3, 4, 5].map((s) => (
                                 <StarIcon
                                   key={s}
-                                  className={`w-3.5 h-3.5 ${s <= Math.floor(rev.rating) ? 'fill-[#F59E0B]' : 'text-neutral-300'}`}
+                                  className={`w-3.5 h-3.5 ${s <= Math.floor(rev.rating) ? "fill-[#F59E0B]" : "text-neutral-300"}`}
                                 />
                               ))}
                             </div>
@@ -955,12 +1062,12 @@ export default function PackageDetailPage() {
                                 <div className="flex items-center gap-1.5 text-[#B85064] font-bold mb-1">
                                   <CheckIcon className="w-3.5 h-3.5 text-[#B85064]" />
                                   <span>
-                                    {er.employeeName || 'Nhân viên'}
+                                    {er.employeeName || "Nhân viên"}
                                     {er.employeePosition && (
                                       <span className="font-normal text-[#7A6C71] ml-1">
                                         ({er.employeePosition})
                                       </span>
-                                    )}{' '}
+                                    )}{" "}
                                     phản hồi:
                                   </span>
                                 </div>
@@ -974,11 +1081,13 @@ export default function PackageDetailPage() {
 
                     <div className="pt-2 border-t border-[#F8EFEF] flex items-center justify-between text-[11px] text-[#8C7D82]">
                       <span className="flex items-center gap-1 text-[#2EA46D]">
-                        <CheckIcon className="w-3 h-3" /> Đánh giá từ cơ sở dữ liệu photo_studio
+                        <CheckIcon className="w-3 h-3" /> Đánh giá từ cơ sở dữ
+                        liệu photo_studio
                       </span>
                       {rev.likes && (
                         <span className="flex items-center gap-1 text-[#8C7D82] hover:text-[#B85064] cursor-pointer">
-                          <HandThumbUpIcon className="w-3.5 h-3.5" /> Hữu ích ({rev.likes})
+                          <HandThumbUpIcon className="w-3.5 h-3.5" /> Hữu ích (
+                          {rev.likes})
                         </span>
                       )}
                     </div>
@@ -986,7 +1095,6 @@ export default function PackageDetailPage() {
                 ))}
               </div>
             </div>
-
           </div>
 
           {/* =================== CỘT PHẢI: BÁO GIÁ & THÔNG SỐ (STICKY TỪ CSDL) =================== */}
@@ -1033,7 +1141,7 @@ export default function PackageDetailPage() {
                     <span className="font-semibold text-[#261A1E]">
                       {packageBackgrounds.length > 0
                         ? `${packageBackgrounds.length} bối cảnh đính kèm`
-                        : 'Bối cảnh nghệ thuật studio'}
+                        : "Bối cảnh nghệ thuật studio"}
                     </span>
                   </div>
                 </div>
@@ -1050,7 +1158,7 @@ export default function PackageDetailPage() {
                     <span className="font-semibold text-[#261A1E]">
                       {packageServices.length > 0
                         ? `${packageServices.length} dịch vụ trọn gói`
-                        : 'Gói chụp tiêu chuẩn studio'}
+                        : "Gói chụp tiêu chuẩn studio"}
                     </span>
                   </div>
                 </div>
@@ -1065,7 +1173,7 @@ export default function PackageDetailPage() {
                       Tình trạng hoạt động
                     </span>
                     <span className="font-semibold text-[#261A1E] uppercase">
-                      {pkg.status || 'Active'}
+                      {pkg.status || "Active"}
                     </span>
                   </div>
                 </div>
@@ -1082,13 +1190,20 @@ export default function PackageDetailPage() {
                 {totalAddOnPrice > 0 && (
                   <div className="mt-3 p-2.5 rounded-xl bg-[#FFF0F2] border border-[#F2C0CA] space-y-1">
                     <div className="text-xs text-[#7A6C71] flex justify-between items-center">
-                      <span>+ Dịch vụ nâng cao ({selectedServiceIds.length}):</span>
-                      <strong className="text-[#B85064]">+{totalAddOnPrice.toLocaleString('vi-VN')}đ</strong>
+                      <span>
+                        + Dịch vụ nâng cao ({selectedServiceIds.length}):
+                      </span>
+                      <strong className="text-[#B85064]">
+                        +{totalAddOnPrice.toLocaleString("vi-VN")}đ
+                      </strong>
                     </div>
                     <div className="pt-1.5 border-t border-[#F2C0CA]/60 flex justify-between items-center text-xs font-bold text-[#261A1E]">
                       <span>Tổng tạm tính:</span>
                       <span className="text-sm font-extrabold text-[#B85064]">
-                        {((Number(pkg.price) || 0) + totalAddOnPrice).toLocaleString('vi-VN')}đ
+                        {(
+                          (Number(pkg.price) || 0) + totalAddOnPrice
+                        ).toLocaleString("vi-VN")}
+                        đ
                       </span>
                     </div>
                   </div>
@@ -1118,12 +1233,11 @@ export default function PackageDetailPage() {
               {/* Ghi chú nhanh dưới nút */}
               <div className="mt-4 text-center">
                 <span className="text-[11px] text-[#8C7D82]">
-                  Dữ liệu đồng bộ trực tiếp từ CSDL PhotoStudio
+                  Dữ liệu đồng bộ trực tiếp từ hệ thống PhotoStudio
                 </span>
               </div>
             </div>
           </div>
-
         </div>
 
         {/* ========================================================================= */}
@@ -1135,7 +1249,8 @@ export default function PackageDetailPage() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#B85064]" />
                 <h2 className="text-2xl sm:text-3xl font-bold font-serif-luxury text-[#261A1E]">
-                  Các gói chụp khác từ CSDL ({recommendedPackages.length} gói)
+                  Các gói chụp khác từ hệ thống ({recommendedPackages.length}{" "}
+                  gói)
                 </h2>
               </div>
 
@@ -1144,7 +1259,9 @@ export default function PackageDetailPage() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setCarouselIndex((prev) => Math.max(0, prev - 1))}
+                    onClick={() =>
+                      setCarouselIndex((prev) => Math.max(0, prev - 1))
+                    }
                     disabled={carouselIndex === 0}
                     className="cursor-pointer w-9 h-9 rounded-full bg-white border border-[#F0E4E6] flex items-center justify-center text-[#4A3C41] hover:text-[#B85064] hover:border-[#B85064] disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all"
                     title="Trước"
@@ -1153,7 +1270,9 @@ export default function PackageDetailPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setCarouselIndex((prev) => Math.min(1, prev + 1))}
+                    onClick={() =>
+                      setCarouselIndex((prev) => Math.min(1, prev + 1))
+                    }
                     disabled={carouselIndex >= 1}
                     className="cursor-pointer w-9 h-9 rounded-full bg-white border border-[#F0E4E6] flex items-center justify-center text-[#4A3C41] hover:text-[#B85064] hover:border-[#B85064] disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all"
                     title="Sau"
@@ -1166,50 +1285,53 @@ export default function PackageDetailPage() {
 
             {/* Lưới các thẻ gói chụp gợi ý từ CSDL */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {recommendedPackages.slice(carouselIndex * 4, carouselIndex * 4 + 4).map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => navigate(`/packages/${p.id}`)}
-                  className="cursor-pointer bg-white rounded-2xl overflow-hidden border border-[#F0E4E6] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
-                >
-                  <div>
-                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 flex items-center justify-center">
-                      {p.imageUrl ? (
-                        <img
-                          src={p.imageUrl}
-                          alt={p.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <ArchiveBoxIcon className="w-12 h-12 text-[#B85064] opacity-40" />
-                      )}
-                      <div className="absolute top-3 left-3">
-                        <span className="px-2.5 py-1 rounded-full text-[9px] font-mono tracking-wider uppercase bg-white/95 backdrop-blur-sm text-[#B85064] border border-[#F5D5DC] shadow-xs">
-                          Mã #{p.id}
-                        </span>
+              {recommendedPackages
+                .slice(carouselIndex * 4, carouselIndex * 4 + 4)
+                .map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => navigate(`/packages/${p.id}`)}
+                    className="cursor-pointer bg-white rounded-2xl overflow-hidden border border-[#F0E4E6] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
+                  >
+                    <div>
+                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100 flex items-center justify-center">
+                        {p.imageUrl ? (
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <ArchiveBoxIcon className="w-12 h-12 text-[#B85064] opacity-40" />
+                        )}
+                        <div className="absolute top-3 left-3">
+                          <span className="px-2.5 py-1 rounded-full text-[9px] font-mono tracking-wider uppercase bg-white/95 backdrop-blur-sm text-[#B85064] border border-[#F5D5DC] shadow-xs">
+                            Mã #{p.id}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-1.5">
+                        <h3 className="text-sm font-bold text-[#261A1E] group-hover:text-[#B85064] transition-colors line-clamp-1">
+                          {p.name}
+                        </h3>
+                        <p className="text-[11px] text-[#7A6C71] line-clamp-2 leading-relaxed">
+                          {p.description ||
+                            `${p.duration || 60} phút chụp tại studio`}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="p-4 space-y-1.5">
-                      <h3 className="text-sm font-bold text-[#261A1E] group-hover:text-[#B85064] transition-colors line-clamp-1">
-                        {p.name}
-                      </h3>
-                      <p className="text-[11px] text-[#7A6C71] line-clamp-2 leading-relaxed">
-                        {p.description || `${p.duration || 60} phút chụp tại studio`}
-                      </p>
+                    <div className="px-4 pb-4 pt-1 flex items-center justify-between border-t border-[#F8EFEF]">
+                      <span className="text-sm sm:text-base font-bold text-[#B85064]">
+                        {p.priceDisplay}
+                      </span>
+                      <span className="text-xs font-semibold text-[#8C7D82] group-hover:text-[#B85064] flex items-center gap-1 transition-colors">
+                        Chi tiết <ArrowRightIcon className="w-3 h-3" />
+                      </span>
                     </div>
                   </div>
-
-                  <div className="px-4 pb-4 pt-1 flex items-center justify-between border-t border-[#F8EFEF]">
-                    <span className="text-sm sm:text-base font-bold text-[#B85064]">
-                      {p.priceDisplay}
-                    </span>
-                    <span className="text-xs font-semibold text-[#8C7D82] group-hover:text-[#B85064] flex items-center gap-1 transition-colors">
-                      Chi tiết <ArrowRightIcon className="w-3 h-3" />
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         )}
@@ -1233,7 +1355,8 @@ export default function PackageDetailPage() {
                     Bạn cần tư vấn thêm về gói chụp này?
                   </h3>
                   <p className="text-xs sm:text-sm text-[#7A6C71] mt-0.5">
-                    Đội ngũ tư vấn của PhotoStudio luôn sẵn sàng hỗ trợ giải đáp chi tiết cho bạn!
+                    Đội ngũ tư vấn của PhotoStudio luôn sẵn sàng hỗ trợ giải đáp
+                    chi tiết cho bạn!
                   </p>
                 </div>
               </div>
@@ -1313,7 +1436,8 @@ export default function PackageDetailPage() {
                   Cảm Ơn Đánh Giá Của Bạn!
                 </h3>
                 <p className="text-xs text-[#7A6C71] leading-relaxed max-w-xs mx-auto">
-                  Nhận xét của bạn về <strong>{pkg.name}</strong> đã được ghi nhận vào hệ thống CSDL PhotoStudio.
+                  Nhận xét của bạn về <strong>{pkg.name}</strong> đã được ghi
+                  nhận vào hệ thống hệ thống PhotoStudio.
                 </p>
                 <button
                   type="button"
@@ -1331,16 +1455,21 @@ export default function PackageDetailPage() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (!newReviewForm.comment.trim()) {
-                    alert('Vui lòng nhập nội dung đánh giá của bạn.');
+                    alert("Vui lòng nhập nội dung đánh giá của bạn.");
                     return;
                   }
-                  const reviewerName = currentCustomer?.fullname || currentCustomer?.username || 'Khách Hàng PhotoStudio';
+                  const reviewerName =
+                    currentCustomer?.fullname ||
+                    currentCustomer?.username ||
+                    "Khách Hàng PhotoStudio";
                   const added = {
                     id: Date.now(),
                     customerName: reviewerName,
-                    avatar: currentCustomer?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+                    avatar:
+                      currentCustomer?.avatar ||
+                      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
                     rating: newReviewForm.rating,
-                    createdAt: 'Hôm nay',
+                    createdAt: "Hôm nay",
                     comment: newReviewForm.comment.trim(),
                     verified: true,
                     tag: pkg.name,
@@ -1348,15 +1477,17 @@ export default function PackageDetailPage() {
                   };
                   setReviews((prev) => [added, ...prev]);
                   setReviewSubmitted(true);
-                  setNewReviewForm({ name: '', rating: 5, comment: '' });
+                  setNewReviewForm({ name: "", rating: 5, comment: "" });
 
                   // Gửi lưu vào backend nếu có API
                   if (customerReviewService?.createReview) {
-                    customerReviewService.createReview({
-                      packageId: targetId,
-                      rating: newReviewForm.rating,
-                      comment: newReviewForm.comment.trim(),
-                    }).catch(() => {});
+                    customerReviewService
+                      .createReview({
+                        packageId: targetId,
+                        rating: newReviewForm.rating,
+                        comment: newReviewForm.comment.trim(),
+                      })
+                      .catch(() => {});
                   }
                 }}
                 className="space-y-4"
@@ -1376,17 +1507,33 @@ export default function PackageDetailPage() {
                     {currentCustomer?.avatar ? (
                       <img
                         src={currentCustomer.avatar}
-                        alt={currentCustomer.fullname || currentCustomer.username}
+                        alt={
+                          currentCustomer.fullname || currentCustomer.username
+                        }
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span>{(currentCustomer?.fullname || currentCustomer?.username || 'KH').charAt(0).toUpperCase()}</span>
+                      <span>
+                        {(
+                          currentCustomer?.fullname ||
+                          currentCustomer?.username ||
+                          "KH"
+                        )
+                          .charAt(0)
+                          .toUpperCase()}
+                      </span>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-[10px] text-[#8C7D82] font-medium uppercase tracking-wider">Tài khoản đánh giá</div>
+                    <div className="text-[10px] text-[#8C7D82] font-medium uppercase tracking-wider">
+                      Tài khoản đánh giá
+                    </div>
                     <div className="text-sm font-bold text-[#2A1D22] truncate flex items-center gap-1.5">
-                      <span>{currentCustomer?.fullname || currentCustomer?.username || 'Khách Hàng PhotoStudio'}</span>
+                      <span>
+                        {currentCustomer?.fullname ||
+                          currentCustomer?.username ||
+                          "Khách Hàng PhotoStudio"}
+                      </span>
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-[#EBF8F2] text-[#2EA46D]">
                         <CheckIcon className="w-2.5 h-2.5 stroke-[3]" />
                         Đã đăng nhập
@@ -1404,11 +1551,13 @@ export default function PackageDetailPage() {
                       <button
                         type="button"
                         key={s}
-                        onClick={() => setNewReviewForm({ ...newReviewForm, rating: s })}
+                        onClick={() =>
+                          setNewReviewForm({ ...newReviewForm, rating: s })
+                        }
                         className="cursor-pointer p-1 text-[#F59E0B] hover:scale-110 transition-transform"
                       >
                         <StarIcon
-                          className={`w-6 h-6 ${s <= newReviewForm.rating ? 'fill-[#F59E0B]' : 'text-neutral-300'}`}
+                          className={`w-6 h-6 ${s <= newReviewForm.rating ? "fill-[#F59E0B]" : "text-neutral-300"}`}
                         />
                       </button>
                     ))}
@@ -1427,7 +1576,12 @@ export default function PackageDetailPage() {
                     required
                     placeholder="Chia sẻ trải nghiệm của bạn về thợ chụp, phòng studio, trang phục, makeup và chất lượng ảnh..."
                     value={newReviewForm.comment}
-                    onChange={(e) => setNewReviewForm({ ...newReviewForm, comment: e.target.value })}
+                    onChange={(e) =>
+                      setNewReviewForm({
+                        ...newReviewForm,
+                        comment: e.target.value,
+                      })
+                    }
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8DCDE] text-xs sm:text-sm focus:outline-none focus:border-[#B85064] bg-[#FAF5F5] resize-none"
                   />
                 </div>
@@ -1472,7 +1626,9 @@ export default function PackageDetailPage() {
               Yêu Cầu Tài Khoản Hợp Lệ
             </h3>
             <p className="text-xs text-[#7A6C71] leading-relaxed mb-6">
-              Tính năng đánh giá chỉ dành cho người dùng đã đăng ký và có vai trò (role) trong hệ thống Studio. Vui lòng đăng nhập để gửi đánh giá cho gói chụp <strong>{pkg.name}</strong>.
+              Tính năng đánh giá chỉ dành cho người dùng đã đăng ký và có vai
+              trò (role) trong hệ thống Studio. Vui lòng đăng nhập để gửi đánh
+              giá cho gói chụp <strong>{pkg.name}</strong>.
             </p>
 
             <div className="space-y-2.5">
@@ -1480,7 +1636,9 @@ export default function PackageDetailPage() {
                 type="button"
                 onClick={() => {
                   setRequireLoginModalOpen(false);
-                  navigate(ROUTES.AUTH.LOGIN, { state: { from: location.pathname } });
+                  navigate(ROUTES.AUTH.LOGIN, {
+                    state: { from: location.pathname },
+                  });
                 }}
                 className="cursor-pointer w-full py-2.5 rounded-full bg-[#B85064] hover:bg-[#A33D50] text-white text-xs font-semibold transition-all shadow-md shadow-[#B85064]/25 flex items-center justify-center gap-1.5"
               >
@@ -1542,16 +1700,17 @@ export default function PackageDetailPage() {
                   Đăng Ký Đặt Lịch Thành Công!
                 </h3>
                 <p className="text-xs sm:text-sm text-[#7A6C71] max-w-sm mx-auto leading-relaxed">
-                  Cảm ơn bạn đã lựa chọn <strong>{pkg.name}</strong> (Mã gói #{pkg.id}).
-                  Studio sẽ gọi lại qua số <strong>{bookingForm.phone}</strong>{' '}
-                  trong vòng 15 phút để chốt giờ chụp và hướng dẫn trang phục.
+                  Cảm ơn bạn đã lựa chọn <strong>{pkg.name}</strong> (Mã gói #
+                  {pkg.id}). Studio sẽ gọi lại qua số{" "}
+                  <strong>{bookingForm.phone}</strong> trong vòng 15 phút để
+                  chốt giờ chụp và hướng dẫn trang phục.
                 </p>
                 <button
                   type="button"
                   onClick={() => {
                     setIsSubmitted(false);
                     setIsBookingModalOpen(false);
-                    setBookingForm({ name: '', phone: '', date: '', note: '' });
+                    setBookingForm({ name: "", phone: "", date: "", note: "" });
                   }}
                   className="cursor-pointer px-6 py-2.5 rounded-full bg-[#B85064] text-white text-xs font-semibold hover:bg-[#A33D50] transition-colors shadow-md"
                 >
@@ -1562,7 +1721,7 @@ export default function PackageDetailPage() {
               <form onSubmit={handleSubmitBooking} className="space-y-4">
                 <div>
                   <span className="text-[10px] uppercase font-bold tracking-wider text-[#B85064] block">
-                    ĐẶT LỊCH GÓI CHỤP CSDL #{pkg.id}
+                    ĐẶT LỊCH GÓI CHỤP #{pkg.id}
                   </span>
                   <h3 className="text-xl font-bold font-serif-luxury text-[#1F1418] mt-0.5">
                     {pkg.name}
@@ -1614,7 +1773,10 @@ export default function PackageDetailPage() {
                       placeholder="0912 345 678"
                       value={bookingForm.phone}
                       onChange={(e) =>
-                        setBookingForm({ ...bookingForm, phone: e.target.value })
+                        setBookingForm({
+                          ...bookingForm,
+                          phone: e.target.value,
+                        })
                       }
                       className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8DCDE] text-xs sm:text-sm focus:outline-none focus:border-[#B85064] bg-[#FAF5F5]"
                     />
@@ -1628,7 +1790,7 @@ export default function PackageDetailPage() {
                   <input
                     type="date"
                     value={bookingForm.date}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={new Date().toISOString().split("T")[0]}
                     onChange={(e) =>
                       setBookingForm({ ...bookingForm, date: e.target.value })
                     }
@@ -1650,8 +1812,8 @@ export default function PackageDetailPage() {
                           onClick={() => setSelectedTimeSlot(slot)}
                           className={`cursor-pointer px-2.5 py-2 rounded-xl text-[11px] font-semibold border text-center transition-all ${
                             isSel
-                              ? 'bg-[#B85064] text-white border-[#B85064] shadow-xs'
-                              : 'bg-white border-[#E8DCDE] text-[#4A3C41] hover:border-[#B85064]'
+                              ? "bg-[#B85064] text-white border-[#B85064] shadow-xs"
+                              : "bg-white border-[#E8DCDE] text-[#4A3C41] hover:border-[#B85064]"
                           }`}
                         >
                           {slot.label}
@@ -1681,7 +1843,9 @@ export default function PackageDetailPage() {
                   disabled={isSubmitting}
                   className="cursor-pointer w-full py-3.5 rounded-xl bg-[#B85064] hover:bg-[#A33D50] text-white font-semibold text-sm transition-all shadow-md shadow-[#B85064]/20 disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Đang gửi thông tin...' : 'Xác nhận đặt lịch ngay'}
+                  {isSubmitting
+                    ? "Đang gửi thông tin..."
+                    : "Xác nhận đặt lịch ngay"}
                 </button>
               </form>
             )}
@@ -1717,7 +1881,7 @@ export default function PackageDetailPage() {
                   Đã Nhận Yêu Cầu Tư Vấn!
                 </h3>
                 <p className="text-xs text-[#7A6C71] leading-relaxed">
-                  Chuyên viên tư vấn của PhotoStudio sẽ gọi qua số{' '}
+                  Chuyên viên tư vấn của PhotoStudio sẽ gọi qua số{" "}
                   <strong>{consultPhone}</strong> trong vòng 5 – 10 phút.
                 </p>
                 <button
@@ -1725,7 +1889,7 @@ export default function PackageDetailPage() {
                   onClick={() => {
                     setConsultSubmitted(false);
                     setIsConsultModalOpen(false);
-                    setConsultPhone('');
+                    setConsultPhone("");
                   }}
                   className="cursor-pointer px-5 py-2 rounded-full bg-[#B85064] text-white text-xs font-semibold"
                 >
@@ -1742,7 +1906,8 @@ export default function PackageDetailPage() {
                     Tư Vấn Miễn Phí {pkg.name}
                   </h3>
                   <p className="text-xs text-[#7A6C71]">
-                    Để lại số điện thoại, studio sẽ gọi lại ngay để giải đáp mọi thắc mắc của bạn.
+                    Để lại số điện thoại, studio sẽ gọi lại ngay để giải đáp mọi
+                    thắc mắc của bạn.
                   </p>
                 </div>
 
@@ -1797,7 +1962,7 @@ export default function PackageDetailPage() {
                 onClick={(e) => {
                   e.stopPropagation();
                   setLightboxIndex((prev) =>
-                    prev === 0 ? galleryImages.length - 1 : prev - 1
+                    prev === 0 ? galleryImages.length - 1 : prev - 1,
                   );
                 }}
                 className="cursor-pointer absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center"
@@ -1809,7 +1974,7 @@ export default function PackageDetailPage() {
                 onClick={(e) => {
                   e.stopPropagation();
                   setLightboxIndex((prev) =>
-                    prev === galleryImages.length - 1 ? 0 : prev + 1
+                    prev === galleryImages.length - 1 ? 0 : prev + 1,
                   );
                 }}
                 className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center"
