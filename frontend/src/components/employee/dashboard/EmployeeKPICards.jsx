@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Camera, CalendarDays, Layers, Star } from 'lucide-react';
+import { Camera, CalendarDays, Layers } from 'lucide-react';
 import CountUp from '../../animations/CountUp';
 
 const POSITION_LABELS = {
@@ -22,7 +22,6 @@ export default function EmployeeKPICards({
   onOpenTab,
   bookings = [],
   equipments = [],
-  reviews = [],
   employeeDetails = null,
 }) {
   // 1. Thống kê ca chụp trong tuần này từ CSDL
@@ -45,6 +44,21 @@ export default function EmployeeKPICards({
     return { total, inProgress, completed };
   }, [bookings]);
 
+  // 1b. KPI trong tháng hiện tại
+  const monthStats = useMemo(() => {
+    const now = new Date();
+    const inMonth = bookings.filter((b) => {
+      if (!b.bookingDate || b.status === 'cancelled') return false;
+      const d = new Date(b.bookingDate);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const total = inMonth.length;
+    const completed = inMonth.filter((b) => b.status === 'completed').length;
+    const remaining = inMonth.filter((b) => b.status !== 'completed').length;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { total, completed, remaining, percent, label: `${now.getMonth() + 1}/${now.getFullYear()}` };
+  }, [bookings]);
+
   // 2. Thống kê thiết bị thật từ CSDL
   const totalEquipments = equipments.length;
   const availableEquipments = equipments.filter((e) => e.status === 'available').length;
@@ -56,12 +70,6 @@ export default function EmployeeKPICards({
   const hireDate = employeeDetails?.hireDate
     ? `Vào làm: ${employeeDetails.hireDate}`
     : 'Đang hoạt động';
-
-  // 4. Thống kê đánh giá thật từ bảng reviews
-  const totalReviews = reviews.length;
-  const avgRating = totalReviews > 0
-    ? (reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / totalReviews).toFixed(1)
-    : '5.0';
 
   const cards = [
     {
@@ -89,18 +97,46 @@ export default function EmployeeKPICards({
       icon: Layers,
       tab: 'profile',
     },
-    {
-      title: 'Đánh Giá Khách Hàng',
-      customValue: totalReviews > 0 ? `★ ${avgRating} / 5.0` : 'Chưa có',
-      subtext: totalReviews > 0 ? `Từ ${totalReviews} lượt đánh giá thực tế` : 'Chưa có đánh giá',
-      icon: Star,
-      tab: 'reviews',
-    },
   ];
 
+  const monthKpi = (
+    <div
+      onClick={() => onOpenTab && onOpenTab('schedule')}
+      className="p-6 rounded-3xl bg-white border border-[#F0E4E6] hover:border-[#B85064]/50 transition-all shadow-[0_4px_20px_rgb(184,80,100,0.04)] cursor-pointer"
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-[#7A6C71] uppercase tracking-wider">
+          KPI Trong Tháng {monthStats.label}
+        </span>
+        <span className="text-sm font-extrabold text-[#B85064]">{monthStats.percent}%</span>
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+        <div>
+          <div className="text-2xl font-extrabold text-[#261A1E]">{monthStats.total}</div>
+          <p className="text-xs text-[#7A6C71] font-medium">Tổng ca chụp</p>
+        </div>
+        <div>
+          <div className="text-2xl font-extrabold text-emerald-600">{monthStats.completed}</div>
+          <p className="text-xs text-[#7A6C71] font-medium">Đã hoàn thành</p>
+        </div>
+        <div>
+          <div className="text-2xl font-extrabold text-amber-600">{monthStats.remaining}</div>
+          <p className="text-xs text-[#7A6C71] font-medium">Còn lại</p>
+        </div>
+      </div>
+      <div className="mt-4 h-2 w-full rounded-full bg-[#FAF5F5] overflow-hidden">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#E28E9E] to-[#B85064] transition-all duration-700"
+          style={{ width: `${monthStats.percent}%` }}
+        />
+      </div>
+    </div>
+  );
+
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card, idx) => {
+    <div className="space-y-5">
+      {monthKpi}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">      {cards.map((card, idx) => {
         const Icon = card.icon;
         return (
           <div
@@ -141,6 +177,7 @@ export default function EmployeeKPICards({
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

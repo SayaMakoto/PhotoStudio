@@ -170,37 +170,6 @@ export default function Testimonials() {
                           </p>
                         </div>
                       )}
-
-                      {/* Employee Specific Reply */}
-                      {rev.employeeReviews &&
-                        rev.employeeReviews.some((er) => er.adminReply) && (
-                          <div className="mb-4 space-y-2">
-                            {rev.employeeReviews
-                              .filter((er) => er.adminReply)
-                              .map((er, erIdx) => (
-                                <div
-                                  key={er.id || erIdx}
-                                  className="p-3 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] text-[11px] text-[#2A1D22]"
-                                >
-                                  <div className="flex items-center gap-1.5 text-[#B85064] font-bold mb-1">
-                                    <ShieldCheckIcon className="w-3.5 h-3.5 text-[#B85064]" />
-                                    <span>
-                                      {er.employeeName || 'Nhân viên'}
-                                      {er.employeePosition && (
-                                        <span className="font-normal text-[#7A6C71] ml-1">
-                                          ({er.employeePosition})
-                                        </span>
-                                      )}{' '}
-                                      phản hồi:
-                                    </span>
-                                  </div>
-                                  <p className="text-[#3E2F35] font-light leading-relaxed">
-                                    "{er.adminReply}"
-                                  </p>
-                                </div>
-                              ))}
-                          </div>
-                        )}
                     </div>
 
                     {/* Customer Profile Footer */}

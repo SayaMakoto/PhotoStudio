@@ -119,15 +119,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/services/trash", "/api/services/trash/**").hasRole("ADMIN")
                         .requestMatchers("/api/packages/trash", "/api/packages/trash/**").hasRole("ADMIN")
                         // Tinh nang danh gia: chi nguoi dung da dang nhap va co role moi duoc phep tao/sua danh gia
-                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/*/reply").hasAnyRole("ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.PATCH, "/api/employee-reviews/*/reply").hasAnyRole("ADMIN", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/*/reply").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/employee-reviews/*/reply").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/reviews", "/api/reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.POST, "/api/employee-reviews", "/api/employee-reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.PUT, "/api/employee-reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/employee-reviews/**").hasAnyRole("USER", "ADMIN", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/api/reviews", "/api/reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/employee-reviews", "/api/employee-reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/employee-reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/employee-reviews/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**", "/api/employee-reviews/**").permitAll()
 
                         // Chỉ admin được tải ảnh lên và thay đổi bản ghi ảnh; ảnh đã lưu được đọc công khai.

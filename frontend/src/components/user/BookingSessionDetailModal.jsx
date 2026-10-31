@@ -686,21 +686,11 @@ export default function BookingSessionDetailModal({
 
     setSubmitting(true);
     try {
-      const employeeReviewsPayload = employees.map((emp) => {
-        const feedback = employeeFeedback[emp.employeeId] || { rating: 5, comment: '' };
-        return {
-          employeeId: emp.employeeId,
-          rating: Number(feedback.rating) || 5.0,
-          comment: feedback.comment.trim() || 'Phục vụ chu đáo, nhiệt tình và chuyên nghiệp',
-        };
-      });
-
       const payload = {
         bookingId: booking.id,
         customerId: currentUser?.id || booking.customerId || 1,
         rating: Number(overallRating) || 5.0,
         comment: overallComment.trim(),
-        employeeReviews: employeeReviewsPayload,
       };
 
       const savedResult = await customerBookingService.submitReview(payload);

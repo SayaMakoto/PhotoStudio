@@ -27,6 +27,7 @@ import {
 import { ROUTES } from "../../routes/web";
 import { customerAuth } from "../../lib/axiosCustomer";
 import customerReviewService from "../../services/user/reviewService";
+import customerBookingService from "../../services/user/bookingService";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -49,6 +50,9 @@ export default function ReviewsPage() {
     comment: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [eligibleBookings, setEligibleBookings] = useState([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const reviewsSectionRef = useRef(null);
@@ -90,9 +94,6 @@ export default function ReviewsPage() {
             avatar: item.avatar || null,
             adminReply: item.adminReply || null,
             adminRepliedAt: item.adminRepliedAt || null,
-            employeeReviews: Array.isArray(item.employeeReviews)
-              ? item.employeeReviews
-              : [],
           }));
           setReviews(mapped);
         } else {
@@ -122,6 +123,8 @@ export default function ReviewsPage() {
         count5: 0,
         count4: 0,
         count3: 0,
+        count2: 0,
+        count1: 0,
         satisfaction: 100,
       };
 
@@ -137,9 +140,15 @@ export default function ReviewsPage() {
     const count3 = reviews.filter(
       (r) => Math.round(Number(r.rating) || 5) === 3,
     ).length;
+    const count2 = reviews.filter(
+      (r) => Math.round(Number(r.rating) || 5) === 2,
+    ).length;
+    const count1 = reviews.filter(
+      (r) => Math.round(Number(r.rating) || 5) === 1,
+    ).length;
     const satisfaction = (((count5 + count4) / total) * 100).toFixed(1);
 
-    return { avg, total, count5, count4, count3, satisfaction };
+    return { avg, total, count5, count4, count3, count2, count1, satisfaction };
   }, [reviews]);
 
   // Đếm số lượng theo từng mức sao cho menu xổ xuống
@@ -216,7 +225,7 @@ export default function ReviewsPage() {
   };
 
   // Mở modal viết đánh giá (Chỉ dành cho người dùng đã có role hợp lệ)
-  const handleOpenReviewModal = () => {
+  const handleOpenReviewModal = async () => {
     const isAuth = customerAuth.isAuthenticated();
     const user = customerAuth.getUser();
 
@@ -226,19 +235,38 @@ export default function ReviewsPage() {
       return;
     }
 
-    // Nếu đã đăng nhập và có role hợp lệ: lấy tên từ tài khoản và khóa lại
     setNewReviewForm({
       customerName: user.fullname || user.username || "Khách hàng PhotoStudio",
       rating: 5,
+      bookingId: "",
       comment: "",
     });
+    setSubmitError("");
+    setEligibleBookings([]);
     setIsModalOpen(true);
-  };
 
+    // Chỉ cho đánh giá các đơn đã hoàn thành của chính khách và chưa được đánh giá
+    setIsLoadingBookings(true);
+    try {
+      const data = await customerBookingService.getBookingsByCustomer(user.id);
+      const reviewedIds = new Set(reviews.map((r) => Number(r.bookingId)));
+      const list = (Array.isArray(data) ? data : []).filter(
+        (b) => b.status === "completed" && !reviewedIds.has(Number(b.id)),
+      );
+      setEligibleBookings(list);
+      if (list.length > 0) {
+        setNewReviewForm((f) => ({ ...f, bookingId: String(list[0].id) }));
+      }
+    } catch (err) {
+      setSubmitError(err.response?.data?.message || "Không tải được danh sách đơn đặt lịch của bạn.");
+    } finally {
+      setIsLoadingBookings(false);
+    }
+  };
   // Submit modal form
   const handleCreateReview = async (e) => {
     e.preventDefault();
-    if (!newReviewForm.comment.trim()) return;
+    if (!newReviewForm.comment.trim() || !newReviewForm.bookingId) return;
 
     const isAuth = customerAuth.isAuthenticated();
     const user = customerAuth.getUser();
@@ -249,53 +277,48 @@ export default function ReviewsPage() {
     }
 
     setIsSubmitting(true);
+    setSubmitError("");
     try {
-      const payload = {
+      const saved = await customerReviewService.createReview({
         customerName: newReviewForm.customerName,
         rating: Number(newReviewForm.rating) || 5.0,
         comment: newReviewForm.comment.trim(),
-        customerId: user?.id,
-        bookingId: 1,
-      };
+        customerId: user.id,
+        bookingId: Number(newReviewForm.bookingId),
+      });
 
-      try {
-        await customerReviewService.createReview(payload);
-      } catch (apiErr) {
-        console.warn(
-          "Gửi API review thất bại, thêm trực tiếp vào giao diện:",
-          apiErr.message,
+      // Tải lại danh sách từ CSDL để hiển thị đúng dữ liệu đã lưu
+      const fresh = await customerReviewService.getAllReviews();
+      if (Array.isArray(fresh)) {
+        setReviews(
+          fresh.map((item) => ({
+            ...item,
+            bookingId: item.bookingId || item.id,
+            customerName: item.customerName || "Khách hàng PhotoStudio",
+            rating: typeof item.rating === "number" ? item.rating : 5.0,
+            comment: item.comment || "",
+            createdAt: item.createdAt || new Date().toISOString(),
+            packageName: item.packageName || "Dịch Vụ Nhiếp Ảnh Chuyên Nghiệp",
+            category: item.category || "portrait",
+          })),
         );
+      } else if (saved) {
+        setReviews([saved, ...reviews]);
       }
-
-      const createdReview = {
-        id: Date.now(),
-        bookingId: Date.now(),
-        customerId: user?.id || 99,
-        customerName: newReviewForm.customerName,
-        rating: payload.rating,
-        comment: payload.comment,
-        packageName: "Đánh Giá Khách Hàng Trực Tiếp",
-        createdAt: new Date().toISOString(),
-        category: selectedCategory !== "all" ? selectedCategory : "portrait",
-        avatar: user?.avatar || null,
-      };
-
-      setReviews([createdReview, ...reviews]);
       setSubmitSuccess(true);
       setTimeout(() => {
         setSubmitSuccess(false);
         setIsModalOpen(false);
-        setNewReviewForm({
-          customerName: "",
-          rating: 5,
-          comment: "",
-        });
+        setNewReviewForm({ customerName: "", rating: 5, bookingId: "", comment: "" });
       }, 1500);
+    } catch (err) {
+      setSubmitError(
+        err.response?.data?.message || err.message || "Không thể gửi đánh giá lúc này.",
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-
   // Lấy nhãn hiển thị cho dropdown số sao
   const currentRatingOptionLabel = useMemo(() => {
     if (selectedRatingFilter === "all") return "Tất Cả Số Sao";
@@ -871,18 +894,6 @@ export default function ReviewsPage() {
                   <div className="text-xs sm:text-sm text-[#3E2F35] leading-relaxed font-light pl-1 sm:pl-2">
                     "{rev.comment}"
                   </div>
-
-                  {/* Ghi chú dịch vụ nhân viên (nếu có) */}
-                  {rev.employeeReviews && rev.employeeReviews.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-dashed border-[#F5EAEB] flex items-center gap-2 text-xs text-[#7A6C71] pl-1 sm:pl-2">
-                      <ChatBubbleLeftRightIcon className="w-4 h-4 text-[#B85064] shrink-0" />
-                      <span>
-                        <strong>Ghi chú dịch vụ:</strong> "
-                        {rev.employeeReviews[0].comment}"
-                      </span>
-                    </div>
-                  )}
-
                   {/* Phản hồi từ PhotoStudio / Ban quản lý */}
                   {rev.adminReply && (
                     <div className="mt-4 p-4 rounded-2xl bg-[#FDF0F3]/80 border border-[#F5D5DC] text-xs space-y-1.5 ml-1 sm:ml-2">
@@ -906,48 +917,6 @@ export default function ReviewsPage() {
                       </p>
                     </div>
                   )}
-
-                  {/* Phản hồi từ nhân viên phụ trách nếu có */}
-                  {rev.employeeReviews &&
-                    rev.employeeReviews.some((er) => er.adminReply) && (
-                      <div className="mt-3 space-y-2 ml-1 sm:ml-2">
-                        {rev.employeeReviews
-                          .filter((er) => er.adminReply)
-                          .map((er, erIdx) => (
-                            <div
-                              key={er.id || erIdx}
-                              className="p-3.5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] text-xs space-y-1"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5 font-bold text-[#2A1D22]">
-                                  <ChatBubbleLeftRightIcon className="w-3.5 h-3.5 text-[#B85064]" />
-                                  <span>
-                                    {er.employeeName || "Nhân viên"}
-                                    {er.employeePosition && (
-                                      <span className="font-normal text-[#7A6C71] ml-1">
-                                        ({er.employeePosition})
-                                      </span>
-                                    )}{" "}
-                                    phản hồi:
-                                  </span>
-                                </div>
-                                {er.adminRepliedAt && (
-                                  <span className="text-[10px] text-[#9E8E93]">
-                                    {new Date(er.adminRepliedAt).toLocaleDateString("vi-VN", {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                    })}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[#3E2F35] font-normal leading-relaxed pl-5 italic">
-                                "{er.adminReply}"
-                              </p>
-                            </div>
-                          ))}
-                      </div>
-                    )}
                 </motion.div>
               );
             })}
@@ -1143,6 +1112,40 @@ export default function ReviewsPage() {
                     </div>
                   </div>
 
+                  {submitError && (
+                    <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs">
+                      {submitError}
+                    </div>
+                  )}
+
+                  {/* Chọn đơn đã hoàn thành để đánh giá */}
+                  <div>
+                    <label className="block text-xs font-bold text-[#2A1D22] mb-1.5">
+                      Đơn đặt lịch cần đánh giá *
+                    </label>
+                    {isLoadingBookings ? (
+                      <p className="text-xs text-[#7A6C71]">Đang tải đơn của bạn...</p>
+                    ) : eligibleBookings.length === 0 ? (
+                      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                        Bạn chưa có đơn nào đã hoàn thành và chưa đánh giá. Chỉ có thể đánh giá sau khi buổi chụp hoàn thành.
+                      </p>
+                    ) : (
+                      <select
+                        required
+                        value={newReviewForm.bookingId}
+                        onChange={(e) =>
+                          setNewReviewForm({ ...newReviewForm, bookingId: e.target.value })
+                        }
+                        className="w-full px-3 py-2.5 bg-[#FAF5F5] border border-[#F0E4E6] rounded-xl text-xs focus:outline-none focus:border-[#B85064]"
+                      >
+                        {eligibleBookings.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            Đơn #{b.id}{b.bookingDate ? ` - ${new Date(b.bookingDate).toLocaleDateString("vi-VN")}` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                   {/* 2. Customer Name (Tên người đăng nhập, BỊ KHÓA KHÔNG CHO SỬA) */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
@@ -1201,7 +1204,7 @@ export default function ReviewsPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={isSubmitting || !newReviewForm.comment.trim()}
+                      disabled={isSubmitting || !newReviewForm.comment.trim() || !newReviewForm.bookingId}
                       className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmitting ? "Đang gửi..." : "Gửi Đánh Giá Ngay"}

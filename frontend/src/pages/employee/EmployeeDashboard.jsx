@@ -5,7 +5,6 @@ import EmployeeKPICards from '../../components/employee/dashboard/EmployeeKPICar
 import EmployeeDashboardOverview from '../../components/employee/dashboard/EmployeeDashboardOverview';
 import BookingListAndSchedule from '../../components/employee/dashboard/BookingListAndSchedule';
 import EquipmentAndCostumesSection from '../../components/employee/dashboard/EquipmentAndCostumesSection';
-import CustomerReviewsSection from '../../components/employee/dashboard/CustomerReviewsSection';
 import EmployeeProfileSection from '../../components/employee/dashboard/EmployeeProfileSection';
 import ShootDetailModal from '../../components/employee/modals/ShootDetailModal';
 import BlurText from '../../components/animations/BlurText';
@@ -13,13 +12,11 @@ import BlurText from '../../components/animations/BlurText';
 import employeeAuthService from '../../services/employee/authService';
 import employeeBookingService from '../../services/employee/bookingService';
 import employeeEquipmentService from '../../services/employee/equipmentService';
-import employeeReviewService from '../../services/employee/reviewService';
 
 const TAB_TITLES = {
   dashboard: 'Tổng Quan & KPI Tác Nghiệp',
   schedule: 'Lịch Chụp',
   equipment: 'Thiết Bị Tác Nghiệp Studio',
-  reviews: 'Đánh Giá Khách Hàng',
   profile: 'Hồ Sơ Cá Nhân & Trạng Thái',
 };
 
@@ -43,8 +40,6 @@ export default function EmployeeDashboard() {
   // 2. Real Database Collections
   const [bookings, setBookings] = useState([]);
   const [equipments, setEquipments] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [generalReviews, setGeneralReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // 3. Modal State
@@ -64,11 +59,10 @@ export default function EmployeeDashboard() {
       setIsLoading(true);
       try {
         // Run requests in parallel
-        const [profileRes, bookingsRes, equipmentsRes, reviewsRes] = await Promise.allSettled([
+        const [profileRes, bookingsRes, equipmentsRes] = await Promise.allSettled([
           employeeAuthService.getProfile(),
           employeeBookingService.getAll(),
           employeeEquipmentService.getAll(),
-          employeeReviewService.getAll(),
         ]);
 
         if (!isMounted) return;
@@ -127,46 +121,6 @@ export default function EmployeeDashboard() {
           setEquipments(equipmentsRes.value);
         }
 
-        // Reviews: Lưu danh sách đánh giá chung studio và đánh giá riêng của nhân viên
-        const generalList =
-          reviewsRes.status === 'fulfilled' && Array.isArray(reviewsRes.value)
-            ? reviewsRes.value
-            : [];
-        if (isMounted) {
-          setGeneralReviews(generalList);
-        }
-
-        const reviewMap = new Map(generalList.map((r) => [r.id, r]));
-
-        let employeeReviewsList = [];
-        if (currentEmployee?.id) {
-          try {
-            const specificReviews = await employeeReviewService.getByEmployeeId(currentEmployee.id);
-            if (Array.isArray(specificReviews) && specificReviews.length > 0) {
-              employeeReviewsList = specificReviews.map((sr) => {
-                const parent = reviewMap.get(sr.reviewId);
-                return {
-                  ...sr,
-                  isEmployeeReview: true,
-                  customerName:
-                    parent?.customerName ||
-                    sr.customerName ||
-                    `Khách hàng (Đơn #${sr.reviewId})`,
-                  bookingId: parent?.bookingId || sr.bookingId,
-                  createdAt: parent?.createdAt || sr.createdAt,
-                };
-              });
-            }
-          } catch (revErr) {
-            console.warn('Không tải được đánh giá cá nhân của nhân viên:', revErr);
-          }
-        }
-        if (employeeReviewsList.length === 0 && generalList.length > 0) {
-          employeeReviewsList = generalList.map((r) => ({ ...r, isEmployeeReview: false }));
-        }
-        if (isMounted) {
-          setReviews(employeeReviewsList);
-        }
       } catch (err) {
         console.error('Lỗi khi tải dữ liệu:', err);
       } finally {
@@ -291,7 +245,6 @@ export default function EmployeeDashboard() {
                 onOpenTab={setActiveTab}
                 bookings={bookings}
                 equipments={equipments}
-                reviews={reviews}
                 employeeDetails={employeeDetails}
               />
 
@@ -335,31 +288,6 @@ export default function EmployeeDashboard() {
               <EquipmentAndCostumesSection
                 equipments={equipments}
                 showHeader={false}
-              />
-            </div>
-          )}
-
-          {/* TAB 4: ĐÁNH GIÁ TỪ KHÁCH HÀNG */}
-          {activeTab === 'reviews' && (
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl font-extrabold text-[#261A1E] tracking-tight">
-                  Đánh Giá & Phản Hồi Từ Khách Hàng
-                </h1>
-              </div>
-
-              <CustomerReviewsSection
-                reviews={reviews}
-                generalReviews={generalReviews}
-                currentEmployee={employeeDetails}
-                onReviewUpdated={(updated) => {
-                  setReviews((prev) =>
-                    prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r))
-                  );
-                  setGeneralReviews((prev) =>
-                    prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r))
-                  );
-                }}
               />
             </div>
           )}

@@ -34,8 +34,8 @@ export default function CustomerReviewsSection({
   currentEmployee = null,
   onReviewUpdated,
 }) {
-  // 1. Phân loại xem: Đánh giá cá nhân của nhân viên vs Đánh giá chung studio
-  const [scopeTab, setScopeTab] = useState('personal'); // 'personal' | 'all'
+  // 1. Chỉ hiển thị đánh giá chung toàn studio
+  
   const [replyFilter, setReplyFilter] = useState('unreplied'); // 'all' | 'unreplied' | 'replied'
   const [ratingFilter, setRatingFilter] = useState('all'); // 'all' | '5' | '4' | '3'
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,12 +49,7 @@ export default function CustomerReviewsSection({
   const [actionSuccess, setActionSuccess] = useState('');
 
   // Tập hợp danh sách đánh giá theo Scope
-  const activeDataset = useMemo(() => {
-    if (scopeTab === 'personal') {
-      return reviews.length > 0 ? reviews : generalReviews;
-    }
-    return generalReviews.length > 0 ? generalReviews : reviews;
-  }, [scopeTab, reviews, generalReviews]);
+  const activeDataset = useMemo(() => (generalReviews.length > 0 ? generalReviews : reviews), [reviews, generalReviews]);
 
   // Bộ lọc danh sách đánh giá
   const filteredReviews = useMemo(() => {
@@ -219,31 +214,6 @@ export default function CustomerReviewsSection({
             </div>
           </div>
 
-          {/* Scope Tab Switcher */}
-          <div className="flex items-center bg-[#FAF5F5] p-1 rounded-2xl border border-[#F0E4E6] self-start lg:self-auto">
-            <button
-              type="button"
-              onClick={() => setScopeTab('personal')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                scopeTab === 'personal'
-                  ? 'bg-white text-[#B85064] shadow-sm border border-[#F0E4E6]'
-                  : 'text-[#7A6C71] hover:text-[#261A1E]'
-              }`}
-            >
-              Đánh giá về tôi ({reviews.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setScopeTab('all')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                scopeTab === 'all'
-                  ? 'bg-white text-[#B85064] shadow-sm border border-[#F0E4E6]'
-                  : 'text-[#7A6C71] hover:text-[#261A1E]'
-              }`}
-            >
-              Tất cả đánh giá Studio ({generalReviews.length || reviews.length})
-            </button>
-          </div>
         </div>
 
         {/* 4 Quick Stat Metric Badges */}
