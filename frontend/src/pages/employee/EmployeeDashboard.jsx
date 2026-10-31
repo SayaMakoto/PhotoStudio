@@ -6,6 +6,7 @@ import EmployeeDashboardOverview from '../../components/employee/dashboard/Emplo
 import BookingListAndSchedule from '../../components/employee/dashboard/BookingListAndSchedule';
 import EquipmentAndCostumesSection from '../../components/employee/dashboard/EquipmentAndCostumesSection';
 import EmployeeProfileSection from '../../components/employee/dashboard/EmployeeProfileSection';
+import EmployeeSalarySection from '../../components/employee/dashboard/EmployeeSalarySection';
 import ShootDetailModal from '../../components/employee/modals/ShootDetailModal';
 import BlurText from '../../components/animations/BlurText';
 
@@ -16,6 +17,7 @@ import employeeEquipmentService from '../../services/employee/equipmentService';
 const TAB_TITLES = {
   dashboard: 'Tổng Quan & KPI Tác Nghiệp',
   schedule: 'Lịch Chụp',
+  salary: 'Bảng Lương & Hoa Hồng Tác Nghiệp',
   equipment: 'Thiết Bị Tác Nghiệp Studio',
   profile: 'Hồ Sơ Cá Nhân & Trạng Thái',
 };
@@ -272,6 +274,16 @@ export default function EmployeeDashboard() {
                 bookings={bookings}
                 onSelectBooking={setSelectedBookingForDetail}
                 onStatusChange={handleStatusChange}
+              />
+            </div>
+          )}
+
+          {/* TAB LƯƠNG & HOA HỒNG & KPI */}
+          {activeTab === 'salary' && (
+            <div className="space-y-6">
+              <EmployeeSalarySection
+                profile={profile}
+                employeeDetails={employeeDetails}
               />
             </div>
           )}

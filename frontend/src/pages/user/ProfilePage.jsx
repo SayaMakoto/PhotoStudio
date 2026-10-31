@@ -488,26 +488,48 @@ export default function ProfilePage() {
     return () => window.removeEventListener("focus", refreshOnFocus);
   }, [activeTab, user?.id]);
 
-  // Tải danh sách đánh giá của tôi
+  // Tải danh sách đánh giá của tôi (luôn lấy các đánh giá MỚI NHẤT)
   const fetchMyReviews = async (targetUser) => {
     setReviewsLoading(true);
     try {
       let myRevs = [];
-      try {
-        const all = await customerReviewService.getAllReviews();
-        if (Array.isArray(all) && all.length > 0) {
-          myRevs = all.filter((r) => {
-            if (!targetUser) return false;
-            const matchCustId = r.customerId && Number(r.customerId) === Number(targetUser.id);
-            const matchUserId = r.userId && Number(r.userId) === Number(targetUser.id);
-            const matchUser = r.username && targetUser.username && r.username.toLowerCase() === targetUser.username.toLowerCase();
-            const matchName = r.customerName && targetUser.fullname && r.customerName.toLowerCase() === targetUser.fullname.toLowerCase();
-            return matchCustId || matchUserId || matchUser || matchName;
-          });
+      const uid = targetUser?.id;
+      if (uid) {
+        try {
+          const res = await customerReviewService.getReviewsByCustomerId(uid);
+          if (Array.isArray(res) && res.length > 0) {
+            myRevs = res;
+          }
+        } catch (apiErr) {
+          console.warn("API getReviewsByCustomerId không trả về kết quả, thử getAllReviews:", apiErr.message);
         }
-      } catch (e) {
-        console.warn("Lỗi gọi getAllReviews:", e.message);
       }
+
+      if (myRevs.length === 0) {
+        try {
+          const all = await customerReviewService.getAllReviews();
+          if (Array.isArray(all) && all.length > 0) {
+            myRevs = all.filter((r) => {
+              if (!targetUser) return false;
+              const matchCustId = r.customerId && Number(r.customerId) === Number(targetUser.id);
+              const matchUserId = r.userId && Number(r.userId) === Number(targetUser.id);
+              const matchUser = r.username && targetUser.username && r.username.toLowerCase() === targetUser.username.toLowerCase();
+              const matchName = r.customerName && targetUser.fullname && r.customerName.toLowerCase() === targetUser.fullname.toLowerCase();
+              return matchCustId || matchUserId || matchUser || matchName;
+            });
+          }
+        } catch (e) {
+          console.warn("Lỗi gọi getAllReviews:", e.message);
+        }
+      }
+
+      // Sắp xếp lấy các đánh giá MỚI NHẤT lên đầu (theo createdAt hoặc id giảm dần)
+      myRevs.sort((a, b) => {
+        const timeA = new Date(a.createdAt || a.adminRepliedAt || 0).getTime();
+        const timeB = new Date(b.createdAt || b.adminRepliedAt || 0).getTime();
+        if (timeB !== timeA) return timeB - timeA;
+        return (Number(b.id) || 0) - (Number(a.id) || 0);
+      });
 
       setReviews(myRevs);
     } catch (err) {
@@ -517,6 +539,16 @@ export default function ProfilePage() {
       setReviewsLoading(false);
     }
   };
+
+  // Tự động tải lại đánh giá mới nhất khi chuyển sang tab "reviews" hoặc focus lại tab
+  useEffect(() => {
+    if (activeTab === "reviews" && user) {
+      fetchMyReviews(user);
+      const refreshReviewsOnFocus = () => fetchMyReviews(user);
+      window.addEventListener("focus", refreshReviewsOnFocus);
+      return () => window.removeEventListener("focus", refreshReviewsOnFocus);
+    }
+  }, [activeTab, user?.id]);
 
   // Tự động co giãn ô nhập Địa chỉ: tối đa 3 dòng, quá 3 dòng hiện thanh cuộn
   const autoResizeAddress = (textarea) => {

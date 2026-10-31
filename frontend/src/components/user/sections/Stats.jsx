@@ -95,7 +95,7 @@ export default function Stats() {
       <div className="absolute inset-0 bg-gradient-to-r from-rose-500/5 via-white/40 to-rose-500/5 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch">
           {statsItems.map((stat, idx) => {
             const Icon = stat.icon;
             return (
@@ -104,10 +104,12 @@ export default function Stats() {
                 direction="up"
                 delay={idx * 0.1}
                 duration={0.7}
+                className="h-full"
               >
-                <div className="group relative p-6 sm:p-7 rounded-3xl bg-white border border-[#F0E4E6] hover:border-[#B85064]/60 transition-all duration-300 shadow-[0_4px_20px_rgb(184,80,100,0.04)] hover:shadow-[0_12px_30px_rgb(184,80,100,0.12)] hover:-translate-y-1">
-                  {/* Icon */}
-                  <div className="w-12 h-12 rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-[#B85064] group-hover:text-white transition-all duration-300 shadow-sm">
+                <div className="group relative p-6 sm:p-7 rounded-3xl bg-white border border-[#F0E4E6] hover:border-[#B85064]/60 transition-all duration-300 shadow-[0_4px_20px_rgb(184,80,100,0.04)] hover:shadow-[0_12px_30px_rgb(184,80,100,0.12)] hover:-translate-y-1 h-full flex flex-col justify-between min-h-[220px]">
+                  <div>
+                    {/* Icon */}
+                    <div className="w-12 h-12 rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-[#B85064] group-hover:text-white transition-all duration-300 shadow-sm">
                     <Icon className="w-6 h-6 text-[#B85064] group-hover:text-white transition-colors" />
                   </div>
 
@@ -135,10 +137,11 @@ export default function Stats() {
                   {/* Label */}
                   <h3 className="text-base font-bold text-[#2A1D22] group-hover:text-[#B85064] transition-colors mb-1">
                     {stat.label}
-                  </h3>
+                    </h3>
+                  </div>
 
                   {/* Description */}
-                  <p className="text-xs text-[#7A6C71] font-light leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#7D6B72] font-normal leading-relaxed mt-1 min-h-[42px] flex items-start">
                     {stat.description}
                   </p>
 

@@ -45,6 +45,7 @@ import AdminNotificationsPage from '../pages/admin/notifications';
 import AdminImagesPage from '../pages/admin/images';
 import AdminContentsPage from '../pages/admin/contents';
 import AdminContactsPage from '../pages/admin/contacts';
+import AdminSalariesPage from '../pages/admin/salaries';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -172,6 +173,12 @@ export default function AppRoutes() {
         <Route
           path={ROUTES.ADMIN.CONTACTS.replace('/admin/', '')}
           element={<AdminContactsPage />}
+        />
+
+        {/* Quản lý lương & KPI */}
+        <Route
+          path={ROUTES.ADMIN.SALARIES.replace('/admin/', '')}
+          element={<AdminSalariesPage />}
         />
       </Route>
       </Route>

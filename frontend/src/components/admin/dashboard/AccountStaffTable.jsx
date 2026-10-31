@@ -101,13 +101,13 @@ export default function AccountStaffTable({
                     <td className="px-3 py-3.5 text-center font-mono font-bold text-emerald-400">
                       {employee.active}
                     </td>
-                    <td className="px-3 py-3.5 text-center font-mono text-amber-300">
+                    <td className="px-3 py-3.5 text-center font-mono text-rose-400">
                       {employee.onLeave}
                     </td>
                     <td className="px-3 py-3.5 text-center font-mono text-neutral-400">
                       {employee.inactive}
                     </td>
-                    <td className="px-3 py-3.5 text-center font-mono text-amber-400">
+                    <td className="px-3 py-3.5 text-center font-mono text-rose-400">
                       {employee.rating == null ? "—" : `${employee.rating.toFixed(1)} / 5`}
                     </td>
                   </tr>

@@ -48,7 +48,7 @@ const EQUIPMENT_COLUMNS = [
 
 function SummaryCard({ icon: Icon, label, value, tone = "amber" }) {
   const tones = {
-    amber: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+    amber: "border-rose-500/20 bg-rose-500/10 text-rose-400",
     green: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
     blue: "border-sky-500/20 bg-sky-500/10 text-sky-300",
     rose: "border-rose-500/20 bg-rose-500/10 text-rose-300",
@@ -259,9 +259,9 @@ export default function AdminEquipmentsPage() {
     <section className="space-y-5">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">Quản lý tài nguyên</p>
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-400">Quản lý tài nguyên</p>
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-white">
-            <Camera className="h-6 w-6 text-amber-300" aria-hidden="true" />
+            <Camera className="h-6 w-6 text-rose-400" aria-hidden="true" />
             {view === "trash" ? "Thùng rác thiết bị" : "Quản lý thiết bị"}
           </h1>
           <p className="mt-1 text-xs text-neutral-400">
@@ -277,7 +277,7 @@ export default function AdminEquipmentsPage() {
             {view !== "trash" && <span className="rounded-full bg-rose-400/15 px-2 py-0.5 text-[10px] text-rose-100">{trashCount}</span>}
           </button>
           {view !== "trash" && (
-            <button type="button" onClick={() => setDialog({ mode: "create", equipment: null })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-amber-400 px-4 text-xs font-semibold text-neutral-950 transition hover:bg-amber-300">
+            <button type="button" onClick={() => setDialog({ mode: "create", equipment: null })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-rose-500 px-4 text-xs font-semibold text-neutral-950 transition hover:bg-rose-600">
               <Plus className="h-4 w-4" aria-hidden="true" />Thêm thiết bị
             </button>
           )}
@@ -316,7 +316,7 @@ export default function AdminEquipmentsPage() {
 
       {loading ? (
         <div className="flex min-h-48 items-center justify-center rounded-2xl border border-neutral-800 bg-neutral-900/50 text-sm text-neutral-400">
-          <span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-amber-300" />
+          <span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-rose-400" />
           Đang tải danh sách thiết bị...
         </div>
       ) : (

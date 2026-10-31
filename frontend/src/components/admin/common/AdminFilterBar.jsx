@@ -111,7 +111,7 @@ export default function AdminFilterBar({
         <button
           type="button"
           onClick={onReset}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-neutral-700 px-3.5 text-xs font-medium text-neutral-300 transition-colors hover:border-amber-400/40 hover:bg-neutral-800 hover:text-white"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-neutral-700 px-3.5 text-xs font-medium text-neutral-300 transition-colors hover:border-rose-400/40 hover:bg-neutral-800 hover:text-white"
         >
           <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
           Đặt lại

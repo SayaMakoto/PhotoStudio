@@ -7,6 +7,9 @@ export const customerReviewService = {
   // Xem tất cả đánh giá từ khách hàng
   getAllReviews: () => axiosCustomer.get('/api/reviews'),
 
+  // Lấy danh sách đánh giá của khách hàng theo customerId
+  getReviewsByCustomerId: (customerId) => axiosCustomer.get(`/api/reviews/customer/${customerId}`),
+
   // Xem đánh giá theo ID đơn đặt lịch
   getReviewByBookingId: (bookingId) => axiosCustomer.get(`/api/reviews/booking/${bookingId}`),
 

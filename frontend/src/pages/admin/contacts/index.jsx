@@ -22,9 +22,9 @@ import {
 
 const asRows = (rows) => (Array.isArray(rows) ? rows : []);
 
-function SummaryCard({ label, value, icon: Icon, tone = 'amber' }) {
+function SummaryCard({ label, value, icon: Icon, tone = 'rose' }) {
   const colors = {
-    amber: 'border-amber-500/20 bg-amber-500/10 text-amber-300',
+    amber: 'border-rose-500/20 bg-rose-500/10 text-rose-400',
     green: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300',
     blue: 'border-sky-500/20 bg-sky-500/10 text-sky-300',
     neutral: 'border-neutral-700 bg-neutral-800 text-neutral-300',
@@ -33,7 +33,7 @@ function SummaryCard({ label, value, icon: Icon, tone = 'amber' }) {
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-neutral-400">{label}</p>
-        <span className={`grid h-9 w-9 place-items-center rounded-xl border ${colors[tone] || colors.amber}`}>
+        <span className={`grid h-9 w-9 place-items-center rounded-xl border ${colors[tone] || colors.rose}`}>
           <Icon className="h-4 w-4" />
         </span>
       </div>
@@ -208,7 +208,7 @@ export default function AdminContactsPage() {
             Đã trả lời
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-300">
+          <span className="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-0.5 text-[11px] font-medium text-rose-400">
             <Clock className="h-3 w-3" />
             Chưa trả lời
           </span>
@@ -225,11 +225,11 @@ export default function AdminContactsPage() {
     <section className="space-y-5">
       {/* Header */}
       <header>
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-400">
           Chăm sóc khách hàng
         </p>
         <h1 className="flex items-center gap-2 text-2xl font-semibold text-white">
-          <Mail className="h-6 w-6 text-amber-300" />
+          <Mail className="h-6 w-6 text-rose-400" />
           Quản lý liên hệ & tư vấn
         </h1>
         <p className="mt-1 text-xs text-neutral-400">
@@ -285,7 +285,7 @@ export default function AdminContactsPage() {
       {/* Table */}
       {loading ? (
         <div className="flex min-h-48 items-center justify-center rounded-2xl border border-neutral-800 bg-neutral-900/50 text-sm text-neutral-400">
-          <span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-amber-300" />
+          <span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-rose-400" />
           Đang tải danh sách liên hệ...
         </div>
       ) : (

@@ -12,8 +12,8 @@ import { formatReviewDate, getReviewErrorMessage, REVIEW_RATING_OPTIONS, REVIEW_
 
 const asRows = (rows) => Array.isArray(rows) ? rows : [];
 
-function SummaryCard({ label, value, icon: Icon, tone = 'amber' }) {
-  const colors = { amber: 'border-amber-500/20 bg-amber-500/10 text-amber-300', green: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300', blue: 'border-sky-500/20 bg-sky-500/10 text-sky-300' };
+function SummaryCard({ label, value, icon: Icon, tone = 'rose' }) {
+  const colors = { amber: 'border-rose-500/20 bg-rose-500/10 text-rose-400', green: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300', blue: 'border-sky-500/20 bg-sky-500/10 text-sky-300' };
   return <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4"><div className="flex items-center justify-between gap-3"><p className="text-xs text-neutral-400">{label}</p><span className={`grid h-9 w-9 place-items-center rounded-xl border ${colors[tone]}`}><Icon className="h-4 w-4" /></span></div><p className="mt-3 text-xl font-semibold text-white">{value}</p></div>;
 }
 
@@ -92,19 +92,19 @@ export default function AdminReviewsPage() {
   const columns = [
     { key: 'id', title: 'Mã đánh giá', cellClassName: 'font-mono text-neutral-400' },
     { key: 'customerName', title: 'Khách hàng', render: (name, review) => <div className="min-w-36"><p className="font-medium text-neutral-100">{name || `Khách hàng #${review.customerId}`}</p><p className="mt-0.5 text-[11px] text-neutral-500">Đơn #{review.bookingId}{bookingMap[review.bookingId]?.customerPhone ? ` · ${bookingMap[review.bookingId].customerPhone}` : ''}</p></div> },
-    { key: 'rating', title: 'Số sao', render: (value) => <span className="inline-flex items-center gap-1 font-semibold text-amber-300"><Star className="h-3.5 w-3.5 fill-current" />{Number(value || 0).toFixed(1)}</span> },
+    { key: 'rating', title: 'Số sao', render: (value) => <span className="inline-flex items-center gap-1 font-semibold text-rose-400"><Star className="h-3.5 w-3.5 fill-current" />{Number(value || 0).toFixed(1)}</span> },
     { key: 'comment', title: 'Nhận xét', render: (value) => <p className="max-w-sm min-w-48 truncate text-neutral-300" title={value || ''}>{value || 'Không có nhận xét'}</p> },
     { key: 'adminReply', title: 'Phản hồi', render: (value) => <StatusBadge status={value?.trim() ? 'replied' : 'unreplied'} domain="reviewReply" /> },
     { key: 'createdAt', title: 'Ngày đánh giá', render: formatReviewDate },
   ];
 
   return <section className="space-y-5">
-    <header><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">Quản lý đánh giá</p><h1 className="flex items-center gap-2 text-2xl font-semibold text-white"><MessageSquareText className="h-6 w-6 text-amber-300" />Đánh giá buổi chụp</h1><p className="mt-1 text-xs text-neutral-400">Theo dõi nhận xét của khách hàng và phản hồi với tư cách quản trị viên. Không chỉnh sửa hoặc xóa đánh giá.</p></header>
+    <header><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-400">Quản lý đánh giá</p><h1 className="flex items-center gap-2 text-2xl font-semibold text-white"><MessageSquareText className="h-6 w-6 text-rose-400" />Đánh giá buổi chụp</h1><p className="mt-1 text-xs text-neutral-400">Theo dõi nhận xét của khách hàng và phản hồi với tư cách quản trị viên. Không chỉnh sửa hoặc xóa đánh giá.</p></header>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><SummaryCard icon={MessageSquareText} label="Tổng đánh giá" value={stats.total} /><SummaryCard icon={Star} label="Điểm trung bình" value={`${stats.average.toFixed(1)} / 5`} tone="blue" /><SummaryCard icon={AlertCircle} label="Chưa phản hồi" value={stats.waiting} /><SummaryCard icon={CheckCircle2} label="Đã phản hồi" value={stats.replied} tone="green" /></div>
     <AdminFilterBar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Tìm mã review, booking, khách hàng, nội dung..." filters={[{ key: 'rating', label: 'Mức đánh giá', value: rating, onChange: setRating, options: REVIEW_RATING_OPTIONS }, { key: 'replyState', label: 'Trạng thái phản hồi', value: replyState, onChange: setReplyState, options: REVIEW_REPLY_OPTIONS }]} sortValue={sortOrder} onSortChange={setSortOrder} onReset={resetFilters} />
     {pageError && <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><span>{pageError}</span><button type="button" onClick={loadData} className="ml-auto whitespace-nowrap font-medium underline">Tải lại</button></div>}
-    {relatedDataWarning && <p role="status" className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">{relatedDataWarning}</p>}
-    {loading ? <div className="flex min-h-48 items-center justify-center rounded-2xl border border-neutral-800 bg-neutral-900/50 text-sm text-neutral-400"><span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-amber-300" />Đang tải đánh giá...</div> : <AdminTable columns={columns} data={filtered} emptyMessage="Không có đánh giá phù hợp với bộ lọc." onDetail={setSelectedReview} />}
+    {relatedDataWarning && <p role="status" className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-xs text-amber-200">{relatedDataWarning}</p>}
+    {loading ? <div className="flex min-h-48 items-center justify-center rounded-2xl border border-neutral-800 bg-neutral-900/50 text-sm text-neutral-400"><span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-rose-400" />Đang tải đánh giá...</div> : <AdminTable columns={columns} data={filtered} emptyMessage="Không có đánh giá phù hợp với bộ lọc." onDetail={setSelectedReview} />}
     <p className="flex items-center gap-2 text-[11px] text-neutral-500"><Users className="h-3.5 w-3.5 shrink-0" />Admin chỉ xem đánh giá, thông tin đánh giá nhân viên và gửi/cập nhật phản hồi của studio.</p>
     {selectedReview && <ReviewDialog key={selectedReview.id} review={selectedReview} booking={bookingMap[selectedReview.bookingId]} employees={employees} onClose={() => setSelectedReview(null)} onReply={replyToReview} />}
   </section>;

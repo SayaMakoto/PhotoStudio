@@ -95,9 +95,9 @@ export default function AdminRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-white selection:bg-amber-400 selection:text-neutral-950 font-sans relative flex flex-col justify-between p-4 sm:p-6 overflow-hidden">
+    <div className="min-h-screen bg-[#07090e] text-white selection:bg-rose-500 selection:text-neutral-950 font-sans relative flex flex-col justify-between p-4 sm:p-6 overflow-hidden">
       {/* Background Matrix/Security Grid & Glows */}
-      <div className="absolute top-0 right-1/2 translate-x-1/2 w-[700px] h-[350px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 right-1/2 translate-x-1/2 w-[700px] h-[350px] bg-rose-500/10 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 left-10 w-[400px] h-[300px] bg-rose-500/10 rounded-full blur-[140px] pointer-events-none" />
       
       <div 
@@ -110,14 +110,14 @@ export default function AdminRegisterPage() {
 
       {/* Top Bar Navigation */}
       <header className="relative z-10 w-full max-w-5xl mx-auto flex items-center justify-between py-2">
-        <Link to={ROUTES.USER.HOME} className="flex items-center gap-2 group text-xs text-neutral-400 hover:text-amber-400 transition-colors">
+        <Link to={ROUTES.USER.HOME} className="flex items-center gap-2 group text-xs text-neutral-400 hover:text-rose-400 transition-colors">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>Về Trang Chủ Studio</span>
         </Link>
 
         <Link
           to={ROUTES.AUTH.ADMIN_LOGIN}
-          className="text-xs text-amber-400 hover:text-amber-300 px-3 py-1.5 rounded-lg border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition-colors font-mono"
+          className="text-xs text-rose-400 hover:text-rose-400 px-3 py-1.5 rounded-lg border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition-colors font-mono"
         >
           ← Trở lại Đăng Nhập Admin
         </Link>
@@ -125,18 +125,18 @@ export default function AdminRegisterPage() {
 
       {/* Centerpiece: Obsidian Security Vault Box */}
       <main className="relative z-10 w-full max-w-xl mx-auto my-auto py-6">
-        <div className="relative rounded-3xl bg-neutral-950/90 border border-amber-500/30 p-7 sm:p-9 shadow-2xl shadow-black/95 backdrop-blur-3xl overflow-hidden">
+        <div className="relative rounded-3xl bg-neutral-950/90 border border-rose-500/30 p-7 sm:p-9 shadow-2xl shadow-black/95 backdrop-blur-3xl overflow-hidden">
           
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-neutral-900 border border-amber-500/40 shadow-lg shadow-amber-500/15 mb-3">
-              <KeyRound className="w-6 h-6 text-amber-400" />
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-neutral-900 border border-rose-500/40 shadow-lg shadow-amber-500/15 mb-3">
+              <KeyRound className="w-6 h-6 text-rose-400" />
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-mono tracking-wider mb-2">
-              <Terminal className="w-3.5 h-3.5 text-amber-400" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-mono tracking-wider mb-2">
+              <Terminal className="w-3.5 h-3.5 text-rose-400" />
               <span>ADMINISTRATIVE ONBOARDING PROTOCOL</span>
             </div>
 
@@ -172,7 +172,7 @@ export default function AdminRegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-500">
-                    <User className="w-3.5 h-3.5 text-amber-400/70" />
+                    <User className="w-3.5 h-3.5 text-rose-400/70" />
                   </div>
                   <input
                     type="text"
@@ -180,7 +180,7 @@ export default function AdminRegisterPage() {
                     value={formData.fullname}
                     onChange={handleChange}
                     placeholder="Nguyễn Quản Trị"
-                    className="w-full pl-9 pr-3 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
+                    className="w-full pl-9 pr-3 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors"
                     required
                   />
                 </div>
@@ -192,7 +192,7 @@ export default function AdminRegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-500">
-                    <span className="text-[11px] text-amber-400/70 font-mono">@</span>
+                    <span className="text-[11px] text-rose-400/70 font-mono">@</span>
                   </div>
                   <input
                     type="text"
@@ -200,7 +200,7 @@ export default function AdminRegisterPage() {
                     value={formData.username}
                     onChange={handleChange}
                     placeholder="admin_lead"
-                    className="w-full pl-8 pr-3 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
+                    className="w-full pl-8 pr-3 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
                     required
                   />
                 </div>
@@ -215,7 +215,7 @@ export default function AdminRegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-500">
-                    <Mail className="w-3.5 h-3.5 text-amber-400/70" />
+                    <Mail className="w-3.5 h-3.5 text-rose-400/70" />
                   </div>
                   <input
                     type="email"
@@ -223,7 +223,7 @@ export default function AdminRegisterPage() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="lead@photostudio.vn"
-                    className="w-full pl-9 pr-3 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
+                    className="w-full pl-9 pr-3 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors"
                     required
                   />
                 </div>
@@ -235,7 +235,7 @@ export default function AdminRegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-500">
-                    <Phone className="w-3.5 h-3.5 text-amber-400/70" />
+                    <Phone className="w-3.5 h-3.5 text-rose-400/70" />
                   </div>
                   <input
                     type="tel"
@@ -243,7 +243,7 @@ export default function AdminRegisterPage() {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="0901234567"
-                    className="w-full pl-9 pr-3 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
+                    className="w-full pl-9 pr-3 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors"
                     required
                   />
                 </div>
@@ -259,14 +259,14 @@ export default function AdminRegisterPage() {
                 <button
                   type="button"
                   onClick={handleFillDemoMasterKey}
-                  className="text-[10px] text-amber-400 hover:text-amber-300 underline font-mono cursor-pointer"
+                  className="text-[10px] text-rose-400 hover:text-rose-400 underline font-mono cursor-pointer"
                 >
                   Nhập mã Demo
                 </button>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-500">
-                  <Fingerprint className="w-4 h-4 text-amber-400" />
+                  <Fingerprint className="w-4 h-4 text-rose-400" />
                 </div>
                 <input
                   type="text"
@@ -274,7 +274,7 @@ export default function AdminRegisterPage() {
                   value={formData.masterKey}
                   onChange={handleChange}
                   placeholder="ADMIN-SUPER-2026"
-                  className="w-full pl-9 pr-3 py-2 bg-neutral-900/90 border border-amber-500/30 rounded-xl text-xs text-amber-300 placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono tracking-wider"
+                  className="w-full pl-9 pr-3 py-2 bg-neutral-900/90 border border-rose-500/30 rounded-xl text-xs text-rose-400 placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono tracking-wider"
                   required
                 />
               </div>
@@ -288,7 +288,7 @@ export default function AdminRegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-500">
-                    <Lock className="w-3.5 h-3.5 text-amber-400/70" />
+                    <Lock className="w-3.5 h-3.5 text-rose-400/70" />
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -296,7 +296,7 @@ export default function AdminRegisterPage() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Tối thiểu 8 ký tự"
-                    className="w-full pl-9 pr-9 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
+                    className="w-full pl-9 pr-9 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
                     required
                   />
                   <button
@@ -315,7 +315,7 @@ export default function AdminRegisterPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-500">
-                    <Lock className="w-3.5 h-3.5 text-amber-400/70" />
+                    <Lock className="w-3.5 h-3.5 text-rose-400/70" />
                   </div>
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
@@ -323,7 +323,7 @@ export default function AdminRegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Nhập lại mật khẩu"
-                    className="w-full pl-9 pr-9 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
+                    className="w-full pl-9 pr-9 py-2 bg-neutral-900/90 border border-neutral-800 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
                     required
                   />
                   <button
@@ -345,7 +345,7 @@ export default function AdminRegisterPage() {
                   name="agreeSecurityPolicy"
                   checked={formData.agreeSecurityPolicy}
                   onChange={handleChange}
-                  className="w-3.5 h-3.5 mt-0.5 rounded border-neutral-700 bg-neutral-900 text-amber-400 focus:ring-amber-400 accent-amber-400"
+                  className="w-3.5 h-3.5 mt-0.5 rounded border-neutral-700 bg-neutral-900 text-rose-400 focus:ring-amber-400 accent-amber-400"
                   required
                 />
                 <span className="text-[11px] text-neutral-400 leading-snug">
@@ -376,7 +376,7 @@ export default function AdminRegisterPage() {
             Đã có tài khoản Quản trị?{' '}
             <Link
               to={ROUTES.AUTH.ADMIN_LOGIN}
-              className="text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-4"
+              className="text-rose-400 hover:text-rose-400 font-semibold underline underline-offset-4"
             >
               Đăng nhập Console
             </Link>
@@ -387,7 +387,7 @@ export default function AdminRegisterPage() {
       {/* Footer */}
       <footer className="relative z-10 w-full max-w-5xl mx-auto flex items-center justify-between py-2 text-[11px] text-neutral-400 font-mono border-t border-white/5">
         <span>PhotoStudio Administrative Gateway v2.4</span>
-        <span className="text-amber-400/80">Security Level: Strict</span>
+        <span className="text-rose-400/80">Security Level: Strict</span>
       </footer>
     </div>
   );

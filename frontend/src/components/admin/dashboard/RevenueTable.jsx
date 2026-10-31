@@ -62,7 +62,7 @@ export default function RevenueTable({ selectedYear, selectedMonth }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
         <div>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
               <DollarSign className="h-4 w-4" />
             </div>
             <h3 className="text-base font-semibold text-white">
@@ -113,7 +113,7 @@ export default function RevenueTable({ selectedYear, selectedMonth }) {
                   key={row.month}
                   className={`transition-colors ${
                     isSelected
-                      ? "bg-amber-500/10 font-medium text-white"
+                      ? "bg-rose-500/10 font-medium text-white"
                       : "hover:bg-neutral-850/50"
                   }`}
                 >
@@ -124,7 +124,7 @@ export default function RevenueTable({ selectedYear, selectedMonth }) {
                         {selectedYear}
                       </span>
                       {isSelected && (
-                        <span className="rounded bg-amber-400/20 text-amber-300 text-[10px] px-1.5 py-0.5 border border-amber-400/30">
+                        <span className="rounded bg-rose-500/20 text-rose-400 text-[10px] px-1.5 py-0.5 border border-rose-400/30">
                           Đang chọn
                         </span>
                       )}
@@ -142,7 +142,7 @@ export default function RevenueTable({ selectedYear, selectedMonth }) {
                   <td className="px-4 py-3.5 text-right font-mono text-neutral-400">
                     {formatCurrency(row.extraRevenue)}
                   </td>
-                  <td className="px-4 py-3.5 text-right font-mono font-bold text-amber-400">
+                  <td className="px-4 py-3.5 text-right font-mono font-bold text-rose-400">
                     {formatCurrency(row.totalRevenue)}
                   </td>
                   <td className="px-4 py-3.5 text-center">
@@ -151,7 +151,7 @@ export default function RevenueTable({ selectedYear, selectedMonth }) {
                         row.status === "Đã quyết toán"
                           ? "bg-neutral-800 text-neutral-300 border border-neutral-700"
                           : row.status === "Đang theo dõi"
-                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
                             : "bg-neutral-800/40 text-neutral-500"
                       }`}
                     >

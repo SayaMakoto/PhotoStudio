@@ -72,9 +72,9 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-white selection:bg-amber-400 selection:text-neutral-950 font-sans relative flex flex-col justify-between p-4 sm:p-6 overflow-hidden">
+    <div className="min-h-screen bg-[#07090e] text-white selection:bg-rose-500 selection:text-neutral-950 font-sans relative flex flex-col justify-between p-4 sm:p-6 overflow-hidden">
       {/* Background Matrix/Security Grid & Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-175 h-87.5 bg-amber-500/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-175 h-87.5 bg-rose-500/10 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 right-10 w-100 h-75 bg-rose-500/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Precision grid pattern */}
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
       <header className="relative z-10 w-full max-w-5xl mx-auto flex items-center justify-between py-2">
         <Link
           to={ROUTES.USER.HOME}
-          className="flex items-center gap-2 group text-xs text-neutral-400 hover:text-amber-400 transition-colors"
+          className="flex items-center gap-2 group text-xs text-neutral-400 hover:text-rose-400 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>Về Trang Chủ Studio</span>
@@ -99,11 +99,11 @@ export default function AdminLoginPage() {
 
       {/* Centerpiece: Obsidian Security Vault Box */}
       <main className="relative z-10 w-full max-w-md mx-auto my-auto py-6">
-        <div className="relative rounded-3xl bg-neutral-950/90 border border-amber-500/30 p-7 sm:p-9 shadow-2xl shadow-black/95 backdrop-blur-3xl overflow-hidden">
+        <div className="relative rounded-3xl bg-neutral-950/90 border border-rose-500/30 p-7 sm:p-9 shadow-2xl shadow-black/95 backdrop-blur-3xl overflow-hidden">
           {/* Security Badge Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-linear-to-b from-neutral-900 to-neutral-950 border border-amber-500/40 shadow-lg shadow-amber-500/20 mb-3.5 relative group">
-              <ShieldAlert className="w-7 h-7 text-amber-400" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-linear-to-b from-neutral-900 to-neutral-950 border border-rose-500/40 shadow-lg shadow-rose-500/20 mb-3.5 relative group">
+              <ShieldAlert className="w-7 h-7 text-rose-400" />
             </div>
 
             <h1 className="text-2xl font-extrabold tracking-tight text-white font-sans">
@@ -138,7 +138,7 @@ export default function AdminLoginPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
-                  <Mail className="w-4 h-4 text-amber-400/70" />
+                  <Mail className="w-4 h-4 text-rose-400/70" />
                 </div>
                 <input
                   type="text"
@@ -146,7 +146,7 @@ export default function AdminLoginPage() {
                   value={formData.usernameOrEmail}
                   onChange={handleChange}
                   placeholder="admin hoặc admin@photostudio.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-neutral-900/90 border border-neutral-800 rounded-xl text-sm text-amber-200 placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 bg-neutral-900/90 border border-neutral-800 rounded-xl text-sm text-amber-200 placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
                   required
                 />
               </div>
@@ -159,7 +159,7 @@ export default function AdminLoginPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
-                  <Lock className="w-4 h-4 text-amber-400/70" />
+                  <Lock className="w-4 h-4 text-rose-400/70" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -167,7 +167,7 @@ export default function AdminLoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-11 py-2.5 bg-neutral-900/90 border border-neutral-800 rounded-xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
+                  className="w-full pl-10 pr-11 py-2.5 bg-neutral-900/90 border border-neutral-800 rounded-xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-amber-400 transition-colors font-mono"
                   required
                 />
                 <button
@@ -192,7 +192,7 @@ export default function AdminLoginPage() {
                   name="rememberMe"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="w-4 h-4 rounded border-neutral-700 bg-neutral-900 text-amber-400 focus:ring-amber-400 accent-amber-400 cursor-pointer"
+                  className="w-4 h-4 rounded border-neutral-700 bg-neutral-900 text-rose-400 focus:ring-amber-400 accent-amber-400 cursor-pointer"
                 />
                 <span>Duy trì phiên đăng nhập an toàn</span>
               </label>

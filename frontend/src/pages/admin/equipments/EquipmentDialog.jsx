@@ -98,7 +98,7 @@ export default function EquipmentDialog({ equipment, mode, onClose, onSave }) {
   };
 
   const inputClassName =
-    "mt-1.5 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-neutral-100 outline-none transition focus:border-amber-400/60";
+    "mt-1.5 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-neutral-100 outline-none transition focus:border-rose-400/60";
 
   return (
     <div
@@ -115,7 +115,7 @@ export default function EquipmentDialog({ equipment, mode, onClose, onSave }) {
       >
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-neutral-800 bg-neutral-900/95 px-5 py-4 backdrop-blur">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-amber-400/10 text-amber-300">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-rose-500/10 text-rose-400">
               <Camera className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
@@ -273,7 +273,7 @@ export default function EquipmentDialog({ equipment, mode, onClose, onSave }) {
                     onClick={openPurchaseDatePicker}
                     aria-label="Mở bộ chọn ngày và giờ mua"
                     title="Chọn ngày và giờ"
-                    className="absolute top-1/2 right-2 inline-grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-amber-300 transition hover:bg-amber-400/10 hover:text-amber-200 focus-visible:outline-2 focus-visible:outline-amber-300"
+                    className="absolute top-1/2 right-2 inline-grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-rose-400 transition hover:bg-rose-500/10 hover:text-amber-200 focus-visible:outline-2 focus-visible:outline-amber-300"
                   >
                     <CalendarDays className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -304,7 +304,7 @@ export default function EquipmentDialog({ equipment, mode, onClose, onSave }) {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl bg-amber-400 px-4 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-amber-300 disabled:cursor-wait disabled:opacity-60"
+                className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-rose-600 disabled:cursor-wait disabled:opacity-60"
               >
                 {saving
                   ? "Đang lưu..."

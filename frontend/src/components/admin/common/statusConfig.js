@@ -1,7 +1,7 @@
 const neutral = "border-neutral-700 bg-neutral-800/70 text-neutral-300";
 const green = "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
 const red = "border-rose-500/30 bg-rose-500/10 text-rose-300";
-const amber = "border-amber-500/30 bg-amber-500/10 text-amber-300";
+const amber = "border-rose-500/30 bg-rose-500/10 text-rose-400";
 const blue = "border-sky-500/30 bg-sky-500/10 text-sky-300";
 const purple = "border-violet-500/30 bg-violet-500/10 text-violet-300";
 
@@ -54,6 +54,11 @@ export const STATUS_DOMAIN_CONFIG = {
     pending: { label: "Chờ phản hồi", className: amber },
     completed: { label: "Đã phản hồi", className: green },
     cancelled: { label: "Đã đóng", className: neutral },
+  },
+  salary: {
+    pending: { label: "Chờ duyệt", className: amber },
+    approved: { label: "Đã duyệt", className: blue },
+    paid: { label: "Đã thanh toán", className: green },
   },
   visibility: {
     active: { label: "Đang hiện", className: green },
