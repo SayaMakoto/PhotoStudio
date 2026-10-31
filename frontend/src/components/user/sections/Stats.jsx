@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserGroupIcon, TrophyIcon, CameraIcon, SparklesIcon } from '@heroicons/react/24/solid';
+import { UserGroupIcon, TrophyIcon, CameraIcon, PaintBrushIcon } from '@heroicons/react/24/solid';
 import CountUp from '../../animations/CountUp';
 import ScrollReveal from '../../animations/ScrollReveal';
 import customerPackageService from '../../../services/user/packageService';
@@ -67,7 +67,7 @@ export default function Stats() {
       description: 'Không gian bối cảnh chuẩn phong cách điện ảnh',
     },
     {
-      icon: SparklesIcon,
+      icon: PaintBrushIcon,
       value: counts.services,
       suffix: counts.services > 0 ? ' Dịch Vụ' : '',
       label: 'Dịch Vụ & Tiện Ích',

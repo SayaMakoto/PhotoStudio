@@ -8,7 +8,6 @@ import {
   Clock3,
   Plus,
   RotateCcw,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 import AdminFilterBar from "../../../components/admin/common/AdminFilterBar";
@@ -362,7 +361,7 @@ export default function AdminPackagesPage() {
       {view !== "trash" && (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <SummaryCard
-            icon={Sparkles}
+            icon={Camera}
             label="Tổng gói chụp"
             value={stats.total}
           />

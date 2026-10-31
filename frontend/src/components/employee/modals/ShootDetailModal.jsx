@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Camera,
   Shirt,
-  Sparkles,
   Package,
   Layers,
   Users,
@@ -61,6 +60,7 @@ export default function ShootDetailModal({
   const [accessories, setAccessories] = useState([]);
   const [packages, setPackages] = useState([]);
   const [services, setServices] = useState([]);
+  const [backgrounds, setBackgrounds] = useState([]);
   const [assignments, setAssignments] = useState([]);
 
   // Active section tab trong modal: 'overview', 'equipment', 'clothing_accessory', 'package'
@@ -82,9 +82,57 @@ export default function ShootDetailModal({
         setClothing([]);
         setAccessories([]);
         setServices([]);
-        if (pkgRes.status === 'fulfilled' && Array.isArray(pkgRes.value)) {
-          setPackages(pkgRes.value);
-        }
+        setBackgrounds([]);
+        setAssignments([]);
+        const bookingPackages = pkgRes.status === 'fulfilled' && Array.isArray(pkgRes.value)
+          ? pkgRes.value
+          : [];
+        const packageDetails = await Promise.allSettled(bookingPackages.map(async (bookingPackage) => {
+          const [detailsResult, servicesResult, backgroundsResult] = await Promise.allSettled([
+            employeeBookingService.getPackageDetails(bookingPackage.packageId),
+            employeeBookingService.getPackageServices(bookingPackage.packageId),
+            employeeBookingService.getPackageBackgrounds(bookingPackage.packageId),
+          ]);
+          return {
+            bookingPackage,
+            details: detailsResult.status === 'fulfilled' ? detailsResult.value : null,
+            services: servicesResult.status === 'fulfilled' && Array.isArray(servicesResult.value) ? servicesResult.value : [],
+            backgrounds: backgroundsResult.status === 'fulfilled' && Array.isArray(backgroundsResult.value) ? backgroundsResult.value : [],
+          };
+        }));
+
+        if (!isMounted) return;
+        const loadedPackages = packageDetails.flatMap((result) => result.status === 'fulfilled' ? [result.value] : []);
+        const addPackageContext = (items, bookingPackage, prefix) => (items || []).map((item, index) => ({
+          ...item,
+          id: `${prefix}-${bookingPackage.id}-${item.id ?? index}`,
+          packageName: bookingPackage.packageName,
+          quantity: (Number(item.quantity) || 1) * (Number(bookingPackage.quantity) || 1),
+        }));
+        setPackages(loadedPackages.map(({ bookingPackage, details }) => ({
+          ...(details || {}),
+          ...bookingPackage,
+          description: details?.description || bookingPackage.description,
+        })));
+        setEquipments(loadedPackages.flatMap(({ bookingPackage, details }) =>
+          addPackageContext(details?.equipments, bookingPackage, 'equipment').map((item) => ({
+            ...item,
+            equipmentName: item.equipmentName || item.equipmentType,
+            status: 'Theo gói chụp',
+          })),
+        ));
+        setClothing(loadedPackages.flatMap(({ bookingPackage, details }) =>
+          addPackageContext(details?.clothes, bookingPackage, 'cloth'),
+        ));
+        setAccessories(loadedPackages.flatMap(({ bookingPackage, details }) =>
+          addPackageContext(details?.accessories, bookingPackage, 'accessory'),
+        ));
+        setServices(loadedPackages.flatMap(({ bookingPackage, services: packageServices }) =>
+          addPackageContext(packageServices, bookingPackage, 'service'),
+        ));
+        setBackgrounds(loadedPackages.flatMap(({ bookingPackage, backgrounds: packageBackgrounds }) =>
+          addPackageContext(packageBackgrounds, bookingPackage, 'background'),
+        ));
         if (assignRes.status === 'fulfilled' && Array.isArray(assignRes.value)) {
           setAssignments(assignRes.value);
         }
@@ -310,7 +358,7 @@ export default function ShootDetailModal({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[#261A1E]">
-                  Tổng số thiết bị phân công cho ca: {equipments.length} món
+                  Thiết bị thuộc gói chụp: {equipments.length} loại
                 </span>
                 <span className="text-[11px] text-[#7A6C71]">
                   Body, Lens, Đèn Flash, Chân máy
@@ -333,7 +381,7 @@ export default function ShootDetailModal({
                             {item.equipmentName || item.name || `Thiết bị #${item.equipmentId}`}
                           </p>
                           <p className="text-[11px] text-[#7A6C71] font-mono">
-                            Loại: {item.equipmentType || item.type || 'Thiết bị chụp'}
+                            Loại: {item.equipmentType || item.type || 'Thiết bị chụp'} • Số lượng trong gói: {item.quantity || 1}
                             {item.equipmentSerialNumber && ` • S/N: ${item.equipmentSerialNumber}`}
                           </p>
                         </div>
@@ -347,7 +395,7 @@ export default function ShootDetailModal({
                 </div>
               ) : (
                 <div className="py-10 text-center text-xs text-[#9E8E93] bg-[#FAF5F5] rounded-2xl border border-[#F0E4E6]">
-                  Chưa có thiết bị nào được gán riêng cho ca chụp này (hoặc dùng thiết bị mặc định của phòng).
+                  Gói chụp này không yêu cầu thêm thiết bị.
                 </div>
               )}
             </div>
@@ -390,7 +438,7 @@ export default function ShootDetailModal({
                   </div>
                 ) : (
                   <p className="text-xs text-[#9E8E93] py-6 text-center bg-[#FAF5F5] rounded-2xl border border-[#F0E4E6]">
-                    Khách hàng tự chuẩn bị trang phục (hoặc chưa chọn trang phục studio).
+                    Gói chụp này không bao gồm trang phục.
                   </p>
                 )}
               </div>
@@ -399,7 +447,7 @@ export default function ShootDetailModal({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-[#261A1E] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#B85064]" />
+                    <Package className="w-3.5 h-3.5 text-[#B85064]" />
                     Phụ Kiện Đạo Cụ Đi Kèm ({accessories.length})
                   </span>
                 </div>
@@ -429,7 +477,7 @@ export default function ShootDetailModal({
                   </div>
                 ) : (
                   <p className="text-xs text-[#9E8E93] py-6 text-center bg-[#FAF5F5] rounded-2xl border border-[#F0E4E6]">
-                    Không có phụ kiện riêng lẻ.
+                    Gói chụp này không bao gồm phụ kiện.
                   </p>
                 )}
               </div>
@@ -461,11 +509,31 @@ export default function ShootDetailModal({
                 )}
               </div>
 
-              {/* Dịch vụ phát sinh */}
+              {/* Bối cảnh lấy theo gói chụp */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-[#261A1E] flex items-center gap-1.5">
                   <Layers className="w-3.5 h-3.5 text-[#B85064]" />
-                  Dịch Vụ Đi Kèm ({services.length})
+                  Bối Cảnh Trong Gói ({backgrounds.length})
+                </span>
+                {backgrounds.length > 0 ? (
+                  <div className="space-y-2">
+                    {backgrounds.map((background, idx) => (
+                      <div key={background.id || idx} className="p-3 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6]">
+                        <p className="font-bold text-[#261A1E]">{background.backgroundName || 'Bối cảnh'}</p>
+                        <p className="text-[11px] text-[#7A6C71]">{background.packageName}{background.backgroundDescription ? ` · ${background.backgroundDescription}` : ''}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#9E8E93] py-4 text-center bg-[#FAF5F5] rounded-2xl border border-[#F0E4E6]">Gói chụp này không có bối cảnh riêng.</p>
+                )}
+              </div>
+
+              {/* Dịch vụ lấy theo gói chụp */}
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-[#261A1E] flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-[#B85064]" />
+                  Dịch Vụ Trong Gói ({services.length})
                 </span>
                 {services.length > 0 ? (
                   <div className="space-y-2">
@@ -478,7 +546,7 @@ export default function ShootDetailModal({
                   </div>
                 ) : (
                   <p className="text-xs text-[#9E8E93] py-4 text-center bg-[#FAF5F5] rounded-2xl border border-[#F0E4E6]">
-                    Không có dịch vụ thêm.
+                    Gói chụp này không bao gồm dịch vụ.
                   </p>
                 )}
               </div>

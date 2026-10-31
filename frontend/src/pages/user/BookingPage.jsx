@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { SquaresPlusIcon } from '@heroicons/react/24/solid';
 import {
   Calendar,
   Clock,
@@ -10,7 +11,6 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   Camera,
   ShieldCheck,
   HelpCircle,
@@ -24,7 +24,6 @@ import {
   Lock,
   X,
   CreditCard,
-  Sparkle,
 } from 'lucide-react';
 import {
   FloralBranchCorner,
@@ -2031,8 +2030,12 @@ export default function BookingPage() {
                   {/* Dịch vụ bổ sung */}
                   {(selectedServices.length > 0 || isServiceOptOut) && (
                     <div className="flex items-center gap-3 pb-3 border-b border-gray-100 text-xs">
-                      <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-[#BE4B5E] shrink-0">
-                        <Sparkles className="w-5 h-5" />
+                      <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-[#BE4B5E] shrink-0 overflow-hidden">
+                        {selectedServices.length === 1 && selectedServices[0].image ? (
+                          <img src={selectedServices[0].image} alt={selectedServices[0].name} className="w-full h-full object-cover" />
+                        ) : (
+                          <SquaresPlusIcon className="w-5 h-5 text-[#BE4B5E]" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="text-[10px] text-gray-400 block">Dịch vụ:</span>

@@ -8,7 +8,6 @@ import {
   Send,
   Edit3,
   Filter,
-  Sparkles,
   User,
   Calendar,
   X,
@@ -587,7 +586,7 @@ export default function CustomerReviewsSection({
               {/* Quick Template Suggestions */}
               <div>
                 <label className="block text-xs font-bold text-[#7A6C71] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-[#B85064]" />
+                  <MessageCircle className="h-3.5 w-3.5 text-[#B85064]" />
                   <span>Chọn mẫu câu cảm ơn nhanh (Click để chọn):</span>
                 </label>
                 <div className="space-y-1.5">

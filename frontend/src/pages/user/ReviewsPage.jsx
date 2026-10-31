@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   StarIcon,
-  SparklesIcon,
   CheckBadgeIcon,
   ShieldCheckIcon,
   ChatBubbleLeftRightIcon,
@@ -895,6 +894,17 @@ export default function ReviewsPage() {
                   <div className="text-xs sm:text-sm text-[#3E2F35] leading-relaxed font-light pl-1 sm:pl-2">
                     "{rev.comment}"
                   </div>
+                  {/* Ghi chú dịch vụ nhân viên (nếu có) */}
+                  {rev.employeeReviews && rev.employeeReviews.length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-dashed border-[#F5EAEB] flex items-center gap-2 text-xs text-[#7A6C71] pl-1 sm:pl-2">
+                      <ChatBubbleLeftRightIcon className="w-4 h-4 text-[#B85064] shrink-0" />
+                      <span>
+                        <strong>Ghi chú dịch vụ:</strong> "
+                        {rev.employeeReviews[0].comment}"
+                      </span>
+                    </div>
+                  )}
+
                   {/* Phản hồi từ PhotoStudio / Ban quản lý */}
                   {rev.adminReply && (
                     <div className="mt-4 p-4 rounded-2xl bg-[#FDF0F3]/80 border border-[#F5D5DC] text-xs space-y-1.5 ml-1 sm:ml-2">
@@ -1020,7 +1030,7 @@ export default function ReviewsPage() {
                 to={ROUTES.USER.PACKAGES}
                 className="px-6 py-3 rounded-full bg-gradient-to-r from-[#BE4B5E] via-[#B85064] to-[#A8394C] text-white text-xs font-bold shadow-lg shadow-rose-950/40 hover:scale-105 transition-all flex items-center gap-2"
               >
-                <SparklesIcon className="w-4 h-4" />
+                <CameraIcon className="w-4 h-4" />
                 <span>Xem Toàn Bộ Báo Giá & Gói Chụp</span>
               </Link>
               <Link

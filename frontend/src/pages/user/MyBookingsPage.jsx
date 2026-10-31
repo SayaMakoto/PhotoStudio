@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   CalendarDaysIcon,
   ClockIcon,
-  SparklesIcon,
+  CameraIcon,
   CheckCircleIcon,
   ReceiptPercentIcon,
   CreditCardIcon,
@@ -334,7 +334,7 @@ export default function MyBookingsPage() {
               to={ROUTES.USER.PACKAGES}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#B85064] hover:bg-[#A8394C] text-white text-xs font-bold shadow-md transition-all cursor-pointer"
             >
-              <SparklesIcon className="w-4 h-4 text-white" />
+              <CameraIcon className="w-4 h-4 text-white" />
               <span>Khám Phá Gói Chụp Studio</span>
             </Link>
           </div>

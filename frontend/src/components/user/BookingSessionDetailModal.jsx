@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { PaintBrushIcon, PhotoIcon } from '@heroicons/react/24/solid';
 import {
   X,
   Calendar,
@@ -7,7 +8,6 @@ import {
   Star,
   Users,
   Camera,
-  Sparkles,
   CheckCircle2,
   FileText,
   AlertCircle,
@@ -21,7 +21,6 @@ import {
   Ban,
   Package,
   Scissors,
-  Sparkle,
 } from 'lucide-react';
 import { FloralCardCorner } from '../common/FloralDecorations';
 import customerBookingService from '../../services/user/bookingService';
@@ -986,7 +985,7 @@ export default function BookingSessionDetailModal({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
               <div className="p-3 rounded-xl bg-gray-50 border border-gray-100 space-y-1">
                 <span className="font-bold text-gray-700 flex items-center gap-1.5 text-[11px]">
-                  <Sparkle className="w-3.5 h-3.5 text-[#BE4B5E]" />
+                  <PhotoIcon className="w-3.5 h-3.5 text-[#BE4B5E]" />
                   Dịch vụ kèm theo
                 </span>
                 <p className="text-gray-600 text-[11px] leading-relaxed">
@@ -1004,7 +1003,7 @@ export default function BookingSessionDetailModal({
               </div>
               <div className="p-3 rounded-xl bg-gray-50 border border-gray-100 space-y-1">
                 <span className="font-bold text-gray-700 flex items-center gap-1.5 text-[11px]">
-                  <Sparkles className="w-3.5 h-3.5 text-[#BE4B5E]" />
+                  <PaintBrushIcon className="w-3.5 h-3.5 text-[#BE4B5E]" />
                   Phụ kiện & Makeup
                 </span>
                 <p className="text-gray-600 text-[11px] leading-relaxed">

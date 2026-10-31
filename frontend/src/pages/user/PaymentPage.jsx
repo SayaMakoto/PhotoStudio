@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import {
   CreditCardIcon,
   ShieldCheckIcon,
-  SparklesIcon,
+  SquaresPlusIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
   TicketIcon,
@@ -646,7 +646,7 @@ export default function PaymentPage() {
                 <div className="p-3.5 rounded-2xl border border-[#F0E4E6] bg-[#FFF0F2]/50 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#B85064] uppercase tracking-wider flex items-center gap-1.5">
-                      <SparklesIcon className="w-3.5 h-3.5" />
+                      <SquaresPlusIcon className="w-3.5 h-3.5" />
                       <span>Dịch Vụ Nâng Cao ({selectedServices.length})</span>
                     </span>
                     <strong className="text-xs text-[#B85064]">

@@ -6,7 +6,8 @@ import {
   MapPinIcon,
   CheckCircleIcon,
   XMarkIcon,
-  SparklesIcon,
+  PencilSquareIcon,
+  CheckIcon,
   ArrowRightIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/solid';
@@ -184,7 +185,7 @@ export default function MissingInfoStickyAlert() {
                 onClick={handleOpenModal}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#BE4B5E] hover:bg-[#a93e50] text-white font-medium text-xs shadow-sm hover:scale-105 active:scale-95 transition-all"
               >
-                <SparklesIcon className="w-3.5 h-3.5" />
+                <PencilSquareIcon className="w-3.5 h-3.5" />
                 <span>Cập nhật ngay</span>
               </button>
               <button
@@ -308,7 +309,7 @@ export default function MissingInfoStickyAlert() {
                         }}
                         className="self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#BE4B5E]/30 hover:bg-[#BE4B5E]/50 text-pink-200 text-[11px] font-medium border border-[#BE4B5E]/40"
                       >
-                        <SparklesIcon className="w-3.5 h-3.5 text-amber-300" />
+                        <CheckIcon className="w-3.5 h-3.5 text-emerald-300" />
                         <span>Đổi thành: <strong>{suggestedPhone}</strong></span>
                       </button>
                     )}

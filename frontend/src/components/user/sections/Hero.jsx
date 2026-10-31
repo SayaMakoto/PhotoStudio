@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRightIcon, SparklesIcon, StarIcon, TrophyIcon, CameraIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
+import { ArrowRightIcon, StarIcon, TrophyIcon, CameraIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
 import BlurText from '../../animations/BlurText';
 import ShinyText from '../../animations/ShinyText';
 import TiltedCard from '../../cards/TiltedCard';
@@ -14,7 +14,7 @@ import { FloralBranchCorner, FloatingPetals } from '../../common/FloralDecoratio
 export default function Hero({ onOpenBooking }) {
   const [heroData, setHeroData] = useState({
     badge: 'STUDIO NHIẾP ẢNH NGHỆ THUẬT & CƯỚI CHUYÊN NGHIỆP',
-    awardBadge: '🏆 Không Gian Chụp Ảnh Nghệ Thuật Độc Bản',
+    awardBadge: 'Không Gian Chụp Ảnh Nghệ Thuật Độc Bản',
     headline: 'Khoảnh Khắc Cảm Xúc',
     description: 'Không gian phòng chụp chuẩn điện ảnh, máy ảnh Full-Frame sắc nét cùng đội ngũ Makeup & Stylist chuyên nghiệp. Hãy để chúng tôi kể lại câu chuyện của bạn bằng ngôn ngữ ánh sáng.',
     imageSrc: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85',
