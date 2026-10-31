@@ -24,6 +24,7 @@ import {
   HomeIcon,
   ChatBubbleLeftRightIcon,
   PhotoIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/solid";
 import customerBookingService from "../../services/user/bookingService";
 import customerPaymentService from "../../services/user/paymentService";
@@ -412,6 +413,14 @@ export default function ProfilePage() {
             const [paymentStatusText, paymentBadgeClass] = paymentLabels[paymentStatus] || paymentLabels.pending;
 
             const rawStatus = (item.status || "pending").toLowerCase();
+
+            // Lấy thông tin lưu từ photostudio_paid_orders (nếu đơn được đặt và thanh toán trên máy)
+            let matchedPaid = null;
+            try {
+              const paidList = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
+              matchedPaid = paidList.find((p) => p.id === item.id || p.bookingId === item.id) || null;
+            } catch {}
+
             return {
               id: item.id,
               customerId: item.customerId,
@@ -420,9 +429,17 @@ export default function ProfilePage() {
               customerEmail: item.customerEmail,
               packageName: pkgName,
               packageImage,
+              packagePrice: matchedPaid?.packagePrice || matchedPaid?.finalPackagePrice,
+              packageOriginalPrice: matchedPaid?.packageOriginalPrice,
+              roomSurcharge: matchedPaid?.roomSurcharge ?? 0,
+              services: matchedPaid?.services || matchedPaid?.selectedServices || [],
+              servicesTotal: matchedPaid?.servicesTotal || 0,
+              isServiceOptOut: matchedPaid?.isServiceOptOut || false,
+              discountAmount: matchedPaid?.discountAmount || 0,
               quantity,
               staffCount: 2,
-              totalPrice,
+              totalPrice: matchedPaid?.totalOrderPrice || totalPrice,
+              totalOrderPrice: matchedPaid?.totalOrderPrice || totalPrice,
               paymentStatusText,
               paymentBadgeClass,
               dayOfWeekAndDate,
@@ -1980,6 +1997,30 @@ export default function ProfilePage() {
                               <p className="text-xs text-gray-700 leading-relaxed">
                                 {rev.comment || rev.content || "Chất lượng hình ảnh và phục vụ rất tuyệt vời!"}
                               </p>
+
+                              {/* Phản hồi từ Quản trị viên / PhotoStudio */}
+                              {rev.adminReply && (
+                                <div className="mt-2.5 p-3 rounded-xl bg-[#FDF0F3]/90 border border-[#F5D5DC] text-xs space-y-1 ml-1 sm:ml-2">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5 font-bold text-[#BE4B5E]">
+                                      <ShieldCheckIcon className="w-3.5 h-3.5 text-[#BE4B5E]" />
+                                      <span>PhotoStudio phản hồi:</span>
+                                    </div>
+                                    {rev.adminRepliedAt && (
+                                      <span className="text-[10px] text-gray-400">
+                                        {new Date(rev.adminRepliedAt).toLocaleDateString("vi-VN", {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                          year: "numeric",
+                                        })}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[#3E2F35] font-normal leading-relaxed pl-5 italic text-[11.5px]">
+                                    "{rev.adminReply}"
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           ))}
 

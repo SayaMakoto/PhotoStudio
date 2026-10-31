@@ -528,6 +528,51 @@ export default function BookingPage() {
     };
   }, []);
 
+  // Phục hồi toàn bộ trạng thái đặt lịch khi thanh toán lại (từ VNPay Return hoặc retry)
+  useEffect(() => {
+    const retryOrder = location.state?.retryOrder || (location.state?.step === 3 ? JSON.parse(sessionStorage.getItem('vnpay_pending_order') || sessionStorage.getItem('pending_booking_order') || 'null') : null);
+
+    if (retryOrder) {
+      if (retryOrder.packageId && packages.length > 0) {
+        const foundPkg = packages.find((p) => p.id === retryOrder.packageId);
+        if (foundPkg) {
+          setSelectedPackage(foundPkg);
+          setIsPackageCollapsed(true);
+        }
+      }
+      if (retryOrder.roomId && rooms.length > 0) {
+        const foundRoom = rooms.find((r) => r.id === retryOrder.roomId);
+        if (foundRoom) {
+          setSelectedRoom(foundRoom);
+          setIsRoomCollapsed(true);
+        }
+      }
+      if (Array.isArray(retryOrder.services)) {
+        setSelectedServices(retryOrder.services);
+        setIsServicesCollapsed(true);
+      }
+      if (retryOrder.isServiceOptOut !== undefined) {
+        setIsServiceOptOut(Boolean(retryOrder.isServiceOptOut));
+      }
+      if (retryOrder.bookingDate) {
+        setSelectedDate(retryOrder.bookingDate);
+      }
+      if (retryOrder.startTime) {
+        setSelectedSlot(retryOrder.startTime.slice(0, 5));
+      }
+      if (retryOrder.customerName) setFullName(retryOrder.customerName);
+      if (retryOrder.customerPhone) setPhone(retryOrder.customerPhone);
+      if (retryOrder.customerEmail) setEmail(retryOrder.customerEmail);
+      if (retryOrder.attendees) setAttendees(retryOrder.attendees);
+      if (retryOrder.customerNote) setCustomerNote(retryOrder.customerNote);
+      if (retryOrder.depositPercent) setDepositPercent(Number(retryOrder.depositPercent) || 30);
+
+      // Chuyển thẳng tới bước 3 thanh toán
+      setCurrentStep(3);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [packages, rooms, location.state]);
+
   // Phục hồi lựa chọn nếu người dùng chuyển từ trang chi tiết gói đến
   useEffect(() => {
     const params = new URLSearchParams(location.search);

@@ -326,16 +326,73 @@ export default function ReviewsPage() {
   }, [selectedRatingFilter, ratingCounts]);
 
   return (
-    <div className="bg-[#FAF5F5] min-h-screen text-[#2A1D22] pt-24 pb-20 relative overflow-hidden">
+    <div className="bg-[#FAF5F5] min-h-screen text-[#2A1D22] pb-20 relative overflow-hidden">
+      {/* ========================================================================= */}
+      {/* 1. HERO BANNER: Nền studio điện ảnh với hình ảnh đầu trang */}
+      {/* ========================================================================= */}
+      <section className="relative w-full min-h-[440px] lg:min-h-[480px] bg-[#141012] overflow-hidden flex items-center pt-24 pb-16 mb-12">
+        {/* Background Image & Lighting Studio Effects với độ sáng chuẩn */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-70 scale-105 pointer-events-none"
+          style={{
+            backgroundImage:
+              'url(https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1920&q=80)',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#141012]/95 via-[#141012]/75 to-[#141012]/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-[#FAF5F5] pointer-events-none" />
+
+        {/* Ambient spotlight glow */}
+        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[350px] bg-[#E5A8B4]/15 rounded-full blur-[140px] pointer-events-none" />
+
+        {/* Họa tiết cành hoa đào nghệ thuật */}
+        <FloralBranchCorner position="top-left" opacity="opacity-90" />
+        <FloralBranchCorner position="top-right" opacity="opacity-80" />
+
+        {/* Chữ script viết tay mờ */}
+        <div className="absolute top-28 left-6 sm:left-14 text-white/35 font-handwriting text-2xl sm:text-3xl select-none pointer-events-none transform -rotate-12">
+          Your smiles,
+          <br />
+          our masterpiece ♡
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 space-y-4 pt-4">
+              {/* Breadcrumb Navigation */}
+              <div className="flex items-center gap-2 text-xs text-neutral-300">
+                <Link to={ROUTES.USER.HOME} className="hover:text-[#E899A8] transition-colors">
+                  Trang Chủ
+                </Link>
+                <span>/</span>
+                <span className="text-[#E899A8] font-semibold">Đánh Giá Của Khách Hàng</span>
+              </div>
+
+              <span className="inline-block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-[#E5A8B4]">
+                TRẢI NGHIỆM & ĐÁNH GIÁ
+              </span>
+
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-[1.25] font-serif-luxury">
+                Lắng nghe cảm nhận từ
+                <br />
+                <span className="italic font-normal text-[#E899A8] font-serif-luxury mr-2">
+                  khách hàng hài lòng
+                </span>
+              </h1>
+
+              <p className="text-[#CFC2C6] text-xs sm:text-sm md:text-base font-light max-w-xl leading-relaxed pt-1">
+                Hơn {stats.total}+ đánh giá trung thực từ những khách hàng đã trực tiếp chụp ảnh tại PhotoStudio. Sự tin tưởng và nụ cười của bạn là nguồn cảm hứng nghệ thuật lớn nhất của chúng tôi.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* Ambient background glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] bg-rose-500/10 rounded-full blur-[170px] pointer-events-none" />
       <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-[#B85064]/5 rounded-full blur-[160px] pointer-events-none" />
 
       {/* Decorative Floral elements */}
-      <FloralBranchCorner
-        position="top-right"
-        className="opacity-20 pointer-events-none"
-      />
       <FloralBranchCorner
         position="bottom-left"
         className="opacity-15 pointer-events-none rotate-180"
@@ -343,41 +400,6 @@ export default function ReviewsPage() {
       <ScatteredPetals count={8} className="opacity-25" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-xs text-[#7A6C71] mb-8 font-medium">
-          <Link
-            to={ROUTES.USER.HOME}
-            className="hover:text-[#B85064] transition-colors"
-          >
-            Trang Chủ
-          </Link>
-          <span>/</span>
-          <span className="text-[#B85064] font-semibold">
-            Đánh Giá Của Khách Hàng
-          </span>
-        </nav>
-
-        {/* Hero Section */}
-        <div className="text-center max-w-4xl mx-auto mb-14">
-          <ScrollReveal direction="down">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-serif-luxury tracking-tight text-[#2A1D22] mb-6 leading-tight">
-              <BlurText
-                text="Lắng Nghe Cảm Nhận Từ"
-                delay={40}
-                className="inline"
-              />{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B85064] via-[#D46B81] to-[#8C3A4B]">
-                Khách Hàng Hài Lòng
-              </span>
-            </h1>
-
-            <p className="text-base sm:text-lg text-[#7A6C71] font-light leading-relaxed max-w-3xl mx-auto">
-              Hơn {stats.total}+ đánh giá trung thực từ những khách hàng đã trực
-              tiếp chụp ảnh tại PhotoStudio. Sự tin tưởng và nụ cười của bạn là
-              nguồn cảm hứng nghệ thuật lớn nhất của chúng tôi.
-            </p>
-          </ScrollReveal>
-        </div>
 
         {/* Rating Overview & Trust Stats Banner */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-14 items-stretch">

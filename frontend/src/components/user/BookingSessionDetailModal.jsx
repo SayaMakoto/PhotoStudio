@@ -258,6 +258,70 @@ export default function BookingSessionDetailModal({
     };
   }, [booking]);
 
+  // Lấy dữ liệu đơn hàng đã lưu từ photostudio_paid_orders (nếu có)
+  const cachedOrder = (() => {
+    try {
+      const list = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
+      return list.find((o) => o.id === booking.id || o.bookingId === booking.id) || null;
+    } catch {
+      return null;
+    }
+  })();
+
+  // Dịch vụ bổ sung đã chọn
+  const selectedServices = (Array.isArray(booking.services) && booking.services.length > 0)
+    ? booking.services
+    : (Array.isArray(booking.selectedServices) && booking.selectedServices.length > 0)
+    ? booking.selectedServices
+    : (Array.isArray(cachedOrder?.services) && cachedOrder.services.length > 0)
+    ? cachedOrder.services
+    : (Array.isArray(cachedOrder?.selectedServices) ? cachedOrder.selectedServices : []);
+
+  const servicesTotal = Number(
+    booking.servicesTotal ??
+    cachedOrder?.servicesTotal ??
+    selectedServices.reduce((sum, s) => sum + Number(s.price || 0), 0)
+  );
+
+  // Phụ thu phòng studio
+  const roomSurcharge = Number(
+    booking.roomSurcharge ??
+    cachedOrder?.roomSurcharge ??
+    (roomDetail?.surcharge || 0)
+  );
+
+  // Tính số đã trả trước và tổng đơn
+  const successfulPaymentStatuses = ['completed', 'paid', 'deposit_30', 'deposit_50'];
+  const paidAmount = payments.length > 0
+    ? payments.reduce((sum, p) => sum + (successfulPaymentStatuses.includes(p.status?.toLowerCase()) ? Number(p.amount || 0) : 0), 0)
+    : Number(booking.paidAmount || 0);
+
+  const packageTotal = Number(packageDetail?.subTotal)
+    || Number(packageDetail?.unitPrice) * Number(packageDetail?.quantity || 1)
+    || 0;
+  const bookingTotal = Number(booking.totalOrderPrice || booking.finalPackagePrice || booking.totalAmount || booking.totalPrice || 0);
+  const depositPayment = payments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
+  const depositRate = depositPayment?.status?.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
+  const depositAmount = Number(depositPayment?.amount || 0);
+  const storedPriceLooksLikeDeposit = depositPayment && (
+    Math.abs(bookingTotal - depositAmount) < 1 || Math.abs(packageTotal - depositAmount) < 1
+  );
+  const inferredOrderTotal = storedPriceLooksLikeDeposit ? depositAmount / depositRate : 0;
+  const totalAmount = Number(booking.totalOrderPrice || booking.finalPackagePrice)
+    || (bookingTotal > paidAmount ? bookingTotal : inferredOrderTotal || packageTotal || bookingTotal)
+    || 1500000;
+  const remainingAmount = Math.max(0, totalAmount - paidAmount);
+
+  // Đơn giá gói chụp (tách riêng với phòng và dịch vụ)
+  const packagePrice = Number(
+    booking.packagePrice ??
+    cachedOrder?.packagePrice ??
+    packageDetail?.unitPrice ??
+    (totalAmount >= roomSurcharge + servicesTotal ? totalAmount - roomSurcharge - servicesTotal : totalAmount)
+  );
+
+  const discountAmount = Number(booking.discountAmount ?? cachedOrder?.discountAmount ?? 0);
+
   const handlePrint = () => {
     // Tạo iframe chuyên dụng để chỉ in duy nhất nội dung hóa đơn của đơn này, hoàn toàn cách ly với trang nền
     const printFrame = document.createElement('iframe');
@@ -281,6 +345,30 @@ export default function BookingSessionDetailModal({
     const roomDesc = roomDetail?.description || 'Phòng chụp sang trọng chuẩn Cinematic với hệ thống ánh sáng Profoto, phông nền nghệ thuật đa phong cách và góc máy sáng tạo.';
 
     const packageName = booking.packageName || packageDetail?.packageName || 'Gói Chụp Ảnh Studio Tiêu Chuẩn';
+
+    const serviceInvoiceRows = selectedServices.length > 0
+      ? selectedServices.map((srv) => `
+        <tr>
+          <td>
+            <strong style="color: #111827;">Dịch vụ: ${srv.name}</strong>
+            <div style="font-size: 10px; color: #9ca3af;">Dịch vụ bổ sung đã chọn</div>
+          </td>
+          <td style="text-align: right; font-weight: 500;">+${Number(srv.price || 0).toLocaleString('vi-VN')} đ</td>
+          <td style="text-align: center; font-weight: bold;">1</td>
+          <td style="text-align: right; font-weight: 800; color: #111827;">+${Number(srv.price || 0).toLocaleString('vi-VN')} đ</td>
+        </tr>
+      `).join('')
+      : `
+        <tr>
+          <td>
+            <strong style="color: #6b7280;">Dịch vụ bổ sung</strong>
+            <div style="font-size: 10px; color: #9ca3af;">Không có dịch vụ bổ sung</div>
+          </td>
+          <td style="text-align: right; color: #9ca3af;">0 đ</td>
+          <td style="text-align: center; color: #9ca3af;">0</td>
+          <td style="text-align: right; color: #9ca3af;">0 đ</td>
+        </tr>
+      `;
 
     const staffRows = employees.length > 0 
       ? employees.map(emp => `
@@ -542,13 +630,13 @@ export default function BookingSessionDetailModal({
             <div style="font-size: 10.5px; color: #6b7280; margin-top: 3px; line-height: 1.4;">${roomDesc}</div>
           </div>
 
-          <!-- 3. CHI TIẾT GÓI DỊCH VỤ -->
+          <!-- 3. BẢNG KÊ CHI PHÍ & DỊCH VỤ BUỔI CHỤP -->
           <div class="card" style="margin-bottom: 12px;">
-            <div class="card-title">Gói Dịch Vụ Đã Đặt</div>
+            <div class="card-title">Bảng Kê Chi Phí & Dịch Vụ Buổi Chụp</div>
             <table>
               <thead>
                 <tr>
-                  <th>Tên gói</th>
+                  <th>Khoản mục / Dịch vụ</th>
                   <th style="text-align: right;">Đơn giá</th>
                   <th style="text-align: center;">Số lượng</th>
                   <th style="text-align: right;">Thành tiền</th>
@@ -557,14 +645,41 @@ export default function BookingSessionDetailModal({
               <tbody>
                 <tr>
                   <td>
-                    <strong style="color: #111827;">${packageName}</strong>
+                    <strong style="color: #111827;">Gói chụp: ${packageName}</strong>
                     <div style="font-size: 10px; color: #9ca3af;">File gốc & hậu kỳ chuyên sâu</div>
                   </td>
-                  <td style="text-align: right; font-weight: 500;">${totalAmount.toLocaleString('vi-VN')} đ</td>
+                  <td style="text-align: right; font-weight: 500;">${packagePrice.toLocaleString('vi-VN')} đ</td>
                   <td style="text-align: center; font-weight: bold;">1</td>
-                  <td style="text-align: right; font-weight: 800; color: #BE4B5E;">${totalAmount.toLocaleString('vi-VN')} đ</td>
+                  <td style="text-align: right; font-weight: 800; color: #111827;">${packagePrice.toLocaleString('vi-VN')} đ</td>
                 </tr>
+                <tr>
+                  <td>
+                    <strong style="color: #111827;">Không gian phòng: ${roomName}</strong>
+                    <div style="font-size: 10px; color: #9ca3af;">Bối cảnh: ${backgroundConcept}</div>
+                  </td>
+                  <td style="text-align: right; font-weight: 500;">${roomSurcharge > 0 ? `+${roomSurcharge.toLocaleString('vi-VN')} đ` : '0 đ (Đã bao gồm)'}</td>
+                  <td style="text-align: center; font-weight: bold;">1</td>
+                  <td style="text-align: right; font-weight: 800; color: #111827;">${roomSurcharge > 0 ? roomSurcharge.toLocaleString('vi-VN') + ' đ' : '0 đ'}</td>
+                </tr>
+                ${serviceInvoiceRows}
+                ${discountAmount > 0 ? `
+                  <tr>
+                    <td>
+                      <strong style="color: #059669;">Ưu đãi giảm giá</strong>
+                      <div style="font-size: 10px; color: #059669;">Voucher khuyến mãi</div>
+                    </td>
+                    <td style="text-align: right; font-weight: 500; color: #059669;">-${discountAmount.toLocaleString('vi-VN')} đ</td>
+                    <td style="text-align: center; color: #059669;">1</td>
+                    <td style="text-align: right; font-weight: 800; color: #059669;">-${discountAmount.toLocaleString('vi-VN')} đ</td>
+                  </tr>
+                ` : ''}
               </tbody>
+              <tfoot>
+                <tr style="border-top: 2px solid #E5E7EB;">
+                  <td colspan="3" style="text-align: right; font-weight: 700; padding-top: 8px;">Tổng chi phí buổi chụp:</td>
+                  <td style="text-align: right; font-weight: 800; color: #BE4B5E; font-size: 13px; padding-top: 8px;">${totalAmount.toLocaleString('vi-VN')} đ</td>
+                </tr>
+              </tfoot>
             </table>
 
             <div class="package-perks">
@@ -765,27 +880,6 @@ export default function BookingSessionDetailModal({
     navigate(ROUTES.USER.BOOKING);
   };
 
-  // Tính số đã trả trước để không nhầm booking.totalPrice chứa trong dữ liệu cũ với tiền cọc.
-  const successfulPaymentStatuses = ['completed', 'paid', 'deposit_30', 'deposit_50'];
-  const paidAmount = payments.length > 0
-    ? payments.reduce((sum, p) => sum + (successfulPaymentStatuses.includes(p.status?.toLowerCase()) ? Number(p.amount || 0) : 0), 0)
-    : Number(booking.paidAmount || 0);
-  const packageTotal = Number(packageDetail?.subTotal)
-    || Number(packageDetail?.unitPrice) * Number(packageDetail?.quantity || 1)
-    || 0;
-  const bookingTotal = Number(booking.totalOrderPrice || booking.finalPackagePrice || booking.totalAmount || booking.totalPrice || 0);
-  const depositPayment = payments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
-  const depositRate = depositPayment?.status?.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
-  const depositAmount = Number(depositPayment?.amount || 0);
-  const storedPriceLooksLikeDeposit = depositPayment && (
-    Math.abs(bookingTotal - depositAmount) < 1 || Math.abs(packageTotal - depositAmount) < 1
-  );
-  const inferredOrderTotal = storedPriceLooksLikeDeposit ? depositAmount / depositRate : 0;
-  const totalAmount = Number(booking.totalOrderPrice || booking.finalPackagePrice)
-    || (bookingTotal > paidAmount ? bookingTotal : inferredOrderTotal || packageTotal || bookingTotal)
-    || 1500000;
-  const remainingAmount = Math.max(0, totalAmount - paidAmount);
-
   const statusKey = (booking.status || 'pending').toLowerCase();
   const statusInfo = STATUS_CONFIG[statusKey] || {
     label: booking.status || 'Chờ xác nhận',
@@ -967,50 +1061,161 @@ export default function BookingSessionDetailModal({
             </div>
           </div>
 
-          {/* 3. GÓI ĐÃ ĐẶT & NỘI DUNG GÓI (DỊCH VỤ, TRANG PHỤC, PHỤ KIỆN) */}
+          {/* 3. BẢNG KÊ CHI PHÍ & DỊCH VỤ BUỔI CHỤP */}
           <div className="p-4 rounded-2xl bg-white border border-gray-100 shadow-xs space-y-3">
             <h4 className="font-bold text-xs text-gray-700 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-gray-100">
               <Package className="w-3.5 h-3.5 text-[#BE4B5E]" />
-              Chi Tiết Gói Chụp Đã Đặt
+              Bảng Kê Chi Phí & Dịch Vụ Buổi Chụp
             </h4>
             
-            {/* Bảng chi tiết đơn giá */}
+            {/* Bảng chi tiết đơn giá từng mục */}
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 text-gray-400 font-medium">
-                    <th className="pb-2">Gói chụp</th>
+                    <th className="pb-2">Khoản mục / Dịch vụ</th>
                     <th className="pb-2 text-right">Đơn giá</th>
                     <th className="pb-2 text-center">Số lượng</th>
                     <th className="pb-2 text-right">Thành tiền</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
+                  {/* Gói chụp chính */}
                   <tr>
                     <td className="py-3 flex items-center gap-3">
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                         <img
                           src={packageDetail?.image || booking.packageImage || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=300&q=80'}
-                          alt={booking.packageName || 'Gói Chụp'}
+                          alt={packageName}
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div>
                         <strong className="text-gray-800 font-bold block text-sm">
-                          {booking.packageName || packageDetail?.packageName || 'Gói Chụp Ảnh Studio Tiêu Chuẩn'}
+                          {packageName}
                         </strong>
-                        <span className="text-gray-400 text-[11px]">Bao gồm file gốc & hậu kỳ chuyên sâu</span>
+                        <span className="text-gray-400 text-[11px]">Gói chụp chính • File gốc & hậu kỳ chuyên sâu</span>
                       </div>
                     </td>
                     <td className="py-3 text-right font-medium text-gray-700">
-                      {totalAmount.toLocaleString('vi-VN')} đ
+                      {packagePrice.toLocaleString('vi-VN')} đ
                     </td>
                     <td className="py-3 text-center font-bold text-gray-800">1</td>
                     <td className="py-3 text-right font-bold text-[#BE4B5E] text-sm">
+                      {packagePrice.toLocaleString('vi-VN')} đ
+                    </td>
+                  </tr>
+
+                  {/* Không gian phòng chụp */}
+                  <tr>
+                    <td className="py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                          <img
+                            src={roomDetail?.thumbnail || roomDetail?.image || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=300&q=80'}
+                            alt={roomName}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div>
+                          <strong className="text-gray-800 font-bold block text-sm">
+                            {roomName}
+                          </strong>
+                          <span className="text-gray-400 text-[11px]">
+                            {booking.backgroundName || roomDetail?.concept || 'Không gian phòng chụp Studio Cinematic'}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 text-right font-medium text-gray-700">
+                      {roomSurcharge > 0 ? `+${roomSurcharge.toLocaleString('vi-VN')} đ` : '0 đ (Đã bao gồm)'}
+                    </td>
+                    <td className="py-3 text-center font-bold text-gray-800">1</td>
+                    <td className="py-3 text-right font-bold text-gray-800 text-sm">
+                      {roomSurcharge > 0 ? `+${roomSurcharge.toLocaleString('vi-VN')} đ` : '0 đ'}
+                    </td>
+                  </tr>
+
+                  {/* Dịch vụ bổ sung */}
+                  {selectedServices.length > 0 ? (
+                    selectedServices.map((srv, idx) => (
+                      <tr key={srv.id || idx}>
+                        <td className="py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-rose-50 flex items-center justify-center shrink-0 border border-rose-100 text-[#BE4B5E]">
+                              {srv.image ? (
+                                <img src={srv.image} alt={srv.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <Scissors className="w-5 h-5" />
+                              )}
+                            </div>
+                            <div>
+                              <strong className="text-gray-800 font-bold block text-sm">
+                                {srv.name}
+                              </strong>
+                              <span className="text-gray-400 text-[11px]">Dịch vụ bổ sung đã chọn</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 text-right font-medium text-gray-700">
+                          +{Number(srv.price || 0).toLocaleString('vi-VN')} đ
+                        </td>
+                        <td className="py-3 text-center font-bold text-gray-800">1</td>
+                        <td className="py-3 text-right font-bold text-gray-800 text-sm">
+                          +{Number(srv.price || 0).toLocaleString('vi-VN')} đ
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 border border-dashed border-gray-200 text-gray-400">
+                            <Scissors className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <strong className="text-gray-600 font-medium block text-sm">
+                              Dịch vụ bổ sung
+                            </strong>
+                            <span className="text-gray-400 text-[11px]">Không có dịch vụ bổ sung</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 text-right font-medium text-gray-400">0 đ</td>
+                      <td className="py-3 text-center font-medium text-gray-400">0</td>
+                      <td className="py-3 text-right font-medium text-gray-400 text-sm">0 đ</td>
+                    </tr>
+                  )}
+
+                  {/* Ưu đãi giảm giá nếu có */}
+                  {discountAmount > 0 && (
+                    <tr>
+                      <td className="py-3">
+                        <strong className="text-emerald-700 font-bold block text-sm">
+                          Ưu đãi giảm giá
+                        </strong>
+                        <span className="text-emerald-600 text-[11px]">Voucher áp dụng thành công</span>
+                      </td>
+                      <td className="py-3 text-right font-medium text-emerald-600">
+                        -{discountAmount.toLocaleString('vi-VN')} đ
+                      </td>
+                      <td className="py-3 text-center font-bold text-emerald-600">1</td>
+                      <td className="py-3 text-right font-bold text-emerald-600 text-sm">
+                        -{discountAmount.toLocaleString('vi-VN')} đ
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-gray-200">
+                    <td colSpan={3} className="py-3.5 text-right font-bold text-gray-800 text-sm">
+                      Tổng tiền thanh toán buổi chụp:
+                    </td>
+                    <td className="py-3.5 text-right font-extrabold text-[#BE4B5E] text-base">
                       {totalAmount.toLocaleString('vi-VN')} đ
                     </td>
                   </tr>
-                </tbody>
+                </tfoot>
               </table>
             </div>
 

@@ -95,7 +95,7 @@ export default function Navbar({ onOpenBooking }) {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled || [ROUTES.USER.BOOKING, ROUTES.USER.PAYMENT, ROUTES.USER.MY_BOOKINGS].includes(location.pathname)
+        scrolled || [ROUTES.USER.BOOKING, ROUTES.USER.MY_BOOKINGS].includes(location.pathname)
           ? 'bg-[#141012]/95 backdrop-blur-2xl border-b border-white/10 py-3 shadow-2xl shadow-black/80'
           : showReminder
           ? 'bg-[#141012]/90 backdrop-blur-md border-b border-white/10 py-3 shadow-lg'

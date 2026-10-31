@@ -11,7 +11,6 @@ import GalleryPage from '../pages/user/GalleryPage';
 import StudiosPage from '../pages/user/StudiosPage';
 import ReviewsPage from '../pages/user/ReviewsPage';
 import BookingPage from '../pages/user/BookingPage';
-import PaymentPage from '../pages/user/PaymentPage';
 import VNPayReturnPage from '../pages/user/VNPayReturnPage';
 import MyBookingsPage from '../pages/user/MyBookingsPage';
 import ContactPage from '../pages/user/ContactPage';
@@ -45,6 +44,7 @@ import AdminBannersPage from '../pages/admin/banners';
 import AdminNotificationsPage from '../pages/admin/notifications';
 import AdminImagesPage from '../pages/admin/images';
 import AdminContentsPage from '../pages/admin/contents';
+import AdminContactsPage from '../pages/admin/contacts';
 import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 
 export default function AppRoutes() {
@@ -60,8 +60,8 @@ export default function AppRoutes() {
         <Route path={ROUTES.USER.STUDIOS} element={<StudiosPage />} />
         <Route path={ROUTES.USER.REVIEWS} element={<ReviewsPage />} />
         <Route path={ROUTES.USER.BOOKING} element={<BookingPage />} />
-        <Route path={ROUTES.USER.PAYMENT} element={<PaymentPage />} />
-        <Route path={ROUTES.USER.CHECKOUT} element={<PaymentPage />} />
+        <Route path={ROUTES.USER.PAYMENT} element={<Navigate to={ROUTES.USER.BOOKING} replace />} />
+        <Route path={ROUTES.USER.CHECKOUT} element={<Navigate to={ROUTES.USER.BOOKING} replace />} />
         <Route path={ROUTES.USER.VNPAY_RETURN} element={<VNPayReturnPage />} />
         <Route path={ROUTES.USER.PROFILE} element={<ProfilePage />} />
         <Route path={ROUTES.USER.MY_BOOKINGS} element={<Navigate to={`${ROUTES.USER.PROFILE}?tab=bookings`} replace />} />
@@ -171,13 +171,7 @@ export default function AppRoutes() {
         {/* Quản lý liên hệ */}
         <Route
           path={ROUTES.ADMIN.CONTACTS.replace('/admin/', '')}
-          element={
-            <AdminPlaceholderPage
-              title="Quản Lý Liên Hệ (Contacts)"
-              category="Chăm sóc khách hàng"
-              description="Danh sách tin nhắn liên hệ, khiếu nại và tư vấn từ form website."
-            />
-          }
+          element={<AdminContactsPage />}
         />
       </Route>
       </Route>
