@@ -58,7 +58,17 @@ export default function MyBookingsPage() {
         try {
           const stored = localStorage.getItem('photostudio_paid_orders');
           if (stored) {
-            localPaidOrders = JSON.parse(stored);
+            const parsedOrders = JSON.parse(stored);
+            localPaidOrders = Array.isArray(parsedOrders) ? parsedOrders.map((order) => {
+              const storedStatus = String(order.paymentStatus || '').toLowerCase();
+              const status = ['paid', 'success', 'completed'].includes(storedStatus) || storedStatus === 'paid_deposit' && Number(order.depositPercent) >= 100
+                ? 'paid'
+                : storedStatus === 'deposit_50' || (storedStatus === 'paid_deposit' && Number(order.depositPercent) === 50)
+                  ? 'deposit_50'
+                  : storedStatus === 'deposit_30' || storedStatus === 'paid_deposit' ? 'deposit_30' : 'pending';
+              const paymentStatus = status === 'paid' ? 'Đã thanh toán' : status === 'deposit_50' ? 'Đã cọc 50%' : status === 'deposit_30' ? 'Đã cọc 30%' : 'Đang chờ thanh toán';
+              return { ...order, paymentStatus, paymentType: status === 'paid' ? 'full' : status.startsWith('deposit_') ? 'deposit' : order.paymentType };
+            }) : [];
           }
         } catch {
           // Bỏ qua lỗi đọc localStorage
