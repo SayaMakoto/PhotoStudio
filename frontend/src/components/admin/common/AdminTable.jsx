@@ -55,7 +55,7 @@ export default function AdminTable({
       label: "Chỉnh sửa",
       icon: Pencil,
       handler: editHandler,
-      colorClass: "text-amber-300 hover:bg-amber-500/10 hover:text-amber-200",
+      colorClass: "text-rose-400 hover:bg-rose-500/10 hover:text-amber-200",
     },
     {
       key: "delete",
@@ -238,7 +238,7 @@ export default function AdminTable({
               aria-current={currentPage === pageNumber ? "page" : undefined}
               className={`min-w-8 rounded-lg border px-2.5 py-1.5 text-xs transition-colors ${
                 currentPage === pageNumber
-                  ? "border-amber-400/40 bg-amber-500/15 font-semibold text-amber-300"
+                  ? "border-rose-400/40 bg-amber-500/15 font-semibold text-rose-400"
                   : "border-transparent text-neutral-400 hover:border-neutral-700 hover:bg-neutral-800 hover:text-white"
               }`}
             >

@@ -19,8 +19,8 @@ const NOTIFICATION_STYLES = {
   warning: {
     label: "Cần chú ý",
     Icon: TriangleAlert,
-    iconClass: "text-amber-300",
-    borderClass: "border-amber-500/30",
+    iconClass: "text-rose-400",
+    borderClass: "border-rose-500/30",
   },
   info: {
     label: "Thông báo",

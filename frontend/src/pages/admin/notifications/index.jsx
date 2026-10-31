@@ -26,7 +26,7 @@ const asRows = (rows) => (Array.isArray(rows) ? rows : []);
 
 function SummaryCard({ label, value, icon: Icon, tone = "amber" }) {
   const colors = {
-    amber: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+    amber: "border-rose-500/20 bg-rose-500/10 text-rose-400",
     green: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
     blue: "border-sky-500/20 bg-sky-500/10 text-sky-300",
   };
@@ -313,7 +313,7 @@ export default function AdminNotificationsPage() {
             type="button"
             onClick={() => markAsRead(item)}
             title="Đánh dấu thông báo đã đọc"
-            className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300 transition hover:bg-amber-500/20"
+            className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-medium text-rose-400 transition hover:bg-rose-500/20"
           >
             <CheckCheck className="h-3.5 w-3.5" />
             Chưa đọc
@@ -327,11 +327,11 @@ export default function AdminNotificationsPage() {
     <section className="space-y-5">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-400">
             Quản lý hệ thống
           </p>
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-white">
-            <Bell className="h-6 w-6 text-amber-300" />
+            <Bell className="h-6 w-6 text-rose-400" />
             Quản lý thông báo
           </h1>
           <p className="mt-1 max-w-3xl text-xs text-neutral-400">
@@ -342,7 +342,7 @@ export default function AdminNotificationsPage() {
         <button
           type="button"
           onClick={() => setDialog({ mode: "create", notification: null })}
-          className="inline-flex min-h-11 items-center gap-2 self-start rounded-xl bg-amber-400 px-4 text-xs font-semibold text-neutral-950 transition hover:bg-amber-300 sm:self-auto"
+          className="inline-flex min-h-11 items-center gap-2 self-start rounded-xl bg-rose-500 px-4 text-xs font-semibold text-neutral-950 transition hover:bg-rose-600 sm:self-auto"
         >
           <Plus className="h-4 w-4" />
           Tạo thông báo
@@ -402,7 +402,7 @@ export default function AdminNotificationsPage() {
       {recipientId && (
         <div className="flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-xs text-neutral-300">
-            <Users className="h-4 w-4 text-amber-300" />
+            <Users className="h-4 w-4 text-rose-400" />
             <span>
               Người nhận:{" "}
               <strong className="font-semibold text-white">
@@ -420,7 +420,7 @@ export default function AdminNotificationsPage() {
             type="button"
             disabled={!recipientUnreadCount || markingAllRead}
             onClick={markRecipientAllAsRead}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-amber-500/30 px-3 text-xs font-medium text-amber-300 transition hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-rose-500/30 px-3 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {markingAllRead ? "Đang cập nhật..." : "Đánh dấu tất cả đã đọc"}
           </button>
@@ -444,7 +444,7 @@ export default function AdminNotificationsPage() {
       )}
       {loading ? (
         <div className="flex min-h-48 items-center justify-center rounded-2xl border border-neutral-800 bg-neutral-900/50 text-sm text-neutral-400">
-          <span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-amber-300" />
+          <span className="mr-3 h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-rose-400" />
           Đang tải thông báo...
         </div>
       ) : (

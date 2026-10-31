@@ -7,6 +7,7 @@ import {
   LogOut,
   Camera,
   X,
+  Wallet,
 } from 'lucide-react';
 import employeeAuthService from '../../../services/employee/authService';
 import { ROUTES } from '../../../routes/web';
@@ -14,6 +15,7 @@ import { ROUTES } from '../../../routes/web';
 const EMPLOYEE_NAV_ITEMS = [
   { id: 'dashboard', label: 'Tổng Quan & KPI', icon: LayoutDashboard },
   { id: 'schedule', label: 'Lịch Chụp', icon: CalendarDays },
+  { id: 'salary', label: 'Lương & Hoa Hồng', icon: Wallet },
   { id: 'equipment', label: 'Thiết Bị Tác Nghiệp', icon: Layers },
   { id: 'profile', label: 'Hồ Sơ Cá Nhân', icon: User },
 ];

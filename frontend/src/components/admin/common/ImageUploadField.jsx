@@ -5,7 +5,7 @@ import adminMediaUploadService from '../../../services/admin/mediaUploadService'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const inputClass = 'mt-1.5 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-neutral-100 outline-none transition focus:border-amber-400/60';
+const inputClass = 'mt-1.5 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-neutral-100 outline-none transition focus:border-rose-400/60';
 
 function getErrorMessage(error) {
   return error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Không thể tải ảnh lên.';
@@ -88,7 +88,7 @@ export default function ImageUploadField({
     <div className="mt-1.5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
       <input type="text" maxLength={255} required={required} value={value || ''} disabled={disabled || uploading} onChange={(event) => setValue(event.target.value)} className={`${inputClass} mt-0 min-w-0`} placeholder="URL ảnh hoặc đường dẫn ảnh đã tải lên" />
       <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" disabled={disabled || uploading} onChange={(event) => uploadFile(event.target.files?.[0])} />
-      <button type="button" disabled={disabled || uploading} onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-amber-500/30 px-3 text-xs font-medium text-amber-300 transition hover:bg-amber-500/10 disabled:cursor-wait disabled:opacity-60">
+      <button type="button" disabled={disabled || uploading} onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-500/30 px-3 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10 disabled:cursor-wait disabled:opacity-60">
         {uploading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
         {uploading ? `Đang tải ${progress}%` : 'Chọn ảnh'}
       </button>

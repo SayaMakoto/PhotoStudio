@@ -17,6 +17,7 @@ import {
   Star,
   UserCheck,
   Users,
+  Wallet,
 } from "lucide-react";
 import { ROUTES } from "../../../routes/web";
 
@@ -123,6 +124,12 @@ export const ADMIN_MENU_CONFIG = [
     title: "Quản lý thanh toán",
     icon: CreditCard,
     path: ROUTES.ADMIN.PAYMENTS,
+  },
+  {
+    id: "salaries",
+    title: "Quản lý lương & KPI",
+    icon: Wallet,
+    path: ROUTES.ADMIN.SALARIES,
   },
   {
     id: "reviews",

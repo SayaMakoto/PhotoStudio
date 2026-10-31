@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Layers,
   Camera,
@@ -7,6 +7,8 @@ import {
   Wrench,
   AlertCircle,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 const TYPE_LABELS = {
@@ -27,6 +29,8 @@ const STATUS_LABELS = {
   retired: 'Ngừng sử dụng',
 };
 
+const ITEMS_PER_PAGE = 8;
+
 export default function EquipmentAndCostumesSection({
   equipments = [],
   showHeader = true,
@@ -34,6 +38,7 @@ export default function EquipmentAndCostumesSection({
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredEquipments = useMemo(() => {
     return equipments.filter((item) => {
@@ -62,6 +67,17 @@ export default function EquipmentAndCostumesSection({
       return true;
     });
   }, [equipments, filterType, filterStatus, searchTerm]);
+
+  // Reset trang về 1 khi thay đổi bộ lọc tìm kiếm
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType, filterStatus]);
+
+  const totalPages = Math.ceil(filteredEquipments.length / ITEMS_PER_PAGE) || 1;
+  const paginatedEquipments = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredEquipments.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredEquipments, currentPage]);
 
   const renderStatusBadge = (status) => {
     switch (status) {
@@ -174,51 +190,107 @@ export default function EquipmentAndCostumesSection({
             : 'Không tìm thấy thiết bị nào khớp với bộ lọc tìm kiếm.'}
         </div>
       ) : (
-        <div className="divide-y divide-[#F0E4E6] rounded-2xl border border-[#F0E4E6] bg-white overflow-hidden shadow-sm">
-          {filteredEquipments.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3.5 hover:bg-[#FAF5F5]/60 transition-colors"
-            >
-              <div className="flex items-start sm:items-center gap-3.5">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] shrink-0 mt-0.5 sm:mt-0">
-                  <Camera className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="text-xs sm:text-sm font-bold text-[#261A1E]">
-                      {item.name}
-                    </h4>
-                    {item.serialNumber && (
-                      <span className="font-mono text-[10px] text-[#B85064] bg-[#FDF0F3] border border-[#F5D5DC] px-2 py-0.5 rounded-md font-semibold">
-                        S/N: {item.serialNumber}
-                      </span>
-                    )}
-                    {item.type && (
-                      <span className="text-[10px] bg-[#FAF5F5] border border-[#F0E4E6] text-[#7A6C71] px-2 py-0.5 rounded-md font-medium">
-                        {TYPE_LABELS[item.type] || item.type}
-                      </span>
-                    )}
+        <div className="space-y-4">
+          <div className="divide-y divide-[#F0E4E6] rounded-2xl border border-[#F0E4E6] bg-white overflow-hidden shadow-sm">
+            {paginatedEquipments.map((item) => (
+              <div
+                key={item.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3.5 hover:bg-[#FAF5F5]/60 transition-colors"
+              >
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] shrink-0 mt-0.5 sm:mt-0">
+                    <Camera className="h-5 w-5" />
                   </div>
-                  <p className="text-[11px] text-[#7A6C71] mt-1">
-                    {item.brand && (
-                      <>Thương hiệu: <strong className="text-[#261A1E] font-medium">{item.brand}</strong></>
-                    )}
-                    {item.model && (
-                      <> • Model: <strong className="text-[#261A1E] font-medium">{item.model}</strong></>
-                    )}
-                    {item.description && (
-                      <> • <span className="italic text-[#9E8E93]">{item.description}</span></>
-                    )}
-                  </p>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-xs sm:text-sm font-bold text-[#261A1E]">
+                        {item.name}
+                      </h4>
+                      {item.serialNumber && (
+                        <span className="font-mono text-[10px] text-[#B85064] bg-[#FDF0F3] border border-[#F5D5DC] px-2 py-0.5 rounded-md font-semibold">
+                          S/N: {item.serialNumber}
+                        </span>
+                      )}
+                      {item.type && (
+                        <span className="text-[10px] bg-[#FAF5F5] border border-[#F0E4E6] text-[#7A6C71] px-2 py-0.5 rounded-md font-medium">
+                          {TYPE_LABELS[item.type] || item.type}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-[#7A6C71] mt-1">
+                      {item.brand && (
+                        <>Thương hiệu: <strong className="text-[#261A1E] font-medium">{item.brand}</strong></>
+                      )}
+                      {item.model && (
+                        <> • Model: <strong className="text-[#261A1E] font-medium">{item.model}</strong></>
+                      )}
+                      {item.description && (
+                        <> • <span className="italic text-[#9E8E93]">{item.description}</span></>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 self-end sm:self-auto shrink-0 pt-2 sm:pt-0">
+                  {renderStatusBadge(item.status)}
                 </div>
               </div>
+            ))}
+          </div>
 
-              <div className="flex items-center gap-3 self-end sm:self-auto shrink-0 pt-2 sm:pt-0">
-                {renderStatusBadge(item.status)}
+          {/* Phân trang 8 thiết bị / lần */}
+          {filteredEquipments.length > ITEMS_PER_PAGE && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#F0E4E6] text-xs">
+              <span className="text-[#7A6C71]">
+                Hiển thị{' '}
+                <strong className="text-[#261A1E]">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + 1}–
+                  {Math.min(currentPage * ITEMS_PER_PAGE, filteredEquipments.length)}
+                </strong>{' '}
+                trong tổng số <strong className="text-[#261A1E]">{filteredEquipments.length}</strong> thiết bị
+              </span>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="p-1.5 rounded-lg border border-[#F0E4E6] bg-white hover:bg-[#FAF5F5] disabled:opacity-40 disabled:cursor-not-allowed text-[#261A1E] transition-colors"
+                  title="Trang trước"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  const pageNum = index + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`min-w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
+                        currentPage === pageNum
+                          ? 'bg-[#B85064] text-white shadow-xs'
+                          : 'border border-[#F0E4E6] bg-white text-[#261A1E] hover:bg-[#FAF5F5]'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="p-1.5 rounded-lg border border-[#F0E4E6] bg-white hover:bg-[#FAF5F5] disabled:opacity-40 disabled:cursor-not-allowed text-[#261A1E] transition-colors"
+                  title="Trang sau"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>

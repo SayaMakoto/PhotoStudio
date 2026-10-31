@@ -88,13 +88,13 @@ export default function AdminSidebar({
             onClick={onCloseMobile}
             className="flex items-center gap-3 hover:opacity-90 transition-opacity"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-amber-400 to-amber-600 text-neutral-950 shadow-lg shadow-amber-500/20 font-bold">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-rose-500 to-rose-700 text-neutral-950 shadow-lg shadow-rose-500/20 font-bold">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
                 PhotoStudio{" "}
-                <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400 border border-amber-500/30">
+                <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-rose-400 border border-rose-500/30">
                   ADMIN
                 </span>
               </h1>
@@ -137,19 +137,19 @@ export default function AdminSidebar({
                   onClick={onCloseMobile}
                   className={`group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200 ${
                     isDirectActive
-                      ? "bg-linear-to-r from-amber-500/20 to-amber-500/5 text-amber-300 shadow-inner border border-amber-500/30"
+                      ? "bg-linear-to-r from-rose-500/20 to-rose-500/5 text-rose-400 shadow-inner border border-rose-500/30"
                       : "text-neutral-300 hover:bg-neutral-900 hover:text-white"
                   }`}
                 >
                   {isDirectActive && (
-                    <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-amber-400 shadow-[0_0_8px_#f59e0b]" />
+                    <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-rose-500 shadow-[0_0_8px_#BE4B5E]" />
                   )}
                   <div className="flex items-center gap-2.5 min-w-0 pr-2">
                     <Icon
                       className={`h-4 w-4 shrink-0 transition-colors ${
                         isDirectActive
-                          ? "text-amber-400"
-                          : "text-neutral-400 group-hover:text-amber-400"
+                          ? "text-rose-400"
+                          : "text-neutral-400 group-hover:text-rose-400"
                       }`}
                     />
                     <span className="whitespace-nowrap text-xs font-medium">
@@ -157,7 +157,7 @@ export default function AdminSidebar({
                     </span>
                   </div>
                   {badge && (
-                    <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-medium text-amber-300 border border-amber-500/30">
+                    <span className="shrink-0 rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-medium text-rose-400 border border-rose-500/30">
                       {badge}
                     </span>
                   )}
@@ -185,8 +185,8 @@ export default function AdminSidebar({
                     <Icon
                       className={`h-4 w-4 shrink-0 transition-colors ${
                         isChildActive
-                          ? "text-amber-400"
-                          : "text-neutral-400 group-hover:text-amber-400"
+                          ? "text-rose-400"
+                          : "text-neutral-400 group-hover:text-rose-400"
                       }`}
                     />
                     <span className="whitespace-nowrap text-xs font-medium">
@@ -195,7 +195,7 @@ export default function AdminSidebar({
                   </div>
                   <ChevronDown
                     className={`h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform duration-200 ${
-                      isGroupOpen ? "rotate-180 text-amber-400" : ""
+                      isGroupOpen ? "rotate-180 text-rose-400" : ""
                     }`}
                   />
                 </button>
@@ -214,18 +214,18 @@ export default function AdminSidebar({
                           onClick={onCloseMobile}
                           className={`group relative flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium transition-all duration-200 ${
                             isSubActive
-                              ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
+                              ? "bg-amber-500/15 text-rose-400 border border-rose-500/30 shadow-sm"
                               : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
                           }`}
                         >
                           {isSubActive && (
-                            <span className="absolute -left-2.25 top-1.5 bottom-1.5 w-0.5 rounded-r bg-amber-400 shadow-[0_0_6px_#f59e0b]" />
+                            <span className="absolute -left-2.25 top-1.5 bottom-1.5 w-0.5 rounded-r bg-rose-500 shadow-[0_0_6px_#f59e0b]" />
                           )}
                           <SubIcon
                             className={`h-3.5 w-3.5 shrink-0 transition-colors ${
                               isSubActive
-                                ? "text-amber-400"
-                                : "text-neutral-400 group-hover:text-amber-300"
+                                ? "text-rose-400"
+                                : "text-neutral-400 group-hover:text-rose-400"
                             }`}
                           />
                           <span className="whitespace-nowrap text-xs font-medium">

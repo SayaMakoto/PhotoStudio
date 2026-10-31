@@ -46,7 +46,7 @@ export default function EmployeeDetailDialog({ employee, onClose }) {
 
         <div className="space-y-6">
           <section>
-            <h3 className="mb-3 text-sm font-semibold text-amber-300">Thông tin tài khoản</h3>
+            <h3 className="mb-3 text-sm font-semibold text-rose-400">Thông tin tài khoản</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <InfoItem label="Mã người dùng" value={employee.userId} />
               <InfoItem label="Tên đăng nhập" value={employee.username} />
@@ -79,7 +79,7 @@ export default function EmployeeDetailDialog({ employee, onClose }) {
           </section>
 
           <section>
-            <h3 className="mb-3 text-sm font-semibold text-amber-300">Hồ sơ nhân viên</h3>
+            <h3 className="mb-3 text-sm font-semibold text-rose-400">Hồ sơ nhân viên</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <InfoItem
                 label="Vị trí"
@@ -97,9 +97,9 @@ export default function EmployeeDetailDialog({ employee, onClose }) {
 
           <section>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold text-amber-300">Đánh giá của khách hàng</h3>
+              <h3 className="text-sm font-semibold text-rose-400">Đánh giá của khách hàng</h3>
               <p className="flex items-center gap-1.5 text-xs text-neutral-300">
-                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-rose-400" />
                 {employee.averageRating == null ? "Chưa có điểm" : `${employee.averageRating.toFixed(1)} / 5`}
                 <span className="text-neutral-500">({employee.reviews.length} đánh giá)</span>
               </p>
@@ -120,8 +120,8 @@ export default function EmployeeDetailDialog({ employee, onClose }) {
                       <p className="text-xs font-medium text-neutral-300">
                         Mã đánh giá #{review.reviewId}
                       </p>
-                      <p className="flex items-center gap-1 text-xs text-amber-300">
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      <p className="flex items-center gap-1 text-xs text-rose-400">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-rose-400" />
                         {Number(review.rating || 0).toFixed(1)} / 5
                       </p>
                     </div>

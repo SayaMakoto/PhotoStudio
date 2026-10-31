@@ -73,7 +73,7 @@ export default function ResourceStatusTable() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-5">
         <div>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
               <Camera className="h-4 w-4" />
             </div>
             <h3 className="text-base font-semibold text-white">
@@ -122,7 +122,7 @@ export default function ResourceStatusTable() {
                 >
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-800 text-amber-400 border border-neutral-700/60">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-800 text-rose-400 border border-neutral-700/60">
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
@@ -144,7 +144,7 @@ export default function ResourceStatusTable() {
                       {res.active}
                     </span>
                   </td>
-                  <td className="px-4 py-4 text-center font-mono text-amber-300 font-medium">
+                  <td className="px-4 py-4 text-center font-mono text-rose-400 font-medium">
                     {res.inUse}
                   </td>
                   <td className="px-4 py-4 text-center font-mono">

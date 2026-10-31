@@ -67,7 +67,7 @@ export default function SummaryCards({
               <span className="text-xs font-medium text-neutral-400">
                 {card.title}
               </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-800/80 text-amber-400 border border-neutral-700/60 shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-800/80 text-rose-400 border border-neutral-700/60 shadow-sm">
                 <Icon className="h-4.5 w-4.5" />
               </div>
             </div>
@@ -83,7 +83,7 @@ export default function SummaryCards({
                       duration={1.5}
                       separator="."
                     />
-                    <span className="text-base text-amber-400 ml-1 font-sans font-semibold">
+                    <span className="text-base text-rose-400 ml-1 font-sans font-semibold">
                       Triệu đồng
                     </span>
                   </>

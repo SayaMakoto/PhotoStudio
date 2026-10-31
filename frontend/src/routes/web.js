@@ -99,6 +99,9 @@ export const ROUTES = {
 
     // Quản lý liên hệ
     CONTACTS: '/admin/contacts',
+
+    // Quản lý lương & hoa hồng
+    SALARIES: '/admin/salaries',
   },
 };
 
