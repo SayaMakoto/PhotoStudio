@@ -91,9 +91,6 @@ export default function ReviewsPage() {
             avatar: item.avatar || null,
             adminReply: item.adminReply || null,
             adminRepliedAt: item.adminRepliedAt || null,
-            employeeReviews: Array.isArray(item.employeeReviews)
-              ? item.employeeReviews
-              : [],
           }));
           setReviews(mapped);
         } else {
@@ -123,6 +120,8 @@ export default function ReviewsPage() {
         count5: 0,
         count4: 0,
         count3: 0,
+        count2: 0,
+        count1: 0,
         satisfaction: 100,
       };
 
@@ -138,9 +137,15 @@ export default function ReviewsPage() {
     const count3 = reviews.filter(
       (r) => Math.round(Number(r.rating) || 5) === 3,
     ).length;
+    const count2 = reviews.filter(
+      (r) => Math.round(Number(r.rating) || 5) === 2,
+    ).length;
+    const count1 = reviews.filter(
+      (r) => Math.round(Number(r.rating) || 5) === 1,
+    ).length;
     const satisfaction = (((count5 + count4) / total) * 100).toFixed(1);
 
-    return { avg, total, count5, count4, count3, satisfaction };
+    return { avg, total, count5, count4, count3, count2, count1, satisfaction };
   }, [reviews]);
 
   // Đếm số lượng theo từng mức sao cho menu xổ xuống
@@ -872,18 +877,6 @@ export default function ReviewsPage() {
                   <div className="text-xs sm:text-sm text-[#3E2F35] leading-relaxed font-light pl-1 sm:pl-2">
                     "{rev.comment}"
                   </div>
-
-                  {/* Ghi chú dịch vụ nhân viên (nếu có) */}
-                  {rev.employeeReviews && rev.employeeReviews.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-dashed border-[#F5EAEB] flex items-center gap-2 text-xs text-[#7A6C71] pl-1 sm:pl-2">
-                      <SparklesIcon className="w-4 h-4 text-[#B85064] shrink-0" />
-                      <span>
-                        <strong>Ghi chú dịch vụ:</strong> "
-                        {rev.employeeReviews[0].comment}"
-                      </span>
-                    </div>
-                  )}
-
                   {/* Phản hồi từ PhotoStudio / Ban quản lý */}
                   {rev.adminReply && (
                     <div className="mt-4 p-4 rounded-2xl bg-[#FDF0F3]/80 border border-[#F5D5DC] text-xs space-y-1.5 ml-1 sm:ml-2">
@@ -907,48 +900,6 @@ export default function ReviewsPage() {
                       </p>
                     </div>
                   )}
-
-                  {/* Phản hồi từ nhân viên phụ trách nếu có */}
-                  {rev.employeeReviews &&
-                    rev.employeeReviews.some((er) => er.adminReply) && (
-                      <div className="mt-3 space-y-2 ml-1 sm:ml-2">
-                        {rev.employeeReviews
-                          .filter((er) => er.adminReply)
-                          .map((er, erIdx) => (
-                            <div
-                              key={er.id || erIdx}
-                              className="p-3.5 rounded-2xl bg-[#FAF5F5] border border-[#F0E4E6] text-xs space-y-1"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5 font-bold text-[#2A1D22]">
-                                  <ChatBubbleLeftRightIcon className="w-3.5 h-3.5 text-[#B85064]" />
-                                  <span>
-                                    {er.employeeName || "Nhân viên"}
-                                    {er.employeePosition && (
-                                      <span className="font-normal text-[#7A6C71] ml-1">
-                                        ({er.employeePosition})
-                                      </span>
-                                    )}{" "}
-                                    phản hồi:
-                                  </span>
-                                </div>
-                                {er.adminRepliedAt && (
-                                  <span className="text-[10px] text-[#9E8E93]">
-                                    {new Date(er.adminRepliedAt).toLocaleDateString("vi-VN", {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                    })}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[#3E2F35] font-normal leading-relaxed pl-5 italic">
-                                "{er.adminReply}"
-                              </p>
-                            </div>
-                          ))}
-                      </div>
-                    )}
                 </motion.div>
               );
             })}

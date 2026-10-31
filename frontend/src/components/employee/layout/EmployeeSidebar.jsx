@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   CalendarDays,
   Layers,
-  Star,
   User,
   LogOut,
   Camera,
@@ -16,7 +15,6 @@ const EMPLOYEE_NAV_ITEMS = [
   { id: 'dashboard', label: 'Tổng Quan & KPI', icon: LayoutDashboard },
   { id: 'schedule', label: 'Lịch Chụp', icon: CalendarDays },
   { id: 'equipment', label: 'Thiết Bị Tác Nghiệp', icon: Layers },
-  { id: 'reviews', label: 'Đánh Giá Khách Hàng', icon: Star },
   { id: 'profile', label: 'Hồ Sơ Cá Nhân', icon: User },
 ];
 

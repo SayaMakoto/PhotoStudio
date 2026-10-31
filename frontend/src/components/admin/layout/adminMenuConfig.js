@@ -17,7 +17,6 @@ import {
   Star,
   UserCheck,
   Users,
-  UserRoundCheck,
 } from "lucide-react";
 import { ROUTES } from "../../../routes/web";
 
@@ -136,13 +135,6 @@ export const ADMIN_MENU_CONFIG = [
         subkey: "reviews",
         icon: Star,
         path: ROUTES.ADMIN.REVIEWS.REVIEWS,
-      },
-      {
-        id: "employee_reviews",
-        title: "Đánh giá nhân viên",
-        subkey: "employee_reviews",
-        icon: UserRoundCheck,
-        path: ROUTES.ADMIN.REVIEWS.EMPLOYEE_REVIEWS,
       },
     ],
   },

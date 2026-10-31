@@ -41,7 +41,6 @@ import AdminPackagesPage from '../pages/admin/packages';
 import AdminBookingsPage from '../pages/admin/bookings';
 import AdminPaymentsPage from '../pages/admin/payments';
 import AdminReviewsPage from '../pages/admin/reviews';
-import AdminEmployeeReviewsPage from '../pages/admin/employee-reviews';
 import AdminBannersPage from '../pages/admin/banners';
 import AdminNotificationsPage from '../pages/admin/notifications';
 import AdminImagesPage from '../pages/admin/images';
@@ -149,10 +148,7 @@ export default function AppRoutes() {
           path={ROUTES.ADMIN.REVIEWS.REVIEWS.replace('/admin/', '')}
           element={<AdminReviewsPage />}
         />
-        <Route
-          path={ROUTES.ADMIN.REVIEWS.EMPLOYEE_REVIEWS.replace('/admin/', '')}
-          element={<AdminEmployeeReviewsPage />}
-        />
+
 
         {/* Quản lý hệ thống */}
         <Route
