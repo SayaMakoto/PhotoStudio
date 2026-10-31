@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   CheckIcon,
   ClockIcon,
@@ -8,39 +8,109 @@ import {
   StarIcon,
   TagIcon,
   CheckCircleIcon,
-} from '@heroicons/react/24/solid';
-import ScrollReveal from '../../animations/ScrollReveal';
-import customerPackageService from '../../../services/user/packageService';
-import customerServiceService from '../../../services/user/serviceService';
-import userImageService from '../../../services/user/imageService';
-import { ROUTES } from '../../../routes/web';
+} from "@heroicons/react/24/solid";
+import ScrollReveal from "../../animations/ScrollReveal";
+import customerPackageService from "../../../services/user/packageService";
+import customerServiceService from "../../../services/user/serviceService";
+import userImageService from "../../../services/user/imageService";
+import { ROUTES } from "../../../routes/web";
 
 const CURATED_FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=85',
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=85",
 ];
 
 const EQUIPMENT_LABELS = {
-  camera: 'Máy ảnh',
-  lighting: 'Đèn studio',
-  tripod: 'Chân máy',
-  backdrop: 'Phông nền',
-  lens: 'Ống kính',
-  reflector: 'Tấm hắt sáng',
-  softbox: 'Softbox',
+  camera: "Máy ảnh",
+  lighting: "Đèn studio",
+  tripod: "Chân máy",
+  backdrop: "Phông nền",
+  lens: "Ống kính",
+  reflector: "Tấm hắt sáng",
+  softbox: "Softbox",
 };
 
 const DEFAULT_ADDITIONAL_SERVICES = [
-  { id: 1, name: 'Trang Điểm & Làm Tóc Chuyên Nghiệp (Layout 1)', type: 'makeup', description: 'Layout makeup cá nhân phù hợp từng đường nét gương mặt và concept chụp', duration: 60, price: 300000.0, status: 'active' },
-  { id: 2, name: 'Trang Điểm Thay Layout Thứ 2 Trong Buổi Chụp', type: 'makeup', description: 'Dặm phấn, thay đổi màu son và kiểu tóc sang concept trang phục mới', duration: 30, price: 200000.0, status: 'active' },
-  { id: 3, name: 'Chỉnh Sửa Ảnh Chuyên Sâu (Retouch Da & Dáng 10 Ảnh)', type: 'photography', description: 'Kỹ thuật Frequency Separation giữ vân da thật, cân chỉnh màu sắc điện ảnh', duration: 60, price: 250000.0, status: 'active' },
-  { id: 4, name: 'Thuê Phụ Kiện Không Giới Hạn Toàn Buổi', type: 'accessory', description: 'Sử dụng toàn bộ vương miện, hoa cưới, đạo cụ trong studio', duration: 0, price: 150000.0, status: 'active' },
-  { id: 5, name: 'In Album Photobook Mở Phẳng Cao Cấp 25x25 (20 Trang)', type: 'photography', description: 'In giấy mỹ thuật phủ màng UV chống ẩm mốc, bìa bọc da sang trọng', duration: 0, price: 850000.0, status: 'active' },
-  { id: 6, name: 'In Ảnh Cổng Pha Lê Tráng Gương Khổ Lớn 60x90cm', type: 'photography', description: 'Khung viền mạ vàng, bề mặt tráng gương chống lóa sắc nét', duration: 0, price: 650000.0, status: 'active' },
-  { id: 7, name: 'Quay Video Highlight Hậu Kỳ Cinematic 4K (60 Giây)', type: 'photography', description: 'Video dọc định dạng Reels/TikTok/Shorts ghi lại hậu trường lung linh', duration: 90, price: 900000.0, status: 'active' },
-  { id: 8, name: 'Thuê Thêm Trang Phục Thiết Kế (1 Bộ / Concept)', type: 'clothing', description: 'Tự chọn váy cưới ren Pháp, áo dài hoặc vest cao cấp kèm hỗ trợ là ủi hơi nước', duration: 30, price: 200000.0, status: 'active' },
+  {
+    id: 1,
+    name: "Trang Điểm & Làm Tóc Chuyên Nghiệp (Layout 1)",
+    type: "makeup",
+    description:
+      "Layout makeup cá nhân phù hợp từng đường nét gương mặt và concept chụp",
+    duration: 60,
+    price: 300000.0,
+    status: "active",
+  },
+  {
+    id: 2,
+    name: "Trang Điểm Thay Layout Thứ 2 Trong Buổi Chụp",
+    type: "makeup",
+    description:
+      "Dặm phấn, thay đổi màu son và kiểu tóc sang concept trang phục mới",
+    duration: 30,
+    price: 200000.0,
+    status: "active",
+  },
+  {
+    id: 3,
+    name: "Chỉnh Sửa Ảnh Chuyên Sâu (Retouch Da & Dáng 10 Ảnh)",
+    type: "photography",
+    description:
+      "Kỹ thuật Frequency Separation giữ vân da thật, cân chỉnh màu sắc điện ảnh",
+    duration: 60,
+    price: 250000.0,
+    status: "active",
+  },
+  {
+    id: 4,
+    name: "Thuê Phụ Kiện Không Giới Hạn Toàn Buổi",
+    type: "accessory",
+    description: "Sử dụng toàn bộ vương miện, hoa cưới, đạo cụ trong studio",
+    duration: 0,
+    price: 150000.0,
+    status: "active",
+  },
+  {
+    id: 5,
+    name: "In Album Photobook Mở Phẳng Cao Cấp 25x25 (20 Trang)",
+    type: "photography",
+    description:
+      "In giấy mỹ thuật phủ màng UV chống ẩm mốc, bìa bọc da sang trọng",
+    duration: 0,
+    price: 850000.0,
+    status: "active",
+  },
+  {
+    id: 6,
+    name: "In Ảnh Cổng Pha Lê Tráng Gương Khổ Lớn 60x90cm",
+    type: "photography",
+    description: "Khung viền mạ vàng, bề mặt tráng gương chống lóa sắc nét",
+    duration: 0,
+    price: 650000.0,
+    status: "active",
+  },
+  {
+    id: 7,
+    name: "Quay Video Highlight Hậu Kỳ Cinematic 4K (60 Giây)",
+    type: "photography",
+    description:
+      "Video dọc định dạng Reels/TikTok/Shorts ghi lại hậu trường lung linh",
+    duration: 90,
+    price: 900000.0,
+    status: "active",
+  },
+  {
+    id: 8,
+    name: "Thuê Thêm Trang Phục Thiết Kế (1 Bộ / Concept)",
+    type: "clothing",
+    description:
+      "Tự chọn váy cưới ren Pháp, áo dài hoặc vest cao cấp kèm hỗ trợ là ủi hơi nước",
+    duration: 30,
+    price: 200000.0,
+    status: "active",
+  },
 ];
 
 export default function Services({ onSelectPackage }) {
@@ -56,26 +126,36 @@ export default function Services({ onSelectPackage }) {
     ])
       .then(([pkgRes, srvRes, imgRes]) => {
         const allImages =
-          imgRes.status === 'fulfilled' && Array.isArray(imgRes.value) ? imgRes.value : [];
+          imgRes.status === "fulfilled" && Array.isArray(imgRes.value)
+            ? imgRes.value
+            : [];
 
-        if (pkgRes.status === 'fulfilled' && Array.isArray(pkgRes.value)) {
-          const active = pkgRes.value.filter((p) => !p.status || p.status === 'active');
+        if (pkgRes.status === "fulfilled" && Array.isArray(pkgRes.value)) {
+          const active = pkgRes.value.filter(
+            (p) => !p.status || p.status === "active",
+          );
           const mapped = active.map((pkg, idx) => {
             const matchedImg = allImages.find(
               (img) =>
-                img.imageableType?.toLowerCase() === 'package' &&
-                Number(img.imageableId) === Number(pkg.id)
+                img.imageableType?.toLowerCase() === "package" &&
+                Number(img.imageableId) === Number(pkg.id),
             );
             const displayImage =
               matchedImg?.imageUrl ||
               pkg.imageUrl ||
               CURATED_FALLBACK_IMAGES[idx % CURATED_FALLBACK_IMAGES.length];
 
-            const nameLower = (pkg.name || '').toLowerCase();
-            let badgeTag = 'Hot Concept';
-            if (nameLower.includes('cưới')) badgeTag = idx === 1 ? 'Best Seller' : 'Luxury Wedding';
-            else if (nameLower.includes('cá nhân') || nameLower.includes('nàng thơ')) badgeTag = 'Xu Hướng 2026';
-            else if (nameLower.includes('gia đình')) badgeTag = 'Ấm Cúng & Gắn Kết';
+            const nameLower = (pkg.name || "").toLowerCase();
+            let badgeTag = "Hot Concept";
+            if (nameLower.includes("cưới"))
+              badgeTag = idx === 1 ? "Best Seller" : "Luxury Wedding";
+            else if (
+              nameLower.includes("cá nhân") ||
+              nameLower.includes("nàng thơ")
+            )
+              badgeTag = "Xu Hướng 2026";
+            else if (nameLower.includes("gia đình"))
+              badgeTag = "Ấm Cúng & Gắn Kết";
 
             return {
               ...pkg,
@@ -88,9 +168,17 @@ export default function Services({ onSelectPackage }) {
           setPackages([]);
         }
 
-        if (srvRes.status === 'fulfilled' && Array.isArray(srvRes.value) && srvRes.value.length > 0) {
-          const activeSrvs = srvRes.value.filter((s) => !s.status || s.status === 'active');
-          setAdditionalServices(activeSrvs.length > 0 ? activeSrvs : DEFAULT_ADDITIONAL_SERVICES);
+        if (
+          srvRes.status === "fulfilled" &&
+          Array.isArray(srvRes.value) &&
+          srvRes.value.length > 0
+        ) {
+          const activeSrvs = srvRes.value.filter(
+            (s) => !s.status || s.status === "active",
+          );
+          setAdditionalServices(
+            activeSrvs.length > 0 ? activeSrvs : DEFAULT_ADDITIONAL_SERVICES,
+          );
         } else {
           setAdditionalServices(DEFAULT_ADDITIONAL_SERVICES);
         }
@@ -99,7 +187,7 @@ export default function Services({ onSelectPackage }) {
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error('[Pricing] Lỗi tải dữ liệu:', err);
+        console.error("[Pricing] Lỗi tải dữ liệu:", err);
       });
   }, []);
 
@@ -118,16 +206,20 @@ export default function Services({ onSelectPackage }) {
         list.push(`${eq.quantity}x ${label}`);
       });
     }
-    return list.length > 0 ? list : ['Bao gồm trọn gói dịch vụ và không gian phòng chụp'];
+    return list.length > 0
+      ? list
+      : ["Bao gồm trọn gói dịch vụ và không gian phòng chụp"];
   };
 
   return (
-    <section id="services" className="py-24 relative overflow-hidden bg-[#FAF5F5]">
+    <section
+      id="services"
+      className="py-24 relative overflow-hidden bg-[#FAF5F5]"
+    >
       {/* Background ambient light */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-rose-500/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
         {/* Section Header */}
         <ScrollReveal direction="down">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -141,7 +233,8 @@ export default function Services({ onSelectPackage }) {
             </h2>
 
             <p className="text-[#7A6C71] text-base font-light leading-relaxed">
-              Các gói chụp nổi bật kết hợp hình ảnh concept đặc sắc từ PhotoStudio.
+              Các gói chụp nổi bật kết hợp hình ảnh concept đặc sắc từ
+              PhotoStudio.
             </p>
           </div>
         </ScrollReveal>
@@ -172,8 +265,8 @@ export default function Services({ onSelectPackage }) {
             {packages.slice(0, 3).map((pkg, idx) => {
               const features = getPackageFeatures(pkg);
               const formattedPrice = pkg.price
-                ? Number(pkg.price).toLocaleString('vi-VN')
-                : 'Liên hệ';
+                ? Number(pkg.price).toLocaleString("vi-VN")
+                : "Liên hệ";
 
               return (
                 <ScrollReveal
@@ -183,9 +276,7 @@ export default function Services({ onSelectPackage }) {
                   duration={0.6}
                   className="flex"
                 >
-                  <div
-                    className="group flex flex-col justify-between relative overflow-hidden rounded-3xl p-0 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#B85064]/20 hover:border-[#B85064] hover:ring-1 hover:ring-[#B85064]/40 w-full bg-white border border-[#F0E4E6] shadow-sm"
-                  >
+                  <div className="group flex flex-col justify-between relative overflow-hidden rounded-3xl p-0 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#B85064]/20 hover:border-[#B85064] hover:ring-1 hover:ring-[#B85064]/40 w-full bg-white border border-[#F0E4E6] shadow-sm">
                     <div>
                       {/* Product Image Cover */}
                       <div className="relative h-56 w-full overflow-hidden bg-neutral-100">
@@ -224,7 +315,8 @@ export default function Services({ onSelectPackage }) {
                         </h3>
 
                         <p className="text-xs text-[#7A6C71] font-light mb-6 min-h-[38px] leading-relaxed line-clamp-2">
-                          {pkg.description || 'Dịch vụ chụp ảnh nghệ thuật tại Studio.'}
+                          {pkg.description ||
+                            "Dịch vụ chụp ảnh nghệ thuật tại Studio."}
                         </p>
 
                         {/* Price from Database */}
@@ -233,7 +325,9 @@ export default function Services({ onSelectPackage }) {
                             <span className="text-3xl sm:text-4xl font-extrabold text-[#B85064] tracking-tight font-sans">
                               {formattedPrice}
                             </span>
-                            <span className="text-base font-bold text-[#B85064]">VNĐ</span>
+                            <span className="text-base font-bold text-[#B85064]">
+                              VNĐ
+                            </span>
                           </div>
                           <span className="text-xs text-[#7A6C71] mt-1 block">
                             Trọn gói thiết bị & không gian phòng chụp
@@ -243,7 +337,10 @@ export default function Services({ onSelectPackage }) {
                         {/* Features */}
                         <div className="space-y-2.5 mb-6">
                           {features.slice(0, 3).map((feat, fIdx) => (
-                            <div key={fIdx} className="flex items-start gap-2.5">
+                            <div
+                              key={fIdx}
+                              className="flex items-start gap-2.5"
+                            >
                               <div className="w-4 h-4 rounded-full bg-[#FDF0F3] text-[#B85064] flex items-center justify-center shrink-0 mt-0.5">
                                 <CheckIcon className="w-3 h-3 stroke-[3]" />
                               </div>
@@ -266,7 +363,9 @@ export default function Services({ onSelectPackage }) {
                       </Link>
 
                       <button
-                        onClick={() => (onSelectPackage ? onSelectPackage(pkg.id) : null)}
+                        onClick={() =>
+                          onSelectPackage ? onSelectPackage(pkg.id) : null
+                        }
                         className="cursor-pointer py-3 px-3 rounded-2xl font-bold text-xs tracking-wide transition-all duration-300 flex items-center justify-center gap-1.5 bg-[#B85064] text-white hover:bg-[#A33D50] shadow-md shadow-[#B85064]/20 hover:scale-[1.03]"
                       >
                         <span>Đặt Lịch Ngay</span>
@@ -301,8 +400,9 @@ export default function Services({ onSelectPackage }) {
                     <WrenchScrewdriverIcon className="w-6 h-6 text-[#B85064]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-[#2A1D22] font-serif-luxury">Dịch Vụ Phụ Trợ & Tiện Ích</h3>
-                    <p className="text-xs text-[#7A6C71]">Đồng bộ từ danh mục dịch vụ trong cơ sở dữ liệu</p>
+                    <h3 className="text-xl font-bold text-[#2A1D22] font-serif-luxury">
+                      Dịch Vụ Phụ Trợ & Tiện Ích
+                    </h3>
                   </div>
                 </div>
                 <span className="text-xs text-[#B85064] bg-[#FDF0F3] px-3.5 py-1.5 rounded-full border border-[#F5D5DC] w-fit font-medium">
@@ -320,17 +420,20 @@ export default function Services({ onSelectPackage }) {
                       <CheckCircleIcon className="w-5 h-5 text-neutral-800" />
                     </div>
                     <span className="text-[10px] uppercase font-bold tracking-wider text-[#B85064] mb-1 block">
-                      Loại: {service.type || 'Dịch vụ'}
+                      Loại: {service.type || "Dịch vụ"}
                     </span>
                     <h4 className="text-sm font-bold text-[#2A1D22] group-hover:text-[#B85064] mb-1.5 transition-colors">
                       {service.name}
                     </h4>
                     <p className="text-xs text-[#7A6C71] mb-4 font-light leading-relaxed min-h-[36px]">
-                      {service.description || 'Dịch vụ tiện ích studio hỗ trợ buổi chụp'}
+                      {service.description ||
+                        "Dịch vụ tiện ích studio hỗ trợ buổi chụp"}
                     </p>
                     <div className="flex items-center justify-between pt-3 border-t border-[#F0E4E6]">
                       <p className="text-sm font-extrabold text-[#B85064]">
-                        {service.price ? `${Number(service.price).toLocaleString('vi-VN')}đ` : 'Liên hệ'}
+                        {service.price
+                          ? `${Number(service.price).toLocaleString("vi-VN")}đ`
+                          : "Liên hệ"}
                       </p>
                       {service.duration ? (
                         <span className="text-[11px] text-[#7A6C71] flex items-center gap-1">
@@ -345,7 +448,6 @@ export default function Services({ onSelectPackage }) {
             </div>
           </ScrollReveal>
         )}
-
       </div>
     </section>
   );
