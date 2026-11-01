@@ -135,11 +135,14 @@ export default function Services({ onSelectPackage }) {
             (p) => !p.status || p.status === "active",
           );
           const mapped = active.map((pkg, idx) => {
-            const matchedImg = allImages.find(
+            const packageImages = allImages.filter(
               (img) =>
-                img.imageableType?.toLowerCase() === "package" &&
+                String(img.imageableType || "").trim().toLowerCase() ===
+                  "package" &&
                 Number(img.imageableId) === Number(pkg.id),
             );
+            const matchedImg =
+              packageImages.find((img) => img.isPrimary) || packageImages[0];
             const displayImage =
               matchedImg?.imageUrl ||
               pkg.imageUrl ||

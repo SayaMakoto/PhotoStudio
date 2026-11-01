@@ -40,7 +40,9 @@ const GlideSelect = ({
   size = "md",
   radius = 10,
   menuWidth = 176,
+  maxMenuHeight,
   placement = "bottom",
+  autoFlip = true,
   align = "left",
   popDuration = 180,
   glideDuration = 220,
@@ -76,9 +78,9 @@ const GlideSelect = ({
     const r = root.getBoundingClientRect();
     const need = el.offsetHeight + MENU_GAP;
     setSide(
-      placement === "bottom" && r.bottom + need > window.innerHeight
+      autoFlip && placement === "bottom" && r.bottom + need > window.innerHeight
         ? "top"
-        : placement === "top" && r.top - need < 0
+        : autoFlip && placement === "top" && r.top - need < 0
           ? "bottom"
           : placement,
     );
@@ -108,6 +110,9 @@ const GlideSelect = ({
     p.style.transitionDuration = jump ? "0ms, 150ms" : "";
     p.style.transform = `translateY(${active * step}px)`;
     p.style.opacity = "1";
+    menuRef.current
+      ?.querySelector(`[data-index="${active}"]`)
+      ?.scrollIntoView({ block: "nearest" });
     instant.current = false;
   }, [active, phase, step]);
 
@@ -301,6 +306,11 @@ const GlideSelect = ({
           data-state="open"
           data-side={side}
           data-align={align}
+          style={
+            maxMenuHeight
+              ? { maxHeight: maxMenuHeight, overflowY: "auto" }
+              : undefined
+          }
         >
           <div
             id={`${id}-list`}

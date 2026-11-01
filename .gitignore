@@ -1,0 +1,65 @@
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials/
+**/credentials/
+credentials*.json
+secrets/
+**/secrets/
+secrets*.json
+
+# Local assistant configuration and generated indexes
+.gitnexus/
+**/.gitnexus/
+/gitnexus
+.claude/settings.local.json
+**/.claude/settings.local.json
+.claude/cache/
+.claude/projects/
+.codex/local/
+.codex/cache/
+.mcp.json
+
+# Keep shared VS Code settings; ignore machine-specific launch/workspace files
+.vscode/launch.json
+.vscode/tasks.json
+*.code-workspace
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# Logs, caches, test output, and build artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+coverage/
+**/coverage/
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+target/
+**/target/
+.gradle/
+**/.gradle/
+*.class
+
+# Locally uploaded or generated files
+uploads/
+**/uploads/

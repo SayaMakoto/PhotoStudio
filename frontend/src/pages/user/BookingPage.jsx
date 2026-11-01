@@ -25,6 +25,7 @@ import customerAuthService, {
 } from "../../services/user/authService";
 import customerRoomService from "../../services/user/roomService";
 import customerPackageService from "../../services/user/packageService";
+import userImageService from "../../services/user/imageService";
 import customerServiceService from "../../services/user/serviceService";
 import customerBookingService from "../../services/user/bookingService";
 import customerPaymentService from "../../services/user/paymentService";
@@ -505,22 +506,56 @@ export default function BookingPage() {
 
     const fetchData = async () => {
       try {
-        const [pkgRes, roomRes, srvRes, bkgRes] = await Promise.allSettled([
+        const [pkgRes, roomRes, srvRes, bkgRes, imageRes] = await Promise.allSettled([
           customerPackageService.getAllPackages(),
           customerRoomService.getAllRooms(),
           customerServiceService.getAllServices(),
           customerBookingService.getAllBookings(),
+          userImageService.getAllImages(),
         ]);
 
         if (!isMounted) return;
 
+        const packageRows =
+          pkgRes.status === "fulfilled"
+            ? Array.isArray(pkgRes.value)
+              ? pkgRes.value
+              : Array.isArray(pkgRes.value?.data)
+                ? pkgRes.value.data
+                : []
+            : [];
+        const roomRows =
+          roomRes.status === "fulfilled"
+            ? Array.isArray(roomRes.value)
+              ? roomRes.value
+              : Array.isArray(roomRes.value?.data)
+                ? roomRes.value.data
+                : []
+            : [];
+        const imageRows =
+          imageRes.status === "fulfilled"
+            ? Array.isArray(imageRes.value)
+              ? imageRes.value
+              : Array.isArray(imageRes.value?.data)
+                ? imageRes.value.data
+                : []
+            : [];
+        const findPrimaryImage = (type, id) => {
+          const matchingImages = imageRows.filter(
+            (image) =>
+              String(image.imageableType || "").trim().toLowerCase() === type &&
+              Number(image.imageableId) === Number(id),
+          );
+          return (
+            matchingImages.find((image) => image.isPrimary)?.imageUrl ||
+            matchingImages[0]?.imageUrl ||
+            ""
+          );
+        };
+
         // Xử lý Gói chụp từ CSDL
-        if (
-          pkgRes.status === "fulfilled" &&
-          Array.isArray(pkgRes.value?.data) &&
-          pkgRes.value.data.length > 0
-        ) {
-          const mappedPackages = pkgRes.value.data
+        if (packageRows.length > 0) {
+          const mappedPackages = packageRows
             .filter((p) => p.status === "active" || !p.status)
             .map((p, idx) => ({
               id: p.id,
@@ -535,6 +570,8 @@ export default function BookingPage() {
               price: Number(p.price || 990000),
               originalPrice: Math.round(Number(p.price || 990000) * 1.25),
               image:
+                findPrimaryImage("package", p.id) ||
+                p.imageUrl ||
                 p.image ||
                 CSDL_PACKAGES[(p.id - 1) % CSDL_PACKAGES.length]?.image ||
                 CSDL_PACKAGES[0].image,
@@ -543,12 +580,8 @@ export default function BookingPage() {
         }
 
         // Xử lý Phòng chụp từ CSDL
-        if (
-          roomRes.status === "fulfilled" &&
-          Array.isArray(roomRes.value?.data) &&
-          roomRes.value.data.length > 0
-        ) {
-          const mappedRooms = roomRes.value.data
+        if (roomRows.length > 0) {
+          const mappedRooms = roomRows
             .filter((r) => r.status === "active" || !r.status)
             .map((r, idx) => ({
               id: r.id,
@@ -570,6 +603,8 @@ export default function BookingPage() {
                 r.description ||
                 "Không gian studio sang trọng chuẩn Cinematic.",
               image:
+                findPrimaryImage("room", r.id) ||
+                r.imageUrl ||
                 r.thumbnail ||
                 r.image ||
                 CSDL_ROOMS[(r.id - 1) % CSDL_ROOMS.length]?.image ||
