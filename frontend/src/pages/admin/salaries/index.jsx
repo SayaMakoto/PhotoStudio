@@ -1,23 +1,20 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
-  Clock,
   DollarSign,
   Package,
   Sparkles,
   Users,
   Wallet,
   User,
-  Send,
-  Coins,
-} from 'lucide-react';
-import AdminFilterBar from '../../../components/admin/common/AdminFilterBar';
-import AdminTable from '../../../components/admin/common/AdminTable';
-import StatusBadge from '../../../components/admin/common/StatusBadge';
-import useAdminNotification from '../../../components/admin/common/useAdminNotification';
-import adminSalaryService from '../../../services/admin/salaryService';
-import SalaryDetailDialog from './SalaryDetailDialog';
+} from "lucide-react";
+import AdminFilterBar from "../../../components/admin/common/AdminFilterBar";
+import AdminTable from "../../../components/admin/common/AdminTable";
+import GlideSelect from "../../../components/admin/common/GlideSelect";
+import useAdminNotification from "../../../components/admin/common/useAdminNotification";
+import adminSalaryService from "../../../services/admin/salaryService";
+import SalaryDetailDialog from "./SalaryDetailDialog";
 import {
   MONTH_OPTIONS,
   SALARY_STATUS_OPTIONS,
@@ -25,22 +22,33 @@ import {
   formatSalaryDate,
   formatVND,
   getSalaryErrorMessage,
-} from './salaryConfig';
+} from "./salaryConfig";
 
 const asRows = (rows) => (Array.isArray(rows) ? rows : []);
 
-function SummaryCard({ label, value, icon: Icon, tone = 'rose' }) {
+async function fetchSalaryRows(month, year) {
+  const rows = asRows(await adminSalaryService.getAll(month, year));
+  if (rows.length > 0) return rows;
+
+  return asRows(
+    await adminSalaryService.calculateSalaries(Number(month), Number(year)),
+  );
+}
+
+function SummaryCard({ label, value, icon: Icon, tone = "rose" }) {
   const colors = {
-    rose: 'border-rose-500/20 bg-rose-500/10 text-rose-300',
-    green: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300',
-    blue: 'border-sky-500/20 bg-sky-500/10 text-sky-300',
-    neutral: 'border-neutral-700 bg-neutral-800 text-neutral-300',
+    rose: "border-rose-500/20 bg-rose-500/10 text-rose-300",
+    green: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+    blue: "border-sky-500/20 bg-sky-500/10 text-sky-300",
+    neutral: "border-neutral-700 bg-neutral-800 text-neutral-300",
   };
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-neutral-400">{label}</p>
-        <span className={`grid h-9 w-9 place-items-center rounded-xl border ${colors[tone] || colors.rose}`}>
+        <span
+          className={`grid h-9 w-9 place-items-center rounded-xl border ${colors[tone] || colors.rose}`}
+        >
           <Icon className="h-4 w-4" />
         </span>
       </div>
@@ -52,34 +60,27 @@ function SummaryCard({ label, value, icon: Icon, tone = 'rose' }) {
 export default function AdminSalariesPage() {
   const { notify } = useAdminNotification();
   const [salaries, setSalaries] = useState([]);
-  const [search, setSearch] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('10');
-  const [selectedYear, setSelectedYear] = useState('2026');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [sortOrder, setSortOrder] = useState('newest');
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+  const [search, setSearch] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("10");
+  const [selectedYear, setSelectedYear] = useState("2026");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [selectedSalary, setSelectedSalary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [disbursingAll, setDisbursingAll] = useState(false);
-  const [pageError, setPageError] = useState('');
+  const [pageError, setPageError] = useState("");
+
+  const handlePeriodChange = (setter, value) => {
+    setLoading(true);
+    setPageError("");
+    setter(value);
+  };
 
   // Tự động tải và tự động tính toán lương tháng nếu chưa có dữ liệu
   const loadData = async (m = selectedMonth, y = selectedYear) => {
-    setLoading(true);
-    setPageError('');
     try {
-      let data = await adminSalaryService.getAll(m, y);
-      const rows = asRows(data);
-      // Tự động tính toán lương nếu kỳ lương này chưa có bản ghi
-      if (rows.length === 0) {
-        const calculated = await adminSalaryService.calculateSalaries(
-          Number(m),
-          Number(y)
-        );
-        setSalaries(asRows(calculated));
-      } else {
-        setSalaries(rows);
-      }
+      setSalaries(await fetchSalaryRows(m, y));
     } catch (err) {
       setPageError(getSalaryErrorMessage(err));
     } finally {
@@ -88,24 +89,39 @@ export default function AdminSalariesPage() {
   };
 
   useEffect(() => {
-    loadData(selectedMonth, selectedYear);
+    let isCurrentRequest = true;
+
+    fetchSalaryRows(selectedMonth, selectedYear)
+      .then((rows) => {
+        if (isCurrentRequest) setSalaries(rows);
+      })
+      .catch((err) => {
+        if (isCurrentRequest) setPageError(getSalaryErrorMessage(err));
+      })
+      .finally(() => {
+        if (isCurrentRequest) setLoading(false);
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
   }, [selectedMonth, selectedYear]);
 
   const handleUpdateStatus = async (id, payload) => {
     try {
       const updated = await adminSalaryService.updateStatus(id, payload);
       setSalaries((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, ...updated } : s))
+        prev.map((s) => (s.id === id ? { ...s, ...updated } : s)),
       );
       setSelectedSalary(null);
       notify({
-        type: 'success',
-        title: 'Cập nhật thành công',
+        type: "success",
+        title: "Cập nhật thành công",
         message: `Đã lưu quyết toán phiếu lương #${id}.`,
       });
       return updated;
     } catch (err) {
-      notify({ type: 'error', message: getSalaryErrorMessage(err) });
+      notify({ type: "error", message: getSalaryErrorMessage(err) });
       throw err;
     }
   };
@@ -117,15 +133,17 @@ export default function AdminSalariesPage() {
 
     try {
       await handleUpdateStatus(item.id, {
-        status: 'paid',
-        note: item.note ? `${item.note} (Admin đã phát lương)` : 'Admin đã phát lương',
+        status: "paid",
+        note: item.note
+          ? `${item.note} (Admin đã phát lương)`
+          : "Admin đã phát lương",
       });
       notify({
-        type: 'success',
-        title: 'Phát lương thành công',
+        type: "success",
+        title: "Phát lương thành công",
         message: `Đã phát lương ${formatVND(item.netSalary)} cho "${item.employeeName}".`,
       });
-    } catch (err) {
+    } catch {
       // lỗi đã notify trong handleUpdateStatus
     }
   };
@@ -148,7 +166,9 @@ export default function AdminSalariesPage() {
 
   const selectedEmployee = useMemo(() => {
     if (!selectedEmployeeId) return null;
-    return employeeOptions.find((e) => String(e.id) === String(selectedEmployeeId));
+    return employeeOptions.find(
+      (e) => String(e.id) === String(selectedEmployeeId),
+    );
   }, [employeeOptions, selectedEmployeeId]);
 
   // Bộ lọc danh sách bảng lương
@@ -170,24 +190,40 @@ export default function AdminSalariesPage() {
             .some((val) => String(val).toLowerCase().includes(keyword));
 
         const matchesStatus = !statusFilter || item.status === statusFilter;
-        const matchesEmployee = !selectedEmployeeId || String(item.employeeId) === String(selectedEmployeeId);
+        const matchesEmployee =
+          !selectedEmployeeId ||
+          String(item.employeeId) === String(selectedEmployeeId);
         return matchesSearch && matchesStatus && matchesEmployee;
       })
       .sort((a, b) => {
         const idA = Number(a.id) || 0;
         const idB = Number(b.id) || 0;
-        return sortOrder === 'oldest' ? idA - idB : idB - idA;
+        return sortOrder === "oldest" ? idA - idB : idB - idA;
       });
   }, [salaries, search, statusFilter, sortOrder, selectedEmployeeId]);
 
   // Thống kê tổng hợp: TÙY THEO PHẦN LỌC hiển thị chính xác theo nhân viên và số lượng nhân viên
   const stats = useMemo(() => {
     const targetList = filtered;
-    const totalNet = targetList.reduce((sum, s) => sum + Number(s.netSalary || 0), 0);
-    const totalBase = targetList.reduce((sum, s) => sum + Number(s.baseSalary || 0), 0);
-    const totalCommission = targetList.reduce((sum, s) => sum + Number(s.totalCommission || 0), 0);
-    const totalWorkDays = targetList.reduce((sum, s) => sum + Number(s.workDays || 0), 0);
-    const uniqueEmployees = new Set(targetList.map((s) => s.employeeId || s.id));
+    const totalNet = targetList.reduce(
+      (sum, s) => sum + Number(s.netSalary || 0),
+      0,
+    );
+    const totalBase = targetList.reduce(
+      (sum, s) => sum + Number(s.baseSalary || 0),
+      0,
+    );
+    const totalCommission = targetList.reduce(
+      (sum, s) => sum + Number(s.totalCommission || 0),
+      0,
+    );
+    const totalWorkDays = targetList.reduce(
+      (sum, s) => sum + Number(s.workDays || 0),
+      0,
+    );
+    const uniqueEmployees = new Set(
+      targetList.map((s) => s.employeeId || s.id),
+    );
     const totalStaff = uniqueEmployees.size;
 
     return {
@@ -201,7 +237,7 @@ export default function AdminSalariesPage() {
 
   // Danh sách nhân sự chưa phát lương trong phần lọc
   const unpaidInFiltered = useMemo(() => {
-    return filtered.filter((s) => s.status !== 'paid');
+    return filtered.filter((s) => s.status !== "paid");
   }, [filtered]);
 
   // Phát lương đồng loạt cho các nhân viên chưa nhận trong bộ lọc
@@ -209,7 +245,7 @@ export default function AdminSalariesPage() {
     if (unpaidInFiltered.length === 0) return;
     const totalUnpaidAmount = unpaidInFiltered.reduce(
       (sum, s) => sum + Number(s.netSalary || 0),
-      0
+      0,
     );
     const confirmMessage = `Xác nhận phát lương đồng loạt cho ${unpaidInFiltered.length} nhân viên với tổng số tiền ${formatVND(totalUnpaidAmount)}?`;
     if (!window.confirm(confirmMessage)) return;
@@ -218,57 +254,62 @@ export default function AdminSalariesPage() {
     try {
       for (const item of unpaidInFiltered) {
         await adminSalaryService.updateStatus(item.id, {
-          status: 'paid',
-          note: item.note ? `${item.note} (Admin đã phát lương)` : 'Admin đã phát lương',
+          status: "paid",
+          note: item.note
+            ? `${item.note} (Admin đã phát lương)`
+            : "Admin đã phát lương",
         });
       }
+      setLoading(true);
+      setPageError("");
       await loadData(selectedMonth, selectedYear);
       notify({
-        type: 'success',
-        title: 'Phát lương thành công',
+        type: "success",
+        title: "Phát lương thành công",
         message: `Đã hoàn tất phát lương cho toàn bộ ${unpaidInFiltered.length} nhân viên.`,
       });
     } catch (err) {
-      notify({ type: 'error', message: getSalaryErrorMessage(err) });
+      notify({ type: "error", message: getSalaryErrorMessage(err) });
     } finally {
       setDisbursingAll(false);
     }
   };
 
   const resetFilters = () => {
-    setSearch('');
-    setStatusFilter('');
-    setSelectedEmployeeId('');
-    setSortOrder('newest');
+    setSearch("");
+    setStatusFilter("");
+    setSelectedEmployeeId("");
+    setSortOrder("newest");
   };
 
   const columns = [
     {
-      key: 'id',
-      title: 'Mã phiếu',
-      cellClassName: 'font-mono text-neutral-400',
+      key: "id",
+      title: "Mã phiếu",
+      cellClassName: "font-mono text-neutral-400",
       render: (id) => `#SAL-${id}`,
     },
     {
-      key: 'employeeName',
-      title: 'Nhân viên',
+      key: "employeeName",
+      title: "Nhân viên",
       render: (name, item) => (
         <div className="min-w-40">
-          <p className="font-semibold text-neutral-100">{name || 'Nhân viên'}</p>
+          <p className="font-semibold text-neutral-100">
+            {name || "Nhân viên"}
+          </p>
           <p className="mt-0.5 text-[11px] text-neutral-400">
-            {item.position === 'photographer'
-              ? 'Nhiếp ảnh gia (250k/ngày)'
-              : item.position === 'makeup'
-              ? 'Makeup Artist'
-              : item.position}{' '}
-            {item.employeePhone ? `· ${item.employeePhone}` : ''}
+            {item.position === "photographer"
+              ? "Nhiếp ảnh gia"
+              : item.position === "makeup"
+                ? "Makeup Artist"
+                : item.position}{" "}
           </p>
         </div>
       ),
     },
     {
-      key: 'workDays',
-      title: 'Số ngày làm',
+      key: "workDays",
+      title: "Số ngày làm",
       render: (days, item) => (
         <div>
           <span className="font-bold text-neutral-100">{days} ngày</span>
@@ -279,15 +320,15 @@ export default function AdminSalariesPage() {
       ),
     },
     {
-      key: 'baseSalary',
-      title: 'Lương cơ bản',
+      key: "baseSalary",
+      title: "Lương cơ bản",
       render: (val) => (
         <span className="font-medium text-neutral-200">{formatVND(val)}</span>
       ),
     },
     {
-      key: 'totalShoots',
-      title: 'Gói chụp',
+      key: "totalShoots",
+      title: "Gói chụp",
       render: (shoots) => (
         <span className="inline-flex items-center gap-1 font-semibold text-neutral-100">
           <Package className="h-3.5 w-3.5 text-rose-400" />
@@ -296,40 +337,30 @@ export default function AdminSalariesPage() {
       ),
     },
     {
-      key: 'totalCommission',
-      title: 'Tổng hoa hồng',
+      key: "totalCommission",
+      title: "Tổng hoa hồng",
       render: (val) => (
         <span className="font-bold text-emerald-400">+{formatVND(val)}</span>
       ),
     },
     {
-      key: 'netSalary',
-      title: 'Tổng thực nhận',
-      render: (val, item) => (
+      key: "netSalary",
+      title: "Tổng thực nhận",
+      render: (val) => (
         <div>
           <span className="font-extrabold text-rose-400 text-sm">
             {formatVND(val)}
           </span>
-          <div className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
-            <span>CB: {formatVND(item.baseSalary)}</span>
-            <span>+</span>
-            <span className="text-emerald-400">HH: {formatVND(item.totalCommission)}</span>
-          </div>
         </div>
       ),
     },
     {
-      key: 'status',
-      title: 'Trạng thái',
-      render: (val) => <StatusBadge status={val} domain="salary" />,
-    },
-    {
-      key: 'payout',
-      title: 'Phát lương',
-      headerClassName: 'text-center',
-      cellClassName: 'text-center',
+      key: "payout",
+      title: "Phát lương",
+      headerClassName: "text-center",
+      cellClassName: "text-center",
       render: (_, item) => {
-        const isPaid = item.status === 'paid';
+        const isPaid = item.status === "paid";
         return (
           <div className="flex items-center justify-center">
             {isPaid ? (
@@ -377,7 +408,8 @@ export default function AdminSalariesPage() {
             Quản lý lương & hoa hồng
           </h1>
           <p className="mt-1 text-xs text-neutral-400">
-            Hệ thống tự động tính lương theo ngày làm việc (250.000 đ/ngày) và hoa hồng 10% trên mỗi gói chụp hoàn thành.
+            Hệ thống tự động tính lương theo ngày làm việc (250.000 đ/ngày) và
+            hoa hồng 10% trên mỗi gói chụp hoàn thành.
           </p>
         </div>
 
@@ -392,7 +424,7 @@ export default function AdminSalariesPage() {
             <DollarSign className="h-4 w-4" />
             <span>
               {disbursingAll
-                ? 'Đang phát lương...'
+                ? "Đang phát lương..."
                 : `Phát lương cho ${unpaidInFiltered.length} nhân viên`}
             </span>
           </button>
@@ -434,47 +466,68 @@ export default function AdminSalariesPage() {
       {/* Filter Bar */}
       <div className="flex flex-wrap items-center gap-3">
         {/* Chọn tháng */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-400 font-medium">Kỳ lương:</span>
-          <select
+        <div className="flex items-center gap-2 bg-gray-50/5 rounded-xl px-3 py-2">
+          <span className="text-xs text-neutral-400 font-medium">
+            Kỳ lương:
+          </span>
+          <GlideSelect
+            ariaLabel="Chọn tháng"
             value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-neutral-100 outline-none focus:border-rose-400"
-          >
-            {MONTH_OPTIONS.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-          <select
+            onChange={(value) => handlePeriodChange(setSelectedMonth, value)}
+            options={MONTH_OPTIONS}
+            size="lg"
+            autoFlip={false}
+            maxMenuHeight={260}
+            accentColor="#fbbf24"
+            surfaceColor="#0a0a0a"
+            highlightColor="#262626"
+            textColor="#e5e5e5"
+            menuWidth={220}
+            className="[&>button]:min-w-32 [&>button]:justify-between"
+          />
+          <GlideSelect
+            ariaLabel="Chọn năm"
             value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-            className="rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-neutral-100 outline-none focus:border-rose-400"
-          >
-            {YEAR_OPTIONS.map((y) => (
-              <option key={y.value} value={y.value}>
-                {y.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => handlePeriodChange(setSelectedYear, value)}
+            options={YEAR_OPTIONS}
+            size="lg"
+            accentColor="#fbbf24"
+            surfaceColor="#0a0a0a"
+            highlightColor="#262626"
+            textColor="#e5e5e5"
+            menuWidth={220}
+            className="[&>button]:min-w-32 [&>button]:justify-between"
+          />
         </div>
 
         {/* Chọn nhân viên theo dõi riêng */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-400 font-medium">Chọn nhân viên:</span>
-          <select
+        <div className="flex items-center gap-2 bg-gray-50/5 rounded-xl px-3 py-2">
+          <span className="text-xs text-neutral-400 font-medium">
+            Chọn nhân viên:
+          </span>
+          <GlideSelect
+            ariaLabel="Lọc theo nhân viên"
             value={selectedEmployeeId}
-            onChange={(e) => setSelectedEmployeeId(e.target.value)}
-            className="rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs font-semibold text-neutral-100 outline-none focus:border-rose-400"
-          >
-            <option value="">-- Tất cả nhân viên ({employeeOptions.length}) --</option>
-            {employeeOptions.map((emp) => (
-              <option key={emp.id} value={emp.id}>
-                {emp.name} ({emp.position === 'photographer' ? 'Nhiếp ảnh gia' : emp.position === 'makeup' ? 'Makeup' : emp.position || 'Nhân sự'})
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedEmployeeId}
+            options={[
+              {
+                value: "",
+                label: `Tất cả nhân viên (${employeeOptions.length})`,
+              },
+              ...employeeOptions.map((employee) => ({
+                value: String(employee.id),
+                label: `${employee.name} (${employee.position === "photographer" ? "Nhiếp ảnh gia" : employee.position === "makeup" ? "Makeup" : employee.position || "Nhân sự"})`,
+              })),
+            ]}
+            size="lg"
+            accentColor="#fbbf24"
+            surfaceColor="#0a0a0a"
+            highlightColor="#262626"
+            textColor="#e5e5e5"
+            menuWidth={300}
+            maxMenuHeight={320}
+            className="[&>button]:min-w-56 [&>button]:justify-between"
+          />
         </div>
       </div>
 
@@ -483,12 +536,22 @@ export default function AdminSalariesPage() {
           <div className="flex items-center gap-2.5">
             <User className="h-4 w-4 text-rose-400 shrink-0" />
             <span>
-              Đang lọc xem bảng lương & KPI của: <strong className="text-white font-bold">{selectedEmployee.name}</strong> ({selectedEmployee.position === 'photographer' ? 'Nhiếp ảnh gia' : selectedEmployee.position === 'makeup' ? 'Makeup Artist' : selectedEmployee.position})
+              Đang lọc xem bảng lương & KPI của:{" "}
+              <strong className="text-white font-bold">
+                {selectedEmployee.name}
+              </strong>{" "}
+              (
+              {selectedEmployee.position === "photographer"
+                ? "Nhiếp ảnh gia"
+                : selectedEmployee.position === "makeup"
+                  ? "Makeup Artist"
+                  : selectedEmployee.position}
+              )
             </span>
           </div>
           <button
             type="button"
-            onClick={() => setSelectedEmployeeId('')}
+            onClick={() => setSelectedEmployeeId("")}
             className="cursor-pointer text-xs font-semibold text-rose-300 hover:text-white underline shrink-0"
           >
             Xem tất cả nhân viên
@@ -502,8 +565,8 @@ export default function AdminSalariesPage() {
         searchPlaceholder="Tìm kiếm nhân viên, số điện thoại, chức vụ..."
         filters={[
           {
-            key: 'status',
-            label: 'Trạng thái',
+            key: "status",
+            label: "Trạng thái",
             value: statusFilter,
             onChange: setStatusFilter,
             options: SALARY_STATUS_OPTIONS,
@@ -524,7 +587,11 @@ export default function AdminSalariesPage() {
           <span>{pageError}</span>
           <button
             type="button"
-            onClick={() => loadData(selectedMonth, selectedYear)}
+            onClick={() => {
+              setLoading(true);
+              setPageError("");
+              loadData(selectedMonth, selectedYear);
+            }}
             className="cursor-pointer ml-auto whitespace-nowrap font-medium underline"
           >
             Tải lại
@@ -549,7 +616,8 @@ export default function AdminSalariesPage() {
 
       <p className="flex items-center gap-2 text-[11px] text-neutral-500">
         <Sparkles className="h-3.5 w-3.5 shrink-0 text-rose-400" />
-        Nhấn vào dòng nhân viên để xem bảng kê chi tiết hoa hồng từng gói chụp, số ngày làm việc, xuất phiếu lương hoặc nhấn nút "Phát lương".
+        Nhấn vào dòng nhân viên để xem bảng kê chi tiết hoa hồng từng gói chụp,
+        số ngày làm việc, xuất phiếu lương hoặc nhấn nút "Phát lương".
       </p>
 
       {/* Detail Dialog */}
