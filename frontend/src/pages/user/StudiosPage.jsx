@@ -49,7 +49,7 @@ export default function StudiosPage() {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [backgrounds, setBackgrounds] = useState([]);
-  const [selectedRoomFilter, setSelectedRoomFilter] = useState("all");
+  const [selectedRoomFilter] = useState("all");
   const [activeSpaceModal, setActiveSpaceModal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -193,11 +193,6 @@ export default function StudiosPage() {
     const start = (currentPage - 1) * ROOMS_PER_PAGE;
     return filteredRooms.slice(start, start + ROOMS_PER_PAGE);
   }, [filteredRooms, currentPage]);
-
-  const handleFilterChange = (filterVal) => {
-    setSelectedRoomFilter(filterVal);
-    setCurrentPage(1);
-  };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -352,7 +347,7 @@ export default function StudiosPage() {
 
           {/* 3D Tilted Cards Grid: 100% Ảnh không gian kiến trúc nội thất thực tế */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {backgrounds.map((item, idx) => (
+            {backgrounds.slice(0, 6).map((item, idx) => (
               <ScrollReveal key={item.id} direction="up" delay={idx * 0.08}>
                 <div
                   onClick={() =>
@@ -405,50 +400,19 @@ export default function StudiosPage() {
             <div className="text-center max-w-2xl mx-auto mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDF0F3] border border-[#F5D5DC] text-[#B85064] text-xs font-semibold uppercase tracking-wider mb-3 shadow-sm">
                 <CubeIcon className="w-4 h-4 text-[#B85064]" />
-                <span>HỆ THỐNG 12 PHÒNG CHỤP</span>
+                <span>HỆ THỐNG {rooms.length} PHÒNG CHỤP</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-[#2A1D22] font-serif-luxury tracking-tight mb-3">
-                Khám Phá Chi Tiết 12 Phòng Chụp
+                Khám Phá Chi Tiết {rooms.length} Phòng Chụp
               </h2>
               <p className="text-[#7A6C71] text-sm leading-relaxed">
-                Hệ thống 12 phòng chụp chuyên biệt khép kín, phân trang 6 phòng
-                mỗi trang với đầy đủ thông số diện tích, sức chứa và hình ảnh
-                thực tế giúp bạn dễ dàng chọn không gian lý tưởng nhất.
+                Hệ thống {rooms.length} phòng chụp chuyên biệt khép kín, phân
+                trang 6 phòng mỗi trang với đầy đủ thông số diện tích, sức chứa
+                và hình ảnh thực tế giúp bạn dễ dàng chọn không gian lý tưởng
+                nhất.
               </p>
             </div>
           </ScrollReveal>
-
-          {/* Room Filter Pills */}
-          <div className="flex items-center justify-center flex-wrap gap-2 sm:gap-2.5 mb-12">
-            <motion.button
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => handleFilterChange("all")}
-              className={`cursor-pointer px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-sm ${
-                selectedRoomFilter === "all"
-                  ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 ring-2 ring-[#B85064]/30"
-                  : "bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 hover:bg-[#FFF9FA]"
-              }`}
-            >
-              Tất Cả 12 Phòng ({rooms.length})
-            </motion.button>
-
-            {rooms.map((room) => (
-              <motion.button
-                key={room.id}
-                whileHover={{ y: -3, scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => handleFilterChange(String(room.id))}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-full text-xs font-semibold transition-colors duration-200 shadow-sm ${
-                  selectedRoomFilter === String(room.id)
-                    ? "bg-[#B85064] text-white shadow-md shadow-[#B85064]/30 ring-2 ring-[#B85064]/30"
-                    : "bg-white text-[#55464B] hover:text-[#B85064] border border-[#F0E4E6] hover:border-[#B85064]/50 hover:bg-[#FFF9FA]"
-                }`}
-              >
-                {room.name.split(" - ")[0]}
-              </motion.button>
-            ))}
-          </div>
 
           {/* Loading state */}
           {isLoading && (
