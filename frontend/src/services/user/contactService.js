@@ -9,7 +9,7 @@ export const customerContactService = {
     try {
       const response = await axiosCustomer.post('/api/contacts', data);
       return response.data || response;
-    } catch (err) {
+    } catch {
       // Lưu phòng hờ vào localStorage nếu backend đang ngoại tuyến
       const savedContacts = JSON.parse(localStorage.getItem('photostudio_offline_contacts') || '[]');
       savedContacts.unshift({

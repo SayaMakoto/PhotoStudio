@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
-  Calendar,
   CheckCircle2,
   DollarSign,
   Package,
   Printer,
   Sparkles,
   User,
-  Wallet,
   X,
-  Clock,
-  Send,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';

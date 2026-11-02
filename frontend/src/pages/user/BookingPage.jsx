@@ -35,7 +35,7 @@ import { validateVietnamesePhone } from "../../utils/phoneValidator";
 // =========================================================================
 // TIỆN ÍCH NGÀY THÁNG CHUẨN VIỆT NAM (KHÔNG BỊ LỆCH MÚI GIỜ UTC)
 // =========================================================================
-export function getVietnamLocalDate(d = new Date()) {
+function getVietnamLocalDate(d = new Date()) {
   const dateObj = d instanceof Date ? d : new Date(d);
   const year = dateObj.getFullYear();
   const month = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -419,7 +419,6 @@ export default function BookingPage() {
   const [rooms, setRooms] = useState(CSDL_ROOMS);
   const [servicesList, setServicesList] = useState(CSDL_SERVICES);
   const [existingBookings, setExistingBookings] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
 
   // BƯỚC 1: LỰA CHỌN THEO TIẾN TRÌNH TUẦN TỰ (CHỌN GÓI XONG MỚI HIỆN PHÒNG, CHỌN PHÒNG XONG MỚI HIỆN DỊCH VỤ)
   const [selectedPackage, setSelectedPackage] = useState(null);
@@ -502,7 +501,6 @@ export default function BookingPage() {
   // Tải dữ liệu Gói, Phòng, Dịch vụ và Bookings từ Backend (nếu backend đang chạy)
   useEffect(() => {
     let isMounted = true;
-    setLoadingData(true);
 
     const fetchData = async () => {
       try {
@@ -621,7 +619,7 @@ export default function BookingPage() {
         ) {
           const mappedServices = srvRes.value.data
             .filter((s) => s.status === "active" || !s.status)
-            .map((s, idx) => ({
+            .map((s) => ({
               id: s.id,
               name: s.name || `Dịch vụ #${s.id}`,
               price: Number(s.price || 300000),
@@ -647,8 +645,6 @@ export default function BookingPage() {
           "Dùng dữ liệu CSDL chuẩn do backend offline:",
           err.message,
         );
-      } finally {
-        if (isMounted) setLoadingData(false);
       }
     };
 
@@ -754,7 +750,7 @@ export default function BookingPage() {
     const totalOrder = Math.max(0, subTotal - discount);
 
     // Tính toán số tiền thanh toán ngay dựa theo mức cọc linh hoạt (30%, 50% hoặc 100%)
-    let amountToPay = 0;
+    let amountToPay;
     if (depositPercent === 100) {
       amountToPay = totalOrder;
     } else if (depositPercent === 50) {

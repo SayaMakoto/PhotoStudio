@@ -3,16 +3,10 @@ import { PaintBrushIcon, PhotoIcon } from '@heroicons/react/24/solid';
 import {
   X,
   Calendar,
-  Clock,
   MapPin,
   Star,
   Users,
-  Camera,
-  CheckCircle2,
   FileText,
-  AlertCircle,
-  ShieldCheck,
-  Send,
   UserCheck,
   Printer,
   CreditCard,
@@ -63,8 +57,6 @@ export default function BookingSessionDetailModal({
   onBookingCancelled,
 }) {
   const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState([]);
   const [existingReview, setExistingReview] = useState(booking?.review || null);
   const [roomDetail, setRoomDetail] = useState(null);
@@ -75,7 +67,6 @@ export default function BookingSessionDetailModal({
   // Form đánh giá
   const [overallRating, setOverallRating] = useState(5);
   const [overallComment, setOverallComment] = useState('');
-  const [employeeFeedback, setEmployeeFeedback] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -83,7 +74,6 @@ export default function BookingSessionDetailModal({
   useEffect(() => {
     if (!isOpen || !booking) return undefined;
     let isMounted = true;
-    setLoading(true);
     setSubmitError('');
     setSubmitSuccess(false);
 
@@ -106,7 +96,7 @@ export default function BookingSessionDetailModal({
                 : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
             }));
           }
-        } catch {}
+        } catch { /* ignore */ }
 
         if (!staffList.length) {
           try {
@@ -128,7 +118,7 @@ export default function BookingSessionDetailModal({
                   : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'),
               }));
             }
-          } catch {}
+          } catch { /* ignore */ }
         }
 
         if (!staffList.length) {
@@ -159,7 +149,7 @@ export default function BookingSessionDetailModal({
           try {
             const rRes = await customerRoomService.getRoomById(booking.roomId);
             if (rRes && isMounted) setRoomDetail(rRes);
-          } catch {}
+          } catch { /* ignore */ }
         }
 
         // 3. Chi tiết gói chụp
@@ -169,7 +159,7 @@ export default function BookingSessionDetailModal({
           if (Array.isArray(bpRes) && bpRes.length > 0) {
             loadedPkg = bpRes[0];
           }
-        } catch {}
+        } catch { /* ignore */ }
 
         if (!loadedPkg && booking.packageId) {
           try {
@@ -188,7 +178,7 @@ export default function BookingSessionDetailModal({
                 accessories: pRes.accessories || 'Trọn bộ phụ kiện cao cấp tại studio',
               };
             }
-          } catch {}
+          } catch { /* ignore */ }
         }
 
         // 4. Lịch sử thanh toán
@@ -198,7 +188,7 @@ export default function BookingSessionDetailModal({
           if (Array.isArray(payRes) && payRes.length > 0) {
             loadedPayments = payRes;
           }
-        } catch {}
+        } catch { /* ignore */ }
 
         // Repair old booking-package rows that stored the deposit as the package price.
         const depositPayment = loadedPayments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
@@ -229,17 +219,12 @@ export default function BookingSessionDetailModal({
               if (Array.isArray(empRevs) && empRevs.length > 0) {
                 reviewData.employeeReviews = empRevs;
               }
-            } catch {}
+            } catch { /* ignore */ }
           }
-        } catch {}
+        } catch { /* ignore */ }
 
         if (isMounted) {
           setEmployees(staffList);
-          const initialFeedback = {};
-          staffList.forEach((emp) => {
-            initialFeedback[emp.employeeId] = { rating: 5, comment: '' };
-          });
-          setEmployeeFeedback(initialFeedback);
 
           if (loadedPkg) setPackageDetail(loadedPkg);
           setPayments(loadedPayments);
@@ -248,7 +233,6 @@ export default function BookingSessionDetailModal({
       } catch (err) {
         console.warn('Lỗi tải chi tiết đơn:', err);
       } finally {
-        if (isMounted) setLoading(false);
       }
     };
 
@@ -787,27 +771,6 @@ export default function BookingSessionDetailModal({
       }
     }, 350);
   };
-
-  const handleEmployeeRatingChange = (empId, star) => {
-    setEmployeeFeedback((prev) => ({
-      ...prev,
-      [empId]: {
-        ...(prev[empId] || { comment: '' }),
-        rating: star,
-      },
-    }));
-  };
-
-  const handleEmployeeCommentChange = (empId, comment) => {
-    setEmployeeFeedback((prev) => ({
-      ...prev,
-      [empId]: {
-        ...(prev[empId] || { rating: 5 }),
-        comment,
-      },
-    }));
-  };
-
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     setSubmitError('');
@@ -900,7 +863,7 @@ export default function BookingSessionDetailModal({
         const dateStr = d.toLocaleDateString('vi-VN');
         formattedFullDate = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${dateStr}`;
       }
-    } catch {}
+    } catch { /* ignore */ }
   }
 
   return (

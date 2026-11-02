@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Star,
   MessageSquare,
@@ -8,15 +8,10 @@ import {
   Send,
   Edit3,
   Filter,
-  User,
-  Calendar,
   X,
   AlertCircle,
   ThumbsUp,
   Search,
-  Heart,
-  Smile,
-  ShieldCheck,
 } from 'lucide-react';
 import employeeReviewService from '../../../services/employee/reviewService';
 
@@ -31,7 +26,6 @@ const QUICK_TEMPLATES = [
 export default function CustomerReviewsSection({
   reviews = [],
   generalReviews = [],
-  currentEmployee = null,
   onReviewUpdated,
 }) {
   // 1. Chỉ hiển thị đánh giá chung toàn studio

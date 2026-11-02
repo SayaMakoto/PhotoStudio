@@ -8,7 +8,6 @@ import {
   XMarkIcon,
   PencilSquareIcon,
   CheckIcon,
-  ArrowRightIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/solid';
 import { customerAuth } from '../../lib/axiosCustomer';

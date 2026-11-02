@@ -5,12 +5,12 @@ import {
   Layers,
   User,
   LogOut,
-  Camera,
   X,
   Wallet,
 } from 'lucide-react';
 import employeeAuthService from '../../../services/employee/authService';
 import { ROUTES } from '../../../routes/web';
+import BrandLogo from '../../common/BrandLogo';
 
 const EMPLOYEE_NAV_ITEMS = [
   { id: 'dashboard', label: 'Tổng Quan & KPI', icon: LayoutDashboard },

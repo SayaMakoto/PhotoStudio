@@ -18,9 +18,6 @@ export const customerBookingService = {
   // Lấy danh sách lịch hẹn của khách hàng theo customerId
   getBookingsByCustomer: (customerId) => axiosCustomer.get(`/api/bookings/customer/${customerId}`),
 
-  // Lấy tất cả đơn đặt lịch để kiểm tra lịch trống phòng/gói
-  getAllBookings: () => axiosCustomer.get('/api/bookings'),
-
   // Lấy lịch đặt theo phòng
   getByRoomId: (roomId) => axiosCustomer.get(`/api/bookings/room/${roomId}`),
 

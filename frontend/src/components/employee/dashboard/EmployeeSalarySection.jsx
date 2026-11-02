@@ -1,18 +1,15 @@
 import { useEffect, useState, useMemo } from 'react';
 import {
-  Calendar,
   CheckCircle2,
   Clock,
   Coins,
   DollarSign,
   Package,
   Printer,
-  Sparkles,
   TrendingUp,
   Wallet,
   ChevronLeft,
   ChevronRight,
-  FileDown,
 } from 'lucide-react';
 import employeeSalaryService from '../../../services/employee/salaryService';
 
