@@ -47,9 +47,7 @@ export default function ShootDetailModal({
   onClose,
   onStatusChange,
 }) {
-  if (!booking) return null;
-
-  const [currentStatus, setCurrentStatus] = useState(booking.status || 'pending');
+  const [currentStatus, setCurrentStatus] = useState(booking?.status || 'pending');
   const [isUpdating, setIsUpdating] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -67,6 +65,7 @@ export default function ShootDetailModal({
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
+    if (!booking) return undefined;
     let isMounted = true;
     const fetchBookingDetails = async () => {
       setLoadingDetails(true);
@@ -189,6 +188,8 @@ export default function ShootDetailModal({
       setIsUpdating(false);
     }
   };
+
+  if (!booking) return null;
 
   return (
     <div

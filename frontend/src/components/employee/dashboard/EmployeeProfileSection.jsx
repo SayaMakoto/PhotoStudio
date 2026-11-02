@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, ShieldCheck, Lock, CheckCircle2, Save, MapPin, AlertCircle, Image as ImageIcon, UploadCloud, Trash2, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Mail, Phone, ShieldCheck, Lock, CheckCircle2, Save, MapPin, AlertCircle, UploadCloud, Trash2, Loader2 } from 'lucide-react';
 import employeeMediaUploadService from '../../../services/employee/mediaUploadService';
 import employeeAuthService from '../../../services/employee/authService';
 

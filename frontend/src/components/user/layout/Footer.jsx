@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import {
-  CameraIcon,
   EnvelopeIcon,
   PhoneIcon,
   MapPinIcon,
@@ -11,6 +10,7 @@ import {
 } from '@heroicons/react/24/solid';
 import Magnet from '../../animations/Magnet';
 import ScrollReveal from '../../animations/ScrollReveal';
+import BrandLogo from '../../common/BrandLogo';
 import { ROUTES } from '../../../routes/web';
 
 export default function Footer() {
@@ -64,9 +64,7 @@ export default function Footer() {
           {/* Col 1 & 2: Brand Info & Vibrant Social Icons */}
           <div className="lg:col-span-2 space-y-4">
             <Link to={ROUTES.USER.HOME} onClick={scrollToTop} className="flex items-center gap-3 group w-fit">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#BE4B5E] to-[#E295A2] flex items-center justify-center shadow-lg shadow-rose-500/25 group-hover:scale-110 transition-transform duration-300">
-                <CameraIcon className="w-6 h-6 text-white" />
-              </div>
+              <BrandLogo withGlow className="w-12 h-12 group-hover:scale-110 transition-transform duration-300" />
               <span className="text-xl font-bold tracking-wider text-white font-sans">
                 PHOTO<span className="text-[#E899A8] font-extrabold">STUDIO</span>
               </span>
