@@ -5,12 +5,12 @@ import {
   Layers,
   User,
   LogOut,
-  Camera,
   X,
   Wallet,
 } from 'lucide-react';
 import employeeAuthService from '../../../services/employee/authService';
 import { ROUTES } from '../../../routes/web';
+import BrandLogo from '../../common/BrandLogo';
 
 const EMPLOYEE_NAV_ITEMS = [
   { id: 'dashboard', label: 'Tổng Quan & KPI', icon: LayoutDashboard },
@@ -65,9 +65,7 @@ export default function EmployeeSidebar({
         {/* Brand / Logo - Consistent with User Studio theme */}
         <div className="flex h-18 items-center justify-between px-6 border-b border-[#F0E4E6]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#B85064] to-[#E28E9E] text-white shadow-[0_4px_12px_rgb(184,80,100,0.25)]">
-              <Camera className="h-5 w-5" />
-            </div>
+            <BrandLogo withGlow glowClassName="bg-gradient-to-tr from-[#B85064]/20 to-[#E28E9E]/20" className="w-10 h-10 drop-shadow-md" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold tracking-tight text-base text-[#261A1E]">PhotoStudio</span>

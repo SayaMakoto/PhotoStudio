@@ -1,7 +1,8 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../routes/web";
-import { ChevronDown, Building2, X, LogOut } from "lucide-react";
+import { ChevronDown, X, LogOut } from "lucide-react";
 import { ADMIN_MENU_CONFIG } from "./adminMenuConfig";
+import BrandLogo from "../../common/BrandLogo";
 import adminAuthService from "../../../services/admin/authService";
 import adminBookingService from "../../../services/admin/bookingService";
 import { useEffect, useState } from "react";
@@ -88,9 +89,7 @@ export default function AdminSidebar({
             onClick={onCloseMobile}
             className="flex items-center gap-3 hover:opacity-90 transition-opacity"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-rose-500 to-rose-700 text-neutral-950 shadow-lg shadow-rose-500/20 font-bold">
-              <Building2 className="h-5 w-5" />
-            </div>
+            <BrandLogo withGlow className="w-10 h-10 drop-shadow-md" />
             <div>
               <h1 className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
                 PhotoStudio{" "}

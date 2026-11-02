@@ -212,7 +212,9 @@ const adminSalaryService = {
     try {
       const res = await axiosAdmin.get(`/api/salaries/${id}`);
       if (res && res.id) return res;
-    } catch {}
+    } catch {
+      // Bỏ qua lỗi kết nối và chuyển sang mock fallback
+    }
     return MOCK_SALARIES.find((s) => Number(s.id) === Number(id)) || null;
   },
 
@@ -249,7 +251,9 @@ const adminSalaryService = {
   delete: async (id) => {
     try {
       await axiosAdmin.delete(`/api/salaries/${id}`);
-    } catch {}
+    } catch {
+      // Bỏ qua lỗi kết nối
+    }
     const idx = MOCK_SALARIES.findIndex((s) => Number(s.id) === Number(id));
     if (idx !== -1) MOCK_SALARIES.splice(idx, 1);
   },

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  CameraIcon, 
   BellAlertIcon, 
   Bars3Icon, 
   XMarkIcon, 
@@ -11,6 +10,7 @@ import {
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/solid';
 import Magnet from '../../animations/Magnet';
+import BrandLogo from '../../common/BrandLogo';
 import { ROUTES } from '../../../routes/web';
 import { customerAuth } from '../../../lib/axiosCustomer';
 import customerAuthService from '../../../services/user/authService';
@@ -106,9 +106,7 @@ export default function Navbar({ onOpenBooking }) {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" onClick={handleScrollToTop} className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#BE4B5E] to-[#E295A2] flex items-center justify-center shadow-lg shadow-rose-500/25 group-hover:scale-105 transition-transform duration-300">
-              <CameraIcon className="w-6 h-6 text-white" />
-            </div>
+            <BrandLogo withGlow className="w-11 h-11 group-hover:scale-110 transition-transform duration-300" />
             <div>
               <span className="text-xl font-bold tracking-wider text-white font-sans flex items-center gap-1.5">
                 PHOTO<span className="text-[#E899A8] font-extrabold">STUDIO</span>

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Camera,
   Lock,
   Mail,
   Eye,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import { ROUTES } from '../../routes/web';
 import employeeAuthService from '../../services/employee/authService';
+import BrandLogo from '../../components/common/BrandLogo';
 
 export default function EmployeeLoginPage() {
   const navigate = useNavigate();
@@ -121,8 +121,9 @@ export default function EmployeeLoginPage() {
         <div className="rounded-3xl bg-neutral-950/90 border border-neutral-800/80 p-7 sm:p-9 shadow-2xl shadow-black/90 backdrop-blur-2xl">
           {/* Brand Header */}
           <div className="text-center mb-7">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#B85064] to-[#E28E9E] text-white shadow-lg shadow-[#B85064]/30 mb-3.5">
-              <Camera className="w-7 h-7 stroke-[2.2]" />
+            <div className="relative inline-flex items-center justify-center mb-3.5">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#B85064]/30 to-[#E28E9E]/20 blur-lg" />
+              <BrandLogo className="relative w-16 h-16 drop-shadow-xl" />
             </div>
 
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#B85064]/15 border border-[#B85064]/30 text-[#F5D5DC] text-[11px] font-semibold tracking-wider uppercase mb-2">

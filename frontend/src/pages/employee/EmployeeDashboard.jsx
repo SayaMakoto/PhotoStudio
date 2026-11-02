@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import EmployeeSidebar from '../../components/employee/layout/EmployeeSidebar';
 import EmployeeHeader from '../../components/employee/layout/EmployeeHeader';
 import EmployeeKPICards from '../../components/employee/dashboard/EmployeeKPICards';

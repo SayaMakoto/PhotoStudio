@@ -17,8 +17,6 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/solid";
 
-import BlurText from "../../components/animations/BlurText";
-import ScrollReveal from "../../components/animations/ScrollReveal";
 import CountUp from "../../components/animations/CountUp";
 import {
   FloralBranchCorner,

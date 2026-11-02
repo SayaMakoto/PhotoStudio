@@ -37,13 +37,10 @@ export function validateVietnamesePhone(phone) {
   let cleaned = phone.trim().replace(/[\s.-]/g, '');
 
   // Nếu người dùng nhập đầu số quốc tế +84 hoặc 84, tự động chuyển về đầu 0
-  let suggested = null;
   if (cleaned.startsWith('+84')) {
-    suggested = '0' + cleaned.slice(3);
-    cleaned = suggested;
+    cleaned = '0' + cleaned.slice(3);
   } else if (cleaned.startsWith('84') && cleaned.length === 11) {
-    suggested = '0' + cleaned.slice(2);
-    cleaned = suggested;
+    cleaned = '0' + cleaned.slice(2);
   }
 
   // 1. Kiểm tra ký tự: Chỉ được chứa số

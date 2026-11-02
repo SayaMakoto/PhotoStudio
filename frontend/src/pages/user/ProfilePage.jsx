@@ -8,7 +8,6 @@ import {
   CalendarIcon,
   LockClosedIcon,
   PencilSquareIcon,
-  CheckIcon,
   XMarkIcon,
   ExclamationCircleIcon,
   CheckCircleIcon,
@@ -16,31 +15,28 @@ import {
   KeyIcon,
   EyeIcon,
   EyeSlashIcon,
-  ClockIcon,
   ArrowRightIcon,
   ArrowRightOnRectangleIcon,
   CalendarDaysIcon,
   StarIcon,
   HomeIcon,
-  ChatBubbleLeftRightIcon,
   PhotoIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/solid";
 import customerBookingService from "../../services/user/bookingService";
 import customerPaymentService from "../../services/user/paymentService";
 import customerReviewService from "../../services/user/reviewService";
+import customerPackageService from "../../services/user/packageService";
+import { API_BASE_URL } from "../../config/api";
 import BookingSessionDetailModal from "../../components/user/BookingSessionDetailModal";
 import { ROUTES } from "../../routes/web";
 import axiosCustomer, { customerAuth } from "../../lib/axiosCustomer";
 import customerAuthService from "../../services/user/authService";
 import {
   validateVietnamesePhone,
-  isValidPhone,
   validateDateOfBirth,
-  isAddressValid,
 } from "../../utils/phoneValidator";
 import {
-  FloralCardCorner,
   FloralBranchCorner,
 } from "../../components/common/FloralDecorations";
 
@@ -53,7 +49,13 @@ export default function ProfilePage() {
   const isAuth = customerAuth.isAuthenticated();
 
   // Tab điều hướng: 'profile' | 'bookings' | 'reviews' | 'messages' | 'password'
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get("tab");
+    return tabParam && ["profile", "bookings", "reviews", "password"].includes(tabParam)
+      ? tabParam
+      : "profile";
+  });
 
   // State lưu thông tin khách hàng (lấy từ CSDL, không dùng dữ liệu mẫu)
   const [user, setUser] = useState(() => customerAuth.getUser() || null);
@@ -96,6 +98,286 @@ export default function ProfilePage() {
   const [reviewCurrentPage, setReviewCurrentPage] = useState(1);
   const REVIEWS_PER_PAGE = 5;
 
+
+
+  // Tự động co giãn ô nhập Địa chỉ: tối đa 3 dòng, quá 3 dòng hiện thanh cuộn
+  const autoResizeAddress = (textarea) => {
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    const scrollHeight = textarea.scrollHeight;
+    // Chiều cao tối đa của 3 dòng văn bản (line-height ~22px + padding ~16px)
+    const maxHeight = 84;
+    if (scrollHeight > maxHeight) {
+      textarea.style.height = `${maxHeight}px`;
+      textarea.style.overflowY = "auto";
+    } else {
+      textarea.style.height = `${Math.max(scrollHeight, 38)}px`;
+      textarea.style.overflowY = "hidden";
+    }
+  };
+
+
+  // Tải đơn đặt lịch: Chỉ lọc đơn của chính mình
+  const fetchRealBookings = async (targetUser) => {
+    setBookingsLoading(true);
+    try {
+      let rawList = [];
+      const apiBookingIds = new Set();
+
+      if (targetUser?.id) {
+        try {
+          const resByCust = await customerBookingService.getBookingsByCustomer(targetUser.id);
+          const apiRows = Array.isArray(resByCust) ? resByCust
+            : Array.isArray(resByCust?.data) ? resByCust.data
+              : Array.isArray(resByCust?.content) ? resByCust.content : [];
+          rawList = apiRows;
+          apiRows.forEach((booking) => apiBookingIds.add(String(booking.id)));
+        } catch (e) {
+          console.warn("Lấy đơn theo customerId:", e.message);
+        }
+      }
+
+      try {
+        const localBookings = JSON.parse(
+          localStorage.getItem(`user_bookings_${targetUser?.id}`) || "[]"
+        );
+        if (Array.isArray(localBookings) && localBookings.length > 0) {
+          const existingIds = new Set(rawList.map((b) => b.id));
+          for (const lb of localBookings) {
+            if (!existingIds.has(lb.id)) rawList.push(lb);
+          }
+        }
+      } catch { /* ignore */ }
+
+      const filteredList = rawList.filter((item) => {
+        if (!targetUser) return false;
+        // Endpoint này đã được giới hạn theo customerId; một số DTO không trả lại customerId.
+        if (apiBookingIds.has(String(item.id))) return true;
+        const matchId = item.customerId && Number(item.customerId) === Number(targetUser.id);
+        const matchUserId = item.userId && Number(item.userId) === Number(targetUser.id);
+        const matchPhone = item.customerPhone && targetUser.phone && item.customerPhone.trim() === targetUser.phone.trim();
+        const matchEmail = item.customerEmail && targetUser.email && item.customerEmail.toLowerCase() === targetUser.email.toLowerCase();
+        return matchId || matchUserId || matchPhone || matchEmail;
+      });
+
+      if (filteredList.length > 0) {
+        const enriched = await Promise.all(
+          filteredList.map(async (item) => {
+            let pkgName = item.roomName ? `Buổi chụp tại ${item.roomName}` : "Gói Chụp Ảnh Studio VIP";
+            let reviewInfo = null;
+            let packageImage = "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=400&q=80";
+            let totalPrice = 1500000;
+            let backgroundName = "Studio Tone Trầm & Cành Đào";
+            let quantity = 1;
+
+            if (item.customerNote && item.customerNote.includes("Gói:")) {
+              const notePart = item.customerNote.split("Gói:")[1];
+              if (notePart) pkgName = notePart.trim();
+            }
+
+            try {
+              const pkgs = await customerBookingService.getBookingPackages(item.id);
+              if (Array.isArray(pkgs) && pkgs.length > 0 && pkgs[0].packageName) {
+                pkgName = pkgs[0].packageName;
+                if (pkgs[0].subTotal) totalPrice = Number(pkgs[0].subTotal);
+                else if (pkgs[0].unitPrice) totalPrice = Number(pkgs[0].unitPrice);
+                if (pkgs[0].quantity) quantity = Number(pkgs[0].quantity);
+                if (pkgs[0].packageId) {
+                  try {
+                    const pInfo = await customerPackageService.getPackageById(pkgs[0].packageId);
+                    if (pInfo?.thumbnail || pInfo?.coverImage) {
+                      packageImage = pInfo.thumbnail || pInfo.coverImage;
+                    }
+                  } catch { /* ignore */ }
+                }
+              }
+            } catch { /* ignore */ }
+
+            try {
+              const rev = await customerBookingService.getBookingReview(item.id);
+              if (rev && rev.id) reviewInfo = rev;
+            } catch { /* ignore */ }
+
+            let bookingPayments = [];
+            try {
+              const paymentResult = await customerPaymentService.getPaymentsByBookingId(item.id);
+              bookingPayments = Array.isArray(paymentResult) ? paymentResult : Array.isArray(paymentResult?.data) ? paymentResult.data : [];
+            } catch { /* ignore */ }
+            const depositPayment = bookingPayments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
+            const savedPackageTotal = Number(totalPrice || 0);
+            if (depositPayment && Math.abs(savedPackageTotal - Number(depositPayment.amount || 0)) < 1) {
+              const rate = depositPayment.status.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
+              totalPrice = Number(depositPayment.amount || 0) / rate;
+            }
+
+            // Ngày có thứ
+            let dayOfWeekAndDate = "Chưa xếp ngày";
+            let timeLabel = "Chờ xếp";
+            let timeLabelClass = "bg-gray-100 text-gray-600 border border-gray-200";
+
+            if (item.bookingDate) {
+              try {
+                const bDate = new Date(item.bookingDate);
+                if (!isNaN(bDate.getTime())) {
+                  const weekday = bDate.toLocaleDateString("vi-VN", { weekday: "long" });
+                  const dateStr = bDate.toLocaleDateString("vi-VN");
+                  dayOfWeekAndDate = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${dateStr}`;
+
+                  const now = new Date();
+                  now.setHours(0, 0, 0, 0);
+                  const target = new Date(bDate);
+                  target.setHours(0, 0, 0, 0);
+                  const diffDays = Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+                  if (diffDays === 0) {
+                    timeLabel = "Hôm nay";
+                    timeLabelClass = "bg-amber-100 text-amber-800 border border-amber-300";
+                  } else if (diffDays === 1) {
+                    timeLabel = "Ngày mai";
+                    timeLabelClass = "bg-rose-100 text-[#BE4B5E] border border-rose-200";
+                  } else if (diffDays > 1) {
+                    timeLabel = `Còn ${diffDays} ngày`;
+                    timeLabelClass = "bg-blue-100 text-blue-800 border border-blue-200";
+                  } else {
+                    timeLabel = "Đã qua";
+                    timeLabelClass = "bg-gray-100 text-gray-600 border border-gray-200";
+                  }
+                }
+              } catch { /* ignore */ }
+            }
+
+            // Local receipt is a fallback for successful redirects when the payment API was unavailable.
+            let matchedPaid = null;
+            try {
+              const paidList = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
+              matchedPaid = paidList.find((p) => String(p.id) === String(item.id) || String(p.bookingId) === String(item.id)) || null;
+            } catch { /* ignore */ }
+            const localPaymentStatus = String(matchedPaid?.paymentStatus || '').toLowerCase();
+            const normalizedLocalStatus = ['paid', 'success', 'completed'].includes(localPaymentStatus) || (localPaymentStatus === 'paid_deposit' && Number(matchedPaid?.depositPercent) >= 100)
+              ? 'paid'
+              : localPaymentStatus === 'deposit_50' || (localPaymentStatus === 'paid_deposit' && Number(matchedPaid?.depositPercent) === 50)
+                ? 'deposit_50'
+                : localPaymentStatus === 'deposit_30' || localPaymentStatus === 'paid_deposit' ? 'deposit_30' : 'pending';
+            const paymentPriority = { pending: 0, deposit_30: 1, deposit_50: 2, paid: 3, success: 3, completed: 3 };
+            const apiPaymentStatus = [...bookingPayments]
+              .sort((a, b) => (paymentPriority[(b.status || '').toLowerCase()] || 0) - (paymentPriority[(a.status || '').toLowerCase()] || 0))[0]?.status;
+            const paymentStatus = String(apiPaymentStatus || normalizedLocalStatus || "pending").toLowerCase();
+            const paymentLabels = {
+              pending: ["Đang chờ thanh toán", "bg-gray-100 text-gray-600 border-gray-200"],
+              deposit_30: ["Đã cọc 30%", "bg-amber-50 text-amber-700 border-amber-200"],
+              deposit_50: ["Đã cọc 50%", "bg-amber-50 text-amber-700 border-amber-200"],
+              paid: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
+              success: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
+              completed: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
+            };
+            const [paymentStatusText, paymentBadgeClass] = paymentLabels[paymentStatus] || paymentLabels.pending;
+
+            const rawStatus = (item.status || "pending").toLowerCase();
+
+            return {
+              id: item.id,
+              customerId: item.customerId,
+              customerName: item.customerName,
+              customerPhone: item.customerPhone,
+              customerEmail: item.customerEmail,
+              packageName: pkgName,
+              packageImage,
+              packagePrice: matchedPaid?.packagePrice || matchedPaid?.finalPackagePrice,
+              packageOriginalPrice: matchedPaid?.packageOriginalPrice,
+              roomSurcharge: matchedPaid?.roomSurcharge ?? 0,
+              services: matchedPaid?.services || matchedPaid?.selectedServices || [],
+              servicesTotal: matchedPaid?.servicesTotal || 0,
+              isServiceOptOut: matchedPaid?.isServiceOptOut || false,
+              discountAmount: matchedPaid?.discountAmount || 0,
+              quantity,
+              staffCount: 2,
+              totalPrice: matchedPaid?.totalOrderPrice || totalPrice,
+              totalOrderPrice: matchedPaid?.totalOrderPrice || totalPrice,
+              paymentStatus,
+              paidAmount: matchedPaid?.amountPaid || matchedPaid?.paidAmount || (paymentStatus === 'paid' ? totalPrice : undefined),
+              paymentStatusText,
+              paymentBadgeClass,
+              dayOfWeekAndDate,
+              timeLabel,
+              timeLabelClass,
+              bookingDate: item.bookingDate,
+              startTime: item.startTime ? String(item.startTime).slice(0, 5) : "08:30",
+              endTime: item.endTime ? String(item.endTime).slice(0, 5) : "10:30",
+              roomId: item.roomId,
+              roomName: item.roomName || `Phòng Studio VIP #${item.roomId || 1}`,
+              backgroundName,
+              status: rawStatus,
+              customerNote: item.customerNote || "",
+              review: reviewInfo,
+            };
+          })
+        );
+        enriched.sort((a, b) => Number(b.id) - Number(a.id));
+        setBookings(enriched);
+      } else {
+        setBookings([]);
+      }
+    } catch (err) {
+      console.warn("Lỗi tải lịch chụp:", err);
+      setBookings([]);
+    } finally {
+      setBookingsLoading(false);
+    }
+  };
+
+
+  // Tải danh sách đánh giá của tôi (luôn lấy các đánh giá MỚI NHẤT)
+  const fetchMyReviews = async (targetUser) => {
+    setReviewsLoading(true);
+    try {
+      let myRevs = [];
+      const uid = targetUser?.id;
+      if (uid) {
+        try {
+          const res = await customerReviewService.getReviewsByCustomerId(uid);
+          if (Array.isArray(res) && res.length > 0) {
+            myRevs = res;
+          }
+        } catch (apiErr) {
+          console.warn("API getReviewsByCustomerId không trả về kết quả, thử getAllReviews:", apiErr.message);
+        }
+      }
+
+      if (myRevs.length === 0) {
+        try {
+          const all = await customerReviewService.getAllReviews();
+          if (Array.isArray(all) && all.length > 0) {
+            myRevs = all.filter((r) => {
+              if (!targetUser) return false;
+              const matchCustId = r.customerId && Number(r.customerId) === Number(targetUser.id);
+              const matchUserId = r.userId && Number(r.userId) === Number(targetUser.id);
+              const matchUser = r.username && targetUser.username && r.username.toLowerCase() === targetUser.username.toLowerCase();
+              const matchName = r.customerName && targetUser.fullname && r.customerName.toLowerCase() === targetUser.fullname.toLowerCase();
+              return matchCustId || matchUserId || matchUser || matchName;
+            });
+          }
+        } catch (e) {
+          console.warn("Lỗi gọi getAllReviews:", e.message);
+        }
+      }
+
+      // Sắp xếp lấy các đánh giá MỚI NHẤT lên đầu (theo createdAt hoặc id giảm dần)
+      myRevs.sort((a, b) => {
+        const timeA = new Date(a.createdAt || a.adminRepliedAt || 0).getTime();
+        const timeB = new Date(b.createdAt || b.adminRepliedAt || 0).getTime();
+        if (timeB !== timeA) return timeB - timeA;
+        return (Number(b.id) || 0) - (Number(a.id) || 0);
+      });
+
+      setReviews(myRevs);
+    } catch (err) {
+      console.warn("Lỗi tải đánh giá:", err);
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
   // Xử lý hủy lịch đặt
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm("Bạn có chắc chắn muốn hủy đơn đặt lịch này không?")) return;
@@ -136,13 +418,9 @@ export default function ProfilePage() {
     navigate(ROUTES.USER.BOOKING);
   };
 
-  // Hỗ trợ tự động mở tab và modal từ URL (?tab=bookings&bookingId=...)
+  // Hỗ trợ tự động mở modal chi tiết đơn từ URL (?bookingId=...)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get("tab");
-    if (tabParam && ["profile", "bookings", "reviews", "password"].includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
     const openId = params.get("bookingId") || params.get("openBookingId");
     if (openId && bookings.length > 0) {
       const targetB = bookings.find((item) => String(item.id) === String(openId));
@@ -271,214 +549,6 @@ export default function ProfilePage() {
     }
   }, [isEditing]);
 
-  // Tải đơn đặt lịch: Chỉ lọc đơn của chính mình
-  const fetchRealBookings = async (targetUser) => {
-    setBookingsLoading(true);
-    try {
-      let rawList = [];
-      const apiBookingIds = new Set();
-
-      if (targetUser?.id) {
-        try {
-          const resByCust = await customerBookingService.getBookingsByCustomer(targetUser.id);
-          const apiRows = Array.isArray(resByCust) ? resByCust
-            : Array.isArray(resByCust?.data) ? resByCust.data
-              : Array.isArray(resByCust?.content) ? resByCust.content : [];
-          rawList = apiRows;
-          apiRows.forEach((booking) => apiBookingIds.add(String(booking.id)));
-        } catch (e) {
-          console.warn("Lấy đơn theo customerId:", e.message);
-        }
-      }
-
-      try {
-        const localBookings = JSON.parse(
-          localStorage.getItem(`user_bookings_${targetUser?.id}`) || "[]"
-        );
-        if (Array.isArray(localBookings) && localBookings.length > 0) {
-          const existingIds = new Set(rawList.map((b) => b.id));
-          for (const lb of localBookings) {
-            if (!existingIds.has(lb.id)) rawList.push(lb);
-          }
-        }
-      } catch {}
-
-      const filteredList = rawList.filter((item) => {
-        if (!targetUser) return false;
-        // Endpoint này đã được giới hạn theo customerId; một số DTO không trả lại customerId.
-        if (apiBookingIds.has(String(item.id))) return true;
-        const matchId = item.customerId && Number(item.customerId) === Number(targetUser.id);
-        const matchUserId = item.userId && Number(item.userId) === Number(targetUser.id);
-        const matchPhone = item.customerPhone && targetUser.phone && item.customerPhone.trim() === targetUser.phone.trim();
-        const matchEmail = item.customerEmail && targetUser.email && item.customerEmail.toLowerCase() === targetUser.email.toLowerCase();
-        return matchId || matchUserId || matchPhone || matchEmail;
-      });
-
-      if (filteredList.length > 0) {
-        const enriched = await Promise.all(
-          filteredList.map(async (item) => {
-            let pkgName = item.roomName ? `Buổi chụp tại ${item.roomName}` : "Gói Chụp Ảnh Studio VIP";
-            let reviewInfo = null;
-            let packageImage = "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=400&q=80";
-            let totalPrice = 1500000;
-            let backgroundName = "Studio Tone Trầm & Cành Đào";
-            let quantity = 1;
-
-            if (item.customerNote && item.customerNote.includes("Gói:")) {
-              const notePart = item.customerNote.split("Gói:")[1];
-              if (notePart) pkgName = notePart.trim();
-            }
-
-            try {
-              const pkgs = await customerBookingService.getBookingPackages(item.id);
-              if (Array.isArray(pkgs) && pkgs.length > 0 && pkgs[0].packageName) {
-                pkgName = pkgs[0].packageName;
-                if (pkgs[0].subTotal) totalPrice = Number(pkgs[0].subTotal);
-                else if (pkgs[0].unitPrice) totalPrice = Number(pkgs[0].unitPrice);
-                if (pkgs[0].quantity) quantity = Number(pkgs[0].quantity);
-                if (pkgs[0].packageId) {
-                  try {
-                    const pInfo = await customerPackageService.getPackageById(pkgs[0].packageId);
-                    if (pInfo?.thumbnail || pInfo?.coverImage) {
-                      packageImage = pInfo.thumbnail || pInfo.coverImage;
-                    }
-                  } catch {}
-                }
-              }
-            } catch {}
-
-            try {
-              const rev = await customerBookingService.getBookingReview(item.id);
-              if (rev && rev.id) reviewInfo = rev;
-            } catch {}
-
-            let bookingPayments = [];
-            try {
-              const paymentResult = await customerPaymentService.getPaymentsByBookingId(item.id);
-              bookingPayments = Array.isArray(paymentResult) ? paymentResult : Array.isArray(paymentResult?.data) ? paymentResult.data : [];
-            } catch {}
-            const depositPayment = bookingPayments.find((payment) => ['deposit_30', 'deposit_50'].includes((payment.status || '').toLowerCase()));
-            const savedPackageTotal = Number(totalPrice || 0);
-            if (depositPayment && Math.abs(savedPackageTotal - Number(depositPayment.amount || 0)) < 1) {
-              const rate = depositPayment.status.toLowerCase() === 'deposit_50' ? 0.5 : 0.3;
-              totalPrice = Number(depositPayment.amount || 0) / rate;
-            }
-
-            // Ngày có thứ
-            let dayOfWeekAndDate = "Chưa xếp ngày";
-            let timeLabel = "Chờ xếp";
-            let timeLabelClass = "bg-gray-100 text-gray-600 border border-gray-200";
-
-            if (item.bookingDate) {
-              try {
-                const bDate = new Date(item.bookingDate);
-                if (!isNaN(bDate.getTime())) {
-                  const weekday = bDate.toLocaleDateString("vi-VN", { weekday: "long" });
-                  const dateStr = bDate.toLocaleDateString("vi-VN");
-                  dayOfWeekAndDate = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${dateStr}`;
-
-                  const now = new Date();
-                  now.setHours(0, 0, 0, 0);
-                  const target = new Date(bDate);
-                  target.setHours(0, 0, 0, 0);
-                  const diffDays = Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-                  if (diffDays === 0) {
-                    timeLabel = "Hôm nay";
-                    timeLabelClass = "bg-amber-100 text-amber-800 border border-amber-300";
-                  } else if (diffDays === 1) {
-                    timeLabel = "Ngày mai";
-                    timeLabelClass = "bg-rose-100 text-[#BE4B5E] border border-rose-200";
-                  } else if (diffDays > 1) {
-                    timeLabel = `Còn ${diffDays} ngày`;
-                    timeLabelClass = "bg-blue-100 text-blue-800 border border-blue-200";
-                  } else {
-                    timeLabel = "Đã qua";
-                    timeLabelClass = "bg-gray-100 text-gray-600 border border-gray-200";
-                  }
-                }
-              } catch {}
-            }
-
-            // Local receipt is a fallback for successful redirects when the payment API was unavailable.
-            let matchedPaid = null;
-            try {
-              const paidList = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
-              matchedPaid = paidList.find((p) => String(p.id) === String(item.id) || String(p.bookingId) === String(item.id)) || null;
-            } catch {}
-            const localPaymentStatus = String(matchedPaid?.paymentStatus || '').toLowerCase();
-            const normalizedLocalStatus = ['paid', 'success', 'completed'].includes(localPaymentStatus) || (localPaymentStatus === 'paid_deposit' && Number(matchedPaid?.depositPercent) >= 100)
-              ? 'paid'
-              : localPaymentStatus === 'deposit_50' || (localPaymentStatus === 'paid_deposit' && Number(matchedPaid?.depositPercent) === 50)
-                ? 'deposit_50'
-                : localPaymentStatus === 'deposit_30' || localPaymentStatus === 'paid_deposit' ? 'deposit_30' : 'pending';
-            const paymentPriority = { pending: 0, deposit_30: 1, deposit_50: 2, paid: 3, success: 3, completed: 3 };
-            const apiPaymentStatus = [...bookingPayments]
-              .sort((a, b) => (paymentPriority[(b.status || '').toLowerCase()] || 0) - (paymentPriority[(a.status || '').toLowerCase()] || 0))[0]?.status;
-            const paymentStatus = String(apiPaymentStatus || normalizedLocalStatus || "pending").toLowerCase();
-            const paymentLabels = {
-              pending: ["Đang chờ thanh toán", "bg-gray-100 text-gray-600 border-gray-200"],
-              deposit_30: ["Đã cọc 30%", "bg-amber-50 text-amber-700 border-amber-200"],
-              deposit_50: ["Đã cọc 50%", "bg-amber-50 text-amber-700 border-amber-200"],
-              paid: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
-              success: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
-              completed: ["Đã thanh toán", "bg-emerald-50 text-emerald-700 border-emerald-200"],
-            };
-            const [paymentStatusText, paymentBadgeClass] = paymentLabels[paymentStatus] || paymentLabels.pending;
-
-            const rawStatus = (item.status || "pending").toLowerCase();
-
-            return {
-              id: item.id,
-              customerId: item.customerId,
-              customerName: item.customerName,
-              customerPhone: item.customerPhone,
-              customerEmail: item.customerEmail,
-              packageName: pkgName,
-              packageImage,
-              packagePrice: matchedPaid?.packagePrice || matchedPaid?.finalPackagePrice,
-              packageOriginalPrice: matchedPaid?.packageOriginalPrice,
-              roomSurcharge: matchedPaid?.roomSurcharge ?? 0,
-              services: matchedPaid?.services || matchedPaid?.selectedServices || [],
-              servicesTotal: matchedPaid?.servicesTotal || 0,
-              isServiceOptOut: matchedPaid?.isServiceOptOut || false,
-              discountAmount: matchedPaid?.discountAmount || 0,
-              quantity,
-              staffCount: 2,
-              totalPrice: matchedPaid?.totalOrderPrice || totalPrice,
-              totalOrderPrice: matchedPaid?.totalOrderPrice || totalPrice,
-              paymentStatus,
-              paidAmount: matchedPaid?.amountPaid || matchedPaid?.paidAmount || (paymentStatus === 'paid' ? totalPrice : undefined),
-              paymentStatusText,
-              paymentBadgeClass,
-              dayOfWeekAndDate,
-              timeLabel,
-              timeLabelClass,
-              bookingDate: item.bookingDate,
-              startTime: item.startTime ? String(item.startTime).slice(0, 5) : "08:30",
-              endTime: item.endTime ? String(item.endTime).slice(0, 5) : "10:30",
-              roomId: item.roomId,
-              roomName: item.roomName || `Phòng Studio VIP #${item.roomId || 1}`,
-              backgroundName,
-              status: rawStatus,
-              customerNote: item.customerNote || "",
-              review: reviewInfo,
-            };
-          })
-        );
-        enriched.sort((a, b) => Number(b.id) - Number(a.id));
-        setBookings(enriched);
-      } else {
-        setBookings([]);
-      }
-    } catch (err) {
-      console.warn("Lỗi tải lịch chụp:", err);
-      setBookings([]);
-    } finally {
-      setBookingsLoading(false);
-    }
-  };
-
   // Làm mới khi người dùng quay lại tab đơn đặt lịch hoặc quay lại cửa sổ sau khi admin cập nhật.
   useEffect(() => {
     if (activeTab !== "bookings" || !user) return undefined;
@@ -487,58 +557,6 @@ export default function ProfilePage() {
     window.addEventListener("focus", refreshOnFocus);
     return () => window.removeEventListener("focus", refreshOnFocus);
   }, [activeTab, user?.id]);
-
-  // Tải danh sách đánh giá của tôi (luôn lấy các đánh giá MỚI NHẤT)
-  const fetchMyReviews = async (targetUser) => {
-    setReviewsLoading(true);
-    try {
-      let myRevs = [];
-      const uid = targetUser?.id;
-      if (uid) {
-        try {
-          const res = await customerReviewService.getReviewsByCustomerId(uid);
-          if (Array.isArray(res) && res.length > 0) {
-            myRevs = res;
-          }
-        } catch (apiErr) {
-          console.warn("API getReviewsByCustomerId không trả về kết quả, thử getAllReviews:", apiErr.message);
-        }
-      }
-
-      if (myRevs.length === 0) {
-        try {
-          const all = await customerReviewService.getAllReviews();
-          if (Array.isArray(all) && all.length > 0) {
-            myRevs = all.filter((r) => {
-              if (!targetUser) return false;
-              const matchCustId = r.customerId && Number(r.customerId) === Number(targetUser.id);
-              const matchUserId = r.userId && Number(r.userId) === Number(targetUser.id);
-              const matchUser = r.username && targetUser.username && r.username.toLowerCase() === targetUser.username.toLowerCase();
-              const matchName = r.customerName && targetUser.fullname && r.customerName.toLowerCase() === targetUser.fullname.toLowerCase();
-              return matchCustId || matchUserId || matchUser || matchName;
-            });
-          }
-        } catch (e) {
-          console.warn("Lỗi gọi getAllReviews:", e.message);
-        }
-      }
-
-      // Sắp xếp lấy các đánh giá MỚI NHẤT lên đầu (theo createdAt hoặc id giảm dần)
-      myRevs.sort((a, b) => {
-        const timeA = new Date(a.createdAt || a.adminRepliedAt || 0).getTime();
-        const timeB = new Date(b.createdAt || b.adminRepliedAt || 0).getTime();
-        if (timeB !== timeA) return timeB - timeA;
-        return (Number(b.id) || 0) - (Number(a.id) || 0);
-      });
-
-      setReviews(myRevs);
-    } catch (err) {
-      console.warn("Lỗi tải đánh giá:", err);
-      setReviews([]);
-    } finally {
-      setReviewsLoading(false);
-    }
-  };
 
   // Tự động tải lại đánh giá mới nhất khi chuyển sang tab "reviews" hoặc focus lại tab
   useEffect(() => {
@@ -549,22 +567,6 @@ export default function ProfilePage() {
       return () => window.removeEventListener("focus", refreshReviewsOnFocus);
     }
   }, [activeTab, user?.id]);
-
-  // Tự động co giãn ô nhập Địa chỉ: tối đa 3 dòng, quá 3 dòng hiện thanh cuộn
-  const autoResizeAddress = (textarea) => {
-    if (!textarea) return;
-    textarea.style.height = "auto";
-    const scrollHeight = textarea.scrollHeight;
-    // Chiều cao tối đa của 3 dòng văn bản (line-height ~22px + padding ~16px)
-    const maxHeight = 84;
-    if (scrollHeight > maxHeight) {
-      textarea.style.height = `${maxHeight}px`;
-      textarea.style.overflowY = "auto";
-    } else {
-      textarea.style.height = `${Math.max(scrollHeight, 38)}px`;
-      textarea.style.overflowY = "hidden";
-    }
-  };
 
   const handleAddressChange = (e) => {
     const target = e.target;

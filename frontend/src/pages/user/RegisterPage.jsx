@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  CameraIcon,
   LockClosedIcon,
   EnvelopeIcon,
   UserIcon,
@@ -15,6 +14,7 @@ import {
 import { ROUTES } from '../../routes/web';
 import customerAuthService from '../../services/user/authService';
 import { FloralCardCorner } from '../../components/common/FloralDecorations';
+import BrandLogo from '../../components/common/BrandLogo';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -181,9 +181,7 @@ export default function RegisterPage() {
           {/* Top Brand Logo */}
           <div className="relative z-10">
             <Link to={ROUTES.USER.HOME} className="inline-flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-[#BE4B5E] flex items-center justify-center shadow-lg shadow-[#BE4B5E]/30 group-hover:scale-105 transition-transform">
-                <CameraIcon className="w-5 h-5 text-white stroke-[2.2]" />
-              </div>
+              <BrandLogo withGlow className="w-11 h-11 group-hover:scale-110 transition-transform" />
               <div>
                 <span className="text-base font-bold tracking-wider text-white font-sans flex items-center gap-1">
                   PHOTO<span className="text-[#E899A8] font-extrabold">STUDIO</span>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Camera, CalendarDays, Layers, Wallet, ArrowRight, Coins, DollarSign, TrendingUp, Sparkles } from 'lucide-react';
 import CountUp from '../../animations/CountUp';
 import employeeSalaryService from '../../../services/employee/salaryService';

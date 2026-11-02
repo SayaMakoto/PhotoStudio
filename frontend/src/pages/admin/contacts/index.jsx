@@ -5,7 +5,6 @@ import {
   Clock,
   Mail,
   MessageSquare,
-  Trash2,
   XCircle,
 } from 'lucide-react';
 import AdminFilterBar from '../../../components/admin/common/AdminFilterBar';

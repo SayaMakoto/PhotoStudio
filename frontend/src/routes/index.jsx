@@ -12,7 +12,6 @@ import StudiosPage from '../pages/user/StudiosPage';
 import ReviewsPage from '../pages/user/ReviewsPage';
 import BookingPage from '../pages/user/BookingPage';
 import VNPayReturnPage from '../pages/user/VNPayReturnPage';
-import MyBookingsPage from '../pages/user/MyBookingsPage';
 import ContactPage from '../pages/user/ContactPage';
 
 // Auth Pages (Đã phân loại vào từng vai trò user, admin, employee)
@@ -27,7 +26,6 @@ import AdminLayout from '../layouts/AdminLayout';
 import AdminRoute from '../layouts/AdminRoute';
 import EmployeeRoute from '../layouts/EmployeeRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
-import AdminPlaceholderPage from '../pages/admin/AdminPlaceholderPage';
 import AdminUsersPage from '../pages/admin/users';
 import AdminEmployeesPage from '../pages/admin/employees';
 import AdminEquipmentsPage from '../pages/admin/equipments';

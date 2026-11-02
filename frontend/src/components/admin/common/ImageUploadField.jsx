@@ -29,7 +29,10 @@ export default function ImageUploadField({
   const dirtyRef = useRef(false);
   const initialValueRef = useRef(value);
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  });
 
   useEffect(() => {
     if (!imageableType || !imageableId || initialValueRef.current) {
