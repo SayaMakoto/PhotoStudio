@@ -654,6 +654,28 @@ export default function BookingPage() {
     };
   }, []);
 
+  // Luôn cập nhật lại danh sách booking khi chuyển ngày hoặc phòng để đồng bộ giờ đã đặt
+  useEffect(() => {
+    let isSubscribed = true;
+    customerBookingService
+      .getAllBookings()
+      .then((res) => {
+        if (!isSubscribed) return;
+        const rows = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+            ? res.data
+            : [];
+        if (rows.length > 0) {
+          setExistingBookings(rows);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isSubscribed = false;
+    };
+  }, [selectedDate, selectedRoom?.id]);
+
   // Phục hồi toàn bộ trạng thái đặt lịch khi thanh toán lại (từ VNPay Return hoặc retry)
   useEffect(() => {
     const retryOrder = location.state?.retryOrder || (location.state?.step === 3 ? JSON.parse(sessionStorage.getItem('vnpay_pending_order') || sessionStorage.getItem('pending_booking_order') || 'null') : null);
@@ -902,7 +924,7 @@ export default function BookingPage() {
     return `Tháng ${midDay.monthNum}, ${midDay.yearNum}`;
   }, [weekDays]);
 
-  // KIỂM TRA KHUNG GIỜ CÓ BỊ VÔ HIỆU HÓA KHÔNG (ĐÃ QUA TRONG NGÀY HOẶC ĐÃ ĐẶT)
+  // KIỂM TRA KHUNG GIỜ CÓ BỊ VÔ HIỆU HÓA KHÔNG (ĐÃ QUA TRONG NGÀY HOẶC ĐÃ CÓ KHÁCH ĐẶT TRÙNG)
   const isSlotDisabled = useCallback(
     (slotTime) => {
       if (!selectedDate) return true;
@@ -928,17 +950,60 @@ export default function BookingPage() {
         }
       }
 
-      // 3. Kiểm tra trùng lịch với existing bookings từ DB
+      // 3. Kiểm tra trùng lịch với existing bookings từ DB (kiểm tra giao nhau khoảng thời gian)
       if (selectedRoom && existingBookings.length > 0) {
+        const [slotHour, slotMin] = slotTime.split(":").map(Number);
+        const slotStartMinutes = slotHour * 60 + slotMin;
+        const durationMinutes = Number(selectedPackage?.durationMinutes || 60);
+        const slotEndMinutes = slotStartMinutes + durationMinutes;
+
         const conflict = existingBookings.some((b) => {
-          if (b.status === "cancelled") return false;
-          if (Number(b.roomId) !== Number(selectedRoom.id)) return false;
+          if (!b) return false;
+          const status = String(b.status || "").toLowerCase();
+          // Bỏ qua đơn đã hủy
+          if (status === "cancelled" || status === "rejected") return false;
 
-          const bDate = b.bookingDate ? b.bookingDate.split("T")[0] : "";
-          if (bDate !== selectedDate) return false;
+          // Kiểm tra đúng phòng chụp
+          const bRoomId = b.roomId || b.room?.id;
+          if (bRoomId && Number(bRoomId) !== Number(selectedRoom.id)) return false;
 
-          const bStart = (b.startTime || "").slice(0, 5);
-          return bStart === slotTime;
+          // Chuẩn hóa ngày đặt từ nhiều định dạng (ISO String hoặc Mảng Jackson)
+          let bDate = "";
+          if (Array.isArray(b.bookingDate)) {
+            const y = b.bookingDate[0];
+            const m = String(b.bookingDate[1]).padStart(2, "0");
+            const d = String(b.bookingDate[2]).padStart(2, "0");
+            bDate = `${y}-${m}-${d}`;
+          } else if (typeof b.bookingDate === "string") {
+            bDate = b.bookingDate.split("T")[0];
+          }
+          if (bDate && bDate !== selectedDate) return false;
+
+          // Chuẩn hóa giờ bắt đầu thành tổng số phút
+          let bStartMin = null;
+          if (Array.isArray(b.startTime)) {
+            bStartMin = b.startTime[0] * 60 + (b.startTime[1] || 0);
+          } else if (typeof b.startTime === "string") {
+            const parts = b.startTime.split(":");
+            bStartMin = Number(parts[0]) * 60 + Number(parts[1] || 0);
+          }
+
+          // Chuẩn hóa giờ kết thúc thành tổng số phút
+          let bEndMin = null;
+          if (Array.isArray(b.endTime)) {
+            bEndMin = b.endTime[0] * 60 + (b.endTime[1] || 0);
+          } else if (typeof b.endTime === "string") {
+            const parts = b.endTime.split(":");
+            bEndMin = Number(parts[0]) * 60 + Number(parts[1] || 0);
+          } else if (bStartMin !== null) {
+            bEndMin = bStartMin + 60;
+          }
+
+          if (bStartMin === null || bEndMin === null) return false;
+
+          // Thuật toán kiểm tra giao nhau giữa 2 khoảng thời gian:
+          // Khung giờ chọn [slotStartMinutes, slotEndMinutes) giao với đơn đã đặt [bStartMin, bEndMin)
+          return slotStartMinutes < bEndMin && bStartMin < slotEndMinutes;
         });
 
         if (conflict) return true;
@@ -946,7 +1011,7 @@ export default function BookingPage() {
 
       return false;
     },
-    [selectedDate, selectedRoom, existingBookings],
+    [selectedDate, selectedRoom, selectedPackage, existingBookings],
   );
 
   // Tự động hủy chọn giờ nếu giờ đó bị vô hiệu hóa do đổi ngày
@@ -1147,7 +1212,14 @@ export default function BookingPage() {
         // Thời gian chụp
         bookingDate: selectedDate,
         startTime: `${selectedSlot}:00`,
-        endTime: `${String(Number(selectedSlot.split(":")[0]) + Math.round(selectedPackage.durationMinutes / 60)).padStart(2, "0")}:00:00`,
+        endTime: (() => {
+          const [sH, sM] = selectedSlot.split(":").map(Number);
+          const dur = Number(selectedPackage?.durationMinutes || selectedPackage?.duration || 60);
+          const totalEnd = sH * 60 + sM + dur;
+          const eH = Math.floor(totalEnd / 60);
+          const eM = totalEnd % 60;
+          return `${String(eH).padStart(2, "0")}:${String(eM).padStart(2, "0")}:00`;
+        })(),
         // Tài chính & Hình thức đặt cọc
         totalPrice: calculation.totalOrder,
         amountToPay: amountToPay,
