@@ -498,6 +498,39 @@ export default function BookingPage() {
     setPhoneError(check.isValid ? "" : check.message);
   };
 
+  // Hàm gộp danh sách đơn đặt lịch từ Backend và LocalStorage (đơn vừa đặt/thanh toán)
+  const getCombinedBookings = useCallback((serverRows = []) => {
+    let localRows = [];
+    try {
+      localRows = JSON.parse(localStorage.getItem('photostudio_paid_orders') || '[]');
+    } catch {
+      localRows = [];
+    }
+    const combined = Array.isArray(serverRows) ? [...serverRows] : [];
+    if (Array.isArray(localRows)) {
+      localRows.forEach((localItem) => {
+        if (!localItem) return;
+        const exists = combined.some((b) =>
+          (b.id && localItem.bookingId && Number(b.id) === Number(localItem.bookingId)) ||
+          (Number(b.roomId) === Number(localItem.roomId) &&
+            String(b.bookingDate).split('T')[0] === String(localItem.bookingDate).split('T')[0] &&
+            String(b.startTime).slice(0, 5) === String(localItem.startTime).slice(0, 5))
+        );
+        if (!exists) {
+          combined.push({
+            id: localItem.bookingId || `local_${localItem.transactionNo || Date.now()}`,
+            roomId: localItem.roomId,
+            bookingDate: localItem.bookingDate,
+            startTime: localItem.startTime,
+            endTime: localItem.endTime,
+            status: localItem.bookingStatus || localItem.status || 'pending',
+          });
+        }
+      });
+    }
+    return combined;
+  }, []);
+
   // Tải dữ liệu Gói, Phòng, Dịch vụ và Bookings từ Backend (nếu backend đang chạy)
   useEffect(() => {
     let isMounted = true;
@@ -634,12 +667,10 @@ export default function BookingPage() {
         }
 
         // Xử lý Booking hiện có để kiểm tra trùng giờ
-        if (
-          bkgRes.status === "fulfilled" &&
-          Array.isArray(bkgRes.value?.data)
-        ) {
-          setExistingBookings(bkgRes.value.data);
-        }
+        const bRows = bkgRes.status === "fulfilled"
+          ? (Array.isArray(bkgRes.value) ? bkgRes.value : Array.isArray(bkgRes.value?.data) ? bkgRes.value.data : [])
+          : [];
+        setExistingBookings(getCombinedBookings(bRows));
       } catch (err) {
         console.warn(
           "Dùng dữ liệu CSDL chuẩn do backend offline:",
@@ -666,15 +697,16 @@ export default function BookingPage() {
           : Array.isArray(res?.data)
             ? res.data
             : [];
-        if (rows.length > 0) {
-          setExistingBookings(rows);
-        }
+        setExistingBookings(getCombinedBookings(rows));
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!isSubscribed) return;
+        setExistingBookings(getCombinedBookings([]));
+      });
     return () => {
       isSubscribed = false;
     };
-  }, [selectedDate, selectedRoom?.id]);
+  }, [selectedDate, selectedRoom?.id, getCombinedBookings]);
 
   // Phục hồi toàn bộ trạng thái đặt lịch khi thanh toán lại (từ VNPay Return hoặc retry)
   useEffect(() => {
