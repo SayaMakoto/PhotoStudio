@@ -92,6 +92,21 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    private boolean isAllowedStatusTransition(BookingStatus current, BookingStatus next) {
+        if (current == next) {
+            return true;
+        }
+
+        return switch (current) {
+            case pending -> next == BookingStatus.confirmed || next == BookingStatus.cancelled;
+            case confirmed -> next == BookingStatus.in_progress
+                    || next == BookingStatus.completed
+                    || next == BookingStatus.cancelled;
+            case in_progress -> next == BookingStatus.completed || next == BookingStatus.cancelled;
+            case completed, cancelled -> false;
+        };
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<BookingResponse> findAll() {
@@ -177,18 +192,11 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = findEntity(id);
 
-        if (booking.getStatus() == BookingStatus.cancelled && bookingStatus != BookingStatus.cancelled) {
-            if (booking.getCustomer() == null) {
-                throw new IllegalArgumentException("Đơn đặt lịch chưa được liên kết với khách hàng hợp lệ");
-            }
-            validateCustomer(booking.getCustomer());
-            if (booking.getRoom() == null) {
-                throw new IllegalArgumentException("Đơn đặt lịch chưa được liên kết với phòng chụp hợp lệ");
-            }
-            validateRoom(booking.getRoom());
-            checkRoomConflict(booking.getRoom().getId(), booking.getBookingDate(), booking.getStartTime(),
-                    booking.getEndTime(), booking.getId());
+        if (!isAllowedStatusTransition(booking.getStatus(), bookingStatus)) {
+            throw new IllegalArgumentException("Không thể chuyển trạng thái đơn từ "
+                    + booking.getStatus() + " sang " + bookingStatus);
         }
+
         if (bookingStatus != BookingStatus.cancelled && booking.getStatus() != BookingStatus.cancelled) {
             if (booking.getRoom() == null) {
                 throw new IllegalArgumentException("Đơn đặt lịch chưa được liên kết với phòng chụp hợp lệ");

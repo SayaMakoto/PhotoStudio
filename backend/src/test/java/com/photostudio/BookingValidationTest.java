@@ -8,6 +8,7 @@ import com.photostudio.model.rooms.Room;
 import com.photostudio.model.rooms.RoomStatus;
 import com.photostudio.model.users.User;
 import com.photostudio.repository.BookingRepository;
+import com.photostudio.repository.BookingEmployeeAssignmentRepository;
 import com.photostudio.repository.RoomRepository;
 import com.photostudio.repository.UserRepository;
 import com.photostudio.service.impl.BookingServiceImpl;
@@ -38,6 +39,9 @@ class BookingValidationTest {
 
     @Mock
     private RoomRepository roomRepository;
+
+    @Mock
+    private BookingEmployeeAssignmentRepository assignmentRepository;
 
     @InjectMocks
     private BookingServiceImpl bookingService;
@@ -280,8 +284,8 @@ class BookingValidationTest {
     }
 
     @Test
-    @DisplayName("Cập nhật trạng thái thành công và kiểm tra xung đột Room khi kích hoạt lại đơn đã huỷ")
-    void testUpdateStatus_FromCancelled_ChecksConflict() {
+    @DisplayName("Không cho phép xác nhận lại đơn đã huỷ")
+    void testUpdateStatus_FromCancelledToConfirmed_IsRejected() {
         Booking existing = new Booking();
         existing.setId(50L);
         existing.setCustomer(testCustomer);
@@ -292,23 +296,56 @@ class BookingValidationTest {
         existing.setStatus(BookingStatus.cancelled);
 
         when(bookingRepository.findById(50L)).thenReturn(Optional.of(existing));
-        when(bookingRepository.existsRoomBookingConflict(
-                eq(2L),
-                eq(LocalDateTime.of(2026, 10, 15, 9, 0, 0)),
-                eq(LocalTime.of(9, 0)),
-                eq(LocalTime.of(11, 0)),
-                eq(BookingStatus.cancelled),
-                eq(50L)
-        )).thenReturn(false);
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> bookingService.updateStatus(50L, "confirmed"));
 
+        assertTrue(ex.getMessage().contains("Không thể chuyển trạng thái đơn"));
+        verify(bookingRepository, never()).existsRoomBookingConflict(anyLong(), any(), any(), any(), any(), any());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Không cho phép xác nhận lại đơn đã hoàn tất")
+    void testUpdateStatus_FromCompletedToConfirmed_IsRejected() {
+        Booking existing = new Booking();
+        existing.setId(51L);
+        existing.setCustomer(testCustomer);
+        existing.setRoom(testRoom);
+        existing.setBookingDate(LocalDateTime.of(2026, 10, 15, 9, 0, 0));
+        existing.setStartTime(LocalTime.of(9, 0));
+        existing.setEndTime(LocalTime.of(11, 0));
+        existing.setStatus(BookingStatus.completed);
+        when(bookingRepository.findById(51L)).thenReturn(Optional.of(existing));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> bookingService.updateStatus(51L, "confirmed"));
+
+        assertTrue(ex.getMessage().contains("Không thể chuyển trạng thái đơn"));
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Cho phép chuyển đơn đã xác nhận sang hoàn tất")
+    void testUpdateStatus_FromConfirmedToCompleted_IsAllowed() {
+        Booking existing = new Booking();
+        existing.setId(52L);
+        existing.setCustomer(testCustomer);
+        existing.setRoom(testRoom);
+        existing.setBookingDate(LocalDateTime.of(2026, 10, 15, 9, 0, 0));
+        existing.setStartTime(LocalTime.of(9, 0));
+        existing.setEndTime(LocalTime.of(11, 0));
+        existing.setStatus(BookingStatus.confirmed);
+        when(bookingRepository.findById(52L)).thenReturn(Optional.of(existing));
+        when(bookingRepository.existsRoomBookingConflict(
+                eq(2L), eq(existing.getBookingDate()), eq(existing.getStartTime()), eq(existing.getEndTime()),
+                eq(BookingStatus.cancelled), eq(52L))).thenReturn(false);
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        BookingResponse response = bookingService.updateStatus(50L, "confirmed");
+        BookingResponse response = bookingService.updateStatus(52L, "completed");
 
-        assertNotNull(response);
-        assertEquals("confirmed", response.getStatus());
-        assertEquals(2L, response.getRoomId());
-        assertEquals("Phòng Studio Vintage", response.getRoomName());
-        verify(bookingRepository, times(1)).save(existing);
+        assertEquals("completed", response.getStatus());
+        verify(bookingRepository).save(existing);
     }
 }

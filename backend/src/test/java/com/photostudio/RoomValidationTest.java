@@ -98,6 +98,17 @@ class RoomValidationTest {
     }
 
     @Test
+    @DisplayName("Chấp nhận sức chứa 20 và từ chối sức chứa vượt quá 20")
+    void capacityUpperBoundary_isEnforced() {
+        validRequest.setCapacity(20);
+        assertDoesNotThrow(() -> validRequest.validate());
+
+        validRequest.setCapacity(21);
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, validRequest::validate);
+        assertTrue(ex.getMessage().contains("Sức chứa tối đa là 20"));
+    }
+
+    @Test
     @DisplayName("Ném ngoại lệ khi trạng thái phòng không hợp lệ")
     void testValidateRoom_InvalidStatus_ThrowsException() {
         validRequest.setStatus("unknown_status");

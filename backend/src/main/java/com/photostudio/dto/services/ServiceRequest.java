@@ -44,8 +44,8 @@ public class ServiceRequest {
             throw new IllegalArgumentException("Mô tả dịch vụ tối đa 255 ký tự");
         }
 
-        if (duration != null && duration < 0) {
-            throw new IllegalArgumentException("Thời lượng dịch vụ không được âm");
+        if (duration == null || duration < 1) {
+            throw new IllegalArgumentException("Thời lượng dịch vụ tối thiểu là 1 phút");
         }
 
         if (price != null && price < 0) {

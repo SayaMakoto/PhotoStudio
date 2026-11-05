@@ -37,6 +37,10 @@ public class RoomRequest {
             throw new IllegalArgumentException("Sức chứa tối thiểu phải là 1");
         }
 
+        if (capacity != null && capacity > 20) {
+            throw new IllegalArgumentException("Sức chứa tối đa là 20");
+        }
+
         if (status != null && !VALID_STATUSES.contains(status.trim().toLowerCase())) {
             throw new IllegalArgumentException("Trạng thái phòng không hợp lệ. Các trạng thái hợp lệ: active, inactive, maintenance");
         }

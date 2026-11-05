@@ -42,8 +42,22 @@ class ServiceValidationTest {
         ServiceRequest r = valid();
         r.setDuration(-5);
         assertThrows(IllegalArgumentException.class, r::validate);
-        r.setDuration(0);
+        r.setDuration(1);
         r.setPrice(-1.0);
+        assertThrows(IllegalArgumentException.class, r::validate);
+    }
+
+    @Test
+    @DisplayName("Thời lượng tối thiểu là một phút")
+    void durationMustBePositive() {
+        ServiceRequest r = valid();
+        r.setDuration(1);
+        assertDoesNotThrow(r::validate);
+
+        r.setDuration(0);
+        assertThrows(IllegalArgumentException.class, r::validate);
+
+        r.setDuration(null);
         assertThrows(IllegalArgumentException.class, r::validate);
     }
 

@@ -158,7 +158,7 @@ public class ReviewServiceImpl implements ReviewService {
         checkId(bookingId, "Mã đơn đặt lịch không hợp lệ");
         return repository.findByBookingId(bookingId)
                 .map(ReviewMapper::toResponse)
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("Đơn đặt lịch chưa có đánh giá"));
     }
 
     @Override
