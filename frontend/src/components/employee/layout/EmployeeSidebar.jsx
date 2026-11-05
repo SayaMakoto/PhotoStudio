@@ -73,9 +73,7 @@ export default function EmployeeSidebar({
             className="flex items-center gap-3 hover:opacity-90 transition-opacity cursor-pointer"
             title="Về trang chủ nhân viên"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#B85064] to-[#E28E9E] text-white shadow-[0_4px_12px_rgb(184,80,100,0.25)]">
-              <Camera className="h-5 w-5" />
-            </div>
+            <BrandLogo withGlow className="w-10 h-10 drop-shadow-md" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold tracking-tight text-base text-[#261A1E]">PhotoStudio</span>
